@@ -184,6 +184,7 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [activeKpiDetail, setActiveKpiDetail] = useState<{title: string, data: any[]} | null>(null);
 
+
   
   // Filtros de Auditoria
   const [dateFilter, setDateFilter] = useState("");
