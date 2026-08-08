@@ -1,15 +1,16 @@
 
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
-  ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download,
+  ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit,
   Heart, Home, LayoutDashboard, LineChart, ListChecks, MapPin, Menu, PackageSearch,
   Plus, Receipt, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
-  SlidersHorizontal, Sparkles, Store, TrendingDown, UserRound, Users, X,
+  SlidersHorizontal, Sparkles, Store, Trash2, TrendingDown, Upload, UserRound, Users, X,
 } from "lucide-react";
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { buildCatalog, verifiedDatasetMetrics, type PlatformMetrics, type Product, type StoreRow } from "./data/catalog";
 import { fetchCatalog } from "./data/remoteCatalog";
+import { supabase } from "./lib/supabase";
 
 const initialCatalog = buildCatalog();
 const initialProducts: Product[] = initialCatalog.products;
@@ -58,8 +59,9 @@ const productImages: Record<string, string> = {
   "acucar-uniao-1kg": "/products/acucar-uniao-1kg.jpg",
 };
 
-function ProductImage({ product, size = "default", eager = false }: { product: Product; size?: "compact" | "default" | "hero" | "basket"; eager?: boolean }) {
-  return <span className={`product-photo product-photo--${size}`}><img src={productImages[product.slug] ?? "/products/arroz-tio-joao-5kg.png"} alt={`Embalagem de ${product.name}`} loading={eager ? "eager" : "lazy"} /><i aria-hidden="true" /></span>;
+function ProductImage({ product, size = "default", eager = false }: { product: Product | any; size?: "compact" | "default" | "hero" | "basket"; eager?: boolean }) {
+  const src = product.image_url || productImages[product.slug] || "/products/arroz-tio-joao-5kg.png";
+  return <span className={`product-photo product-photo--${size}`}><img src={src} alt={`Embalagem de ${product.name}`} loading={eager ? "eager" : "lazy"} /><i aria-hidden="true" /></span>;
 }
 
 function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
@@ -168,7 +170,7 @@ function PlansPage() {
   return <div className="shell page-shell plans-page"><div className="center-heading"><span className="eyebrow">Planos PreçoCerto</span><h1>Economia que se paga na primeira compra</h1><p>Recursos transparentes para consumidores e para o comércio local.</p><div className="segmented large"><button className={!shop?"active":""} onClick={()=>setShop(false)}>Para você</button><button className={shop?"active":""} onClick={()=>setShop(true)}>Para sua loja</button></div></div><div className="plan-grid">{plans.map(plan=><article className={plan.featured?"featured":""} key={plan.name}>{plan.featured&&<span className="recommended">Recomendado</span>}<h2>{plan.name}</h2><p>{plan.desc}</p><div className="plan-price"><strong>{money(plan.price)}</strong><span>/mês</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={`/checkout/${plan.name.toLowerCase().replace(" ","-")}`}>{plan.price===0?"Começar grátis":"Escolher plano"}<ArrowRight/></a><ul>{plan.features.map(f=><li key={f}><Check/> {f}</li>)}</ul></article>)}</div><div className="plan-note"><ShieldCheck/><span><b>Pagamento seguro via Pix</b><small>Ativação automática após confirmação. Cancele quando quiser.</small></span></div></div>;
 }
 
-function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
+function AdminPage({ path, onLogout, products: allProducts, stores: allStores }: { path: string; onLogout: () => void; products: Product[]; stores: StoreRow[] }) {
   const [auditLogs, setAuditLogs] = useState<any[]>(() => {
     try { return JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]"); } catch { return []; }
   });
@@ -183,12 +185,17 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
   const [showAddStore, setShowAddStore] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [activeKpiDetail, setActiveKpiDetail] = useState<{title: string, data: any[]} | null>(null);
-
-
-  
-  // Filtros de Auditoria
   const [dateFilter, setDateFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+
+  // Novos Estados Administrativos
+  const [adminSearch, setAdminSearch] = useState("");
+  const [adminFilterStore, setAdminFilterStore] = useState("all");
+  const [adminActiveTab, setAdminActiveTab] = useState<"products" | "stores">("products");
+  const [editingItem, setEditingItem] = useState<{ type: 'product' | 'store', data: any } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{ type: 'product' | 'store', id: string, name: string } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadLogs = () => {
     try {
@@ -206,6 +213,68 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
       return matchesDate && matchesType;
     });
   }, [auditLogs, dateFilter, typeFilter]);
+
+  // Logica de busca e filtros
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter(p => {
+      const searchMatch = !adminSearch || 
+        p.name.toLowerCase().includes(adminSearch.toLowerCase()) || 
+        p.barcode?.includes(adminSearch);
+      const storeMatch = adminFilterStore === "all" || p.establishment === adminFilterStore;
+      return searchMatch && storeMatch;
+    });
+  }, [allProducts, adminSearch, adminFilterStore]);
+
+  const filteredStores = useMemo(() => {
+    return allStores.filter(s => {
+      const searchMatch = !adminSearch || s.name.toLowerCase().includes(adminSearch.toLowerCase());
+      return searchMatch;
+    });
+  }, [allStores, adminSearch]);
+
+  const handleDelete = async () => {
+    if (!confirmDelete || !supabase) return;
+    const { type, id, name } = confirmDelete;
+    const table = type === 'product' ? 'products' : 'establishments';
+    
+    const { error } = await supabase.from(table).delete().eq('id', id);
+    if (error) {
+      alert(`Erro ao excluir: ${error.message}`);
+      addAuditLog(`Falha ao excluir ${type}: ${name}`, 'error');
+    } else {
+      addAuditLog(`${type === 'product' ? 'Produto' : 'Estabelecimento'} excluído: ${name}`, 'warning');
+      setConfirmDelete(null);
+      window.location.reload(); 
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, productId: string) => {
+    const file = e.target.files?.[0];
+    if (!file || !supabase) return;
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${productId}-${Math.random()}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase.from('products').update({ image_url: publicUrl }).eq('id', productId);
+      if (updateError) throw updateError;
+
+      addAuditLog(`Imagem enviada para produto ID: ${productId}`);
+      alert("Foto enviada com sucesso!");
+    } catch (err: any) {
+      alert(`Erro no upload: ${err.message}`);
+      addAuditLog(`Erro no upload de foto: ${err.message}`, 'error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const exportCSV = () => {
     const headers = ["Data/Hora", "Usuário", "Ação", "Tipo"];
@@ -432,24 +501,117 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
 
   <section className="admin-card">
     <div className="admin-card-head">
-      <div><h2>Monitoramento operacional</h2><p>Dados mais recentes do catálogo local.</p></div>
+      <div>
+        <h2>Gestão de Catálogo</h2>
+        <p>Produtos e estabelecimentos registrados no sistema.</p>
+      </div>
       <div style={{display:"flex",gap:"0.75rem"}}>
         <button className="button button--outline" onClick={handleImport} disabled={isImporting} title="Disparar importação para o Supabase externo">
-          <Database/> {isImporting ? "Importando..." : "Importar 2.838 Preços"}
-
+          <Database/> {isImporting ? "Importando..." : "Importar Dados Excel"}
         </button>
-        <button className="button button--outline"><Download/> Exportar</button>
         <button className="button button--primary" onClick={() => setShowAddProduct(true)}><Plus/> Novo produto</button>
         <button className="button button--primary" onClick={() => setShowAddStore(true)} style={{ background: '#10b981' }}><Store/> Nova Loja</button>
-
       </div>
     </div>
-    <div className="admin-filters"><label><Search/><input placeholder="Buscar produto, loja ou código"/></label><button><SlidersHorizontal/> Filtros</button><button><Clock3/> Últimas 24h</button></div>
-    <div className="admin-table">
-      <div className="admin-tr admin-th"><span>Produto</span><span>Estabelecimento</span><span>Preço</span><span>Status</span><span>Atualizado</span><span /></div>
-      {rows.map((r,i)=><div className="admin-tr" key={r[0]}><span><b>{r[0]}</b><small>PC-{1200+i}</small></span><span>{r[1]}</span><span><b>{r[2]}</b></span><span><em className={r[3]==="Verificado"?"ok":"review"}>{r[3]}</em></span><span>há {i*11+4} min</span><span><button aria-label="Abrir registro"><ChevronRight/></button></span></div>)}
+    
+    <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', padding: '0 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
+      <button 
+        onClick={() => setAdminActiveTab("products")}
+        style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'products' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'products' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'products' ? '600' : '400', background: 'none' }}
+      >
+        Produtos ({filteredProducts.length})
+      </button>
+      <button 
+        onClick={() => setAdminActiveTab("stores")}
+        style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'stores' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'stores' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'stores' ? '600' : '400', background: 'none' }}
+      >
+        Lojas ({filteredStores.length})
+      </button>
     </div>
-    <div className="admin-card-foot"><span>Mostrando 4 de 1.247 registros</span><div><button disabled>Anterior</button><button>Próxima</button></div></div>
+
+    <div className="admin-filters">
+      <label style={{ flex: 1 }}>
+        <Search/>
+        <input 
+          placeholder={adminActiveTab === 'products' ? "Buscar por nome ou código de barras..." : "Buscar loja pelo nome..."} 
+          value={adminSearch}
+          onChange={e => setAdminSearch(e.target.value)}
+        />
+      </label>
+      {adminActiveTab === 'products' && (
+        <select 
+          value={adminFilterStore} 
+          onChange={e => setAdminFilterStore(e.target.value)}
+          style={{ padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}
+        >
+          <option value="all">Todos os Mercados</option>
+          {allStores.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+        </select>
+      )}
+      <button className="button button--outline" onClick={() => { setAdminSearch(""); setAdminFilterStore("all"); }}><SlidersHorizontal/> Limpar</button>
+    </div>
+
+    <div className="admin-table">
+      {adminActiveTab === 'products' ? (
+        <>
+          <div className="admin-tr admin-th">
+            <span>Produto</span>
+            <span>Marca / Cat.</span>
+            <span>Mercado Base</span>
+            <span>Preço Min.</span>
+            <span style={{ textAlign: 'right' }}>Ações</span>
+          </div>
+          {filteredProducts.slice(0, 50).map((p) => (
+            <div className="admin-tr" key={p.id}>
+              <span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ProductImage product={p} size="compact" />
+                  <div>
+                    <b>{p.name}</b>
+                    <small style={{ display: 'block' }}>{p.barcode || 'Sem código'}</small>
+                  </div>
+                </div>
+              </span>
+              <span>{p.brand}<br/><small>{p.category}</small></span>
+              <span>{p.establishment}</span>
+              <span><b>{money(p.minPrice)}</b></span>
+              <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
+                <button className="icon-button" onClick={() => setEditingItem({ type: 'product', data: p })} title="Editar"><Edit size={16}/></button>
+                <button className="icon-button" onClick={() => setConfirmDelete({ type: 'product', id: String(p.id), name: p.name })} style={{ color: '#dc2626' }} title="Excluir"><Trash2 size={16}/></button>
+              </span>
+            </div>
+          ))}
+        </>
+      ) : (
+        <>
+          <div className="admin-tr admin-th">
+            <span>Estabelecimento</span>
+            <span>Bairro</span>
+            <span>Tipo</span>
+            <span style={{ textAlign: 'right' }}>Ações</span>
+          </div>
+          {filteredStores.map((s) => (
+            <div className="admin-tr" key={s.id}>
+              <span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color }} />
+                  <b>{s.name}</b>
+                </div>
+              </span>
+              <span>{s.neighborhood}</span>
+              <span>{s.kind === 'market' ? 'Supermercado' : s.kind}</span>
+              <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
+                <button className="icon-button" onClick={() => setEditingItem({ type: 'store', data: s })} title="Editar"><Edit size={16}/></button>
+                <button className="icon-button" onClick={() => setConfirmDelete({ type: 'store', id: String(s.id), name: s.name })} style={{ color: '#dc2626' }} title="Excluir"><Trash2 size={16}/></button>
+              </span>
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+    <div className="admin-card-foot">
+      <span>Mostrando {adminActiveTab === 'products' ? filteredProducts.length : filteredStores.length} registros</span>
+    </div>
   </section>
 
   <div className="admin-lower" style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1.5rem"}}>
@@ -582,6 +744,92 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
           </div>
           <label>Código de Barras <input name="barcode" placeholder="Opcional" /></label>
           <button type="submit" className="button button--primary" style={{ marginTop: '1rem' }}>Salvar Produto</button>
+        </div>
+      </form>
+    </div>
+  )}
+  {/* Modal de Confirmação de Exclusão */}
+  {confirmDelete && (
+    <div className="admin-modal-overlay">
+      <div className="admin-modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
+        <div className="admin-modal-head">
+          <h3>Confirmar Exclusão</h3>
+          <button className="icon-button" onClick={() => setConfirmDelete(null)}><X/></button>
+        </div>
+        <div className="admin-modal-body">
+          <AlertTriangle size={48} color="#dc2626" style={{ margin: '0 auto 1rem' }} />
+          <p>Tem certeza que deseja excluir o {confirmDelete.type === 'product' ? 'produto' : 'estabelecimento'} <strong>{confirmDelete.name}</strong>?</p>
+          <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>Esta ação não pode ser desfeita no banco de dados.</p>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+            <button className="button button--outline" style={{ flex: 1 }} onClick={() => setConfirmDelete(null)}>Cancelar</button>
+            <button className="button button--primary" style={{ flex: 1, background: '#dc2626' }} onClick={handleDelete}>Excluir Agora</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* Modal de Edição */}
+  {editingItem && (
+    <div className="admin-modal-overlay">
+      <form className="admin-modal-content" onSubmit={async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        if (!supabase) return;
+        
+        const table = editingItem.type === 'product' ? 'products' : 'establishments';
+        const payload: any = {};
+        fd.forEach((value, key) => { payload[key] = value; });
+
+        const { error } = await supabase.from(table).update(payload).eq('id', editingItem.data.id);
+        
+        if (error) alert(error.message);
+        else {
+          addAuditLog(`${editingItem.type === 'product' ? 'Produto' : 'Loja'} atualizado: ${editingItem.data.name || editingItem.data.id}`);
+          setEditingItem(null);
+          window.location.reload();
+        }
+      }}>
+        <div className="admin-modal-head">
+          <h3>Editar {editingItem.type === 'product' ? 'Produto' : 'Estabelecimento'}</h3>
+          <button type="button" className="icon-button" onClick={() => setEditingItem(null)}><X/></button>
+        </div>
+        <div className="admin-modal-body" style={{ display: 'grid', gap: '1rem' }}>
+          {editingItem.type === 'product' ? (
+            <>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+                <img 
+                  src={editingItem.data.image_url || "/products/arroz-tio-joao-5kg.png"} 
+                  style={{ width: '80px', height: '80px', objectFit: 'contain', borderRadius: '4px', marginBottom: '0.5rem' }} 
+                  alt="Preview"
+                />
+                <button type="button" className="button button--small button--outline" onClick={() => fileInputRef.current?.click()}>
+                  <Upload size={14}/> {isUploading ? "Enviando..." : "Mudar Foto Real"}
+                </button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  hidden 
+                  accept="image/*" 
+                  onChange={(e) => handleFileUpload(e, String(editingItem.data.id))} 
+                />
+              </div>
+              <label>Nome <input name="name" defaultValue={editingItem.data.name} required /></label>
+              <label>Marca <input name="brand" defaultValue={editingItem.data.brand} /></label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <label>Categoria <input name="category" defaultValue={editingItem.data.category} /></label>
+                <label>Tamanho <input name="size" defaultValue={editingItem.data.size} /></label>
+              </div>
+              <label>Código de Barras <input name="barcode" defaultValue={editingItem.data.barcode} /></label>
+            </>
+          ) : (
+            <>
+              <label>Nome da Loja <input name="name" defaultValue={editingItem.data.name} required /></label>
+              <label>Bairro <input name="neighborhood" defaultValue={editingItem.data.neighborhood} /></label>
+              <label>Cor da Marca <input name="brand_color" type="color" defaultValue={editingItem.data.color || '#3b82f6'} style={{ height: '40px' }} /></label>
+            </>
+          )}
+          <button type="submit" className="button button--primary" style={{ marginTop: '0.5rem' }}>Salvar Alterações</button>
         </div>
       </form>
     </div>
@@ -846,7 +1094,7 @@ export default function PrecoCertoApp() {
     return null;
   }
 
-  if(isAdmin) return <><AdminPage path={pathname} onLogout={handleAdminLogout}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
+  if(isAdmin) return <><AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
   if(isAuth) return <AuthPage path={pathname} onAdminAuth={handleAdminAuth}/>;
 
   let page:ReactNode;
