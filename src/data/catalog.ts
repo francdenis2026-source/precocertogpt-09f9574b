@@ -2,13 +2,13 @@
 // Mantém a mesma forma de dados consumida pela interface, agregando preços por produto.
 
 export type Product = {
-  id: number; slug: string; name: string; brand: string; category: string; size: string;
+  id: string | number; slug: string; name: string; brand: string; category: string; size: string;
   unit: string; barcode?: string; minPrice: number; avgPrice: number; maxPrice: number;
-  storeCount: number; establishmentId: number; establishmentSlug: string; establishment: string;
+  storeCount: number; establishmentId: string | number; establishmentSlug: string; establishment: string;
   neighborhood: string; storeColor: string; capturedAt: string; previousPrice?: number;
 };
 
-export type StoreRow = { id: number; slug: string; name: string; neighborhood: string; color: string; products: number };
+export type StoreRow = { id: string | number; slug: string; name: string; neighborhood: string; color: string; products: number };
 
 export type PlatformMetrics = { products: number; prices: number; stores: number };
 
