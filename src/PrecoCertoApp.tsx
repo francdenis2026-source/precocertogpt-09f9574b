@@ -123,11 +123,55 @@ function PriceBadge({ product }: { product: Product }) {
   return <span className="price-badge"><TrendingDown size={13} /> {saving.toFixed(0)}% menor</span>;
 }
 
+function useRandomFeatured(products: Product[]) {
+  const [randomFeatured, setRandomFeatured] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const pickRandom = () => {
+      const attractive = [...products].sort((a, b) => {
+        const aSaving = a.previousPrice ? (a.previousPrice - a.minPrice) / a.previousPrice : 0;
+        const bSaving = b.previousPrice ? (b.previousPrice - b.minPrice) / b.previousPrice : 0;
+        return bSaving - aSaving;
+      });
+
+      const selected: Product[] = [];
+      const usedStores = new Set();
+      
+      for (const p of attractive) {
+        if (!usedStores.has(p.establishmentId)) {
+          selected.push(p);
+          usedStores.add(p.establishmentId);
+        }
+        if (selected.length >= 6) break;
+      }
+      
+      if (selected.length < 6) {
+        for (const p of attractive) {
+          if (!selected.find(s => s.id === p.id)) {
+            selected.push(p);
+          }
+          if (selected.length >= 6) break;
+        }
+      }
+
+      setRandomFeatured(selected.sort(() => Math.random() - 0.5));
+    };
+
+    pickRandom();
+    const interval = setInterval(pickRandom, 3600000); // 60 minutes
+    return () => clearInterval(interval);
+  }, [products]);
+
+  return randomFeatured;
+}
+
 function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction }: PageProps) {
   const [priceMode, setPriceMode] = useState<"recent" | "lowest">("recent");
   const [featuredIndex, setFeaturedIndex] = useState(0);
+  const randomFeatured = useRandomFeatured(products);
+
   const rows = [...products].sort((a,b) => priceMode === "lowest" ? a.minPrice - b.minPrice : Date.parse(b.capturedAt) - Date.parse(a.capturedAt)).slice(0, 6);
-  const featured = products[featuredIndex] ?? products[0];
+  const featured = randomFeatured[featuredIndex] ?? products[0];
   return <>
     <section className="hero">
       <div className="hero-photo" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=2000&auto=format&fit=crop")', backgroundSize: 'cover', backgroundPosition: 'center' }} />
@@ -147,7 +191,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
         <aside className="hero-radar hero-commerce" aria-label="Comparação interativa em destaque">
           <div className="radar-head"><span><Activity /> Comparação inteligente</span><em>ao vivo</em></div>
           {featured && <><div className="commerce-product"><ProductImage product={featured} size="hero" eager /><div className="commerce-copy"><span>{featured.category} • {featured.size}</span><h2>{featured.name}</h2><small><ShieldCheck /> preço verificado há 8 min</small></div></div><div className="commerce-prices"><div><small>Melhor preço</small><strong>{money(featured.minPrice)}</strong><span>em {featured.establishment}</span></div><div className="commerce-chart"><svg viewBox="0 0 250 72" role="img" aria-label="Tendência de preço em queda"><defs><linearGradient id="priceArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#54d69a" stopOpacity=".42"/><stop offset="1" stopColor="#54d69a" stopOpacity="0"/></linearGradient></defs><path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55 L246 70 L4 70 Z" fill="url(#priceArea)"/><path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55" fill="none" stroke="#65dfa8" strokeWidth="3" strokeLinecap="round"/><circle cx="246" cy="55" r="5" fill="#65dfa8" stroke="#08243a" strokeWidth="3"/></svg><span><TrendingDown /> caiu {money(Math.max(0,(featured.previousPrice ?? featured.maxPrice)-featured.minPrice))}</span></div></div><div className="commerce-actions"><button className="button button--gold" onClick={()=>addBasket(featured)}><Plus /> Adicionar à cesta</button><a href={`/produto/${featured.slug}`}>Ver comparação <ArrowRight /></a></div></>}
-          <div className="commerce-thumbs">{products.slice(0,4).map((product,index)=><button className={featuredIndex===index?"active":""} onClick={()=>setFeaturedIndex(index)} aria-pressed={featuredIndex===index} aria-label={`Destacar ${product.name}`} key={product.id}><ProductImage product={product} size="compact" /><span>{product.brand}<small>{money(product.minPrice)}</small></span></button>)}</div>
+          <div className="commerce-thumbs">{(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 4).map((product, index) => <button className={featuredIndex === index ? "active" : ""} onClick={() => setFeaturedIndex(index)} aria-pressed={featuredIndex === index} aria-label={`Destacar ${product.name}`} key={product.id}><ProductImage product={product} size="compact" /><span>{product.brand}<small>{money(product.minPrice)}</small></span></button>)}</div>
         </aside>
       </div>
     </section>
@@ -180,7 +224,58 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
     </section>
     <div className="shell metrics-float" aria-label="Métricas da plataforma"><div><span className="metric-icon"><Store /></span><strong>{count(metrics.stores)}</strong><span>estabelecimentos cadastrados</span></div><div><span className="metric-icon"><PackageSearch /></span><strong>{count(metrics.products)}</strong><span>itens cadastrados</span></div><div><span className="metric-icon"><Activity /></span><strong>{count(metrics.prices)}</strong><span>preços registrados</span></div><small><span /> Base consolidada até 7 de agosto de 2026</small></div>
     <nav className="shell category-rail" aria-label="Atalhos de compra"><span>Explore por intenção</span><a href="/categoria/mercearia"><PackageSearch /> Mercearia <ArrowRight /></a><a href="/categoria/acougue"><TrendingDown /> Ofertas do dia <ArrowRight /></a><a href="/cesta-basica"><ShoppingBasket /> Cesta essencial <ArrowRight /></a><a href="/estabelecimentos"><Store /> Mercados locais <ArrowRight /></a></nav>
-    <section className="section shell featured-products"><div className="section-heading"><div><span className="eyebrow">Mais buscados em Feijó</span><h2>Produtos que valem comparar</h2><p>Embalagens reais, histórico recente e o melhor preço disponível agora.</p></div><a className="inline-link" href="/buscar">Explorar catálogo <ArrowRight /></a></div><div className="visual-product-grid">{products.slice(0,6).map((p,index)=><article className="visual-product-card" key={p.id}><button className="floating-favorite" onClick={()=>saveAction("favorite","product",String(p.id))} aria-label={`Favoritar ${p.name}`}><Heart /></button><a className="visual-product-image" href={`/produto/${p.slug}`}><span className="position-number">0{index+1}</span><ProductImage product={p} /><span className="verified-chip"><ShieldCheck /> Verificado</span></a><div className="visual-product-content"><span className="category-tag">{p.category} • {p.size}</span><a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a><div className="visual-store"><span className="market-dot" style={{background:p.storeColor}}/><span>{p.establishment}<small><MapPin /> {p.neighborhood}</small></span></div><div className="visual-price"><span><small>a partir de</small><strong>{money(p.minPrice)}</strong></span><span><small>média local</small><b>{money(p.avgPrice)}</b></span></div><div className="mini-trend"><svg viewBox="0 0 180 34" aria-hidden="true"><path d={`M2 ${9+index%3*3} C24 ${7+index}, 31 ${22-index}, 54 18 S86 ${8+index}, 108 20 S145 ${27-index},178 ${13+index}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="178" cy={13+index} r="3" fill="currentColor"/></svg><span><TrendingDown /> {Math.max(3,Math.round((1-p.minPrice/p.maxPrice)*100))}% abaixo do maior</span></div><div className="visual-product-actions"><button className="button button--primary" onClick={()=>addBasket(p)}><Plus /> Cesta</button><a href={`/produto/${p.slug}`}>Comparar <ArrowRight /></a></div></div></article>)}</div></section>
+    <section className="section shell featured-products">
+      <div className="section-heading">
+        <div>
+          <span className="eyebrow">Destaques de hoje em Feijó</span>
+          <h2>Ofertas em Destaque</h2>
+          <p>Produtos com preços atrativos, atualizados automaticamente a cada 60 minutos para promover todos os estabelecimentos locais.</p>
+        </div>
+        <a className="inline-link" href="/melhores-precos">Ver todas as ofertas <ArrowRight /></a>
+      </div>
+      <div className="visual-product-grid">
+        {(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 6).map((p, index) => (
+          <article className="visual-product-card" key={p.id}>
+            <button className="floating-favorite" onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}>
+              <Heart />
+            </button>
+            <a className="visual-product-image" href={`/produto/${p.slug}`}>
+              <span className="position-number">0{index + 1}</span>
+              <ProductImage product={p} />
+              {p.previousPrice && p.previousPrice > p.minPrice && (
+                <span className="price-drop-tag"><TrendingDown size={14}/> -{Math.round((1 - p.minPrice / p.previousPrice) * 100)}%</span>
+              )}
+              <span className="verified-chip"><ShieldCheck /> Verificado</span>
+            </a>
+            <div className="visual-product-content">
+              <span className="category-tag">{p.category} • {p.size}</span>
+              <a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a>
+              <div className="visual-store">
+                <span className="market-dot" style={{ background: p.storeColor }} />
+                <span><strong>{p.establishment}</strong><small><MapPin /> {p.neighborhood}</small></span>
+              </div>
+              <div className="visual-price">
+                <span><small>a partir de</small><strong>{money(p.minPrice)}</strong></span>
+                {p.previousPrice && p.previousPrice > p.minPrice && (
+                  <span className="old-price"><small>era</small><s>{money(p.previousPrice)}</s></span>
+                )}
+              </div>
+              <div className="mini-trend">
+                <svg viewBox="0 0 180 34" aria-hidden="true">
+                  <path d={`M2 ${9 + index % 3 * 3} C24 ${7 + index}, 31 ${22 - index}, 54 18 S86 ${8 + index}, 108 20 S145 ${27 - index}, 178 ${13 + index}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <circle cx="178" cy={13 + index} r="3" fill="currentColor" />
+                </svg>
+                <span><TrendingDown /> {Math.max(3, Math.round((1 - p.minPrice / p.maxPrice) * 100))}% abaixo do maior</span>
+              </div>
+              <div className="visual-product-actions">
+                <button className="button button--primary" onClick={() => addBasket(p)}><Plus /> Cesta</button>
+                <a href={`/produto/${p.slug}`} className="button button--ghost button--small">Comparar</a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
     <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Economia pronta para você</span><h2>Cestas otimizadas</h2><p>Combinações que aproveitam o melhor preço de cada mercado de Feijó.</p></div><a className="inline-link" href="/cesta-basica">Ver todas as cestas <ArrowRight /></a></div><div className="basket-grid"><article className="basket-feature"><div className="basket-top"><span className="basket-icon"><ShoppingBasket /></span><PriceBadge product={products[0]} /></div><p>Cesta essencial da semana</p><h3>12 itens em 2 mercados</h3><div className="basket-total"><span>Valor otimizado</span><strong>{money(87.34)}</strong><small>economia estimada de {money(18.62)}</small></div><div className="store-route"><span><b style={{background: stores[0]?.color}}>CS</b> Central Super · 8 itens</span><span><b style={{background: stores[1]?.color}}>MR</b> Rebouças · 4 itens</span></div><a href="/cesta-basica" className="button button--dark">Abrir cesta otimizada <ArrowRight /></a></article><article className="basket-plan"><span className="eyebrow">Planejamento inteligente</span><h3>Quanto você quer gastar?</h3><p>Informe seu orçamento e montamos a melhor cesta possível, explicando cada escolha.</p><div className="budget-chips"><a href="/cesta-basica?orcamento=80">R$ 80</a><a href="/cesta-basica?orcamento=100">R$ 100</a><a href="/cesta-basica?orcamento=150">R$ 150</a><a href="/cesta-basica?orcamento=200">R$ 200</a></div><a href="/cesta-basica" className="inline-link">Montar minha cesta <ArrowRight /></a></article></div></section>
     <section className="section section--soft"><div className="shell"><div className="section-heading"><div><span className="eyebrow">Agora em Feijó</span><h2>Preços em tempo real</h2><p>Compare registros recentes e encontre o menor preço com transparência.</p></div><div className="segmented"><button className={priceMode === "recent" ? "active" : ""} onClick={() => setPriceMode("recent")}>Recentes</button><button className={priceMode === "lowest" ? "active" : ""} onClick={() => setPriceMode("lowest")}>Menor preço</button></div></div><div className="price-table-card"><div className="price-table-head"><span>Produto</span><span>Mercado</span><span>Preço</span><span>Atualizado</span><span>Ação</span></div>{rows.map((p, index) => <div className="price-row" key={p.id}><div className="product-cell"><ProductImage product={p} size="compact" /><span><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size}</small></span></div><div className="market-cell"><span className="market-dot" style={{background:p.storeColor}} /> <span>{p.establishment}<small>{p.neighborhood}</small></span></div><div><strong className="green-price">{money(p.minPrice)}</strong>{index < 3 && <PriceBadge product={p} />}</div><div><span className="freshness"><Clock3 /> há {8 + index * 7} min</span></div><div className="row-actions"><button onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}><Heart /></button><button onClick={() => addBasket(p)} aria-label={`Adicionar ${p.name} à cesta`}><Plus /></button></div></div>)}<div className="table-footer"><a href="/buscar">Abrir catálogo completo <ArrowRight /></a><span><ShieldCheck /> Dados auditáveis e verificados</span></div></div></div></section>
     <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Rede local</span><h2>Estabelecimentos monitorados</h2><p>Preço e disponibilidade perto de você, bairro por bairro.</p></div><a className="inline-link" href="/estabelecimentos">Ver diretório <ArrowRight /></a></div><div className="store-grid">{stores.map(store => <a className="store-card" href={`/estabelecimento/${store.slug}`} key={store.id}><span className="store-logo" style={{background:store.color}}>{store.name.split(" ").map(v=>v[0]).join("").slice(0,2)}</span><span><strong>{store.name}</strong><small><MapPin /> {store.neighborhood}</small></span><ChevronRight /></a>)}</div></section>
@@ -1040,7 +1135,8 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
 
 }
 
-function GenericPage({ path, products, stores, addBasket, saveAction }: PageProps & { path:string }) {
+function GenericPage({ path, products, stores, metrics, addBasket, saveAction }: PageProps & { path:string }) {
+  const randomFeatured = useRandomFeatured(products);
   const isStore = path.startsWith("/estabelecimento/") || path.startsWith("/loja/");
   const isProduct = path.startsWith("/produto") || path.includes("/produto/");
   const routeInfo: Record<string,[string,string,ReactNode]> = {
@@ -1186,7 +1282,66 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
     );
   }
 
-  return <div className="shell page-shell generic-page"><section className="generic-hero"><span className="generic-icon">{info[2]}</span><div><span className="eyebrow">{info[0]}</span><h1>{info[1]}</h1><p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p></div><a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a></section><div className="generic-grid"><section className="generic-main"><div className="section-heading compact"><div><h2>{isStore?"Ofertas em destaque":isProduct?"Onde está mais barato":"Destaques de hoje"}</h2><p>Registros compatíveis e verificados recentemente.</p></div></div>{products.slice(0,4).map(p=><article className="compact-product" key={p.id}><span className="product-visual">{p.category.slice(0,1)}</span><div><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size} • {p.establishment}</small><span><ShieldCheck/> Verificado há poucos minutos</span></div><strong>{money(p.minPrice)}</strong><button onClick={()=>saveAction("favorite","product",String(p.id))} aria-label="Favoritar"><Heart/></button><button className="button button--primary" onClick={()=>addBasket(p)}><Plus/> Cesta</button></article>)}</section><aside className="generic-aside"><span className="eyebrow">Visão local</span><h2>Feijó economiza junto</h2><div className="aside-stat"><span>Produtos acompanhados</span><strong>1.247</strong></div><div className="aside-stat"><span>Atualizações hoje</span><strong>214</strong></div><div className="aside-stat"><span>Economia potencial</span><strong>14,8%</strong></div><a href="/cesta-basica" className="button button--dark button--full">Montar cesta inteligente</a></aside></div></div>;
+  return (
+    <div className="shell page-shell generic-page">
+      <section className="generic-hero">
+        <span className="generic-icon">{info[2]}</span>
+        <div>
+          <span className="eyebrow">{info[0]}</span>
+          <h1>{info[1]}</h1>
+          <p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p>
+        </div>
+        <a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a>
+      </section>
+      <div className="generic-grid">
+        <section className="generic-main">
+          <div className="section-heading compact">
+            <div>
+              <h2>{isStore ? "Ofertas em destaque" : isProduct ? "Onde está mais barato" : "Destaques inteligentes"}</h2>
+              <p>Seleção automática de produtos com preços atrativos e curadoria local.</p>
+            </div>
+          </div>
+          {(randomFeatured.length > 0 ? randomFeatured : products.slice(0, 4)).map(p => (
+            <article className="compact-product" key={p.id}>
+              <span className="product-visual">{p.category.slice(0,1)}</span>
+              <div>
+                <a href={`/produto/${p.slug}`}>{p.name}</a>
+                <small>{p.brand} • {p.size} • <strong>{p.establishment}</strong></small>
+                <span><ShieldCheck/> Verificado recentemente</span>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <strong style={{ display: 'block' }}>{money(p.minPrice)}</strong>
+                {p.previousPrice && p.previousPrice > p.minPrice && (
+                  <small style={{ color: 'var(--green)', fontWeight: 600 }}>
+                    <TrendingDown size={10}/> -{Math.round((1 - p.minPrice / p.previousPrice) * 100)}%
+                  </small>
+                )}
+              </div>
+              <button onClick={() => saveAction("favorite", "product", String(p.id))} aria-label="Favoritar"><Heart/></button>
+              <button className="button button--primary" onClick={() => addBasket(p)}><Plus/> Cesta</button>
+            </article>
+          ))}
+        </section>
+        <aside className="generic-aside">
+          <span className="eyebrow">Visão local</span>
+          <h2>Feijó economiza junto</h2>
+          <div className="aside-stat">
+            <span>Produtos acompanhados</span>
+            <strong>{count(metrics.products)}</strong>
+          </div>
+          <div className="aside-stat">
+            <span>Atualizações hoje</span>
+            <strong>214</strong>
+          </div>
+          <div className="aside-stat">
+            <span>Economia potencial</span>
+            <strong>14,8%</strong>
+          </div>
+          <a href="/cesta-basica" className="button button--dark button--full">Montar cesta inteligente</a>
+        </aside>
+      </div>
+    </div>
+  );
 
 }
 
@@ -1386,7 +1541,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 }
 
 
-function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }: PageProps) {
+function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction }: PageProps) {
   const pathname = useLocation().pathname;
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeStore, setActiveStore] = useState("all");
@@ -1395,6 +1550,7 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
   const [chartPeriod, setChartPeriod] = useState("30d");
   const [isLoading, setIsLoading] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const randomFeatured = useRandomFeatured(products);
   
   useEffect(() => {
     const saved = localStorage.getItem("precocerto:favorites");
@@ -1722,11 +1878,11 @@ export default function PrecoCertoApp() {
 
   let page:ReactNode;
   if(pathname==="/") page=<HomePage {...props}/>;
-  else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props}/>;
-  else if(pathname==="/alertas") page=<GenericPage {...props} path={pathname}/>;
+  else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
+  else if(pathname==="/alertas") page=<GenericPage {...props} metrics={metrics} path={pathname}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
-  else page=<GenericPage {...props} path={pathname}/>;
+  else page=<GenericPage {...props} metrics={metrics} path={pathname}/>;
 
   return <div className="app">
     <Header basketCount={cart.length} user={user} onLogout={handleLogout}/>
