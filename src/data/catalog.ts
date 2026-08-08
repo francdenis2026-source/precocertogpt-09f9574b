@@ -6,7 +6,9 @@ export type Product = {
   unit: string; barcode?: string; minPrice: number; avgPrice: number; maxPrice: number;
   storeCount: number; establishmentId: string | number; establishmentSlug: string; establishment: string;
   neighborhood: string; storeColor: string; capturedAt: string; previousPrice?: number;
+  image_url?: string;
 };
+
 
 export type StoreRow = { id: string | number; slug: string; name: string; neighborhood: string; color: string; products: number; kind?: string };
 
