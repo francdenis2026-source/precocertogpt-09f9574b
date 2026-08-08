@@ -623,7 +623,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
             </span>
             <span style={{ textAlign: 'right' }}>Ações</span>
           </div>
-          {paginatedProducts.map((p) => (
+          {paginatedProducts.map((p: any) => (
             <div className="admin-tr" key={p.id}>
               <span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -663,7 +663,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
             <span>Tipo</span>
             <span style={{ textAlign: 'right' }}>Ações</span>
           </div>
-          {paginatedStores.map((s) => (
+          {paginatedStores.map((s: any) => (
             <div className="admin-tr" key={s.id}>
               <span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -681,6 +681,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
           ))}
         </>
       )}
+
     </div>
     <div className="admin-card-foot" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <span>Mostrando {adminActiveTab === 'products' ? paginatedProducts.length : paginatedStores.length} de {adminActiveTab === 'products' ? filteredProducts.length : filteredStores.length} registros</span>
