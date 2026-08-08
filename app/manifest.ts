@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait",
     lang: "pt-BR",
     icons: [
-      { src: "/favicon.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+      { src: "/favicon.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }
