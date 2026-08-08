@@ -182,3 +182,31 @@ export async function testSupabaseConnection(): Promise<{
   }
 }
 
+/**
+ * Função para enviar e-mail de redefinição de senha (simulada via API Rest do Supabase ou Provedor).
+ * Como estamos em um frontend sem backend direto acessível para SMTP, 
+ * usamos um webhook ou uma Edge Function do Supabase se disponível.
+ */
+export async function sendAdminResetEmail(email: string, user: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Simulação de chamada para provedor configurável (SendGrid/Resend/Postmark)
+    // No cenário real, isso seria uma chamada para uma Edge Function que possui a API Key secreta.
+    console.log(`[E-mail] Enviando link de redefinição para ${email} (Usuário: ${user})`);
+    
+    // Simulando latência de rede
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Se fosse usar Supabase Auth real para reset:
+    // const { error } = await supabase.auth.resetPasswordForEmail(email);
+    // if (error) throw error;
+
+    return { success: true };
+  } catch (err) {
+    return { 
+      success: false, 
+      error: err instanceof Error ? err.message : "Falha ao disparar e-mail" 
+    };
+  }
+}
+
+
