@@ -1547,10 +1547,13 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeStore, setActiveStore] = useState("all");
   const [activeBrand, setActiveBrand] = useState("all");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [updateRecency, setUpdateRecency] = useState("all"); // 'all', '7d', '24h'
   const [sortBy, setSortBy] = useState<"price" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
   const [chartPeriod, setChartPeriod] = useState("30d");
   const [isLoading, setIsLoading] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const randomFeatured = useRandomFeatured(products);
   
   useEffect(() => {
