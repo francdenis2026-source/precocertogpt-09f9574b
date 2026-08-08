@@ -1628,6 +1628,10 @@ export default function PrecoCertoApp() {
   const [query,setQuery]=useState("");
   const [cart,setCart]=useState<Product[]>(() => JSON.parse(localStorage.getItem("precocerto:basket") || "[]"));
   const [toast,setToast]=useState("");
+  const [user, setUser] = useState<{name: string} | null>(() => {
+    const saved = localStorage.getItem("precocerto:user");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [adminAuth, setAdminAuth] = useState(() => localStorage.getItem("precocerto:admin_authenticated") === "true");
   
   const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; 
