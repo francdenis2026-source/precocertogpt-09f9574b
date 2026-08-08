@@ -39,14 +39,15 @@ export async function runPriceImport(
     let data;
     try {
       const response = await fetch('/xlsx_data.json'); 
-      if (!response.ok) throw new Error("JSON não encontrado.");
+      if (!response.ok) throw new Error("Arquivo de dados não encontrado no servidor.");
       data = await response.json();
+      onProgress(`Dados carregados: ${data.products?.length || 0} produtos e ${data.prices?.length || 0} preços.`, 5, 100);
     } catch (e) {
-      onProgress("Usando catálogo local...", 5, 100);
+      onProgress("Dados do Excel não disponíveis. Usando catálogo de demonstração...", 5, 100);
       const { buildCatalog } = await import("./catalog");
       const local = buildCatalog();
       data = {
-        establishments: local.stores.map(s => ({ id: s.id, name: s.name, brand_color: s.color, neighborhood: s.neighborhood })),
+        establishments: local.stores.map(s => ({ id: s.id, name: s.name, brand_color: s.color, neighborhood: s.neighborhood, kind: 'market' })),
         products: local.products.map(p => ({ id: p.id, name: p.name, brand: p.brand, category: p.category, size: p.size, unit: p.unit, barcode: p.barcode })),
         prices: local.products.map(p => ({ product_id: p.id, establishment_id: p.establishmentId, value: p.minPrice, previous_value: p.previousPrice, captured_at: p.capturedAt }))
       };
