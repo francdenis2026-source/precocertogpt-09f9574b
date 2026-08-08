@@ -468,6 +468,8 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
       if (recoveryUser === "admin") {
         setRecoveryStep(2);
         setError("");
+        // Simulação de envio de email
+        console.log("[Simulação] Link de redefinição enviado para o email cadastrado do admin.");
       } else {
         setError("Usuário administrador não encontrado.");
       }
@@ -476,6 +478,7 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
         setError("A nova senha deve ter pelo menos 6 caracteres.");
         return;
       }
+
       localStorage.setItem("precocerto:admin_password", newPass);
       
       // Registrar no log de auditoria
