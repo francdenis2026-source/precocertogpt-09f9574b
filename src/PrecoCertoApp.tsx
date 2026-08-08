@@ -341,7 +341,16 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
     </section>
     <section className="admin-card">
       <div className="admin-card-head"><div><h2>Auditoria recente</h2><p>Ações sensíveis registradas.</p></div></div>
-      {["Preço atualizado por moderador","Importação concluída sem erros","Plano anual ativado","Cupom promocional revisado"].map((v,i)=><div className="audit-row" key={v}><span>{i===0?<CircleDollarSign/>:i===1?<Database/>:i===2?<CheckCircle2/>:<Receipt/>}</span><div><b>{v}</b><small>Franc D’Nis • há {i*12+3} min</small></div></div>)}
+      {auditLogs.slice(0, 4).map((log, i) => (
+        <div className="audit-row" key={i}>
+          <span>{log.type === "error" ? <AlertTriangle color="#dc2626"/> : log.action.includes("Importação") ? <Database/> : <ShieldCheck/>}</span>
+          <div>
+            <b>{log.action}</b>
+            <small>{log.user} • há {Math.round((Date.now() - new Date(log.at).getTime()) / 60000)} min</small>
+          </div>
+        </div>
+      ))}
+
     </section>
   </div>
 </main></div>;
