@@ -153,7 +153,19 @@ function PlansPage() {
   return <div className="shell page-shell plans-page"><div className="center-heading"><span className="eyebrow">Planos PreçoCerto</span><h1>Economia que se paga na primeira compra</h1><p>Recursos transparentes para consumidores e para o comércio local.</p><div className="segmented large"><button className={!shop?"active":""} onClick={()=>setShop(false)}>Para você</button><button className={shop?"active":""} onClick={()=>setShop(true)}>Para sua loja</button></div></div><div className="plan-grid">{plans.map(plan=><article className={plan.featured?"featured":""} key={plan.name}>{plan.featured&&<span className="recommended">Recomendado</span>}<h2>{plan.name}</h2><p>{plan.desc}</p><div className="plan-price"><strong>{money(plan.price)}</strong><span>/mês</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={`/checkout/${plan.name.toLowerCase().replace(" ","-")}`}>{plan.price===0?"Começar grátis":"Escolher plano"}<ArrowRight/></a><ul>{plan.features.map(f=><li key={f}><Check/> {f}</li>)}</ul></article>)}</div><div className="plan-note"><ShieldCheck/><span><b>Pagamento seguro via Pix</b><small>Ativação automática após confirmação. Cancele quando quiser.</small></span></div></div>;
 }
 
-function AdminPage({ path }: { path:string }) {
+function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<{ action: string; user: string; at: string; type: string }[]>(() => {
+    try { return JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]"); } catch { return []; }
+  });
+
+  const addAuditLog = (action: string, type: string = "info") => {
+    const newLog = { action, user: "Franc D’Nis", at: new Date().toISOString(), type };
+    const updated = [newLog, ...auditLogs].slice(0, 100);
+    setAuditLogs(updated);
+    localStorage.setItem("precocerto:admin_logs", JSON.stringify(updated));
+  };
+
   const [importing, setImporting] = useState(false);
   const [testing, setTesting] = useState(false);
   const [importStatus, setImportStatus] = useState("");
