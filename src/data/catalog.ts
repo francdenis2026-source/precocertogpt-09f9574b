@@ -8,7 +8,7 @@ export type Product = {
   neighborhood: string; storeColor: string; capturedAt: string; previousPrice?: number;
 };
 
-export type StoreRow = { id: string | number; slug: string; name: string; neighborhood: string; color: string; products: number };
+export type StoreRow = { id: string | number; slug: string; name: string; neighborhood: string; color: string; products: number; kind?: string };
 
 export type PlatformMetrics = { products: number; prices: number; stores: number };
 
