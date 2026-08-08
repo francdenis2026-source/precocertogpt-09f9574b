@@ -84,7 +84,7 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
         <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a>
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>Olá, <strong>{user.name.split(' ')[0]}</strong></span>
+            <a href="/perfil" style={{ fontSize: '0.9rem', color: 'var(--muted)', textDecoration: 'none' }}>Olá, <strong>{user.name.split(' ')[0]}</strong></a>
             <button className="text-link" onClick={onLogout}>Sair</button>
           </div>
         ) : (
