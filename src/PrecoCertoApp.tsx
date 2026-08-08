@@ -298,10 +298,11 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
 
   
   <div className="admin-kpis">
-    <article><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
-    <article><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
-    <article onClick={() => window.location.href = '/admin/auditoria'} style={{ cursor: 'pointer' }}><span>Pendências <AlertTriangle/></span><strong>17</strong><small className="warning">5 com prioridade alta</small></article>
-    <article><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
+    <article onClick={() => setActiveKpiDetail({ title: "Preços Ativos", data: rows })} style={{ cursor: 'pointer' }}><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
+    <article onClick={() => setActiveKpiDetail({ title: "Produtos Cobertos", data: initialProducts.slice(0, 10) })} style={{ cursor: 'pointer' }}><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
+    <article onClick={() => window.location.href = '#admin-auditoria'} style={{ cursor: 'pointer' }}><span>Pendências <AlertTriangle/></span><strong>17</strong><small className="warning">5 com prioridade alta</small></article>
+    <article onClick={() => setActiveKpiDetail({ title: "Estabelecimentos", data: initialStores })} style={{ cursor: 'pointer' }}><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
+
   </div>
 
   <div className="admin-lower" style={{gridTemplateColumns: "1fr 1fr", marginBottom: "1.5rem", display: "grid", gap: "1.5rem"}}>
@@ -433,7 +434,9 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
 
         </button>
         <button className="button button--outline"><Download/> Exportar</button>
-        <button className="button button--primary"><Plus/> Novo registro</button>
+        <button className="button button--primary" onClick={() => setShowAddProduct(true)}><Plus/> Novo produto</button>
+        <button className="button button--primary" onClick={() => setShowAddStore(true)} style={{ background: '#10b981' }}><Store/> Nova Loja</button>
+
       </div>
     </div>
     <div className="admin-filters"><label><Search/><input placeholder="Buscar produto, loja ou código"/></label><button><SlidersHorizontal/> Filtros</button><button><Clock3/> Últimas 24h</button></div>
@@ -479,7 +482,107 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
     </section>
 
   </div>
+  
+  {/* Modais de Gestão Administrativa */}
+  {activeKpiDetail && (
+    <div className="admin-modal-overlay" onClick={() => setActiveKpiDetail(null)}>
+      <div className="admin-modal-content" onClick={e => e.stopPropagation()}>
+        <div className="admin-modal-head">
+          <h3>{activeKpiDetail.title}</h3>
+          <button className="icon-button" onClick={() => setActiveKpiDetail(null)}><X/></button>
+        </div>
+        <div className="admin-modal-body">
+          <div style={{ maxHeight: '300px', overflowY: 'auto', background: '#f8fafc', padding: '1rem', borderRadius: '0.5rem', fontSize: '0.75rem' }}>
+            {activeKpiDetail.data.map((item, i) => (
+              <div key={i} style={{ padding: '0.5rem 0', borderBottom: '1px solid #e2e8f0' }}>
+                {JSON.stringify(item)}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {showAddStore && (
+    <div className="admin-modal-overlay">
+      <form className="admin-modal-content" onSubmit={async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        const { supabase } = await import("./lib/supabase");
+        if (!supabase) return;
+        const { error } = await supabase.from('establishments').insert({
+          name: fd.get('name'),
+          neighborhood: fd.get('neighborhood'),
+          brand_color: fd.get('color'),
+          kind: 'market'
+        });
+        if (error) alert(error.message);
+        else {
+          addAuditLog(`Novo estabelecimento cadastrado: ${fd.get('name')}`);
+          setShowAddStore(false);
+          loadLogs();
+        }
+      }}>
+        <div className="admin-modal-head">
+          <h3>Cadastrar Novo Estabelecimento</h3>
+          <button type="button" className="icon-button" onClick={() => setShowAddStore(false)}><X/></button>
+        </div>
+        <div className="admin-modal-body" style={{ display: 'grid', gap: '0.5rem' }}>
+          <label>Nome do Estabelecimento <input name="name" required placeholder="Ex: Mercado do Povo" /></label>
+          <label>Bairro <input name="neighborhood" required placeholder="Ex: Centro" /></label>
+          <label>Cor da Marca <input name="color" type="color" defaultValue="#3b82f6" style={{ height: '40px', padding: '2px' }} /></label>
+          <button type="submit" className="button button--primary" style={{ marginTop: '1rem' }}>Salvar Estabelecimento</button>
+        </div>
+      </form>
+    </div>
+  )}
+
+  {showAddProduct && (
+    <div className="admin-modal-overlay">
+      <form className="admin-modal-content" onSubmit={async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        const { supabase } = await import("./lib/supabase");
+        if (!supabase) return;
+        const { error } = await supabase.from('products').insert({
+          name: fd.get('name'),
+          brand: fd.get('brand'),
+          category: fd.get('category'),
+          size: fd.get('size'),
+          barcode: fd.get('barcode')
+        });
+        if (error) alert(error.message);
+        else {
+          addAuditLog(`Novo produto cadastrado: ${fd.get('name')}`);
+          setShowAddProduct(false);
+          loadLogs();
+        }
+      }}>
+        <div className="admin-modal-head">
+          <h3>Cadastrar Novo Produto</h3>
+          <button type="button" className="icon-button" onClick={() => setShowAddProduct(false)}><X/></button>
+        </div>
+        <div className="admin-modal-body" style={{ display: 'grid', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem', background: '#f8fafc', borderRadius: '0.5rem', border: '2px dashed #cbd5e1', marginBottom: '1rem' }}>
+            <Camera size={32} color="#64748b" />
+            <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', color: '#64748b' }}>Clique para subir foto</div>
+            <input type="file" accept="image/*" style={{ opacity: 0, position: 'absolute', width: '100px', cursor: 'pointer' }} onChange={() => alert('Simulação: Upload de imagem processado com sucesso.')} />
+          </div>
+          <label>Nome do Produto <input name="name" required placeholder="Ex: Arroz 5kg" /></label>
+          <label>Marca <input name="brand" required placeholder="Ex: Tio João" /></label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <label>Categoria <input name="category" placeholder="Ex: Mercearia" /></label>
+            <label>Tamanho <input name="size" placeholder="Ex: 5kg" /></label>
+          </div>
+          <label>Código de Barras <input name="barcode" placeholder="Opcional" /></label>
+          <button type="submit" className="button button--primary" style={{ marginTop: '1rem' }}>Salvar Produto</button>
+        </div>
+      </form>
+    </div>
+  )}
 </main></div>;
+
 }
 
 function GenericPage({ path, products, stores, addBasket, saveAction }: PageProps & { path:string }) {
