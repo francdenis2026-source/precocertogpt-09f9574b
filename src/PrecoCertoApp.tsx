@@ -309,31 +309,63 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
 
     <section className="admin-card">
       <div className="admin-card-head">
-        <div><h2>Log de Importação</h2><p>Resultado da última carga de preços.</p></div>
+        <div><h2>Progresso de Importação</h2><p>Processamento de dados em tempo real.</p></div>
       </div>
-      {importLog ? (
-        <div style={{padding: "1rem"}}>
-          <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-            <span style={{fontSize: "0.85rem"}}>Novos preços inseridos:</span>
-            <strong style={{color: "#16a34a"}}>+{importLog.count}</strong>
+      <div style={{padding: "1rem"}}>
+        {importing ? (
+          <div className="import-progress-panel">
+            <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem"}}>
+              <span>{importStatus}</span>
+              <b>{Math.round((importProgress / importTotal) * 100)}%</b>
+            </div>
+            <div style={{height: "8px", background: "#f1f5f9", borderRadius: "4px", overflow: "hidden", marginBottom: "0.5rem"}}>
+              <div style={{height: "100%", background: "#1473e6", width: `${(importProgress / importTotal) * 100}%`, transition: "width 0.3s ease"}} />
+            </div>
+            <small style={{color: "#64748b"}}>{importProgress} de {importTotal} registros processados</small>
           </div>
-          <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-            <span style={{fontSize: "0.85rem"}}>Duplicados ignorados:</span>
-            <span style={{color: "#6b7280"}}>{importLog.duplicates}</span>
+        ) : importLog ? (
+          <div style={{padding: "0"}}>
+            {importLog.error ? (
+              <div style={{background: "#fee2e2", padding: "1rem", borderRadius: "0.5rem", border: "1px solid #fecaca"}}>
+                <div style={{display: "flex", alignItems: "center", gap: "0.5rem", color: "#b91c1c", marginBottom: "0.5rem"}}>
+                  <AlertTriangle size={18} />
+                  <strong>Erro Crítico na Importação</strong>
+                </div>
+                <p style={{fontSize: "0.85rem", color: "#991b1b", margin: 0}}>{importLog.error}</p>
+                <small style={{display: "block", marginTop: "0.75rem", color: "#b91c1c", fontSize: "0.75rem"}}>
+                  Verifique a conexão com o banco ou permissões de RLS.
+                </small>
+              </div>
+            ) : (
+              <>
+                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
+                  <span style={{fontSize: "0.85rem"}}>Novos preços inseridos:</span>
+                  <strong style={{color: "#16a34a"}}>+{importLog.count}</strong>
+                </div>
+                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
+                  <span style={{fontSize: "0.85rem"}}>Duplicados ignorados:</span>
+                  <span style={{color: "#6b7280"}}>{importLog.duplicates}</span>
+                </div>
+                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
+                  <span style={{fontSize: "0.85rem"}}>Total processado:</span>
+                  <strong>{importLog.count + importLog.duplicates}</strong>
+                </div>
+                <div style={{borderTop: "1px solid #e5e7eb", marginTop: "0.5rem", paddingTop: "0.5rem", display: "flex", justifyContent: "space-between"}}>
+                  <small style={{color: "#6b7280"}}>Execução: {(importLog.duration / 1000).toFixed(2)}s</small>
+                  <small style={{color: "#6b7280"}}>{importLog.stores} lojas | {importLog.products} produtos</small>
+                </div>
+                <div style={{marginTop: '0.75rem', padding: '0.5rem', background: '#f0fdf4', color: '#166534', borderRadius: '0.25rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
+                  <Check size={14}/> Sincronização concluída com sucesso.
+                </div>
+              </>
+            )}
           </div>
-          <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-            <span style={{fontSize: "0.85rem"}}>Total processado:</span>
-            <strong>{importLog.count + importLog.duplicates}</strong>
-          </div>
-          <div style={{borderTop: "1px solid #e5e7eb", marginTop: "0.5rem", paddingTop: "0.5rem", display: "flex", justifyContent: "space-between"}}>
-            <small style={{color: "#6b7280"}}>Execução: {(importLog.duration / 1000).toFixed(2)}s</small>
-            <small style={{color: "#6b7280"}}>{importLog.stores} lojas | {importLog.products} produtos</small>
-          </div>
-        </div>
-      ) : (
-        <div style={{padding: "2rem", textAlign: "center", color: "#6b7280"}}><small>Nenhuma importação realizada nesta sessão.</small></div>
-      )}
+        ) : (
+          <div style={{padding: "1rem", textAlign: "center", color: "#6b7280"}}><small>Aguardando início do processo de carga.</small></div>
+        )}
+      </div>
     </section>
+
   </div>
 
   <section className="admin-card">
