@@ -195,6 +195,10 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   const [editingItem, setEditingItem] = useState<{ type: 'product' | 'store', data: any } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ type: 'product' | 'store', id: string, name: string } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [photoViewer, setPhotoViewer] = useState<{ url: string, name: string } | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadLogs = () => {
@@ -213,6 +217,39 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       return matchesDate && matchesType;
     });
   }, [auditLogs, dateFilter, typeFilter]);
+
+  const sortedProducts = useMemo(() => {
+    let items = [...allProducts];
+    if (sortConfig && sortConfig.key) {
+      items.sort((a: any, b: any) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return items;
+  }, [allProducts, sortConfig]);
+
+  const sortedStores = useMemo(() => {
+    let items = [...allStores];
+    if (sortConfig && sortConfig.key) {
+      items.sort((a: any, b: any) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return items;
+  }, [allStores, sortConfig]);
+
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
 
   // Logica de busca e filtros
   const filteredProducts = useMemo(() => {
@@ -555,17 +592,32 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       {adminActiveTab === 'products' ? (
         <>
           <div className="admin-tr admin-th">
-            <span>Produto</span>
-            <span>Marca / Cat.</span>
-            <span>Mercado Base</span>
-            <span>Preço Min.</span>
+            <span onClick={() => requestSort('name')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              Produto {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+            </span>
+            <span onClick={() => requestSort('brand')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              Marca / Cat. {sortConfig?.key === 'brand' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+            </span>
+            <span onClick={() => requestSort('establishment')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              Mercado Base {sortConfig?.key === 'establishment' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+            </span>
+            <span onClick={() => requestSort('minPrice')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              Preço Min. {sortConfig?.key === 'minPrice' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+            </span>
             <span style={{ textAlign: 'right' }}>Ações</span>
           </div>
-          {filteredProducts.slice(0, 50).map((p) => (
+          {paginatedProducts.map((p) => (
             <div className="admin-tr" key={p.id}>
               <span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <ProductImage product={p} size="compact" />
+                  <div 
+                    onClick={() => setPhotoViewer({ url: p.image_url || "/products/arroz-tio-joao-5kg.png", name: p.name })}
+                    style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                    onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                    onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                  >
+                    <ProductImage product={p} size="compact" />
+                  </div>
                   <div>
                     <b>{p.name}</b>
                     <small style={{ display: 'block' }}>{p.barcode || 'Sem código'}</small>
@@ -585,12 +637,16 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       ) : (
         <>
           <div className="admin-tr admin-th">
-            <span>Estabelecimento</span>
-            <span>Bairro</span>
+            <span onClick={() => requestSort('name')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              Estabelecimento {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+            </span>
+            <span onClick={() => requestSort('neighborhood')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              Bairro {sortConfig?.key === 'neighborhood' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+            </span>
             <span>Tipo</span>
             <span style={{ textAlign: 'right' }}>Ações</span>
           </div>
-          {filteredStores.map((s) => (
+          {paginatedStores.map((s) => (
             <div className="admin-tr" key={s.id}>
               <span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -609,9 +665,27 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
         </>
       )}
     </div>
-    <div className="admin-card-foot">
-      <span>Mostrando {adminActiveTab === 'products' ? filteredProducts.length : filteredStores.length} registros</span>
+    <div className="admin-card-foot" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span>Mostrando {adminActiveTab === 'products' ? paginatedProducts.length : paginatedStores.length} de {adminActiveTab === 'products' ? filteredProducts.length : filteredStores.length} registros</span>
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', gap: '0.25rem' }}>
+          <button 
+            className="button button--outline button--small" 
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          >Anterior</button>
+          <div style={{ display: 'flex', alignItems: 'center', px: '0.5rem', fontSize: '0.85rem', color: '#64748b' }}>
+            Página {currentPage} de {totalPages}
+          </div>
+          <button 
+            className="button button--outline button--small" 
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          >Próxima</button>
+        </div>
+      )}
     </div>
+
   </section>
 
   <div className="admin-lower" style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1.5rem"}}>
@@ -676,19 +750,29 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       <form className="admin-modal-content" onSubmit={async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
+        const name = String(fd.get('name')).trim();
+        const neighborhood = String(fd.get('neighborhood')).trim();
+        const color = String(fd.get('color'));
+
+        if (!name || !neighborhood) {
+          alert("Por favor, preencha o nome e o bairro.");
+          return;
+        }
+
         const { supabase } = await import("./lib/supabase");
         if (!supabase) return;
         const { error } = await supabase.from('establishments').insert({
-          name: fd.get('name'),
-          neighborhood: fd.get('neighborhood'),
-          brand_color: fd.get('color'),
+          name,
+          neighborhood,
+          brand_color: color,
           kind: 'market'
         });
-        if (error) alert(error.message);
+        if (error) alert("Erro ao salvar: " + error.message);
         else {
-          addAuditLog(`Novo estabelecimento cadastrado: ${fd.get('name')}`);
+          addAuditLog(`Novo estabelecimento cadastrado: ${name}`);
           setShowAddStore(false);
           loadLogs();
+          window.location.reload();
         }
       }}>
         <div className="admin-modal-head">
@@ -696,8 +780,8 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
           <button type="button" className="icon-button" onClick={() => setShowAddStore(false)}><X/></button>
         </div>
         <div className="admin-modal-body" style={{ display: 'grid', gap: '0.5rem' }}>
-          <label>Nome do Estabelecimento <input name="name" required placeholder="Ex: Mercado do Povo" /></label>
-          <label>Bairro <input name="neighborhood" required placeholder="Ex: Centro" /></label>
+          <label>Nome do Estabelecimento * <input name="name" required placeholder="Ex: Mercado do Povo" /></label>
+          <label>Bairro * <input name="neighborhood" required placeholder="Ex: Centro" /></label>
           <label>Cor da Marca <input name="color" type="color" defaultValue="#3b82f6" style={{ height: '40px', padding: '2px' }} /></label>
           <button type="submit" className="button button--primary" style={{ marginTop: '1rem' }}>Salvar Estabelecimento</button>
         </div>
@@ -705,25 +789,34 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
     </div>
   )}
 
+
   {showAddProduct && (
     <div className="admin-modal-overlay">
       <form className="admin-modal-content" onSubmit={async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
+        const name = String(fd.get('name')).trim();
+        const brand = String(fd.get('brand')).trim();
+        const category = String(fd.get('category')).trim();
+        const size = String(fd.get('size')).trim();
+        const barcode = String(fd.get('barcode')).trim();
+
+        if (!name || !brand || !category) {
+          alert("Por favor, preencha os campos obrigatórios (Nome, Marca e Categoria).");
+          return;
+        }
+
         const { supabase } = await import("./lib/supabase");
         if (!supabase) return;
         const { error } = await supabase.from('products').insert({
-          name: fd.get('name'),
-          brand: fd.get('brand'),
-          category: fd.get('category'),
-          size: fd.get('size'),
-          barcode: fd.get('barcode')
+          name, brand, category, size, barcode
         });
-        if (error) alert(error.message);
+        if (error) alert("Erro ao salvar: " + error.message);
         else {
-          addAuditLog(`Novo produto cadastrado: ${fd.get('name')}`);
+          addAuditLog(`Novo produto cadastrado: ${name}`);
           setShowAddProduct(false);
           loadLogs();
+          window.location.reload();
         }
       }}>
         <div className="admin-modal-head">
@@ -734,12 +827,20 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem', background: '#f8fafc', borderRadius: '0.5rem', border: '2px dashed #cbd5e1', marginBottom: '1rem' }}>
             <Camera size={32} color="#64748b" />
             <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', color: '#64748b' }}>Clique para subir foto</div>
-            <input type="file" accept="image/*" style={{ opacity: 0, position: 'absolute', width: '100px', cursor: 'pointer' }} onChange={() => alert('Simulação: Upload de imagem processado com sucesso.')} />
+            <input type="file" accept="image/*" style={{ opacity: 0, position: 'absolute', width: '100px', cursor: 'pointer' }} onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file && !file.type.startsWith('image/')) {
+                alert("Apenas arquivos de imagem são permitidos.");
+                e.target.value = "";
+              } else if (file) {
+                alert('Foto selecionada: ' + file.name + ' (O upload real ocorre na edição do produto)');
+              }
+            }} />
           </div>
-          <label>Nome do Produto <input name="name" required placeholder="Ex: Arroz 5kg" /></label>
-          <label>Marca <input name="brand" required placeholder="Ex: Tio João" /></label>
+          <label>Nome do Produto * <input name="name" required placeholder="Ex: Arroz 5kg" /></label>
+          <label>Marca * <input name="brand" required placeholder="Ex: Tio João" /></label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <label>Categoria <input name="category" placeholder="Ex: Mercearia" /></label>
+            <label>Categoria * <input name="category" required placeholder="Ex: Mercearia" /></label>
             <label>Tamanho <input name="size" placeholder="Ex: 5kg" /></label>
           </div>
           <label>Código de Barras <input name="barcode" placeholder="Opcional" /></label>
@@ -748,6 +849,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       </form>
     </div>
   )}
+
   {/* Modal de Confirmação de Exclusão */}
   {confirmDelete && (
     <div className="admin-modal-overlay">
@@ -834,7 +936,23 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       </form>
     </div>
   )}
+  {photoViewer && (
+    <div className="admin-modal-overlay" onClick={() => setPhotoViewer(null)}>
+      <div className="admin-modal-content" style={{ maxWidth: '500px', padding: '0.5rem' }} onClick={e => e.stopPropagation()}>
+        <div className="admin-modal-head" style={{ borderBottom: 'none' }}>
+          <h3 style={{ fontSize: '0.9rem' }}>{photoViewer.name}</h3>
+          <button className="icon-button" onClick={() => setPhotoViewer(null)}><X/></button>
+        </div>
+        <img 
+          src={photoViewer.url} 
+          alt={photoViewer.name} 
+          style={{ width: '100%', height: 'auto', borderRadius: '8px', display: 'block' }} 
+        />
+      </div>
+    </div>
+  )}
 </main></div>;
+
 
 }
 
