@@ -1238,21 +1238,203 @@ function AuthPage({ path, onAdminAuth }: { path: string; onAdminAuth: (success: 
 }
 
 
+function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }: PageProps) {
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeStore, setActiveStore] = useState("all");
+  const [activeBrand, setActiveBrand] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const saved = localStorage.getItem("precocerto:favorites");
+    if (saved) setFavorites(JSON.parse(saved));
+  }, []);
+
+  const handleFavorite = async (productId: string) => {
+    const newFavorites = favorites.includes(productId) 
+      ? favorites.filter(id => id !== productId)
+      : [...favorites, productId];
+    
+    setFavorites(newFavorites);
+    localStorage.setItem("precocerto:favorites", JSON.stringify(newFavorites));
+    saveAction("favorite", "product", productId);
+  };
+
+  useEffect(() => {
+    if (query || activeCategory !== "all" || activeStore !== "all" || activeBrand !== "all") {
+      setIsLoading(true);
+      const timer = setTimeout(() => setIsLoading(false), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [query, activeCategory, activeStore, activeBrand]);
+
+  const categories = useMemo(() => ["all", ...new Set(products.map(p => p.category))], [products]);
+  const allBrands = useMemo(() => ["all", ...new Set(products.map(p => p.brand))], [products]);
+  const allStores = useMemo(() => ["all", ...new Set(stores.map(s => s.name))], [stores]);
+
+  const filtered = useMemo(() => {
+    return products.filter(p => {
+      const q = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const matchesQuery = !query || `${p.name} ${p.brand} ${p.category}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q);
+      const matchesCategory = activeCategory === "all" || p.category === activeCategory;
+      const matchesStore = activeStore === "all" || p.establishment === activeStore;
+      const matchesBrand = activeBrand === "all" || p.brand === activeBrand;
+      return matchesQuery && matchesCategory && matchesStore && matchesBrand;
+    });
+  }, [products, query, activeCategory, activeStore, activeBrand]);
+
+  return (
+    <div className="shell page-shell">
+      <section className="search-header">
+        <h1>Comparador de Preços</h1>
+        <p>Encontre o melhor preço entre {stores.length} estabelecimentos em Feijó.</p>
+        <div style={{ maxWidth: '600px', marginTop: '1.5rem' }}>
+          <SearchBox value={query} setValue={setQuery} products={products} />
+        </div>
+      </section>
+
+      <div className="search-layout">
+        <aside className="search-sidebar">
+          <div className="filter-group">
+            <h3>Categorias</h3>
+            <div className="filter-list">
+              {categories.map(c => (
+                <button key={c} className={activeCategory === c ? "active" : ""} onClick={() => setActiveCategory(c)}>
+                  {c === "all" ? "Todas" : c}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="filter-group">
+            <h3>Marcas</h3>
+            <div className="filter-list">
+              {allBrands.map(b => (
+                <button key={b} className={activeBrand === b ? "active" : ""} onClick={() => setActiveBrand(b)}>
+                  {b === "all" ? "Todas" : b}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="filter-group">
+            <h3>Estabelecimentos</h3>
+            <div className="filter-list">
+              {allStores.map(s => (
+                <button key={s} className={activeStore === s ? "active" : ""} onClick={() => setActiveStore(s)}>
+                  {s === "all" ? "Todos" : s}
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <main className="search-results">
+          {isLoading ? (
+            <div className="search-loading">
+              <div className="spinner" />
+              <p>Otimizando busca para Feijó...</p>
+            </div>
+          ) : filtered.length > 0 ? (
+            <div className="results-grid">
+              {filtered.map(p => (
+                <article className="result-card" key={p.id}>
+                  <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => handleFavorite(String(p.id))}>
+                    <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
+                  </button>
+                  <div className="result-image"><ProductImage product={p} /></div>
+                  <div className="result-content">
+                    <span className="category-tag">{p.category}</span>
+                    <h3>{p.name}</h3>
+                    <small>{p.brand} • {p.size}</small>
+                    <div className="verified-details">
+                      <div className="detail-item"><MapPin size={12} /><span>{p.establishment}</span></div>
+                      <div className="detail-item"><Clock3 size={12} /><span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')}</span></div>
+                      <div className="detail-item"><ShieldCheck size={12} /><span>{p.source || "Coleta Direta"}</span></div>
+                    </div>
+                    {p.price_history && p.price_history.length > 1 && (
+                      <div className="history-preview">
+                        <LineChart size={12} />
+                        <span>Variação: {Math.round((1 - p.minPrice / p.maxPrice) * 100)}% na cidade</span>
+                      </div>
+                    )}
+                    <div className="price-row">
+                      <div className="main-price"><small>Melhor preço</small><strong>{money(p.minPrice)}</strong></div>
+                      <div className="avg-price"><small>Média local</small><b>{money(p.avgPrice)}</b></div>
+                    </div>
+                    <div className="result-actions">
+                      <button className="button button--primary button--full" onClick={() => addBasket(p)}><Plus /> Cesta</button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="no-results">
+              <PackageSearch size={48} />
+              <h2>Nenhum produto encontrado</h2>
+              <p>Tente outros filtros ou limpe sua busca.</p>
+              <button className="button button--outline" onClick={() => { setQuery(""); setActiveCategory("all"); setActiveStore("all"); setActiveBrand("all"); }}>Limpar tudo</button>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+interface PageProps {
+  products: Product[];
+  stores: StoreRow[];
+  metrics: PlatformMetrics;
+  query: string;
+  setQuery: (v: string) => void;
+  addBasket: (p: Product) => void;
+  saveAction: (action: string, type: string, id: string) => void;
+}
+
 export default function PrecoCertoApp() {
   const pathname = useLocation().pathname || "/";
-  const [products,setProducts]=useState<Product[]>(initialProducts); const [stores,setStores]=useState<StoreRow[]>(initialStores); const [metrics,setMetrics]=useState<PlatformMetrics>(verifiedDatasetMetrics); const [query,setQuery]=useState(""); const [cart,setCart]=useState<Product[]>([]); const [toast,setToast]=useState("");
+  const [products,setProducts]=useState<Product[]>(initialProducts);
+  const [stores,setStores]=useState<StoreRow[]>(initialStores);
+  const [metrics,setMetrics]=useState<PlatformMetrics>(verifiedDatasetMetrics);
+  const [query,setQuery]=useState("");
+  const [cart,setCart]=useState<Product[]>(() => JSON.parse(localStorage.getItem("precocerto:basket") || "[]"));
+  const [toast,setToast]=useState("");
   const [adminAuth, setAdminAuth] = useState(() => localStorage.getItem("precocerto:admin_authenticated") === "true");
+  
   const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; 
   const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
-  useEffect(()=>{ let alive=true; const q=new URLSearchParams(window.location.search).get("q")??""; if(q) setQuery(q);
-    // Fonte primária: Supabase do usuário. Fallback automático para o catálogo local.
-    fetchCatalog(q).then(data=>{ if(!alive)return; if(data.products.length)setProducts(data.products); if(data.stores.length)setStores(data.stores); setMetrics(data.metrics); if(data.source==="local"&&data.error) console.warn("[PreçoCerto] catálogo local em uso:",data.error); }).catch(err=>console.error("[PreçoCerto] falha ao carregar catálogo:",err));
-    return()=>{alive=false;}; },[]);
+
+  useEffect(()=>{
+    let alive=true;
+    const q=new URLSearchParams(window.location.search).get("q")??"";
+    if(q) setQuery(q);
+    fetchCatalog(q).then(data=>{
+      if(!alive)return;
+      if(data.products.length) setProducts(data.products);
+      if(data.stores.length) setStores(data.stores);
+      setMetrics(data.metrics);
+    }).catch(err=>console.error(err));
+    return()=>{alive=false;};
+  },[]);
+
+  useEffect(() => {
+    localStorage.setItem("precocerto:basket", JSON.stringify(cart));
+  }, [cart]);
+
   useEffect(()=>{ if(!toast)return; const t=setTimeout(()=>setToast(""),2800); return()=>clearTimeout(t); },[toast]);
-  function addBasket(p:Product){setCart(current=>current.some(i=>i.id===p.id)?current:[...current,p]);setToast(`${p.name} foi adicionado à cesta.`);}
-  function removeBasket(id:number){setCart(current=>current.filter(i=>i.id!==id));setToast("Item removido da cesta.");}
-  function saveAction(action:string,entityType:string,entityId:string){setToast(action==="alert"?"Alerta ativado com sucesso.":"Salvo nos seus favoritos.");try{const key="precocerto:actions";const saved=JSON.parse(localStorage.getItem(key)??"[]") as unknown[];localStorage.setItem(key,JSON.stringify([...saved,{action,entityType,entityId,at:new Date().toISOString()}].slice(-200)));}catch{setToast("A ação ficou salva nesta sessão.");}}
+  
+  function addBasket(p:Product){setCart(current=>current.some(i=>i.id===p.id)?current:[...current,p]);setToast(`${p.name} adicionado.`);}
+  function removeBasket(id:number|string){setCart(current=>current.filter(i=>String(i.id)!==String(id)));setToast("Removido.");}
+  
+  function saveAction(action:string,type:string,id:string){
+    setToast(action==="alert"?"Alerta ativado.":"Favoritado.");
+    const key="precocerto:actions";
+    const saved=JSON.parse(localStorage.getItem(key)??"[]");
+    localStorage.setItem(key,JSON.stringify([...saved,{action,type,id,at:new Date().toISOString()}].slice(-200)));
+  }
+
   const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction}),[products,stores,metrics,query]);
+
   const handleAdminAuth = (success: boolean) => {
     if (success) {
       setAdminAuth(true);
@@ -1261,27 +1443,29 @@ export default function PrecoCertoApp() {
     }
   };
 
-
   const handleAdminLogout = () => {
     setAdminAuth(false);
     localStorage.removeItem("precocerto:admin_authenticated");
+    window.location.href = "/login";
   };
 
-  // Redirecionamento forçado se tentar acessar admin sem estar logado
   if (isAdmin && !adminAuth) {
     window.location.href = "/admin-login";
     return null;
   }
 
-  if(isAdmin) return <><AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
-  if(isAuth) return <AuthPage path={pathname} onAdminAuth={handleAdminAuth}/>;
-
   let page:ReactNode;
-  if(pathname==="/oi") page=<div style={{padding:"4rem",textAlign:"center",fontSize:"2rem",fontFamily:"sans-serif"}}>oi</div>;
-  else if(pathname==="/") page=<HomePage {...props}/>;
-  else if(pathname==="/buscar") page=<SearchPage {...props}/>;
-  else if(pathname==="/cesta-basica"||pathname==="/cesta") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket}/>;
-  else if(pathname==="/planos"||pathname.startsWith("/checkout/")) page=<PlansPage/>;
+  if(pathname==="/") page=<HomePage {...props}/>;
+  else if(pathname==="/buscar"||pathname==="/comparador") page=<SearchPage {...props}/>;
+  else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
+  else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth}/>;
   else page=<GenericPage {...props} path={pathname}/>;
-  return <div className="app"><Header basketCount={cart.length}/><div className="market-pulse"><div className="shell"><span><i /> Rede PreçoCerto operacional</span><span>Feijó, Acre</span><span>Última leitura: agora</span><a href="/colaborar">Contribua com um preço <ArrowRight /></a></div></div><main>{page}</main><Footer/><MobileBar basketCount={cart.length}/>{toast&&<div className="toast" role="status" aria-live="polite"><CheckCircle2/>{toast}</div>}</div>;
+
+  return <div className="app">
+    <Header basketCount={cart.length}/>
+    <main>{page}</main>
+    <Footer/>
+    <MobileBar basketCount={cart.length}/>
+    {toast&&<div className="toast"><CheckCircle2/>{toast}</div>}
+  </div>;
 }
