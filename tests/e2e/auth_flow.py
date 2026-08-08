@@ -22,8 +22,10 @@ async def run_test():
             await page.click("text=Salvar Nova Senha")
             print("Senha alterada com sucesso")
 
-            # O link de volta tem o texto "Voltar ao login admin"
-            await page.click("text=Voltar ao login admin")
+            # Em vez de clicar, vamos navegar para garantir o reset do estado do componente
+            await page.goto("http://localhost:8080/admin-login")
+            print("Recarregou /admin-login")
+
             await page.fill('input[placeholder="usuário"]', "admin")
             await page.fill('input[placeholder="••••••••"]', "nova_senha_2026")
             await page.click('button[type="submit"]')
