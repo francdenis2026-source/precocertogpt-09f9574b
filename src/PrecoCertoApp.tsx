@@ -477,12 +477,26 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
         return;
       }
       localStorage.setItem("precocerto:admin_password", newPass);
+      
+      // Registrar no log de auditoria
+      try {
+        const logs = JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]");
+        const newLog = { 
+          action: "Senha administrativa redefinida via fluxo de recuperação", 
+          user: "Sistema (Auto)", 
+          at: new Date().toISOString(), 
+          type: "warning" 
+        };
+        localStorage.setItem("precocerto:admin_logs", JSON.stringify([newLog, ...logs].slice(0, 100)));
+      } catch {}
+
       setShowForgot(false);
       setRecoveryStep(1);
       setError("");
-      alert("Senha administrativa alterada com sucesso!");
+      alert("Senha administrativa alterada com sucesso! Um log desta ação foi registrado para auditoria.");
     }
   }
+
 
 
   return <div className="auth-page">
