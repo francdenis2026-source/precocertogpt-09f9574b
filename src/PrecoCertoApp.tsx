@@ -182,7 +182,16 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
     setImporting(true);
     setImportStatus("Iniciando...");
     setImportLog(null);
-    const result = await runPriceImport((msg) => setImportStatus(msg));
+    setImportProgress(0);
+    setImportTotal(2838); // Total estimado de registros
+
+    const result = await runPriceImport((msg) => {
+      setImportStatus(msg);
+      // Extrair progresso se a mensagem contiver números
+      const match = msg.match(/Importado: (\d+)/);
+      if (match) setImportProgress(parseInt(match[1]));
+    });
+
     setImporting(false);
     if (result.success) {
       setImportLog({
@@ -195,10 +204,19 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
       setImportStatus("Importação concluída.");
       addAuditLog(`Importação de ${result.count} preços concluída`, "success");
     } else {
-      setImportStatus(`Erro: ${result.error}`);
+      setImportLog({
+        count: 0,
+        duplicates: 0,
+        stores: 0,
+        products: 0,
+        duration: 0,
+        error: result.error
+      });
+      setImportStatus(`Erro na importação`);
       addAuditLog(`Falha na importação: ${result.error}`, "error");
     }
   }
+
 
 
   async function handleTestConnection() {
