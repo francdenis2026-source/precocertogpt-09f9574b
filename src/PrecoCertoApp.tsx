@@ -532,10 +532,23 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
         {isAdminLogin ? (
           showForgot ? (
             recoveryStep === 1 ? (
-              <label>Confirme o Usuário Administrador<input required value={recoveryUser} onChange={e=>setRecoveryUser(e.target.value)} placeholder="usuário"/></label>
+              <>
+                <label>Confirme o Usuário Administrador<input required value={recoveryUser} onChange={e=>setRecoveryUser(e.target.value)} placeholder="usuário"/></label>
+                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.5rem', background: '#f8fafc', padding: '0.5rem', borderRadius: '0.25rem' }}>
+                  <ShieldCheck size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }}/>
+                  Um link de segurança será simulado para o email do administrador.
+                </div>
+              </>
             ) : (
-              <label>Nova Senha Administrativa<input required type="password" value={newPass} onChange={e=>setNewPass(e.target.value)} placeholder="mínimo 6 caracteres"/></label>
+              <>
+                <label>Nova Senha Administrativa<input required type="password" value={newPass} onChange={e=>setNewPass(e.target.value)} placeholder="mínimo 6 caracteres"/></label>
+                <div style={{ fontSize: '0.75rem', color: '#b45309', marginTop: '0.5rem' }}>
+                  <Clock3 size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }}/>
+                  Esta sessão de redefinição expira em 10 minutos.
+                </div>
+              </>
             )
+
           ) : (
             <>
               <label>Usuário Administrador<input required value={user} onChange={e=>setUser(e.target.value)} placeholder="usuário"/></label>
