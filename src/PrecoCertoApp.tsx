@@ -1016,10 +1016,33 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
         </section>
         <div className="generic-grid">
           <section className="generic-main">
-            <div className="section-heading compact">
+            <div className="section-heading compact" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <h2>Produtos Monitorados ({alertProducts.length})</h2>
                 <p>Alertas configurados para variações de preço e validade da informação.</p>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className="button button--outline" onClick={() => {
+                  const csv = [
+                    ["Produto", "Marca", "Tamanho", "Estabelecimento", "Preco", "Atualizacao"].join(","),
+                    ...alertProducts.map(p => [
+                      `"${p.name}"`, `"${p.brand}"`, `"${p.size}"`, `"${p.establishment}"`, p.minPrice, new Date(p.capturedAt).toLocaleDateString()
+                    ].join(","))
+                  ].join("\n");
+                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.setAttribute("href", url);
+                  link.setAttribute("download", `alertas-precocerto-${new Date().toISOString().split('T')[0]}.csv`);
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }} title="Exportar para CSV">
+                  <Download size={16} /> CSV
+                </button>
+                <button className="button button--outline" onClick={() => window.print()} title="Imprimir lista (PDF)">
+                  <Receipt size={16} /> PDF
+                </button>
               </div>
             </div>
             {alertProducts.length > 0 ? alertProducts.map(p => {
@@ -1063,6 +1086,35 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
             <div className="aside-stat">
               <span>Alerta de dado expirado (7 dias)</span>
               <strong style={{ fontSize: '1rem', color: 'var(--blue)' }}>Ativado</strong>
+            </div>
+            <div className="aside-stat" style={{ background: 'var(--gold-soft)', border: '1px solid var(--gold)', marginTop: '1.5rem', padding: '1rem', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
+                <div style={{ background: '#25D366', color: 'white', padding: '6px', borderRadius: '50%' }}><Users size={16} /></div>
+                <strong style={{ fontSize: '0.9rem', color: '#128C7E' }}>Alertas via WhatsApp</strong>
+              </div>
+              <p style={{ fontSize: '0.75rem', lineHeight: '1.3', color: '#444' }}>
+                Receba notificações instantâneas de quedas de preço e dados expirados no seu celular.
+              </p>
+              <button 
+                className="button button--small" 
+                style={{ background: '#25D366', color: 'white', border: 'none', width: '100%', marginTop: '0.8rem' }}
+                onClick={() => window.open(`https://wa.me/5568999999999?text=${encodeURIComponent("Olá! Gostaria de ativar os alertas do PreçoCerto para minha lista de acompanhamento.")}`)}
+              >
+                Ativar WhatsApp
+              </button>
+            </div>
+            <div style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <div className="pulse-dot" style={{ background: 'var(--green)' }} />
+                <strong style={{ fontSize: '0.85rem' }}>Notificações em tempo real</strong>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+                {alertProducts.length > 0 ? (
+                  <p>Monitorando {alertProducts.length} itens. Última variação checada há 4 min.</p>
+                ) : (
+                  <p>Aguardando itens para monitoramento...</p>
+                )}
+              </div>
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '1rem' }}>Os alertas são processados localmente baseados nas últimas coletas realizadas em Feijó.</p>
           </aside>
@@ -1438,7 +1490,12 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
                         )}
                       </div>
                       <h3>{p.name}</h3>
-                      <small>{p.brand} • {p.size}</small>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <small>{p.brand} • {p.size}</small>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          {p.establishment}
+                        </span>
+                      </div>
                       <div className="verified-details">
                         <div className="detail-item" title="Local de coleta">
                           <MapPin size={12} />
