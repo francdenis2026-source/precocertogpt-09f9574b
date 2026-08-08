@@ -1,30 +1,29 @@
 import asyncio
-import os
 from playwright.async_api import async_playwright
 
 async def run_test():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context(viewport={"width": 1280, "height": 1800})
-        page = await context.new_page()
+        page = await browser.new_page()
         
         print("--- Iniciando Teste E2E: Redefinição de Senha ---")
         try:
             await page.goto("http://localhost:8080/admin-login")
             print("Acessou /admin-login")
 
-            await page.click('button:has-text("Esqueci minha senha admin")')
+            await page.click("text=Esqueci minha senha admin")
             print("Clicou em 'Esqueci minha senha'")
 
             await page.fill('input[placeholder="usuário"]', "admin")
-            await page.click('button:has-text("Verificar Usuário")')
+            await page.click("text=Verificar Usuário")
             print("Usuário 'admin' verificado")
 
             await page.fill('input[placeholder="mínimo 6 caracteres"]', "nova_senha_2026")
-            await page.click('button:has-text("Salvar Nova Senha")')
+            await page.click("text=Salvar Nova Senha")
             print("Senha alterada com sucesso")
 
-            await page.click('button:has-text("Voltar ao login admin")')
+            # O link de volta tem o texto "Voltar ao login admin"
+            await page.click("text=Voltar ao login admin")
             await page.fill('input[placeholder="usuário"]', "admin")
             await page.fill('input[placeholder="••••••••"]', "nova_senha_2026")
             await page.click('button[type="submit"]')
