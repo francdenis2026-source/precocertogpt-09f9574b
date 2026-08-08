@@ -1882,7 +1882,7 @@ export default function PrecoCertoApp() {
   else if(pathname==="/alertas") page=<GenericPage {...props} metrics={metrics} path={pathname}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
-  else page=<GenericPage {...props} path={pathname}/>;
+  else page=<GenericPage {...props} metrics={metrics} path={pathname}/>;
 
   return <div className="app">
     <Header basketCount={cart.length} user={user} onLogout={handleLogout}/>
