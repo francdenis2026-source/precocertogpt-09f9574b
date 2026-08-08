@@ -490,70 +490,115 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
   return <div className="shell page-shell generic-page"><section className="generic-hero"><span className="generic-icon">{info[2]}</span><div><span className="eyebrow">{info[0]}</span><h1>{info[1]}</h1><p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p></div><a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a></section><div className="generic-grid"><section className="generic-main"><div className="section-heading compact"><div><h2>{isStore?"Ofertas em destaque":isProduct?"Onde está mais barato":"Destaques de hoje"}</h2><p>Registros compatíveis e verificados recentemente.</p></div></div>{products.slice(0,4).map(p=><article className="compact-product" key={p.id}><span className="product-visual">{p.category.slice(0,1)}</span><div><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size} • {p.establishment}</small><span><ShieldCheck/> Verificado há poucos minutos</span></div><strong>{money(p.minPrice)}</strong><button onClick={()=>saveAction("favorite","product",String(p.id))} aria-label="Favoritar"><Heart/></button><button className="button button--primary" onClick={()=>addBasket(p)}><Plus/> Cesta</button></article>)}</section><aside className="generic-aside"><span className="eyebrow">Visão local</span><h2>Feijó economiza junto</h2><div className="aside-stat"><span>Produtos acompanhados</span><strong>1.247</strong></div><div className="aside-stat"><span>Atualizações hoje</span><strong>214</strong></div><div className="aside-stat"><span>Economia potencial</span><strong>14,8%</strong></div><a href="/cesta-basica" className="button button--dark button--full">Montar cesta inteligente</a></aside></div></div>;
 }
 
-function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: boolean) => void }) {
+function AuthPage({ path, onAdminAuth }: { path: string; onAdminAuth: (success: boolean) => void }) {
   const register = path === "/cadastro" || path === "/registrar";
   const isAdminLogin = path === "/admin-login";
-  const [pin,setPin]=useState(""); const [cpf,setCpf]=useState("");
-  const [user,setUser]=useState(""); const [pass,setPass]=useState("");
+  const [pin, setPin] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
   const [error, setError] = useState("");
   const [showForgot, setShowForgot] = useState(false);
   const [recoveryUser, setRecoveryUser] = useState("");
   const [newPass, setNewPass] = useState("");
   const [recoveryStep, setRecoveryStep] = useState(1); // 1: input user, 2: reset pass
+  const [attempts, setAttempts] = useState(0);
+  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
-  function submit(e:FormEvent){
+  useEffect(() => {
+    const blocked = localStorage.getItem("precocerto:admin_blocked_until");
+    if (blocked) {
+      const until = parseInt(blocked, 10);
+      if (until > Date.now()) setBlockedUntil(until);
+    }
+  }, []);
+
+  function submit(e: FormEvent) {
     e.preventDefault();
+    if (blockedUntil && Date.now() < blockedUntil) {
+      const remaining = Math.ceil((blockedUntil - Date.now()) / 1000);
+      setError(`Acesso bloqueado por segurança. Tente novamente em ${remaining}s.`);
+      return;
+    }
+
     if (isAdminLogin) {
-      // Verifica no localStorage se a senha foi alterada, senão usa a padrão
       const savedPass = localStorage.getItem("precocerto:admin_password") || "feijo2026";
       if (user === "admin" && pass === savedPass) {
         onAdminAuth(true);
-        window.location.href="/admin";
+        setAttempts(0);
+        localStorage.removeItem("precocerto:admin_blocked_until");
+        window.location.href = "/admin";
       } else {
-        setError("Credenciais administrativas incorretas.");
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        if (newAttempts >= 5) {
+          const until = Date.now() + 60000; // 1 minuto
+          setBlockedUntil(until);
+          localStorage.setItem("precocerto:admin_blocked_until", until.toString());
+          setError("Muitas tentativas falhas. Acesso bloqueado por 1 minuto.");
+          addAuditLog("Bloqueio de segurança ativado após 5 falhas no login", "error", user || "Desconhecido");
+        } else {
+          setError(`Credenciais incorretas. Tentativa ${newAttempts} de 5.`);
+        }
       }
     } else {
-      window.location.href="/app";
+      window.location.href = "/app";
     }
   }
 
-  function handleRecovery(e: FormEvent) {
+  async function handleRecovery(e: FormEvent) {
     e.preventDefault();
+    if (blockedUntil && Date.now() < blockedUntil) {
+      setError("Muitas tentativas. Aguarde o desbloqueio.");
+      return;
+    }
+
     if (recoveryStep === 1) {
       if (recoveryUser === "admin") {
-        setRecoveryStep(2);
+        setIsSendingEmail(true);
         setError("");
-        // Simulação de envio de email
-        console.log("[Simulação] Link de redefinição enviado para o email cadastrado do admin.");
+        try {
+          const { sendAdminResetEmail } = await import("./data/importer");
+          const res = await sendAdminResetEmail("admin@precocerto.com.br", "admin");
+          if (res.success) {
+            setRecoveryStep(2);
+            addAuditLog("Solicitação de redefinição de senha admin (E-mail enviado)");
+          } else {
+            setError(res.error || "Erro ao enviar e-mail.");
+          }
+        } catch (err) {
+          setError("Erro técnico ao processar envio.");
+        } finally {
+          setIsSendingEmail(false);
+        }
       } else {
-        setError("Usuário administrador não encontrado.");
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        if (newAttempts >= 3) {
+          const until = Date.now() + 300000; // 5 min
+          setBlockedUntil(until);
+          localStorage.setItem("precocerto:admin_blocked_until", until.toString());
+          setError("Muitas tentativas de recuperação. Bloqueado por 5 minutos.");
+          addAuditLog("Bloqueio de recuperação por tentativas inválidas", "error");
+        } else {
+          setError(`Usuário não encontrado. Tentativa ${newAttempts} de 3.`);
+        }
       }
     } else {
       if (newPass.length < 6) {
         setError("A nova senha deve ter pelo menos 6 caracteres.");
         return;
       }
-
       localStorage.setItem("precocerto:admin_password", newPass);
-      
-      // Registrar no log de auditoria
-      try {
-        const logs = JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]");
-        const newLog = { 
-          action: "Senha administrativa redefinida via fluxo de recuperação", 
-          user: "Sistema (Auto)", 
-          at: new Date().toISOString(), 
-          type: "warning" 
-        };
-        localStorage.setItem("precocerto:admin_logs", JSON.stringify([newLog, ...logs].slice(0, 100)));
-      } catch {}
-
+      addAuditLog("Senha administrativa redefinida via fluxo de recuperação", "warning");
       setShowForgot(false);
       setRecoveryStep(1);
       setError("");
-      alert("Senha administrativa alterada com sucesso! Um log desta ação foi registrado para auditoria.");
+      alert("Senha administrativa alterada com sucesso!");
     }
   }
+
 
 
 
