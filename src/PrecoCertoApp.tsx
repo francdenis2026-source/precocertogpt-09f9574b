@@ -34,6 +34,21 @@ const adminRouteNames: Record<string, string> = {
 function money(value: number) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value); }
 function count(value: number) { return new Intl.NumberFormat("pt-BR").format(value); }
 
+/**
+ * Registra uma entrada no log de auditoria persistente.
+ */
+function addAuditLog(action: string, type: "success" | "warning" | "error" = "success", user: string = "Franc D’Nis") {
+  try {
+    const key = "precocerto:admin_logs";
+    const logs = JSON.parse(localStorage.getItem(key) ?? "[]");
+    const newLog = { action, type, user, at: new Date().toISOString() };
+    localStorage.setItem(key, JSON.stringify([newLog, ...logs].slice(0, 100)));
+  } catch (err) {
+    console.error("Erro ao salvar log de auditoria:", err);
+  }
+}
+
+
 const productImages: Record<string, string> = {
   "arroz-tio-joao-5kg": "/products/arroz-tio-joao-5kg.png",
   "cafe-3-coracoes-500g": "/products/cafe-3-coracoes-500g.jpg",
@@ -392,19 +407,35 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
       <div className="admin-card-head"><div><h2>Saúde das integrações</h2><p>Serviços críticos e filas.</p></div></div>
       {[["Banco e Realtime","Operacional","99,99%"],["Mercado Pago","Operacional","100%"],["Fila de IA","Atenção","3 jobs"],["E-mails","Operacional","98,7%"]].map((r,i)=><div className="health-row" key={r[0]}><span className={i===2?"status warning":"status"}/><b>{r[0]}</b><em>{r[1]}</em><strong>{r[2]}</strong></div>)}
     </section>
-    <section className="admin-card">
-      <div className="admin-card-head"><div><h2>Auditoria recente</h2><p>Ações sensíveis registradas.</p></div></div>
-      {auditLogs.slice(0, 4).map((log, i) => (
-        <div className="audit-row" key={i}>
-          <span>{log.type === "error" ? <AlertTriangle color="#dc2626"/> : log.action.includes("Importação") ? <Database/> : <ShieldCheck/>}</span>
-          <div>
-            <b>{log.action}</b>
-            <small>{log.user} • há {Math.round((Date.now() - new Date(log.at).getTime()) / 60000)} min</small>
-          </div>
+    <section className="admin-card" style={{ gridColumn: "span 2" }}>
+      <div className="admin-card-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div><h2>Auditoria Completa</h2><p>Logs de segurança e operações sensíveis.</p></div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <input type="date" value={dateFilter} onChange={e=>setDateFilter(e.target.value)} style={{ padding: '0.25rem', fontSize: '0.8rem', border: '1px solid #ddd', borderRadius: '4px' }}/>
+          <select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} style={{ padding: '0.25rem', fontSize: '0.8rem', border: '1px solid #ddd', borderRadius: '4px' }}>
+            <option value="all">Todos Tipos</option>
+            <option value="success">Sucesso</option>
+            <option value="warning">Aviso</option>
+            <option value="error">Crítico</option>
+          </select>
+          <button className="button button--small" onClick={exportCSV}><Download size={14}/> Exportar CSV</button>
         </div>
-      ))}
-
+      </div>
+      <div style={{ maxHeight: '400px', overflowY: 'auto', marginTop: '1rem' }}>
+        {filteredLogs.length > 0 ? filteredLogs.map((log, i) => (
+          <div className="audit-row" key={i} style={{ borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0' }}>
+            <span style={{ minWidth: '24px' }}>{log.type === "error" ? <AlertTriangle color="#dc2626"/> : log.type === "warning" ? <Bell color="#b45309"/> : <CheckCircle2 color="#16a34a"/>}</span>
+            <div style={{ flex: 1 }}>
+              <b style={{ fontSize: '0.9rem' }}>{log.action}</b>
+              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                {log.user} • {new Date(log.at).toLocaleString("pt-BR")}
+              </div>
+            </div>
+          </div>
+        )) : <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>Nenhum log encontrado para os filtros selecionados.</div>}
+      </div>
     </section>
+
   </div>
 </main></div>;
 }
@@ -602,14 +633,10 @@ export default function PrecoCertoApp() {
   const handleAdminAuth = (success: boolean) => {
     if (success) {
       setAdminAuth(true);
-      // Log de login (não temos addAuditLog aqui, mas podemos fazer via localStorage direto)
-      try {
-        const logs = JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]");
-        const newLog = { action: "Login administrativo realizado", user: "Franc D’Nis", at: new Date().toISOString(), type: "success" };
-        localStorage.setItem("precocerto:admin_logs", JSON.stringify([newLog, ...logs].slice(0, 100)));
-      } catch {}
+      addAuditLog("Login administrativo realizado");
     }
   };
+
 
   const handleAdminLogout = () => {
     setAdminAuth(false);
