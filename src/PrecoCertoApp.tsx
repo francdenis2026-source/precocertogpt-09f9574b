@@ -674,7 +674,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
           >Anterior</button>
-          <div style={{ display: 'flex', alignItems: 'center', px: '0.5rem', fontSize: '0.85rem', color: '#64748b' }}>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.5rem', fontSize: '0.85rem', color: '#64748b' }}>
             Página {currentPage} de {totalPages}
           </div>
           <button 
