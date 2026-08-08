@@ -70,7 +70,7 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
   </a>;
 }
 
-function Header({ basketCount }: { basketCount: number }) {
+function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   return <header className="site-header">
     <div className="shell header-inner">
