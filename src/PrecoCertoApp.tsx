@@ -160,7 +160,6 @@ interface PageProps {
   addBasket: (p: Product) => void;
   saveAction: (action: string, type: string, id: string) => void;
 }
-}
 
 function BasketPage({ products, addBasket }: PageProps & { cart: Product[]; removeBasket:(id:number)=>void }) {
   const [mode, setMode] = useState("budget"); const [budget, setBudget] = useState(150); const [items, setItems] = useState<Product[]>(products.slice(0,5));
