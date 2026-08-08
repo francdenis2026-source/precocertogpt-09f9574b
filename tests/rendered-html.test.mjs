@@ -62,9 +62,10 @@ test("ships persistent catalog, brand metadata and social assets", async () => {
   assert.match(schema, /sqliteTable\("products"/);
   assert.match(schema, /sqliteTable\("prices"/);
   assert.match(layout, /PreçoCerto — Economia Real em Feijó/);
-  assert.match(layout, /\/og\.png/);
+  assert.match(layout, /\/og-profissional\.png/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
   await access(new URL("../public/og.png", import.meta.url));
+  await access(new URL("../public/og-profissional.png", import.meta.url));
   await access(new URL("../public/favicon.png", import.meta.url));
   await access(new URL("../drizzle/0000_precocerto_catalog.sql", import.meta.url));
 });
