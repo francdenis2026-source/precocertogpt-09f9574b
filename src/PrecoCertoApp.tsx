@@ -185,11 +185,14 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [activeKpiDetail, setActiveKpiDetail] = useState<{title: string, data: any[]} | null>(null);
 
-
-  
-  // Filtros de Auditoria
-  const [dateFilter, setDateFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
+  // Novos Estados Administrativos
+  const [adminSearch, setAdminSearch] = useState("");
+  const [adminFilterStore, setAdminFilterStore] = useState("all");
+  const [adminActiveTab, setAdminActiveTab] = useState<"products" | "stores">("products");
+  const [editingItem, setEditingItem] = useState<{ type: 'product' | 'store', data: any } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{ type: 'product' | 'store', id: string, name: string } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadLogs = () => {
     try {
@@ -207,6 +210,75 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
       return matchesDate && matchesType;
     });
   }, [auditLogs, dateFilter, typeFilter]);
+
+  // Logica de busca e filtros
+  const { products, stores } = useMemo(() => {
+    // Acessando as props do escopo externo via closure (sendo injetadas pelo componente pai)
+    // Mas aqui na AdminPage elas virão de buildCatalog() se não carregadas ainda.
+    const cat = buildCatalog();
+    return { products: cat.products, stores: cat.stores };
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => {
+      const searchMatch = !adminSearch || 
+        p.name.toLowerCase().includes(adminSearch.toLowerCase()) || 
+        p.barcode?.includes(adminSearch);
+      const storeMatch = adminFilterStore === "all" || p.establishment === adminFilterStore;
+      return searchMatch && storeMatch;
+    });
+  }, [products, adminSearch, adminFilterStore]);
+
+  const filteredStores = useMemo(() => {
+    return stores.filter(s => {
+      const searchMatch = !adminSearch || s.name.toLowerCase().includes(adminSearch.toLowerCase());
+      return searchMatch;
+    });
+  }, [stores, adminSearch]);
+
+  const handleDelete = async () => {
+    if (!confirmDelete || !supabase) return;
+    const { type, id, name } = confirmDelete;
+    const table = type === 'product' ? 'products' : 'establishments';
+    
+    const { error } = await supabase.from(table).delete().eq('id', id);
+    if (error) {
+      alert(`Erro ao excluir: ${error.message}`);
+      addAuditLog(`Falha ao excluir ${type}: ${name}`, 'error');
+    } else {
+      addAuditLog(`${type === 'product' ? 'Produto' : 'Estabelecimento'} excluído: ${name}`, 'warning');
+      setConfirmDelete(null);
+      window.location.reload(); 
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, productId: string) => {
+    const file = e.target.files?.[0];
+    if (!file || !supabase) return;
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${productId}-${Math.random()}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase.from('products').update({ image_url: publicUrl }).eq('id', productId);
+      if (updateError) throw updateError;
+
+      addAuditLog(`Imagem enviada para produto ID: ${productId}`);
+      alert("Foto enviada com sucesso!");
+    } catch (err: any) {
+      alert(`Erro no upload: ${err.message}`);
+      addAuditLog(`Erro no upload de foto: ${err.message}`, 'error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const exportCSV = () => {
     const headers = ["Data/Hora", "Usuário", "Ação", "Tipo"];
