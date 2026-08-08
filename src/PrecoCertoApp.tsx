@@ -123,22 +123,17 @@ function PriceBadge({ product }: { product: Product }) {
   return <span className="price-badge"><TrendingDown size={13} /> {saving.toFixed(0)}% menor</span>;
 }
 
-function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction }: PageProps) {
-  const [priceMode, setPriceMode] = useState<"recent" | "lowest">("recent");
-  const [featuredIndex, setFeaturedIndex] = useState(0);
+function useRandomFeatured(products: Product[]) {
   const [randomFeatured, setRandomFeatured] = useState<Product[]>([]);
 
   useEffect(() => {
     const pickRandom = () => {
-      // Logic to pick random attractive products (e.g. products with highest discount)
-      // and ensure diversity of establishments.
       const attractive = [...products].sort((a, b) => {
         const aSaving = a.previousPrice ? (a.previousPrice - a.minPrice) / a.previousPrice : 0;
         const bSaving = b.previousPrice ? (b.previousPrice - b.minPrice) / b.previousPrice : 0;
         return bSaving - aSaving;
       });
 
-      // Try to get products from different establishments
       const selected: Product[] = [];
       const usedStores = new Set();
       
@@ -150,7 +145,6 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
         if (selected.length >= 6) break;
       }
       
-      // If we don't have enough, fill with others
       if (selected.length < 6) {
         for (const p of attractive) {
           if (!selected.find(s => s.id === p.id)) {
@@ -167,6 +161,14 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
     const interval = setInterval(pickRandom, 3600000); // 60 minutes
     return () => clearInterval(interval);
   }, [products]);
+
+  return randomFeatured;
+}
+
+function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction }: PageProps) {
+  const [priceMode, setPriceMode] = useState<"recent" | "lowest">("recent");
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const randomFeatured = useRandomFeatured(products);
 
   const rows = [...products].sort((a,b) => priceMode === "lowest" ? a.minPrice - b.minPrice : Date.parse(b.capturedAt) - Date.parse(a.capturedAt)).slice(0, 6);
   const featured = randomFeatured[featuredIndex] ?? products[0];
