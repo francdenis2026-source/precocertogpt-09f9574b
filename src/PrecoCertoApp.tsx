@@ -201,7 +201,16 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
     const result = await testSupabaseConnection();
     setConnectionInfo(result);
     setTesting(false);
+    addAuditLog(result.success ? "Teste de conexão: Sucesso" : "Teste de conexão: Falha", result.success ? "success" : "error");
   }
+
+  const handleLogoutRequest = () => setShowLogoutConfirm(true);
+  const confirmLogout = () => {
+    addAuditLog("Logout administrativo realizado");
+    setShowLogoutConfirm(false);
+    onLogout();
+  };
+
 
 
   const rows = [
