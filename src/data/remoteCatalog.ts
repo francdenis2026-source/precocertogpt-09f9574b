@@ -86,7 +86,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
 
     const mapped = productRows
       .map((product): Product | null => {
-        const rows = priceRows.filter(price => price.product_id === product.id);
+        const rows = priceRows.filter(price => String(price.product_id) === String(product.id));
         if (!rows.length) return null;
 
         const values = rows.map(row => toNumber(row.value));
@@ -100,7 +100,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
 
         return {
           id: product.id,
-          slug: product.id,
+          slug: String(product.id),
           name: product.name ?? "Produto sem nome",
           brand: product.brand ?? "—",
           category: product.category ?? "Geral",
@@ -112,7 +112,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
           maxPrice: round(Math.max(...values)),
           storeCount: new Set(rows.map(row => row.establishment_id)).size,
           establishmentId: store.id,
-          establishmentSlug: store.id,
+          establishmentSlug: String(store.id),
           establishment: store.name ?? "Estabelecimento",
           neighborhood: store.neighborhood ?? "—",
           storeColor: store.brand_color ?? "#1473E6",
@@ -132,7 +132,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
 
     const stores: StoreRow[] = storeRows.map(store => ({
       id: store.id,
-      slug: store.id,
+      slug: String(store.id),
       name: store.name ?? "Estabelecimento",
       neighborhood: store.neighborhood ?? "—",
       color: store.brand_color ?? "#1473E6",
