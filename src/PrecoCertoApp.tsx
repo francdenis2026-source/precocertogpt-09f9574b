@@ -1751,7 +1751,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                           </span>
                         )}
                       </div>
-                      <h3>{p.name}</h3>
+                      <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <small>{p.brand} • {p.size}</small>
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
