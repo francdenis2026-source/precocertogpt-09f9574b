@@ -121,7 +121,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
   const featured = products[featuredIndex] ?? products[0];
   return <>
     <section className="hero">
-      <div className="hero-photo" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1604719312563-8912e9223c6a?auto=format&fit=crop&q=80&w=2000")' }} /><div className="hero-wash" />
+      <div className="hero-photo" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1604719312563-8912e9223c6a?auto=format&fit=crop&q=80&w=2000")', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 1, visibility: 'visible' }} /><div className="hero-wash" />
       <div className="shell hero-content">
         <div className="hero-copy">
           <span className="hero-live"><i /> Inteligência de compra em tempo real</span>
