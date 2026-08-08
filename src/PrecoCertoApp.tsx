@@ -441,11 +441,17 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
   const [pin,setPin]=useState(""); const [cpf,setCpf]=useState("");
   const [user,setUser]=useState(""); const [pass,setPass]=useState("");
   const [error, setError] = useState("");
+  const [showForgot, setShowForgot] = useState(false);
+  const [recoveryUser, setRecoveryUser] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [recoveryStep, setRecoveryStep] = useState(1); // 1: input user, 2: reset pass
 
   function submit(e:FormEvent){
     e.preventDefault();
     if (isAdminLogin) {
-      if (user === "admin" && pass === "feijo2026") {
+      // Verifica no localStorage se a senha foi alterada, senão usa a padrão
+      const savedPass = localStorage.getItem("precocerto:admin_password") || "feijo2026";
+      if (user === "admin" && pass === savedPass) {
         onAdminAuth(true);
         window.location.href="/admin";
       } else {
@@ -455,6 +461,29 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
       window.location.href="/app";
     }
   }
+
+  function handleRecovery(e: FormEvent) {
+    e.preventDefault();
+    if (recoveryStep === 1) {
+      if (recoveryUser === "admin") {
+        setRecoveryStep(2);
+        setError("");
+      } else {
+        setError("Usuário administrador não encontrado.");
+      }
+    } else {
+      if (newPass.length < 6) {
+        setError("A nova senha deve ter pelo menos 6 caracteres.");
+        return;
+      }
+      localStorage.setItem("precocerto:admin_password", newPass);
+      setShowForgot(false);
+      setRecoveryStep(1);
+      setError("");
+      alert("Senha administrativa alterada com sucesso!");
+    }
+  }
+
 
   return <div className="auth-page">
     <div className="auth-brand-panel">
