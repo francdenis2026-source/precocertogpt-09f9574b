@@ -96,7 +96,7 @@ function Footer() {
 }
 
 function MobileBar({ basketCount }: { basketCount: number }) {
-  return <nav className="mobile-bar" aria-label="Navegação móvel"><a href="/"><Home /><span>Início</span></a><a href="/buscar"><Search /><span>Buscar</span></a><a href="/lista"><ListChecks /><span>Lista</span></a><a href="/cesta" className="mobile-basket"><ShoppingBasket />{basketCount > 0 && <b>{basketCount}</b>}<span>Cesta</span></a><a href="/app"><UserRound /><span>Painel</span></a></nav>;
+  return <nav className="mobile-bar" aria-label="Navegação móvel"><a href="/"><Home /><span>Início</span></a><a href="/buscar"><Search /><span>Buscar</span></a><a href="/alertas"><Bell /><span>Alertas</span></a><a href="/cesta" className="mobile-basket"><ShoppingBasket />{basketCount > 0 && <b>{basketCount}</b>}<span>Cesta</span></a><a href="/app"><UserRound /><span>Painel</span></a></nav>;
 }
 
 function SearchBox({ value, setValue, products, hero = false }: { value: string; setValue: (v: string) => void; products: Product[]; hero?: boolean }) {
@@ -994,13 +994,85 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
     "/lojista":["Inteligência para vender melhor","Painel do lojista",<LayoutDashboard key="i"/>],
     "/financas":["Controle com contexto","Minhas finanças",<CircleDollarSign key="i"/>],
     "/favoritos":["Tudo que importa","Seus favoritos",<Heart key="i"/>],
-    "/alertas":["O preço caiu, você fica sabendo","Alertas de preço",<Bell key="i"/>],
+    "/alertas":["Monitoramento de preços e validade","Lista de Acompanhamento",<Bell key="i"/>],
     "/lista":["Compra organizada","Minhas listas",<ListChecks key="i"/>],
     "/app":["Seu resumo dos últimos 90 dias","Painel de economia",<LayoutDashboard key="i"/>],
   };
   const defaultInfo:[string,string,ReactNode] = ["PreçoCerto em Feijó","Economia inteligente para sua próxima compra",<Sparkles key="i"/>];
   const info = isStore ? ["Estabelecimento verificado", stores[0]?.name ?? "Comércio local", <Store key="s"/>] as [string,string,ReactNode] : isProduct ? ["Produto monitorado", products[0]?.name ?? "Produto local", <PackageSearch key="p"/>] as [string,string,ReactNode] : (routeInfo[path] ?? defaultInfo);
+  const alerts = JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]").filter((a: any) => a.action === "alert");
+  const alertProducts = products.filter(p => alerts.some((a: any) => String(a.id) === String(p.id)));
+
+  if (path === "/alertas") {
+    return (
+      <div className="shell page-shell generic-page">
+        <section className="generic-hero">
+          <span className="generic-icon"><Bell /></span>
+          <div>
+            <span className="eyebrow">Monitoramento Ativo</span>
+            <h1>Lista de Acompanhamento</h1>
+            <p>Receba alertas automáticos quando houver quedas de preço ou quando os dados precisarem de nova verificação em Feijó.</p>
+          </div>
+        </section>
+        <div className="generic-grid">
+          <section className="generic-main">
+            <div className="section-heading compact">
+              <div>
+                <h2>Produtos Monitorados ({alertProducts.length})</h2>
+                <p>Alertas configurados para variações de preço e validade da informação.</p>
+              </div>
+            </div>
+            {alertProducts.length > 0 ? alertProducts.map(p => {
+               const days = Math.floor((new Date().getTime() - new Date(p.capturedAt).getTime()) / (1000 * 60 * 60 * 24));
+               return (
+                <article className="compact-product" key={p.id}>
+                  <span className="product-visual">{p.category.slice(0,1)}</span>
+                  <div>
+                    <a href={`/produto/${p.slug}`}>{p.name}</a>
+                    <small>{p.brand} • {p.size} • {p.establishment}</small>
+                    <span style={{ color: days >= 7 ? 'var(--red)' : 'var(--green)', fontWeight: 600 }}>
+                      {days >= 7 ? <AlertTriangle size={12}/> : <CheckCircle2 size={12}/>} 
+                      {days === 0 ? "Atualizado hoje" : days === 1 ? "Atualizado ontem" : `Atualizado há ${days} dias`}
+                    </span>
+                  </div>
+                  <strong>{money(p.minPrice)}</strong>
+                  <button onClick={() => {
+                    const saved = JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]");
+                    const filtered = saved.filter((a: any) => !(a.action === "alert" && String(a.id) === String(p.id)));
+                    localStorage.setItem("precocerto:actions", JSON.stringify(filtered));
+                    window.location.reload();
+                  }} aria-label="Remover alerta" title="Remover alerta"><Trash2 size={16}/></button>
+                  <button className="button button--primary" onClick={() => addBasket(p)}><Plus/> Cesta</button>
+                </article>
+               );
+            }) : (
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)', background: 'var(--surface-2)', borderRadius: '12px' }}>
+                <Bell size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                <p>Você ainda não possui alertas configurados.</p>
+                <a href="/buscar" className="button button--outline" style={{ marginTop: '1rem' }}>Explorar catálogo</a>
+              </div>
+            )}
+          </section>
+          <aside className="generic-aside">
+            <span className="eyebrow">Configurações</span>
+            <h2>Preferências de Alerta</h2>
+            <div className="aside-stat">
+              <span>Notificar queda de preço</span>
+              <strong style={{ fontSize: '1rem', color: 'var(--blue)' }}>Ativado</strong>
+            </div>
+            <div className="aside-stat">
+              <span>Alerta de dado expirado (7 dias)</span>
+              <strong style={{ fontSize: '1rem', color: 'var(--blue)' }}>Ativado</strong>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '1rem' }}>Os alertas são processados localmente baseados nas últimas coletas realizadas em Feijó.</p>
+          </aside>
+        </div>
+      </div>
+    );
+  }
+
   return <div className="shell page-shell generic-page"><section className="generic-hero"><span className="generic-icon">{info[2]}</span><div><span className="eyebrow">{info[0]}</span><h1>{info[1]}</h1><p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p></div><a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a></section><div className="generic-grid"><section className="generic-main"><div className="section-heading compact"><div><h2>{isStore?"Ofertas em destaque":isProduct?"Onde está mais barato":"Destaques de hoje"}</h2><p>Registros compatíveis e verificados recentemente.</p></div></div>{products.slice(0,4).map(p=><article className="compact-product" key={p.id}><span className="product-visual">{p.category.slice(0,1)}</span><div><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size} • {p.establishment}</small><span><ShieldCheck/> Verificado há poucos minutos</span></div><strong>{money(p.minPrice)}</strong><button onClick={()=>saveAction("favorite","product",String(p.id))} aria-label="Favoritar"><Heart/></button><button className="button button--primary" onClick={()=>addBasket(p)}><Plus/> Cesta</button></article>)}</section><aside className="generic-aside"><span className="eyebrow">Visão local</span><h2>Feijó economiza junto</h2><div className="aside-stat"><span>Produtos acompanhados</span><strong>1.247</strong></div><div className="aside-stat"><span>Atualizações hoje</span><strong>214</strong></div><div className="aside-stat"><span>Economia potencial</span><strong>14,8%</strong></div><a href="/cesta-basica" className="button button--dark button--full">Montar cesta inteligente</a></aside></div></div>;
+
 }
 
 function AuthPage({ path, onAdminAuth }: { path: string; onAdminAuth: (success: boolean) => void }) {
@@ -1413,6 +1485,7 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
                       </div>
                       <div className="result-actions" style={{ display: 'flex', gap: '0.5rem' }}>
                         <button className="button button--primary" style={{ flex: 1 }} onClick={() => addBasket(p)}><Plus /> Cesta</button>
+                        <button className="button button--outline" title="Ativar alerta de preço e atualização" onClick={() => saveAction("alert", "product", String(p.id))}><Bell size={16} /></button>
                         <button className="button button--outline" title="Compartilhar produto" onClick={() => handleShare(p)}><Share2 size={16} /></button>
                       </div>
                     </div>
@@ -1471,10 +1544,18 @@ export default function PrecoCertoApp() {
   function removeBasket(id:number|string){setCart(current=>current.filter(i=>String(i.id)!==String(id)));setToast("Removido.");}
   
   function saveAction(action:string,type:string,id:string){
-    setToast(action==="alert"?"Alerta ativado.":"Favoritado.");
     const key="precocerto:actions";
     const saved=JSON.parse(localStorage.getItem(key)??"[]");
-    localStorage.setItem(key,JSON.stringify([...saved,{action,type,id,at:new Date().toISOString()}].slice(-200)));
+    const isNew = !saved.some((a: any) => a.action === action && a.type === type && a.id === id);
+    
+    if (isNew) {
+      localStorage.setItem(key,JSON.stringify([...saved,{action,type,id,at:new Date().toISOString()}].slice(-200)));
+      setToast(action==="alert"?"Alerta de preço ativado.":"Favoritado.");
+    } else if (action === "alert") {
+      setToast("Você já está acompanhando este produto.");
+    } else {
+      setToast("Item já está nos favoritos.");
+    }
   }
 
   const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction}),[products,stores,metrics,query]);
@@ -1501,6 +1582,7 @@ export default function PrecoCertoApp() {
   let page:ReactNode;
   if(pathname==="/") page=<HomePage {...props}/>;
   else if(pathname==="/buscar"||pathname==="/comparador") page=<SearchPage {...props}/>;
+  else if(pathname==="/alertas") page=<GenericPage {...props} path={pathname}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth}/>;
   else page=<GenericPage {...props} path={pathname}/>;
