@@ -342,7 +342,9 @@ function AuthPage({ path }: { path:string }) {
 export default function PrecoCertoApp() {
   const pathname = useLocation().pathname || "/";
   const [products,setProducts]=useState<Product[]>(initialProducts); const [stores,setStores]=useState<StoreRow[]>(initialStores); const [metrics,setMetrics]=useState<PlatformMetrics>(verifiedDatasetMetrics); const [query,setQuery]=useState(""); const [cart,setCart]=useState<Product[]>([]); const [toast,setToast]=useState("");
-  const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
+  const [adminAuth, setAdminAuth] = useState(false);
+  const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; 
+  const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
   useEffect(()=>{ let alive=true; const q=new URLSearchParams(window.location.search).get("q")??""; if(q) setQuery(q);
     // Fonte primária: Supabase do usuário. Fallback automático para o catálogo local.
     fetchCatalog(q).then(data=>{ if(!alive)return; if(data.products.length)setProducts(data.products); if(data.stores.length)setStores(data.stores); setMetrics(data.metrics); if(data.source==="local"&&data.error) console.warn("[PreçoCerto] catálogo local em uso:",data.error); }).catch(err=>console.error("[PreçoCerto] falha ao carregar catálogo:",err));
