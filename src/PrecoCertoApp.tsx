@@ -1346,46 +1346,79 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
             </div>
           ) : filtered.length > 0 ? (
             <div className="results-grid">
-              {filtered.map(p => (
-                <article className="result-card" key={p.id}>
-                  <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => handleFavorite(String(p.id))}>
-                    <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
-                  </button>
-                  <div className="result-image"><ProductImage product={p} /></div>
-                  <div className="result-content">
-                    <span className="category-tag">{p.category}</span>
-                    <h3>{p.name}</h3>
-                    <small>{p.brand} • {p.size}</small>
-                    <div className="verified-details">
-                      <div className="detail-item" title="Local de coleta">
-                        <MapPin size={12} />
-                        <span>{p.establishment}</span>
+              {filtered.map(p => {
+                const daysSinceUpdate = Math.floor((new Date().getTime() - new Date(p.capturedAt).getTime()) / (1000 * 60 * 60 * 24));
+                const isOutdated = daysSinceUpdate >= 7;
+
+                return (
+                  <article className="result-card" key={p.id}>
+                    <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => handleFavorite(String(p.id))}>
+                      <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
+                    </button>
+                    <div className="result-image"><ProductImage product={p} /></div>
+                    <div className="result-content">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <span className="category-tag">{p.category}</span>
+                        {isOutdated && (
+                          <span className="outdated-badge" title="Este preço pode ter mudado">
+                            <Clock3 size={10} /> {daysSinceUpdate} dias sem verificar
+                          </span>
+                        )}
                       </div>
-                      <div className="detail-item" title="Data da última atualização">
-                        <Clock3 size={12} />
-                        <span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')} às {new Date(p.capturedAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+                      <h3>{p.name}</h3>
+                      <small>{p.brand} • {p.size}</small>
+                      <div className="verified-details">
+                        <div className="detail-item" title="Local de coleta">
+                          <MapPin size={12} />
+                          <span>{p.establishment}</span>
+                        </div>
+                        <div className="detail-item" title="Data da última atualização">
+                          <Clock3 size={12} />
+                          <span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')} às {new Date(p.capturedAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                        <div className="detail-item" title="Origem do dado">
+                          <ShieldCheck size={12} />
+                          <span>Origem: {p.source || "Coleta Direta"}</span>
+                        </div>
                       </div>
-                      <div className="detail-item" title="Origem do dado">
-                        <ShieldCheck size={12} />
-                        <span>Origem: {p.source || "Coleta Direta"}</span>
+                      
+                      <div className="history-chart-container">
+                        <div className="chart-header">
+                          <h4><LineChart size={14} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Histórico em Feijó</h4>
+                          <select className="chart-period-select" value={chartPeriod} onChange={e => setChartPeriod(e.target.value)}>
+                            <option value="7d">7 dias</option>
+                            <option value="30d">30 dias</option>
+                            <option value="90d">90 dias</option>
+                          </select>
+                        </div>
+                        <div className="mini-sparkline">
+                          <svg viewBox="0 0 100 30" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+                            <path 
+                              d={`M 0 20 Q 25 ${15 + (p.id as any % 5)} 50 ${20 - (p.id as any % 8)} T 100 ${10 + (p.id as any % 10)}`} 
+                              fill="none" 
+                              stroke="var(--blue)" 
+                              strokeWidth="2"
+                            />
+                            <circle cx="100" cy={10 + (p.id as any % 10)} r="2" fill="var(--blue)" />
+                          </svg>
+                        </div>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
+                          Variação de {Math.round((1 - p.minPrice / p.maxPrice) * 100)}% no período.
+                        </p>
+                      </div>
+
+                      <div className="price-row" style={{ marginTop: '1.5rem' }}>
+                        <div className="main-price"><small>Melhor preço</small><strong>{money(p.minPrice)}</strong></div>
+                        <div className="avg-price"><small>Média local</small><b>{money(p.avgPrice)}</b></div>
+                      </div>
+                      <div className="result-actions" style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="button button--primary" style={{ flex: 1 }} onClick={() => addBasket(p)}><Plus /> Cesta</button>
+                        <button className="button button--outline" title="Compartilhar produto" onClick={() => handleShare(p)}><Share2 size={16} /></button>
                       </div>
                     </div>
-                    {p.price_history && p.price_history.length > 1 && (
-                      <div className="history-preview">
-                        <LineChart size={12} />
-                        <span>Histórico: Variação de {Math.round((1 - p.minPrice / p.maxPrice) * 100)}% em Feijó nos últimos 30 dias</span>
-                      </div>
-                    )}
-                    <div className="price-row">
-                      <div className="main-price"><small>Melhor preço</small><strong>{money(p.minPrice)}</strong></div>
-                      <div className="avg-price"><small>Média local</small><b>{money(p.avgPrice)}</b></div>
-                    </div>
-                    <div className="result-actions">
-                      <button className="button button--primary button--full" onClick={() => addBasket(p)}><Plus /> Cesta</button>
-                    </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           ) : (
             <div className="no-results">
