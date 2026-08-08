@@ -251,23 +251,40 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   };
 
 
-  // Logica de busca e filtros
+  // Logica de busca, ordenação e paginação
   const filteredProducts = useMemo(() => {
-    return allProducts.filter(p => {
+    return sortedProducts.filter(p => {
       const searchMatch = !adminSearch || 
         p.name.toLowerCase().includes(adminSearch.toLowerCase()) || 
         p.barcode?.includes(adminSearch);
       const storeMatch = adminFilterStore === "all" || p.establishment === adminFilterStore;
       return searchMatch && storeMatch;
     });
-  }, [allProducts, adminSearch, adminFilterStore]);
+  }, [sortedProducts, adminSearch, adminFilterStore]);
 
   const filteredStores = useMemo(() => {
-    return allStores.filter(s => {
+    return sortedStores.filter(s => {
       const searchMatch = !adminSearch || s.name.toLowerCase().includes(adminSearch.toLowerCase());
       return searchMatch;
     });
-  }, [allStores, adminSearch]);
+  }, [sortedStores, adminSearch]);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  const paginatedStores = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredStores.slice(start, start + itemsPerPage);
+  }, [filteredStores, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil((adminActiveTab === 'products' ? filteredProducts.length : filteredStores.length) / itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [adminSearch, adminFilterStore, adminActiveTab]);
+
 
   const handleDelete = async () => {
     if (!confirmDelete || !supabase) return;
