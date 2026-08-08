@@ -1306,9 +1306,18 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
                     <h3>{p.name}</h3>
                     <small>{p.brand} • {p.size}</small>
                     <div className="verified-details">
-                      <div className="detail-item"><MapPin size={12} /><span>{p.establishment}</span></div>
-                      <div className="detail-item"><Clock3 size={12} /><span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')}</span></div>
-                      <div className="detail-item"><ShieldCheck size={12} /><span>{p.source || "Coleta Direta"}</span></div>
+                      <div className="detail-item" title="Local de coleta">
+                        <MapPin size={12} />
+                        <span>{p.establishment}</span>
+                      </div>
+                      <div className="detail-item" title="Data da última atualização">
+                        <Clock3 size={12} />
+                        <span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')} às {new Date(p.capturedAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+                      </div>
+                      <div className="detail-item" title="Origem do dado">
+                        <ShieldCheck size={12} />
+                        <span>Origem: {p.source || "Coleta Direta"}</span>
+                      </div>
                     </div>
                     {p.price_history && p.price_history.length > 1 && (
                       <div className="history-preview">
