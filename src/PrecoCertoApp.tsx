@@ -1279,7 +1279,66 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
     );
   }
 
-  return <div className="shell page-shell generic-page"><section className="generic-hero"><span className="generic-icon">{info[2]}</span><div><span className="eyebrow">{info[0]}</span><h1>{info[1]}</h1><p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p></div><a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a></section><div className="generic-grid"><section className="generic-main"><div className="section-heading compact"><div><h2>{isStore?"Ofertas em destaque":isProduct?"Onde está mais barato":"Destaques de hoje"}</h2><p>Registros compatíveis e verificados recentemente.</p></div></div>{products.slice(0,4).map(p=><article className="compact-product" key={p.id}><span className="product-visual">{p.category.slice(0,1)}</span><div><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size} • {p.establishment}</small><span><ShieldCheck/> Verificado há poucos minutos</span></div><strong>{money(p.minPrice)}</strong><button onClick={()=>saveAction("favorite","product",String(p.id))} aria-label="Favoritar"><Heart/></button><button className="button button--primary" onClick={()=>addBasket(p)}><Plus/> Cesta</button></article>)}</section><aside className="generic-aside"><span className="eyebrow">Visão local</span><h2>Feijó economiza junto</h2><div className="aside-stat"><span>Produtos acompanhados</span><strong>1.247</strong></div><div className="aside-stat"><span>Atualizações hoje</span><strong>214</strong></div><div className="aside-stat"><span>Economia potencial</span><strong>14,8%</strong></div><a href="/cesta-basica" className="button button--dark button--full">Montar cesta inteligente</a></aside></div></div>;
+  return (
+    <div className="shell page-shell generic-page">
+      <section className="generic-hero">
+        <span className="generic-icon">{info[2]}</span>
+        <div>
+          <span className="eyebrow">{info[0]}</span>
+          <h1>{info[1]}</h1>
+          <p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p>
+        </div>
+        <a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a>
+      </section>
+      <div className="generic-grid">
+        <section className="generic-main">
+          <div className="section-heading compact">
+            <div>
+              <h2>{isStore ? "Ofertas em destaque" : isProduct ? "Onde está mais barato" : "Destaques inteligentes"}</h2>
+              <p>Seleção automática de produtos com preços atrativos e curadoria local.</p>
+            </div>
+          </div>
+          {(randomFeatured.length > 0 ? randomFeatured : products.slice(0, 4)).map(p => (
+            <article className="compact-product" key={p.id}>
+              <span className="product-visual">{p.category.slice(0,1)}</span>
+              <div>
+                <a href={`/produto/${p.slug}`}>{p.name}</a>
+                <small>{p.brand} • {p.size} • <strong>{p.establishment}</strong></small>
+                <span><ShieldCheck/> Verificado recentemente</span>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <strong style={{ display: 'block' }}>{money(p.minPrice)}</strong>
+                {p.previousPrice && p.previousPrice > p.minPrice && (
+                  <small style={{ color: 'var(--green)', fontWeight: 600 }}>
+                    <TrendingDown size={10}/> -{Math.round((1 - p.minPrice / p.previousPrice) * 100)}%
+                  </small>
+                )}
+              </div>
+              <button onClick={() => saveAction("favorite", "product", String(p.id))} aria-label="Favoritar"><Heart/></button>
+              <button className="button button--primary" onClick={() => addBasket(p)}><Plus/> Cesta</button>
+            </article>
+          ))}
+        </section>
+        <aside className="generic-aside">
+          <span className="eyebrow">Visão local</span>
+          <h2>Feijó economiza junto</h2>
+          <div className="aside-stat">
+            <span>Produtos acompanhados</span>
+            <strong>{count(metrics.products)}</strong>
+          </div>
+          <div className="aside-stat">
+            <span>Atualizações hoje</span>
+            <strong>214</strong>
+          </div>
+          <div className="aside-stat">
+            <span>Economia potencial</span>
+            <strong>14,8%</strong>
+          </div>
+          <a href="/cesta-basica" className="button button--dark button--full">Montar cesta inteligente</a>
+        </aside>
+      </div>
+    </div>
+  );
 
 }
 
