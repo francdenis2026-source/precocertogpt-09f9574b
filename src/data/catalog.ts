@@ -6,7 +6,7 @@ export type Product = {
   unit: string; barcode?: string; minPrice: number; avgPrice: number; maxPrice: number;
   storeCount: number; establishmentId: string | number; establishmentSlug: string; establishment: string;
   neighborhood: string; storeColor: string; capturedAt: string; previousPrice?: number;
-  image_url?: string;
+  image_url?: string; source?: string; updated_at?: string; price_history?: { date: string; value: number }[];
 };
 
 

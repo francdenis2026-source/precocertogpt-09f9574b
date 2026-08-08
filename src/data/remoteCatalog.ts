@@ -37,6 +37,7 @@ type PriceRow = {
   value: number | string | null;
   previous_value: number | string | null;
   captured_at: string | null;
+  source?: string;
 };
 
 export type CatalogSource = "supabase" | "local";
@@ -118,6 +119,9 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
           storeColor: store.brand_color ?? "#1473E6",
           capturedAt: best.captured_at ?? new Date().toISOString(),
           previousPrice: Number.isFinite(previous) ? round(previous) : undefined,
+          source: best.source ?? "Coleta Manual",
+          updated_at: best.captured_at,
+          price_history: rows.map(r => ({ date: r.captured_at || new Date().toISOString(), value: toNumber(r.value) })).sort((a,b) => Date.parse(a.date) - Date.parse(b.date))
         };
       })
       .filter((product): product is Product => product !== null)
