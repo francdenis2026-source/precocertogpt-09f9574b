@@ -1,9 +1,3 @@
-"use client";
-
-/* Client-side route shells intentionally use standard anchors so direct links work across the complete catch-all route inventory. */
-/* eslint-disable @next/next/no-html-link-for-pages */
-/* Product photography is served locally and intentionally uses native img elements for the Vinext runtime. */
-/* eslint-disable @next/next/no-img-element */
 
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
@@ -13,37 +7,13 @@ import {
   SlidersHorizontal, Sparkles, Store, TrendingDown, UserRound, Users, X,
 } from "lucide-react";
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router-dom";
+import { buildCatalog, verifiedDatasetMetrics, type PlatformMetrics, type Product, type StoreRow } from "./data/catalog";
 
-type Product = {
-  id: number; slug: string; name: string; brand: string; category: string; size: string;
-  unit: string; barcode?: string; minPrice: number; avgPrice: number; maxPrice: number;
-  storeCount: number; establishmentId: number; establishmentSlug: string; establishment: string;
-  neighborhood: string; storeColor: string; capturedAt: string; previousPrice?: number;
-};
+const initialCatalog = buildCatalog();
+const initialProducts: Product[] = initialCatalog.products;
 
-type StoreRow = { id: number; slug: string; name: string; neighborhood: string; color: string; products: number };
-
-type PlatformMetrics = { products: number; prices: number; stores: number };
-
-const verifiedDatasetMetrics: PlatformMetrics = { products: 836, prices: 3080, stores: 12 };
-
-const initialProducts: Product[] = [
-  { id: 1, slug: "arroz-tio-joao-5kg", name: "Arroz Tio João Tipo 1", brand: "Tio João", category: "Mercearia", size: "5 kg", unit: "pacote", minPrice: 29.89, avgPrice: 31.32, maxPrice: 32.9, storeCount: 4, establishmentId: 1, establishmentSlug: "central-super", establishment: "Central Super", neighborhood: "Centro", storeColor: "#1473E6", capturedAt: new Date().toISOString(), previousPrice: 32.5 },
-  { id: 2, slug: "cafe-3-coracoes-500g", name: "Café 3 Corações Tradicional", brand: "3 Corações", category: "Mercearia", size: "500 g", unit: "pacote", minPrice: 15.75, avgPrice: 16.71, maxPrice: 17.9, storeCount: 3, establishmentId: 2, establishmentSlug: "mercado-reboucas", establishment: "Mercado Rebouças", neighborhood: "Esperança", storeColor: "#16A36A", capturedAt: new Date().toISOString(), previousPrice: 17.2 },
-  { id: 3, slug: "leite-italac-1l", name: "Leite Integral Italac", brand: "Italac", category: "Laticínios", size: "1 L", unit: "caixa", minPrice: 5.69, avgPrice: 5.89, maxPrice: 6.09, storeCount: 3, establishmentId: 3, establishmentSlug: "pague-pouco", establishment: "Pague Pouco", neighborhood: "Centro", storeColor: "#F4B400", capturedAt: new Date().toISOString(), previousPrice: 5.99 },
-  { id: 4, slug: "feijao-kicaldo-1kg", name: "Feijão Carioca Kicaldo", brand: "Kicaldo", category: "Mercearia", size: "1 kg", unit: "pacote", minPrice: 7.49, avgPrice: 7.86, maxPrice: 8.29, storeCount: 3, establishmentId: 4, establishmentSlug: "super-feijoense", establishment: "Super Feijoense", neighborhood: "Zenaide Paiva", storeColor: "#EF6C3B", capturedAt: new Date().toISOString(), previousPrice: 8.19 },
-  { id: 5, slug: "oleo-soja-liza-900ml", name: "Óleo de Soja Liza", brand: "Liza", category: "Mercearia", size: "900 ml", unit: "garrafa", minPrice: 7.29, avgPrice: 7.52, maxPrice: 7.89, storeCount: 3, establishmentId: 1, establishmentSlug: "central-super", establishment: "Central Super", neighborhood: "Centro", storeColor: "#1473E6", capturedAt: new Date().toISOString(), previousPrice: 7.69 },
-  { id: 6, slug: "acucar-uniao-1kg", name: "Açúcar Refinado União", brand: "União", category: "Mercearia", size: "1 kg", unit: "pacote", minPrice: 4.69, avgPrice: 4.89, maxPrice: 5.09, storeCount: 3, establishmentId: 2, establishmentSlug: "mercado-reboucas", establishment: "Mercado Rebouças", neighborhood: "Esperança", storeColor: "#16A36A", capturedAt: new Date().toISOString(), previousPrice: 4.99 },
-];
-
-const initialStores: StoreRow[] = [
-  { id: 1, slug: "central-super", name: "Central Super", neighborhood: "Centro", color: "#1473E6", products: 8 },
-  { id: 2, slug: "mercado-reboucas", name: "Mercado Rebouças", neighborhood: "Esperança", color: "#16A36A", products: 6 },
-  { id: 3, slug: "pague-pouco", name: "Pague Pouco", neighborhood: "Centro", color: "#F4B400", products: 5 },
-  { id: 4, slug: "super-feijoense", name: "Super Feijoense", neighborhood: "Zenaide Paiva", color: "#EF6C3B", products: 5 },
-  { id: 5, slug: "parceirao", name: "Parceirão", neighborhood: "Conquista", color: "#7259C7", products: 3 },
-];
+const initialStores: StoreRow[] = initialCatalog.stores;
 
 const adminRouteNames: Record<string, string> = {
   "/admin": "Visão geral", "/admin/gestao": "Licenças e assinaturas", "/admin/acessos-temporarios": "Acessos temporários",
@@ -77,8 +47,8 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
 }
 
 function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
-  return <a className={`brand ${inverse ? "brand--inverse" : ""}`} href="/" aria-label="PreçoCerto — página inicial">
-    <img className={`brand__logo ${compact ? "brand__logo--compact" : ""}`} src={compact ? "/logo-preco-certo-simbolo.svg" : inverse ? "/logo-preco-certo-inversa.svg" : "/logo-preco-certo.svg"} alt="" aria-hidden="true" />
+  return <a className={`brand ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} href="/" aria-label="PreçoCerto — página inicial">
+    <img className={`brand__logo ${compact ? "brand__logo--compact" : ""}`} src={compact ? "/logo-precocerto-emblema.png" : "/logo-precocerto-wordmark.png"} alt="PreçoCerto" width={1152} height={576} />
   </a>;
 }
 
@@ -91,7 +61,12 @@ function Header({ basketCount }: { basketCount: number }) {
       <nav className="desktop-nav" aria-label="Navegação principal">
         <a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas</a><a href="/planos">Planos</a>
       </nav>
-      <div className="header-actions"><a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a><a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a><a className="text-link" href="/login">Entrar</a><a className="button button--primary button--small" href="/cadastro">Começar grátis</a></div>
+      <div className="header-actions">
+        <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
+        <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a>
+        <a className="text-link" href="/login">Entrar</a>
+        <a className="button button--primary button--small" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
+      </div>
       <button className="mobile-menu-button" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open}><Menu /></button>
     </div>
     {open && <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu principal"><button className="drawer-backdrop" aria-label="Fechar menu" onClick={() => setOpen(false)} /><div className="drawer-panel"><div className="drawer-head"><Brand /><button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu"><X /></button></div><nav><a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas de hoje</a><a href="/planos">Planos</a><a href="/colaborar">Enviar nota fiscal</a></nav><a className="button button--primary" href="/cadastro">Criar conta gratuita</a><a className="button button--ghost" href="/login">Já tenho uma conta</a></div></div>}
@@ -221,14 +196,14 @@ function AuthPage({ path }: { path:string }) {
 }
 
 export default function PrecoCertoApp() {
-  const pathname = usePathname() || "/";
+  const pathname = useLocation().pathname || "/";
   const [products,setProducts]=useState<Product[]>(initialProducts); const [stores,setStores]=useState<StoreRow[]>(initialStores); const [metrics,setMetrics]=useState<PlatformMetrics>(verifiedDatasetMetrics); const [query,setQuery]=useState(""); const [cart,setCart]=useState<Product[]>([]); const [toast,setToast]=useState("");
   const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
-  useEffect(()=>{ const q=new URLSearchParams(window.location.search).get("q")??""; if(q) queueMicrotask(()=>setQuery(q)); fetch(`/api/catalog${q?`?q=${encodeURIComponent(q)}`:""}`).then(r=>r.ok?(r.json() as Promise<{products?:Product[];stores?:StoreRow[];metrics?:Partial<PlatformMetrics>}>):null).then(data=>{if(data?.products?.length)setProducts(data.products);if(data?.stores?.length)setStores(data.stores);if(data?.metrics)setMetrics({products:Math.max(verifiedDatasetMetrics.products,Number(data.metrics.products)||0),prices:Math.max(verifiedDatasetMetrics.prices,Number(data.metrics.prices)||0),stores:Math.max(verifiedDatasetMetrics.stores,Number(data.metrics.stores)||0)})}).catch(()=>undefined); },[]);
+  useEffect(()=>{ const q=new URLSearchParams(window.location.search).get("q")??""; if(q) setQuery(q); const data=buildCatalog(q); if(data.products.length)setProducts(data.products); setStores(data.stores); setMetrics(data.metrics); },[]);
   useEffect(()=>{ if(!toast)return; const t=setTimeout(()=>setToast(""),2800); return()=>clearTimeout(t); },[toast]);
   function addBasket(p:Product){setCart(current=>current.some(i=>i.id===p.id)?current:[...current,p]);setToast(`${p.name} foi adicionado à cesta.`);}
   function removeBasket(id:number){setCart(current=>current.filter(i=>i.id!==id));setToast("Item removido da cesta.");}
-  async function saveAction(action:string,entityType:string,entityId:string){setToast(action==="alert"?"Alerta ativado com sucesso.":"Salvo nos seus favoritos.");try{await fetch("/api/actions",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action,entityType,entityId})});}catch{setToast("A ação ficou salva nesta sessão.");}}
+  function saveAction(action:string,entityType:string,entityId:string){setToast(action==="alert"?"Alerta ativado com sucesso.":"Salvo nos seus favoritos.");try{const key="precocerto:actions";const saved=JSON.parse(localStorage.getItem(key)??"[]") as unknown[];localStorage.setItem(key,JSON.stringify([...saved,{action,entityType,entityId,at:new Date().toISOString()}].slice(-200)));}catch{setToast("A ação ficou salva nesta sessão.");}}
   const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction}),[products,stores,metrics,query]);
   if(isAdmin) return <><AdminPage path={pathname}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
   if(isAuth) return <AuthPage path={pathname}/>;
