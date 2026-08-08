@@ -180,6 +180,10 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
   const [importTotal, setImportTotal] = useState(2838);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [importLog, setImportLog] = useState<any>(null);
+  const [showAddStore, setShowAddStore] = useState(false);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [activeKpiDetail, setActiveKpiDetail] = useState<{title: string, data: any[]} | null>(null);
+
   
   // Filtros de Auditoria
   const [dateFilter, setDateFilter] = useState("");
