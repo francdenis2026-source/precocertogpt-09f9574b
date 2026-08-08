@@ -300,7 +300,7 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
   <div className="admin-kpis">
     <article><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
     <article><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
-    <article><span>Pendências <AlertTriangle/></span><strong>17</strong><small className="warning">5 com prioridade alta</small></article>
+    <article onClick={() => window.location.href = '/admin/auditoria'} style={{ cursor: 'pointer' }}><span>Pendências <AlertTriangle/></span><strong>17</strong><small className="warning">5 com prioridade alta</small></article>
     <article><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
   </div>
 
@@ -449,7 +449,7 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
       <div className="admin-card-head"><div><h2>Saúde das integrações</h2><p>Serviços críticos e filas.</p></div></div>
       {[["Banco e Realtime","Operacional","99,99%"],["Mercado Pago","Operacional","100%"],["Fila de IA","Atenção","3 jobs"],["E-mails","Operacional","98,7%"]].map((r,i)=><div className="health-row" key={r[0]}><span className={i===2?"status warning":"status"}/><b>{r[0]}</b><em>{r[1]}</em><strong>{r[2]}</strong></div>)}
     </section>
-    <section className="admin-card" style={{ gridColumn: "span 2" }}>
+    <section className="admin-card" id="admin-auditoria" style={{ gridColumn: "span 2" }}>
       <div className="admin-card-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div><h2>Auditoria Completa</h2><p>Logs de segurança e operações sensíveis.</p></div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
