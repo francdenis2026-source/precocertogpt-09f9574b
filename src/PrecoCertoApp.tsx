@@ -1471,10 +1471,18 @@ export default function PrecoCertoApp() {
   function removeBasket(id:number|string){setCart(current=>current.filter(i=>String(i.id)!==String(id)));setToast("Removido.");}
   
   function saveAction(action:string,type:string,id:string){
-    setToast(action==="alert"?"Alerta ativado.":"Favoritado.");
     const key="precocerto:actions";
     const saved=JSON.parse(localStorage.getItem(key)??"[]");
-    localStorage.setItem(key,JSON.stringify([...saved,{action,type,id,at:new Date().toISOString()}].slice(-200)));
+    const isNew = !saved.some((a: any) => a.action === action && a.type === type && a.id === id);
+    
+    if (isNew) {
+      localStorage.setItem(key,JSON.stringify([...saved,{action,type,id,at:new Date().toISOString()}].slice(-200)));
+      setToast(action==="alert"?"Alerta de preço ativado.":"Favoritado.");
+    } else if (action === "alert") {
+      setToast("Você já está acompanhando este produto.");
+    } else {
+      setToast("Item já está nos favoritos.");
+    }
   }
 
   const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction}),[products,stores,metrics,query]);
