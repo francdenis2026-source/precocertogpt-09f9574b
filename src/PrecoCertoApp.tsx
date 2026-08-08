@@ -1490,7 +1490,12 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
                         )}
                       </div>
                       <h3>{p.name}</h3>
-                      <small>{p.brand} • {p.size}</small>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <small>{p.brand} • {p.size}</small>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          {p.establishment}
+                        </span>
+                      </div>
                       <div className="verified-details">
                         <div className="detail-item" title="Local de coleta">
                           <MapPin size={12} />
