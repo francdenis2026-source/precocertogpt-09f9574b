@@ -1728,7 +1728,7 @@ export default function PrecoCertoApp() {
   else page=<GenericPage {...props} path={pathname}/>;
 
   return <div className="app">
-    <Header basketCount={cart.length}/>
+    <Header basketCount={cart.length} user={user} onLogout={handleLogout}/>
     <main>{page}</main>
     <Footer/>
     <MobileBar basketCount={cart.length}/>
