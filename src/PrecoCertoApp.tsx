@@ -168,46 +168,83 @@ function PlansPage() {
   return <div className="shell page-shell plans-page"><div className="center-heading"><span className="eyebrow">Planos PreçoCerto</span><h1>Economia que se paga na primeira compra</h1><p>Recursos transparentes para consumidores e para o comércio local.</p><div className="segmented large"><button className={!shop?"active":""} onClick={()=>setShop(false)}>Para você</button><button className={shop?"active":""} onClick={()=>setShop(true)}>Para sua loja</button></div></div><div className="plan-grid">{plans.map(plan=><article className={plan.featured?"featured":""} key={plan.name}>{plan.featured&&<span className="recommended">Recomendado</span>}<h2>{plan.name}</h2><p>{plan.desc}</p><div className="plan-price"><strong>{money(plan.price)}</strong><span>/mês</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={`/checkout/${plan.name.toLowerCase().replace(" ","-")}`}>{plan.price===0?"Começar grátis":"Escolher plano"}<ArrowRight/></a><ul>{plan.features.map(f=><li key={f}><Check/> {f}</li>)}</ul></article>)}</div><div className="plan-note"><ShieldCheck/><span><b>Pagamento seguro via Pix</b><small>Ativação automática após confirmação. Cancele quando quiser.</small></span></div></div>;
 }
 
-function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [auditLogs, setAuditLogs] = useState<{ action: string; user: string; at: string; type: string }[]>(() => {
+function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
+  const [auditLogs, setAuditLogs] = useState<any[]>(() => {
     try { return JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]"); } catch { return []; }
   });
+  const [connStatus, setConnStatus] = useState<any>(null);
+  const [isTesting, setIsTesting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState("");
+  const [importProgress, setImportProgress] = useState(0);
+  const [importTotal, setImportTotal] = useState(2838);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [importLog, setImportLog] = useState<any>(null);
+  
+  // Filtros de Auditoria
+  const [dateFilter, setDateFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
 
-  const addAuditLog = (action: string, type: string = "info") => {
-    const newLog = { action, user: "Franc D’Nis", at: new Date().toISOString(), type };
-    const updated = [newLog, ...auditLogs].slice(0, 100);
-    setAuditLogs(updated);
-    localStorage.setItem("precocerto:admin_logs", JSON.stringify(updated));
+  const loadLogs = () => {
+    try {
+      const logs = JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]");
+      setAuditLogs(logs);
+    } catch {
+      setAuditLogs([]);
+    }
   };
 
-  const [importing, setImporting] = useState(false);
-  const [testing, setTesting] = useState(false);
-  const [importStatus, setImportStatus] = useState("");
-  const [importProgress, setImportProgress] = useState(0);
-  const [importTotal, setImportTotal] = useState(0);
-  const [connectionInfo, setConnectionInfo] = useState<{ success: boolean; latency: number; tables: Record<string, number>; error?: string } | null>(null);
-  const [importLog, setImportLog] = useState<{ count: number; duplicates: number; stores: number; products: number; duration: number; error?: string } | null>(null);
-
-  
-  const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
-  
-  async function handleImport() {
-    const { runPriceImport } = await import("./data/importer");
-    setImporting(true);
-    setImportStatus("Iniciando...");
-    setImportLog(null);
-    setImportProgress(0);
-    setImportTotal(2838); // Total estimado de registros
-
-    const result = await runPriceImport((msg) => {
-      setImportStatus(msg);
-      // Extrair progresso se a mensagem contiver números
-      const match = msg.match(/Importado: (\d+)/);
-      if (match) setImportProgress(parseInt(match[1]));
+  const filteredLogs = useMemo(() => {
+    return auditLogs.filter(log => {
+      const matchesDate = !dateFilter || log.at.startsWith(dateFilter);
+      const matchesType = typeFilter === "all" || log.type === typeFilter;
+      return matchesDate && matchesType;
     });
+  }, [auditLogs, dateFilter, typeFilter]);
 
-    setImporting(false);
+  const exportCSV = () => {
+    const headers = ["Data/Hora", "Usuário", "Ação", "Tipo"];
+    const rows = filteredLogs.map(log => [
+      new Date(log.at).toLocaleString("pt-BR"),
+      log.user,
+      log.action,
+      log.type
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `auditoria_precocerto_${new Date().toISOString().split('T')[0]}.csv`);
+    link.click();
+    addAuditLog("Exportação de logs de auditoria realizada");
+    loadLogs();
+  };
+
+  const handleTestConnection = async () => {
+    setIsTesting(true);
+    const { testSupabaseConnection } = await import("./data/importer");
+    const result = await testSupabaseConnection();
+    setConnStatus(result);
+    setIsTesting(false);
+    addAuditLog(`Teste de conexão: ${result.success ? "Sucesso" : "Falha"}`, result.success ? "success" : "error");
+    loadLogs();
+  };
+
+  const handleImport = async () => {
+    setIsImporting(true);
+    setImportMsg("Iniciando...");
+    setImportProgress(0);
+    setImportLog(null);
+    const { runPriceImport } = await import("./data/importer");
+    const result = await runPriceImport((msg) => {
+      setImportMsg(msg);
+      if (msg.includes("Importado:")) {
+        const count = parseInt(msg.match(/\d+/)?.[0] ?? "0", 10);
+        setImportProgress(count);
+      }
+    });
+    setIsImporting(false);
     if (result.success) {
       setImportLog({
         count: result.count,
@@ -216,32 +253,13 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
         products: result.products,
         duration: result.duration || 0
       });
-      setImportStatus("Importação concluída.");
-      addAuditLog(`Importação de ${result.count} preços concluída`, "success");
+      addAuditLog(`Importação concluída: ${result.count} novos registros`, "success");
     } else {
-      setImportLog({
-        count: 0,
-        duplicates: 0,
-        stores: 0,
-        products: 0,
-        duration: 0,
-        error: result.error
-      });
-      setImportStatus(`Erro na importação`);
+      setImportLog({ error: result.error });
       addAuditLog(`Falha na importação: ${result.error}`, "error");
     }
-  }
-
-
-
-  async function handleTestConnection() {
-    const { testSupabaseConnection } = await import("./data/importer");
-    setTesting(true);
-    const result = await testSupabaseConnection();
-    setConnectionInfo(result);
-    setTesting(false);
-    addAuditLog(result.success ? "Teste de conexão: Sucesso" : "Teste de conexão: Falha", result.success ? "success" : "error");
-  }
+    loadLogs();
+  };
 
   const handleLogoutRequest = () => setShowLogoutConfirm(true);
   const confirmLogout = () => {
@@ -252,13 +270,16 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
 
 
 
+
   const rows = [
     ["Arroz Tio João 5 kg","Central Super","R$ 29,89","Verificado"],
     ["Café 3 Corações 500 g","Mercado Rebouças","R$ 15,75","Verificado"],
     ["Leite Integral Italac 1 L","Pague Pouco","R$ 5,69","Revisar"],
     ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
   ];
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo"><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importStatus && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importStatus}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+  const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
+  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo"><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+
   {showLogoutConfirm && (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
       <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', maxWidth: '400px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
