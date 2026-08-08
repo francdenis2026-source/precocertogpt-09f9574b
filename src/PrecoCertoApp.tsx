@@ -1000,7 +1000,79 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
   };
   const defaultInfo:[string,string,ReactNode] = ["PreçoCerto em Feijó","Economia inteligente para sua próxima compra",<Sparkles key="i"/>];
   const info = isStore ? ["Estabelecimento verificado", stores[0]?.name ?? "Comércio local", <Store key="s"/>] as [string,string,ReactNode] : isProduct ? ["Produto monitorado", products[0]?.name ?? "Produto local", <PackageSearch key="p"/>] as [string,string,ReactNode] : (routeInfo[path] ?? defaultInfo);
+  const alerts = JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]").filter((a: any) => a.action === "alert");
+  const alertProducts = products.filter(p => alerts.some((a: any) => String(a.id) === String(p.id)));
+
+  if (path === "/alertas") {
+    return (
+      <div className="shell page-shell generic-page">
+        <section className="generic-hero">
+          <span className="generic-icon"><Bell /></span>
+          <div>
+            <span className="eyebrow">Monitoramento Ativo</span>
+            <h1>Lista de Acompanhamento</h1>
+            <p>Receba alertas automáticos quando houver quedas de preço ou quando os dados precisarem de nova verificação em Feijó.</p>
+          </div>
+        </section>
+        <div className="generic-grid">
+          <section className="generic-main">
+            <div className="section-heading compact">
+              <div>
+                <h2>Produtos Monitorados ({alertProducts.length})</h2>
+                <p>Alertas configurados para variações de preço e validade da informação.</p>
+              </div>
+            </div>
+            {alertProducts.length > 0 ? alertProducts.map(p => {
+               const days = Math.floor((new Date().getTime() - new Date(p.capturedAt).getTime()) / (1000 * 60 * 60 * 24));
+               return (
+                <article className="compact-product" key={p.id}>
+                  <span className="product-visual">{p.category.slice(0,1)}</span>
+                  <div>
+                    <a href={`/produto/${p.slug}`}>{p.name}</a>
+                    <small>{p.brand} • {p.size} • {p.establishment}</small>
+                    <span style={{ color: days >= 7 ? 'var(--red)' : 'var(--green)', fontWeight: 600 }}>
+                      {days >= 7 ? <AlertTriangle size={12}/> : <CheckCircle2 size={12}/>} 
+                      {days === 0 ? "Atualizado hoje" : days === 1 ? "Atualizado ontem" : `Atualizado há ${days} dias`}
+                    </span>
+                  </div>
+                  <strong>{money(p.minPrice)}</strong>
+                  <button onClick={() => {
+                    const saved = JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]");
+                    const filtered = saved.filter((a: any) => !(a.action === "alert" && String(a.id) === String(p.id)));
+                    localStorage.setItem("precocerto:actions", JSON.stringify(filtered));
+                    window.location.reload();
+                  }} aria-label="Remover alerta" title="Remover alerta"><Trash2 size={16}/></button>
+                  <button className="button button--primary" onClick={() => addBasket(p)}><Plus/> Cesta</button>
+                </article>
+               );
+            }) : (
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)', background: 'var(--surface-2)', borderRadius: '12px' }}>
+                <Bell size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                <p>Você ainda não possui alertas configurados.</p>
+                <a href="/buscar" className="button button--outline" style={{ marginTop: '1rem' }}>Explorar catálogo</a>
+              </div>
+            )}
+          </section>
+          <aside className="generic-aside">
+            <span className="eyebrow">Configurações</span>
+            <h2>Preferências de Alerta</h2>
+            <div className="aside-stat">
+              <span>Notificar queda de preço</span>
+              <strong style={{ fontSize: '1rem', color: 'var(--blue)' }}>Ativado</strong>
+            </div>
+            <div className="aside-stat">
+              <span>Alerta de dado expirado (7 dias)</span>
+              <strong style={{ fontSize: '1rem', color: 'var(--blue)' }}>Ativado</strong>
+            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '1rem' }}>Os alertas são processados localmente baseados nas últimas coletas realizadas em Feijó.</p>
+          </aside>
+        </div>
+      </div>
+    );
+  }
+
   return <div className="shell page-shell generic-page"><section className="generic-hero"><span className="generic-icon">{info[2]}</span><div><span className="eyebrow">{info[0]}</span><h1>{info[1]}</h1><p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p></div><a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a></section><div className="generic-grid"><section className="generic-main"><div className="section-heading compact"><div><h2>{isStore?"Ofertas em destaque":isProduct?"Onde está mais barato":"Destaques de hoje"}</h2><p>Registros compatíveis e verificados recentemente.</p></div></div>{products.slice(0,4).map(p=><article className="compact-product" key={p.id}><span className="product-visual">{p.category.slice(0,1)}</span><div><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size} • {p.establishment}</small><span><ShieldCheck/> Verificado há poucos minutos</span></div><strong>{money(p.minPrice)}</strong><button onClick={()=>saveAction("favorite","product",String(p.id))} aria-label="Favoritar"><Heart/></button><button className="button button--primary" onClick={()=>addBasket(p)}><Plus/> Cesta</button></article>)}</section><aside className="generic-aside"><span className="eyebrow">Visão local</span><h2>Feijó economiza junto</h2><div className="aside-stat"><span>Produtos acompanhados</span><strong>1.247</strong></div><div className="aside-stat"><span>Atualizações hoje</span><strong>214</strong></div><div className="aside-stat"><span>Economia potencial</span><strong>14,8%</strong></div><a href="/cesta-basica" className="button button--dark button--full">Montar cesta inteligente</a></aside></div></div>;
+
 }
 
 function AuthPage({ path, onAdminAuth }: { path: string; onAdminAuth: (success: boolean) => void }) {
