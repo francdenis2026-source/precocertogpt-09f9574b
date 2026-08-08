@@ -184,6 +184,8 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
   const [showAddStore, setShowAddStore] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [activeKpiDetail, setActiveKpiDetail] = useState<{title: string, data: any[]} | null>(null);
+  const [dateFilter, setDateFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   // Novos Estados Administrativos
   const [adminSearch, setAdminSearch] = useState("");
