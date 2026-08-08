@@ -1322,7 +1322,7 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
                     {p.price_history && p.price_history.length > 1 && (
                       <div className="history-preview">
                         <LineChart size={12} />
-                        <span>Variação: {Math.round((1 - p.minPrice / p.maxPrice) * 100)}% na cidade</span>
+                        <span>Histórico: Variação de {Math.round((1 - p.minPrice / p.maxPrice) * 100)}% em Feijó nos últimos 30 dias</span>
                       </div>
                     )}
                     <div className="price-row">
