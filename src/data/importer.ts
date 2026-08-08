@@ -37,7 +37,7 @@ export async function runPriceImport(
       // Nota: No ambiente sandbox, podemos tentar carregar via fetch se exposto, 
       // mas como o arquivo JSON está no /tmp, precisamos dele no src para o Vite ver, 
       // ou passar como parâmetro. Para simplificar e garantir que funcione AGORA:
-      const response = await fetch('/tmp/xlsx_data.json'); 
+      const response = await fetch('/xlsx_data.json'); 
       if (!response.ok) throw new Error("JSON não encontrado no caminho temporário.");
       data = await response.json();
     } catch (e) {
