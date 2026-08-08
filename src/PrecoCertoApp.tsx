@@ -688,7 +688,7 @@ function AuthPage({ path, onAdminAuth }: { path: string; onAdminAuth: (success: 
 export default function PrecoCertoApp() {
   const pathname = useLocation().pathname || "/";
   const [products,setProducts]=useState<Product[]>(initialProducts); const [stores,setStores]=useState<StoreRow[]>(initialStores); const [metrics,setMetrics]=useState<PlatformMetrics>(verifiedDatasetMetrics); const [query,setQuery]=useState(""); const [cart,setCart]=useState<Product[]>([]); const [toast,setToast]=useState("");
-  const [adminAuth, setAdminAuth] = useState(false);
+  const [adminAuth, setAdminAuth] = useState(() => localStorage.getItem("precocerto:admin_authenticated") === "true");
   const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; 
   const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
   useEffect(()=>{ let alive=true; const q=new URLSearchParams(window.location.search).get("q")??""; if(q) setQuery(q);
@@ -703,6 +703,7 @@ export default function PrecoCertoApp() {
   const handleAdminAuth = (success: boolean) => {
     if (success) {
       setAdminAuth(true);
+      localStorage.setItem("precocerto:admin_authenticated", "true");
       addAuditLog("Login administrativo realizado");
     }
   };
@@ -710,6 +711,7 @@ export default function PrecoCertoApp() {
 
   const handleAdminLogout = () => {
     setAdminAuth(false);
+    localStorage.removeItem("precocerto:admin_authenticated");
   };
 
   // Redirecionamento forçado se tentar acessar admin sem estar logado
