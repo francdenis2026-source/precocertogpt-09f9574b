@@ -222,7 +222,58 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
     </section>
     <div className="shell metrics-float" aria-label="Métricas da plataforma"><div><span className="metric-icon"><Store /></span><strong>{count(metrics.stores)}</strong><span>estabelecimentos cadastrados</span></div><div><span className="metric-icon"><PackageSearch /></span><strong>{count(metrics.products)}</strong><span>itens cadastrados</span></div><div><span className="metric-icon"><Activity /></span><strong>{count(metrics.prices)}</strong><span>preços registrados</span></div><small><span /> Base consolidada até 7 de agosto de 2026</small></div>
     <nav className="shell category-rail" aria-label="Atalhos de compra"><span>Explore por intenção</span><a href="/categoria/mercearia"><PackageSearch /> Mercearia <ArrowRight /></a><a href="/categoria/acougue"><TrendingDown /> Ofertas do dia <ArrowRight /></a><a href="/cesta-basica"><ShoppingBasket /> Cesta essencial <ArrowRight /></a><a href="/estabelecimentos"><Store /> Mercados locais <ArrowRight /></a></nav>
-    <section className="section shell featured-products"><div className="section-heading"><div><span className="eyebrow">Mais buscados em Feijó</span><h2>Produtos que valem comparar</h2><p>Embalagens reais, histórico recente e o melhor preço disponível agora.</p></div><a className="inline-link" href="/buscar">Explorar catálogo <ArrowRight /></a></div><div className="visual-product-grid">{products.slice(0,6).map((p,index)=><article className="visual-product-card" key={p.id}><button className="floating-favorite" onClick={()=>saveAction("favorite","product",String(p.id))} aria-label={`Favoritar ${p.name}`}><Heart /></button><a className="visual-product-image" href={`/produto/${p.slug}`}><span className="position-number">0{index+1}</span><ProductImage product={p} /><span className="verified-chip"><ShieldCheck /> Verificado</span></a><div className="visual-product-content"><span className="category-tag">{p.category} • {p.size}</span><a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a><div className="visual-store"><span className="market-dot" style={{background:p.storeColor}}/><span>{p.establishment}<small><MapPin /> {p.neighborhood}</small></span></div><div className="visual-price"><span><small>a partir de</small><strong>{money(p.minPrice)}</strong></span><span><small>média local</small><b>{money(p.avgPrice)}</b></span></div><div className="mini-trend"><svg viewBox="0 0 180 34" aria-hidden="true"><path d={`M2 ${9+index%3*3} C24 ${7+index}, 31 ${22-index}, 54 18 S86 ${8+index}, 108 20 S145 ${27-index},178 ${13+index}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="178" cy={13+index} r="3" fill="currentColor"/></svg><span><TrendingDown /> {Math.max(3,Math.round((1-p.minPrice/p.maxPrice)*100))}% abaixo do maior</span></div><div className="visual-product-actions"><button className="button button--primary" onClick={()=>addBasket(p)}><Plus /> Cesta</button><a href={`/produto/${p.slug}`}>Comparar <ArrowRight /></a></div></div></article>)}</div></section>
+    <section className="section shell featured-products">
+      <div className="section-heading">
+        <div>
+          <span className="eyebrow">Destaques de hoje em Feijó</span>
+          <h2>Ofertas em Destaque</h2>
+          <p>Produtos com preços atrativos, atualizados automaticamente a cada 60 minutos para promover todos os estabelecimentos locais.</p>
+        </div>
+        <a className="inline-link" href="/melhores-precos">Ver todas as ofertas <ArrowRight /></a>
+      </div>
+      <div className="visual-product-grid">
+        {(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 6).map((p, index) => (
+          <article className="visual-product-card" key={p.id}>
+            <button className="floating-favorite" onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}>
+              <Heart />
+            </button>
+            <a className="visual-product-image" href={`/produto/${p.slug}`}>
+              <span className="position-number">0{index + 1}</span>
+              <ProductImage product={p} />
+              {p.previousPrice && p.previousPrice > p.minPrice && (
+                <span className="price-drop-tag"><TrendingDown size={14}/> -{Math.round((1 - p.minPrice / p.previousPrice) * 100)}%</span>
+              )}
+              <span className="verified-chip"><ShieldCheck /> Verificado</span>
+            </a>
+            <div className="visual-product-content">
+              <span className="category-tag">{p.category} • {p.size}</span>
+              <a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a>
+              <div className="visual-store">
+                <span className="market-dot" style={{ background: p.storeColor }} />
+                <span><strong>{p.establishment}</strong><small><MapPin /> {p.neighborhood}</small></span>
+              </div>
+              <div className="visual-price">
+                <span><small>a partir de</small><strong>{money(p.minPrice)}</strong></span>
+                {p.previousPrice && p.previousPrice > p.minPrice && (
+                  <span className="old-price"><small>era</small><s>{money(p.previousPrice)}</s></span>
+                )}
+              </div>
+              <div className="mini-trend">
+                <svg viewBox="0 0 180 34" aria-hidden="true">
+                  <path d={`M2 ${9 + index % 3 * 3} C24 ${7 + index}, 31 ${22 - index}, 54 18 S86 ${8 + index}, 108 20 S145 ${27 - index}, 178 ${13 + index}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <circle cx="178" cy={13 + index} r="3" fill="currentColor" />
+                </svg>
+                <span><TrendingDown /> {Math.max(3, Math.round((1 - p.minPrice / p.maxPrice) * 100))}% abaixo do maior</span>
+              </div>
+              <div className="visual-product-actions">
+                <button className="button button--primary" onClick={() => addBasket(p)}><Plus /> Cesta</button>
+                <a href={`/produto/${p.slug}`} className="button button--ghost button--small">Comparar</a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
     <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Economia pronta para você</span><h2>Cestas otimizadas</h2><p>Combinações que aproveitam o melhor preço de cada mercado de Feijó.</p></div><a className="inline-link" href="/cesta-basica">Ver todas as cestas <ArrowRight /></a></div><div className="basket-grid"><article className="basket-feature"><div className="basket-top"><span className="basket-icon"><ShoppingBasket /></span><PriceBadge product={products[0]} /></div><p>Cesta essencial da semana</p><h3>12 itens em 2 mercados</h3><div className="basket-total"><span>Valor otimizado</span><strong>{money(87.34)}</strong><small>economia estimada de {money(18.62)}</small></div><div className="store-route"><span><b style={{background: stores[0]?.color}}>CS</b> Central Super · 8 itens</span><span><b style={{background: stores[1]?.color}}>MR</b> Rebouças · 4 itens</span></div><a href="/cesta-basica" className="button button--dark">Abrir cesta otimizada <ArrowRight /></a></article><article className="basket-plan"><span className="eyebrow">Planejamento inteligente</span><h3>Quanto você quer gastar?</h3><p>Informe seu orçamento e montamos a melhor cesta possível, explicando cada escolha.</p><div className="budget-chips"><a href="/cesta-basica?orcamento=80">R$ 80</a><a href="/cesta-basica?orcamento=100">R$ 100</a><a href="/cesta-basica?orcamento=150">R$ 150</a><a href="/cesta-basica?orcamento=200">R$ 200</a></div><a href="/cesta-basica" className="inline-link">Montar minha cesta <ArrowRight /></a></article></div></section>
     <section className="section section--soft"><div className="shell"><div className="section-heading"><div><span className="eyebrow">Agora em Feijó</span><h2>Preços em tempo real</h2><p>Compare registros recentes e encontre o menor preço com transparência.</p></div><div className="segmented"><button className={priceMode === "recent" ? "active" : ""} onClick={() => setPriceMode("recent")}>Recentes</button><button className={priceMode === "lowest" ? "active" : ""} onClick={() => setPriceMode("lowest")}>Menor preço</button></div></div><div className="price-table-card"><div className="price-table-head"><span>Produto</span><span>Mercado</span><span>Preço</span><span>Atualizado</span><span>Ação</span></div>{rows.map((p, index) => <div className="price-row" key={p.id}><div className="product-cell"><ProductImage product={p} size="compact" /><span><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size}</small></span></div><div className="market-cell"><span className="market-dot" style={{background:p.storeColor}} /> <span>{p.establishment}<small>{p.neighborhood}</small></span></div><div><strong className="green-price">{money(p.minPrice)}</strong>{index < 3 && <PriceBadge product={p} />}</div><div><span className="freshness"><Clock3 /> há {8 + index * 7} min</span></div><div className="row-actions"><button onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}><Heart /></button><button onClick={() => addBasket(p)} aria-label={`Adicionar ${p.name} à cesta`}><Plus /></button></div></div>)}<div className="table-footer"><a href="/buscar">Abrir catálogo completo <ArrowRight /></a><span><ShieldCheck /> Dados auditáveis e verificados</span></div></div></div></section>
     <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Rede local</span><h2>Estabelecimentos monitorados</h2><p>Preço e disponibilidade perto de você, bairro por bairro.</p></div><a className="inline-link" href="/estabelecimentos">Ver diretório <ArrowRight /></a></div><div className="store-grid">{stores.map(store => <a className="store-card" href={`/estabelecimento/${store.slug}`} key={store.id}><span className="store-logo" style={{background:store.color}}>{store.name.split(" ").map(v=>v[0]).join("").slice(0,2)}</span><span><strong>{store.name}</strong><small><MapPin /> {store.neighborhood}</small></span><ChevronRight /></a>)}</div></section>
