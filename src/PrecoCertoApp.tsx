@@ -165,7 +165,13 @@ function AdminPage({ path }: { path:string }) {
     const result = await runPriceImport((msg) => setImportStatus(msg));
     setImporting(false);
     if (result.success) {
-      setImportStatus(`Sucesso! ${result.count} preços importados.`);
+      if (result.duplicates && result.count === 0) {
+        setImportStatus(`Concluído: Todos os ${result.duplicates} registros já estão no banco.`);
+      } else if (result.duplicates) {
+        setImportStatus(`Sucesso! ${result.count} novos preços criados (${result.duplicates} duplicados ignorados).`);
+      } else {
+        setImportStatus(`Sucesso! ${result.count} preços importados.`);
+      }
     } else {
       setImportStatus(`Erro: ${result.error}`);
     }
