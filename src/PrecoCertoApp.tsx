@@ -212,7 +212,8 @@ export default function PrecoCertoApp() {
   if(isAdmin) return <><AdminPage path={pathname}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
   if(isAuth) return <AuthPage path={pathname}/>;
   let page:ReactNode;
-  if(pathname==="/") page=<HomePage {...props}/>;
+  if(pathname==="/oi") page=<div style={{padding:"4rem",textAlign:"center",fontSize:"2rem",fontFamily:"sans-serif"}}>oi</div>;
+  else if(pathname==="/") page=<HomePage {...props}/>;
   else if(pathname==="/buscar") page=<SearchPage {...props}/>;
   else if(pathname==="/cesta-basica"||pathname==="/cesta") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket}/>;
   else if(pathname==="/planos"||pathname.startsWith("/checkout/")) page=<PlansPage/>;
