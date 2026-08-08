@@ -120,7 +120,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
           capturedAt: best.captured_at ?? new Date().toISOString(),
           previousPrice: Number.isFinite(previous) ? round(previous) : undefined,
           source: best.source ?? "Coleta Manual",
-          updated_at: best.captured_at,
+          updated_at: best.captured_at || undefined,
           price_history: rows.map(r => ({ date: r.captured_at || new Date().toISOString(), value: toNumber(r.value) })).sort((a,b) => Date.parse(a.date) - Date.parse(b.date))
         };
       })
