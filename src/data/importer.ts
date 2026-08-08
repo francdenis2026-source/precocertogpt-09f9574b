@@ -116,8 +116,10 @@ export async function runPriceImport(
     console.error("Erro na importação:", err);
     return { success: false, count: 0, duplicates: 0, stores: 0, products: 0, error: err instanceof Error ? err.message : "Erro desconhecido" };
   }
+}
 
 /**
+
  * Função para testar a conexão com o Supabase.
  */
 export async function testSupabaseConnection(): Promise<{ 
