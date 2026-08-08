@@ -77,7 +77,7 @@ function Header({ basketCount }: { basketCount: number }) {
       <Brand />
       <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
       <nav className="desktop-nav" aria-label="Navegação principal">
-        <a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas</a><a href="/planos">Planos</a>
+        <a href="/buscar">Comparar preços</a><a href="/melhores-precos">Ofertas</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/planos">Planos</a>
       </nav>
       <div className="header-actions">
         <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
