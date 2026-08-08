@@ -1016,10 +1016,33 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
         </section>
         <div className="generic-grid">
           <section className="generic-main">
-            <div className="section-heading compact">
+            <div className="section-heading compact" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <h2>Produtos Monitorados ({alertProducts.length})</h2>
                 <p>Alertas configurados para variações de preço e validade da informação.</p>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className="button button--outline" onClick={() => {
+                  const csv = [
+                    ["Produto", "Marca", "Tamanho", "Estabelecimento", "Preco", "Atualizacao"].join(","),
+                    ...alertProducts.map(p => [
+                      `"${p.name}"`, `"${p.brand}"`, `"${p.size}"`, `"${p.establishment}"`, p.minPrice, new Date(p.capturedAt).toLocaleDateString()
+                    ].join(","))
+                  ].join("\n");
+                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.setAttribute("href", url);
+                  link.setAttribute("download", `alertas-precocerto-${new Date().toISOString().split('T')[0]}.csv`);
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }} title="Exportar para CSV">
+                  <Download size={16} /> CSV
+                </button>
+                <button className="button button--outline" onClick={() => window.print()} title="Imprimir lista (PDF)">
+                  <Receipt size={16} /> PDF
+                </button>
               </div>
             </div>
             {alertProducts.length > 0 ? alertProducts.map(p => {
