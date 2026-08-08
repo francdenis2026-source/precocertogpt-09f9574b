@@ -82,8 +82,17 @@ function Header({ basketCount }: { basketCount: number }) {
       <div className="header-actions">
         <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
         <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a>
-        <a className="text-link" href="/login">Entrar</a>
-        <a className="button button--primary button--small" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
+        {user ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>Olá, <strong>{user.name.split(' ')[0]}</strong></span>
+            <button className="text-link" onClick={onLogout}>Sair</button>
+          </div>
+        ) : (
+          <>
+            <a className="text-link" href="/login">Entrar</a>
+            <a className="button button--primary button--small" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
+          </>
+        )}
       </div>
       <button className="mobile-menu-button" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open}><Menu /></button>
     </div>
