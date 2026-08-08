@@ -1135,7 +1135,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
 
 }
 
-function GenericPage({ path, products, stores, metrics, addBasket, saveAction }: PageProps & { path:string }) {
+function GenericPage({ path, products, stores, metrics, addBasket, saveAction, user }: PageProps & { path:string, user?: any }) {
   const randomFeatured = useRandomFeatured(products);
   const isStore = path.startsWith("/estabelecimento/") || path.startsWith("/loja/");
   const isProduct = path.startsWith("/produto") || path.includes("/produto/");
