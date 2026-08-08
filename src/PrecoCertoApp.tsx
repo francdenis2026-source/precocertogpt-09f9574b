@@ -994,7 +994,7 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
     "/lojista":["Inteligência para vender melhor","Painel do lojista",<LayoutDashboard key="i"/>],
     "/financas":["Controle com contexto","Minhas finanças",<CircleDollarSign key="i"/>],
     "/favoritos":["Tudo que importa","Seus favoritos",<Heart key="i"/>],
-    "/alertas":["O preço caiu, você fica sabendo","Alertas de preço",<Bell key="i"/>],
+    "/alertas":["Monitoramento de preços e validade","Lista de Acompanhamento",<Bell key="i"/>],
     "/lista":["Compra organizada","Minhas listas",<ListChecks key="i"/>],
     "/app":["Seu resumo dos últimos 90 dias","Painel de economia",<LayoutDashboard key="i"/>],
   };
