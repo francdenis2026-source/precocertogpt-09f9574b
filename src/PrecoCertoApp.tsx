@@ -70,20 +70,29 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
   </a>;
 }
 
-function Header({ basketCount }: { basketCount: number }) {
+function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   return <header className="site-header">
     <div className="shell header-inner">
       <Brand />
       <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
       <nav className="desktop-nav" aria-label="Navegação principal">
-        <a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas</a><a href="/planos">Planos</a>
+        <a href="/buscar">Comparar preços</a><a href="/melhores-precos">Ofertas</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/planos">Planos</a>
       </nav>
       <div className="header-actions">
         <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
         <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a>
-        <a className="text-link" href="/login">Entrar</a>
-        <a className="button button--primary button--small" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
+        {user ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <span style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>Olá, <strong>{user.name.split(' ')[0]}</strong></span>
+            <button className="text-link" onClick={onLogout}>Sair</button>
+          </div>
+        ) : (
+          <>
+            <a className="text-link" href="/login">Entrar</a>
+            <a className="button button--primary button--small" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
+          </>
+        )}
       </div>
       <button className="mobile-menu-button" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open}><Menu /></button>
     </div>
@@ -175,7 +184,30 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
     <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Economia pronta para você</span><h2>Cestas otimizadas</h2><p>Combinações que aproveitam o melhor preço de cada mercado de Feijó.</p></div><a className="inline-link" href="/cesta-basica">Ver todas as cestas <ArrowRight /></a></div><div className="basket-grid"><article className="basket-feature"><div className="basket-top"><span className="basket-icon"><ShoppingBasket /></span><PriceBadge product={products[0]} /></div><p>Cesta essencial da semana</p><h3>12 itens em 2 mercados</h3><div className="basket-total"><span>Valor otimizado</span><strong>{money(87.34)}</strong><small>economia estimada de {money(18.62)}</small></div><div className="store-route"><span><b style={{background: stores[0]?.color}}>CS</b> Central Super · 8 itens</span><span><b style={{background: stores[1]?.color}}>MR</b> Rebouças · 4 itens</span></div><a href="/cesta-basica" className="button button--dark">Abrir cesta otimizada <ArrowRight /></a></article><article className="basket-plan"><span className="eyebrow">Planejamento inteligente</span><h3>Quanto você quer gastar?</h3><p>Informe seu orçamento e montamos a melhor cesta possível, explicando cada escolha.</p><div className="budget-chips"><a href="/cesta-basica?orcamento=80">R$ 80</a><a href="/cesta-basica?orcamento=100">R$ 100</a><a href="/cesta-basica?orcamento=150">R$ 150</a><a href="/cesta-basica?orcamento=200">R$ 200</a></div><a href="/cesta-basica" className="inline-link">Montar minha cesta <ArrowRight /></a></article></div></section>
     <section className="section section--soft"><div className="shell"><div className="section-heading"><div><span className="eyebrow">Agora em Feijó</span><h2>Preços em tempo real</h2><p>Compare registros recentes e encontre o menor preço com transparência.</p></div><div className="segmented"><button className={priceMode === "recent" ? "active" : ""} onClick={() => setPriceMode("recent")}>Recentes</button><button className={priceMode === "lowest" ? "active" : ""} onClick={() => setPriceMode("lowest")}>Menor preço</button></div></div><div className="price-table-card"><div className="price-table-head"><span>Produto</span><span>Mercado</span><span>Preço</span><span>Atualizado</span><span>Ação</span></div>{rows.map((p, index) => <div className="price-row" key={p.id}><div className="product-cell"><ProductImage product={p} size="compact" /><span><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size}</small></span></div><div className="market-cell"><span className="market-dot" style={{background:p.storeColor}} /> <span>{p.establishment}<small>{p.neighborhood}</small></span></div><div><strong className="green-price">{money(p.minPrice)}</strong>{index < 3 && <PriceBadge product={p} />}</div><div><span className="freshness"><Clock3 /> há {8 + index * 7} min</span></div><div className="row-actions"><button onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}><Heart /></button><button onClick={() => addBasket(p)} aria-label={`Adicionar ${p.name} à cesta`}><Plus /></button></div></div>)}<div className="table-footer"><a href="/buscar">Abrir catálogo completo <ArrowRight /></a><span><ShieldCheck /> Dados auditáveis e verificados</span></div></div></div></section>
     <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Rede local</span><h2>Estabelecimentos monitorados</h2><p>Preço e disponibilidade perto de você, bairro por bairro.</p></div><a className="inline-link" href="/estabelecimentos">Ver diretório <ArrowRight /></a></div><div className="store-grid">{stores.map(store => <a className="store-card" href={`/estabelecimento/${store.slug}`} key={store.id}><span className="store-logo" style={{background:store.color}}>{store.name.split(" ").map(v=>v[0]).join("").slice(0,2)}</span><span><strong>{store.name}</strong><small><MapPin /> {store.neighborhood}</small></span><ChevronRight /></a>)}</div></section>
-    <section className="section shell" id="como-funciona"><div className="benefit-grid"><article><span><ShieldCheck /></span><h3>Preços verificados</h3><p>Cada registro mostra mercado, horário e origem para você comprar com confiança.</p><a href="/precos">Entenda os dados <ArrowRight /></a></article><article><span><LineChart /></span><h3>Histórico de preços</h3><p>Veja a tendência e descubra se a promoção de hoje é realmente uma boa escolha.</p><a href="/tendencias">Ver tendências <ArrowRight /></a></article><article><span><ShoppingBasket /></span><h3>Cesta inteligente</h3><p>Compare uma loja só com a melhor combinação de mercados para toda a lista.</p><a href="/cesta-basica">Otimizar cesta <ArrowRight /></a></article></div></section>
+    <section className="section shell" id="como-funciona">
+      <div className="section-heading center">
+        <span className="eyebrow">Simples e direto</span>
+        <h2>Como funciona o PreçoCerto</h2>
+        <p>Economize em Feijó seguindo estes 3 passos fundamentais.</p>
+      </div>
+      <div className="steps-grid">
+        <div className="step-card">
+          <div className="step-number">01</div>
+          <h3>Busque Produtos</h3>
+          <p>Digite o nome do item que você precisa. Nossa base cobre desde mercearia até limpeza com preços de {metrics.stores} lojas locais.</p>
+        </div>
+        <div className="step-card">
+          <div className="step-number">02</div>
+          <h3>Compare Ofertas</h3>
+          <p>Veja onde o produto está mais barato hoje. Analise o histórico e a validade do preço verificado por nossa equipe.</p>
+        </div>
+        <div className="step-card">
+          <div className="step-number">03</div>
+          <h3>Economize Real</h3>
+          <p>Monte sua cesta e escolha o melhor mercado (ou a combinação deles) para finalizar sua compra com o menor custo possível.</p>
+        </div>
+      </div>
+    </section>
     <section className="shell final-cta"><div><span className="eyebrow eyebrow--gold">Economia inteligente todos os dias</span><h2>Antes de comprar,<br/>compare com o PreçoCerto.</h2><p>Crie sua conta gratuita, salve listas e receba alertas quando o preço baixar.</p><a className="button button--gold" href="/cadastro">Criar minha conta gratuita <ArrowRight /></a></div><div className="cta-stat"><span>Economia potencial</span><strong>R$ 186,40</strong><small>média mensal em uma cesta familiar</small><div><TrendingDown /> −14,8% no custo estimado</div></div></section>
     <section className="section shell professional"><div className="section-heading"><div><span className="eyebrow">Para o comércio local</span><h2>Painel de inteligência de mercado</h2><p>Acompanhe cobertura, competitividade e oportunidades sem perder o contexto local.</p></div><a href="/lojista" className="button button--outline">Conhecer painel lojista</a></div><div className="dashboard-preview"><div className="preview-sidebar"><Brand compact /><span className="active"><LayoutDashboard />Visão geral</span><span><Store />Lojas</span><span><PackageSearch />Produtos</span><span><LineChart />Tendências</span><span><Settings />Configurações</span></div><div className="preview-main"><div className="preview-title"><div><small>Monitoramento</small><h3>Estabelecimentos</h3></div><button><Plus /> Adicionar loja</button></div><div className="mini-kpis"><span><small>Lojas ativas</small><b>{stores.length}</b></span><span><small>Produtos cobertos</small><b>82%</b></span><span><small>Atualizações hoje</small><b>214</b></span></div>{stores.slice(0,3).map((s,i)=><div className="sync-row" key={s.id}><span className="store-logo small" style={{background:s.color}}>{s.name.slice(0,2)}</span><span><b>{s.name}</b><small>Última sincronização há {i*9+4} min</small></span><em>Ativo</em><span className="insight">{i===0 ? "12 preços líderes" : i===1 ? "Cobertura em alta" : "3 itens para revisar"}</span><button aria-label={`Abrir ${s.name}`}><ChevronRight /></button></div>)}</div></div></section>
   </>;
@@ -1158,7 +1190,7 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
 
 }
 
-function AuthPage({ path, onAdminAuth }: { path: string; onAdminAuth: (success: boolean) => void }) {
+function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (success: boolean) => void; onLogin?: () => void }) {
   const register = path === "/cadastro" || path === "/registrar";
   const isAdminLogin = path === "/admin-login";
   const [pin, setPin] = useState("");
@@ -1211,7 +1243,8 @@ function AuthPage({ path, onAdminAuth }: { path: string; onAdminAuth: (success: 
         }
       }
     } else {
-      window.location.href = "/app";
+      if (onLogin) onLogin();
+      window.location.href = "/";
     }
   }
 
@@ -1354,10 +1387,11 @@ function AuthPage({ path, onAdminAuth }: { path: string; onAdminAuth: (success: 
 
 
 function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }: PageProps) {
+  const pathname = useLocation().pathname;
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeStore, setActiveStore] = useState("all");
   const [activeBrand, setActiveBrand] = useState("all");
-  const [sortBy, setSortBy] = useState<"price" | "date" | "variation">("price");
+  const [sortBy, setSortBy] = useState<"price" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
   const [chartPeriod, setChartPeriod] = useState("30d");
   const [isLoading, setIsLoading] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -1432,8 +1466,8 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
     <div className="shell page-shell">
       <section className="search-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1>Comparador de Preços</h1>
-          <p>Encontre o melhor preço entre {stores.length} estabelecimentos em Feijó.</p>
+          <h1>{pathname === "/melhores-precos" ? "Melhores Ofertas de Feijó" : "Comparador de Preços"}</h1>
+          <p>{pathname === "/melhores-precos" ? "Veja os produtos com maior queda de preço e economize agora." : `Encontre o melhor preço entre ${stores.length} estabelecimentos em Feijó.`}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button className="button button--outline" onClick={() => handleShare()}>
@@ -1604,6 +1638,10 @@ export default function PrecoCertoApp() {
   const [query,setQuery]=useState("");
   const [cart,setCart]=useState<Product[]>(() => JSON.parse(localStorage.getItem("precocerto:basket") || "[]"));
   const [toast,setToast]=useState("");
+  const [user, setUser] = useState<{name: string} | null>(() => {
+    const saved = localStorage.getItem("precocerto:user");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [adminAuth, setAdminAuth] = useState(() => localStorage.getItem("precocerto:admin_authenticated") === "true");
   
   const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; 
@@ -1656,6 +1694,21 @@ export default function PrecoCertoApp() {
     }
   };
 
+  const handleUserLogin = () => {
+    const newUser = { name: "Usuário PreçoCerto" };
+    setUser(newUser);
+    localStorage.setItem("precocerto:user", JSON.stringify(newUser));
+    setToast("Bem-vindo ao PreçoCerto!");
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setAdminAuth(false);
+    localStorage.removeItem("precocerto:user");
+    localStorage.removeItem("precocerto:admin_authenticated");
+    window.location.href = "/";
+  };
+
   const handleAdminLogout = () => {
     setAdminAuth(false);
     localStorage.removeItem("precocerto:admin_authenticated");
@@ -1669,14 +1722,14 @@ export default function PrecoCertoApp() {
 
   let page:ReactNode;
   if(pathname==="/") page=<HomePage {...props}/>;
-  else if(pathname==="/buscar"||pathname==="/comparador") page=<SearchPage {...props}/>;
+  else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props}/>;
   else if(pathname==="/alertas") page=<GenericPage {...props} path={pathname}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
-  else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth}/>;
+  else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
   else page=<GenericPage {...props} path={pathname}/>;
 
   return <div className="app">
-    <Header basketCount={cart.length}/>
+    <Header basketCount={cart.length} user={user} onLogout={handleLogout}/>
     <main>{page}</main>
     <Footer/>
     <MobileBar basketCount={cart.length}/>
