@@ -169,7 +169,7 @@ function PlansPage() {
   return <div className="shell page-shell plans-page"><div className="center-heading"><span className="eyebrow">Planos PreçoCerto</span><h1>Economia que se paga na primeira compra</h1><p>Recursos transparentes para consumidores e para o comércio local.</p><div className="segmented large"><button className={!shop?"active":""} onClick={()=>setShop(false)}>Para você</button><button className={shop?"active":""} onClick={()=>setShop(true)}>Para sua loja</button></div></div><div className="plan-grid">{plans.map(plan=><article className={plan.featured?"featured":""} key={plan.name}>{plan.featured&&<span className="recommended">Recomendado</span>}<h2>{plan.name}</h2><p>{plan.desc}</p><div className="plan-price"><strong>{money(plan.price)}</strong><span>/mês</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={`/checkout/${plan.name.toLowerCase().replace(" ","-")}`}>{plan.price===0?"Começar grátis":"Escolher plano"}<ArrowRight/></a><ul>{plan.features.map(f=><li key={f}><Check/> {f}</li>)}</ul></article>)}</div><div className="plan-note"><ShieldCheck/><span><b>Pagamento seguro via Pix</b><small>Ativação automática após confirmação. Cancele quando quiser.</small></span></div></div>;
 }
 
-function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
+function AdminPage({ path, onLogout, products: allProducts, stores: allStores }: { path: string; onLogout: () => void; products: Product[]; stores: StoreRow[] }) {
   const [auditLogs, setAuditLogs] = useState<any[]>(() => {
     try { return JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]"); } catch { return []; }
   });
@@ -214,29 +214,22 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
   }, [auditLogs, dateFilter, typeFilter]);
 
   // Logica de busca e filtros
-  const { products, stores } = useMemo(() => {
-    // Acessando as props do escopo externo via closure (sendo injetadas pelo componente pai)
-    // Mas aqui na AdminPage elas virão de buildCatalog() se não carregadas ainda.
-    const cat = buildCatalog();
-    return { products: cat.products, stores: cat.stores };
-  }, []);
-
   const filteredProducts = useMemo(() => {
-    return products.filter(p => {
+    return allProducts.filter(p => {
       const searchMatch = !adminSearch || 
         p.name.toLowerCase().includes(adminSearch.toLowerCase()) || 
         p.barcode?.includes(adminSearch);
       const storeMatch = adminFilterStore === "all" || p.establishment === adminFilterStore;
       return searchMatch && storeMatch;
     });
-  }, [products, adminSearch, adminFilterStore]);
+  }, [allProducts, adminSearch, adminFilterStore]);
 
   const filteredStores = useMemo(() => {
-    return stores.filter(s => {
+    return allStores.filter(s => {
       const searchMatch = !adminSearch || s.name.toLowerCase().includes(adminSearch.toLowerCase());
       return searchMatch;
     });
-  }, [stores, adminSearch]);
+  }, [allStores, adminSearch]);
 
   const handleDelete = async () => {
     if (!confirmDelete || !supabase) return;
@@ -551,7 +544,7 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
           style={{ padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}
         >
           <option value="all">Todos os Mercados</option>
-          {stores.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+          {allStores.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
         </select>
       )}
       <button className="button button--outline" onClick={() => { setAdminSearch(""); setAdminFilterStore("all"); }}><SlidersHorizontal/> Limpar</button>
@@ -1100,7 +1093,7 @@ export default function PrecoCertoApp() {
     return null;
   }
 
-  if(isAdmin) return <><AdminPage path={pathname} onLogout={handleAdminLogout}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
+  if(isAdmin) return <><AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
   if(isAuth) return <AuthPage path={pathname} onAdminAuth={handleAdminAuth}/>;
 
   let page:ReactNode;
