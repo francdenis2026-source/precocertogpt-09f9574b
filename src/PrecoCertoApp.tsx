@@ -441,11 +441,17 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
   const [pin,setPin]=useState(""); const [cpf,setCpf]=useState("");
   const [user,setUser]=useState(""); const [pass,setPass]=useState("");
   const [error, setError] = useState("");
+  const [showForgot, setShowForgot] = useState(false);
+  const [recoveryUser, setRecoveryUser] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [recoveryStep, setRecoveryStep] = useState(1); // 1: input user, 2: reset pass
 
   function submit(e:FormEvent){
     e.preventDefault();
     if (isAdminLogin) {
-      if (user === "admin" && pass === "feijo2026") {
+      // Verifica no localStorage se a senha foi alterada, senão usa a padrão
+      const savedPass = localStorage.getItem("precocerto:admin_password") || "feijo2026";
+      if (user === "admin" && pass === savedPass) {
         onAdminAuth(true);
         window.location.href="/admin";
       } else {
@@ -455,6 +461,29 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
       window.location.href="/app";
     }
   }
+
+  function handleRecovery(e: FormEvent) {
+    e.preventDefault();
+    if (recoveryStep === 1) {
+      if (recoveryUser === "admin") {
+        setRecoveryStep(2);
+        setError("");
+      } else {
+        setError("Usuário administrador não encontrado.");
+      }
+    } else {
+      if (newPass.length < 6) {
+        setError("A nova senha deve ter pelo menos 6 caracteres.");
+        return;
+      }
+      localStorage.setItem("precocerto:admin_password", newPass);
+      setShowForgot(false);
+      setRecoveryStep(1);
+      setError("");
+      alert("Senha administrativa alterada com sucesso!");
+    }
+  }
+
 
   return <div className="auth-page">
     <div className="auth-brand-panel">
@@ -476,18 +505,26 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
         <a className="auth-back" href="/" style={{ margin: 0 }}><ArrowRight/> Voltar ao início</a>
         {!register && !isAdminLogin && <a href="/admin" style={{ fontSize: '0.75rem', color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#94a3b8'} onMouseOut={e => e.currentTarget.style.color = '#cbd5e1'}>Acesso Restrito</a>}
       </div>
-      <form className="auth-form" onSubmit={submit}>
-        <span className="eyebrow">{isAdminLogin ? "Segurança" : register?"Crie sua conta":"Acesse sua conta"}</span>
-        <h2>{isAdminLogin ? "Login Administrativo" : register?"Comece grátis":"Entrar no PreçoCerto"}</h2>
-        <p>{isAdminLogin ? "Insira suas chaves de acesso para continuar." : register?"Leva menos de dois minutos.":"Use seu CPF e PIN de 6 dígitos."}</p>
+      <form className="auth-form" onSubmit={showForgot ? handleRecovery : submit}>
+        <span className="eyebrow">{isAdminLogin ? (showForgot ? "Recuperação" : "Segurança") : register?"Crie sua conta":"Acesse sua conta"}</span>
+        <h2>{isAdminLogin ? (showForgot ? "Redefinir Senha" : "Login Administrativo") : register?"Comece grátis":"Entrar no PreçoCerto"}</h2>
+        <p>{isAdminLogin ? (showForgot ? "Siga os passos para recuperar o acesso." : "Insira suas chaves de acesso para continuar.") : register?"Leva menos de dois minutos.":"Use seu CPF e PIN de 6 dígitos."}</p>
         
         {error && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><AlertTriangle size={16}/> {error}</div>}
 
         {isAdminLogin ? (
-          <>
-            <label>Usuário Administrador<input required value={user} onChange={e=>setUser(e.target.value)} placeholder="usuário"/></label>
-            <label>Senha Secreta<input required value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="••••••••"/></label>
-          </>
+          showForgot ? (
+            recoveryStep === 1 ? (
+              <label>Confirme o Usuário Administrador<input required value={recoveryUser} onChange={e=>setRecoveryUser(e.target.value)} placeholder="usuário"/></label>
+            ) : (
+              <label>Nova Senha Administrativa<input required type="password" value={newPass} onChange={e=>setNewPass(e.target.value)} placeholder="mínimo 6 caracteres"/></label>
+            )
+          ) : (
+            <>
+              <label>Usuário Administrador<input required value={user} onChange={e=>setUser(e.target.value)} placeholder="usuário"/></label>
+              <label>Senha Secreta<input required value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="••••••••"/></label>
+            </>
+          )
         ) : (
           <>
             {register&&<label>Nome completo<input required minLength={3} placeholder="Seu nome e sobrenome"/></label>}
@@ -497,12 +534,16 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
           </>
         )}
 
-        <button className="button button--primary button--full" type="submit" disabled={isAdminLogin ? (!user || !pass) : (pin.length!==6||cpf.length!==11)}>
-          {isAdminLogin ? "Autenticar Acesso" : register?"Criar minha conta":"Entrar com segurança"}
+        <button className="button button--primary button--full" type="submit" disabled={isAdminLogin ? (showForgot ? (recoveryStep === 1 ? !recoveryUser : !newPass) : (!user || !pass)) : (pin.length!==6||cpf.length!==11)}>
+          {isAdminLogin ? (showForgot ? (recoveryStep === 1 ? "Verificar Usuário" : "Salvar Nova Senha") : "Autenticar Acesso") : register?"Criar minha conta":"Entrar com segurança"}
           <ArrowRight/>
         </button>
         
+        {isAdminLogin && !showForgot && <button type="button" onClick={() => setShowForgot(true)} className="center-link" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', marginTop: '1rem' }}>Esqueci minha senha admin</button>}
+        {isAdminLogin && showForgot && <button type="button" onClick={() => { setShowForgot(false); setRecoveryStep(1); setError(""); }} className="center-link" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', marginTop: '1rem' }}>Voltar ao login admin</button>}
+        
         {!register && !isAdminLogin && <a href="/resgatar" className="center-link">Esqueci meu PIN</a>}
+
         <div className="auth-switch">
           {isAdminLogin ? <a href="/login">Voltar para login comum</a> : (register?"Já possui conta? ":"Ainda não tem conta? ")}
           {!isAdminLogin && <a href={register?"/login":"/cadastro"}>{register?"Entrar":"Começar grátis"}</a>}
