@@ -475,8 +475,31 @@ export default function PrecoCertoApp() {
   function removeBasket(id:number){setCart(current=>current.filter(i=>i.id!==id));setToast("Item removido da cesta.");}
   function saveAction(action:string,entityType:string,entityId:string){setToast(action==="alert"?"Alerta ativado com sucesso.":"Salvo nos seus favoritos.");try{const key="precocerto:actions";const saved=JSON.parse(localStorage.getItem(key)??"[]") as unknown[];localStorage.setItem(key,JSON.stringify([...saved,{action,entityType,entityId,at:new Date().toISOString()}].slice(-200)));}catch{setToast("A ação ficou salva nesta sessão.");}}
   const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction}),[products,stores,metrics,query]);
-  if(isAdmin) return <><AdminPage path={pathname}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
-  if(isAuth) return <AuthPage path={pathname}/>;
+  const handleAdminAuth = (success: boolean) => {
+    if (success) {
+      setAdminAuth(true);
+      // Log de login (não temos addAuditLog aqui, mas podemos fazer via localStorage direto)
+      try {
+        const logs = JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]");
+        const newLog = { action: "Login administrativo realizado", user: "Franc D’Nis", at: new Date().toISOString(), type: "success" };
+        localStorage.setItem("precocerto:admin_logs", JSON.stringify([newLog, ...logs].slice(0, 100)));
+      } catch {}
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setAdminAuth(false);
+  };
+
+  // Redirecionamento forçado se tentar acessar admin sem estar logado
+  if (isAdmin && !adminAuth) {
+    window.location.href = "/admin-login";
+    return null;
+  }
+
+  if(isAdmin) return <><AdminPage path={pathname} onLogout={handleAdminLogout}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
+  if(isAuth) return <AuthPage path={pathname} onAdminAuth={handleAdminAuth}/>;
+
   let page:ReactNode;
   if(pathname==="/oi") page=<div style={{padding:"4rem",textAlign:"center",fontSize:"2rem",fontFamily:"sans-serif"}}>oi</div>;
   else if(pathname==="/") page=<HomePage {...props}/>;
