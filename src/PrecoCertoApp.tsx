@@ -1202,6 +1202,8 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeStore, setActiveStore] = useState("all");
   const [activeBrand, setActiveBrand] = useState("all");
+  const [sortBy, setSortBy] = useState<"price" | "date" | "variation">("price");
+  const [chartPeriod, setChartPeriod] = useState("30d");
   const [isLoading, setIsLoading] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   
