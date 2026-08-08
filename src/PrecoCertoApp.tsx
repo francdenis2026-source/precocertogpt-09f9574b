@@ -1341,15 +1341,6 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
   );
 }
 
-interface PageProps {
-  products: Product[];
-  stores: StoreRow[];
-  metrics: PlatformMetrics;
-  query: string;
-  setQuery: (v: string) => void;
-  addBasket: (p: Product) => void;
-  saveAction: (action: string, type: string, id: string) => void;
-}
 
 export default function PrecoCertoApp() {
   const pathname = useLocation().pathname || "/";
