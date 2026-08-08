@@ -121,14 +121,18 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
   const featured = products[featuredIndex] ?? products[0];
   return <>
     <section className="hero">
-      <div className="hero-photo" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=2000&auto=format&fit=crop")', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.5 }} /><div className="hero-wash" />
+      <div className="hero-photo" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=2000&auto=format&fit=crop")', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+      <div className="hero-wash" />
       <div className="shell hero-content">
         <div className="hero-copy">
           <span className="hero-live"><i /> Inteligência de compra em tempo real</span>
           <span className="eyebrow eyebrow--light"><MapPin size={14} /> Curadoria local • Feijó • Acre</span>
           <h1>Compre melhor.<br/><span>Gaste menos.</span></h1>
           <p>Uma leitura precisa do comércio local para você encontrar a melhor combinação de preço, loja e conveniência.</p>
-          <SearchBox value={query} setValue={setQuery} products={products} hero />
+          <div className="hero-actions">
+            <SearchBox value={query} setValue={setQuery} products={products} hero />
+            <a href="/buscar" className="button button--white">Explorar ofertas <ArrowRight size={18} /></a>
+          </div>
           <div className="hero-trust"><span><CheckCircle2 /> Preços verificados</span><span><Clock3 /> Atualização contínua</span><span><ShieldCheck /> Dados protegidos</span></div>
         </div>
         <aside className="hero-radar hero-commerce" aria-label="Comparação interativa em destaque">
@@ -136,6 +140,33 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
           {featured && <><div className="commerce-product"><ProductImage product={featured} size="hero" eager /><div className="commerce-copy"><span>{featured.category} • {featured.size}</span><h2>{featured.name}</h2><small><ShieldCheck /> preço verificado há 8 min</small></div></div><div className="commerce-prices"><div><small>Melhor preço</small><strong>{money(featured.minPrice)}</strong><span>em {featured.establishment}</span></div><div className="commerce-chart"><svg viewBox="0 0 250 72" role="img" aria-label="Tendência de preço em queda"><defs><linearGradient id="priceArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#54d69a" stopOpacity=".42"/><stop offset="1" stopColor="#54d69a" stopOpacity="0"/></linearGradient></defs><path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55 L246 70 L4 70 Z" fill="url(#priceArea)"/><path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55" fill="none" stroke="#65dfa8" strokeWidth="3" strokeLinecap="round"/><circle cx="246" cy="55" r="5" fill="#65dfa8" stroke="#08243a" strokeWidth="3"/></svg><span><TrendingDown /> caiu {money(Math.max(0,(featured.previousPrice ?? featured.maxPrice)-featured.minPrice))}</span></div></div><div className="commerce-actions"><button className="button button--gold" onClick={()=>addBasket(featured)}><Plus /> Adicionar à cesta</button><a href={`/produto/${featured.slug}`}>Ver comparação <ArrowRight /></a></div></>}
           <div className="commerce-thumbs">{products.slice(0,4).map((product,index)=><button className={featuredIndex===index?"active":""} onClick={()=>setFeaturedIndex(index)} aria-pressed={featuredIndex===index} aria-label={`Destacar ${product.name}`} key={product.id}><ProductImage product={product} size="compact" /><span>{product.brand}<small>{money(product.minPrice)}</small></span></button>)}</div>
         </aside>
+      </div>
+    </section>
+
+    <section className="benefits-section">
+      <div className="shell">
+        <div className="benefits-grid">
+          <div className="benefit-card">
+            <div className="benefit-icon"><CircleDollarSign size={24} /></div>
+            <h3>Economia Real</h3>
+            <p>Compare preços entre mercados e economize até 30% na sua lista mensal.</p>
+          </div>
+          <div className="benefit-card">
+            <div className="benefit-icon"><Clock3 size={24} /></div>
+            <h3>Dados Atualizados</h3>
+            <p>Nossa equipe verifica os preços diariamente nos principais comércios de Feijó.</p>
+          </div>
+          <div className="benefit-card">
+            <div className="benefit-icon"><LayoutDashboard size={24} /></div>
+            <h3>Cestas Inteligentes</h3>
+            <p>Monte sua lista e descubra em qual loja ela sai mais barata automaticamente.</p>
+          </div>
+          <div className="benefit-card">
+            <div className="benefit-icon"><ShieldCheck size={24} /></div>
+            <h3>Transparência Total</h3>
+            <p>Veja o histórico de preços e saiba se a oferta é realmente vantajosa.</p>
+          </div>
+        </div>
       </div>
     </section>
     <div className="shell metrics-float" aria-label="Métricas da plataforma"><div><span className="metric-icon"><Store /></span><strong>{count(metrics.stores)}</strong><span>estabelecimentos cadastrados</span></div><div><span className="metric-icon"><PackageSearch /></span><strong>{count(metrics.products)}</strong><span>itens cadastrados</span></div><div><span className="metric-icon"><Activity /></span><strong>{count(metrics.prices)}</strong><span>preços registrados</span></div><small><span /> Base consolidada até 7 de agosto de 2026</small></div>
