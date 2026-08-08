@@ -84,7 +84,7 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
         <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a>
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>Olá, <strong>{user.name.split(' ')[0]}</strong></span>
+            <a href="/perfil" style={{ fontSize: '0.9rem', color: 'var(--muted)', textDecoration: 'none' }}>Olá, <strong>{user.name.split(' ')[0]}</strong></a>
             <button className="text-link" onClick={onLogout}>Sair</button>
           </div>
         ) : (
@@ -1135,7 +1135,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
 
 }
 
-function GenericPage({ path, products, stores, metrics, addBasket, saveAction }: PageProps & { path:string }) {
+function GenericPage({ path, products, stores, metrics, addBasket, saveAction, user }: PageProps & { path:string, user?: any }) {
   const randomFeatured = useRandomFeatured(products);
   const isStore = path.startsWith("/estabelecimento/") || path.startsWith("/loja/");
   const isProduct = path.startsWith("/produto") || path.includes("/produto/");
@@ -1155,12 +1155,133 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction }:
     "/favoritos":["Tudo que importa","Seus favoritos",<Heart key="i"/>],
     "/alertas":["Monitoramento de preços e validade","Lista de Acompanhamento",<Bell key="i"/>],
     "/lista":["Compra organizada","Minhas listas",<ListChecks key="i"/>],
+    "/perfil":["Gerencie seus dados","Minha conta",<UserRound key="i"/>],
     "/app":["Seu resumo dos últimos 90 dias","Painel de economia",<LayoutDashboard key="i"/>],
   };
   const defaultInfo:[string,string,ReactNode] = ["PreçoCerto em Feijó","Economia inteligente para sua próxima compra",<Sparkles key="i"/>];
   const info = isStore ? ["Estabelecimento verificado", stores[0]?.name ?? "Comércio local", <Store key="s"/>] as [string,string,ReactNode] : isProduct ? ["Produto monitorado", products[0]?.name ?? "Produto local", <PackageSearch key="p"/>] as [string,string,ReactNode] : (routeInfo[path] ?? defaultInfo);
   const alerts = JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]").filter((a: any) => a.action === "alert");
   const alertProducts = products.filter(p => alerts.some((a: any) => String(a.id) === String(p.id)));
+
+  if (path === "/perfil") {
+    const favorites = JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]");
+    const favProducts = products.filter(p => favorites.includes(String(p.id)));
+    
+    return (
+      <div className="shell page-shell generic-page">
+        <section className="generic-hero">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ width: '80px', height: '80px', background: 'var(--blue-soft)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)' }}>
+              <UserRound size={40} />
+            </div>
+            <div>
+              <span className="eyebrow">Minha Conta</span>
+              <h1>{user?.name || "Usuário PreçoCerto"}</h1>
+              <p>Gerencie seus alertas, favoritos e preferências de economia em Feijó.</p>
+            </div>
+          </div>
+        </section>
+
+        <div className="generic-grid">
+          <section className="generic-main">
+            <div className="section-heading compact">
+              <h2>Ofertas Favoritas ({favProducts.length})</h2>
+              <p>Produtos que você marcou com o coração para acesso rápido.</p>
+            </div>
+            
+            {favProducts.length > 0 ? (
+              <div className="visual-product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+                {favProducts.map(p => (
+                  <article className="visual-product-card" key={p.id}>
+                    <a className="visual-product-image" href={`/produto/${p.slug}`} style={{ height: '120px' }}>
+                      <ProductImage product={p} size="compact" />
+                    </a>
+                    <div className="visual-product-content" style={{ padding: '1rem' }}>
+                      <a className="visual-product-name" href={`/produto/${p.slug}`} style={{ fontSize: '0.9rem', height: '2.5rem' }}>{p.name}</a>
+                      <div className="visual-price">
+                        <strong>{money(p.minPrice)}</strong>
+                      </div>
+                      <div className="visual-product-actions">
+                        <button className="button button--primary button--small" onClick={() => addBasket(p)}><Plus size={14}/> Cesta</button>
+                        <button className="button button--ghost button--small" onClick={() => {
+                          const newFavs = favorites.filter((id: string) => id !== String(p.id));
+                          localStorage.setItem("precocerto:favorites", JSON.stringify(newFavs));
+                          window.location.reload();
+                        }}><Trash2 size={14}/></button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--surface-2)', borderRadius: '12px' }}>
+                <Heart size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                <p>Nenhuma oferta favoritada ainda.</p>
+                <a href="/buscar" className="button button--outline" style={{ marginTop: '1rem' }}>Ver catálogo</a>
+              </div>
+            )}
+
+            <div className="section-heading compact" style={{ marginTop: '3rem' }}>
+              <h2>Histórico de Ações Recentes</h2>
+            </div>
+            <div className="price-table-card">
+              {JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]").slice(0, 5).map((a: any, i: number) => (
+                <div key={i} className="price-row" style={{ padding: '0.75rem 1rem' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                     {a.action === 'favorite' ? <Heart size={14} color="var(--red)"/> : <Bell size={14} color="var(--blue)"/>}
+                     <span style={{ fontSize: '0.85rem' }}>
+                       {a.action === 'favorite' ? 'Favoritou um produto' : 'Ativou alerta de preço'}
+                     </span>
+                   </div>
+                   <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{new Date(a.at).toLocaleDateString()}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <aside className="generic-aside">
+            <span className="eyebrow">Preferências</span>
+            <h2>Configurações</h2>
+            
+            <div className="aside-stat" style={{ cursor: 'pointer' }} onClick={() => window.location.href = "/alertas"}>
+              <span>Alertas de Preço</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <strong>{alerts.length} ativos</strong>
+                <ChevronRight size={14} />
+              </div>
+            </div>
+
+            <div className="aside-stat">
+              <span>Notificações WhatsApp</span>
+              <strong style={{ color: 'var(--green)' }}>Ativado</strong>
+            </div>
+
+            <div className="aside-stat">
+              <span>Bairro Preferencial</span>
+              <strong>Centro, Feijó</strong>
+            </div>
+
+            <div style={{ marginTop: '2rem' }}>
+              <button className="button button--outline button--full" onClick={() => {
+                localStorage.removeItem("precocerto:user");
+                window.location.href = "/";
+              }}>Sair da Conta</button>
+            </div>
+
+            <div style={{ background: 'var(--blue-soft)', padding: '1rem', borderRadius: '12px', marginTop: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'var(--blue)' }}>
+                <ShieldCheck size={16} />
+                <strong style={{ fontSize: '0.85rem' }}>Privacidade</strong>
+              </div>
+              <p style={{ fontSize: '0.7rem', color: 'var(--muted)', lineHeight: '1.4' }}>
+                Seus dados de navegação e preferências são armazenados localmente para garantir sua privacidade.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    );
+  }
 
   if (path === "/alertas") {
     return (
@@ -1546,10 +1667,13 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeStore, setActiveStore] = useState("all");
   const [activeBrand, setActiveBrand] = useState("all");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [updateRecency, setUpdateRecency] = useState("all"); // 'all', '7d', '24h'
   const [sortBy, setSortBy] = useState<"price" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
   const [chartPeriod, setChartPeriod] = useState("30d");
   const [isLoading, setIsLoading] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const randomFeatured = useRandomFeatured(products);
   
   useEffect(() => {
@@ -1586,7 +1710,15 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
       const matchesCategory = activeCategory === "all" || p.category === activeCategory;
       const matchesStore = activeStore === "all" || p.establishment === activeStore;
       const matchesBrand = activeBrand === "all" || p.brand === activeBrand;
-      return matchesQuery && matchesCategory && matchesStore && matchesBrand;
+      
+      const matchesPrice = p.minPrice >= priceRange[0] && p.minPrice <= priceRange[1];
+      
+      const daysSinceUpdate = Math.floor((new Date().getTime() - new Date(p.capturedAt).getTime()) / (1000 * 60 * 60 * 24));
+      const matchesRecency = updateRecency === "all" 
+        || (updateRecency === "7d" && daysSinceUpdate <= 7)
+        || (updateRecency === "24h" && daysSinceUpdate === 0);
+
+      return matchesQuery && matchesCategory && matchesStore && matchesBrand && matchesPrice && matchesRecency;
     });
 
     if (sortBy === "price") {
@@ -1681,6 +1813,35 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
               ))}
             </div>
           </div>
+          <div className="filter-group">
+            <div className="filter-header">
+              <h3>Faixa de Preço</h3>
+            </div>
+            <div style={{ padding: '0 0.5rem' }}>
+              <input 
+                type="range" 
+                min="0" 
+                max="500" 
+                value={priceRange[1]} 
+                onChange={e => setPriceRange([0, Number(e.target.value)])}
+                style={{ width: '100%' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
+                <span>R$ 0</span>
+                <span>Até {money(priceRange[1])}</span>
+              </div>
+            </div>
+          </div>
+          <div className="filter-group">
+            <div className="filter-header">
+              <h3>Recência</h3>
+            </div>
+            <div className="filter-list">
+              <button className={updateRecency === "all" ? "active" : ""} onClick={() => setUpdateRecency("all")}>Todos</button>
+              <button className={updateRecency === "24h" ? "active" : ""} onClick={() => setUpdateRecency("24h")}>Hoje</button>
+              <button className={updateRecency === "7d" ? "active" : ""} onClick={() => setUpdateRecency("7d")}>Última semana</button>
+            </div>
+          </div>
         </aside>
 
         <main className="search-results">
@@ -1710,7 +1871,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                           </span>
                         )}
                       </div>
-                      <h3>{p.name}</h3>
+                      <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <small>{p.brand} • {p.size}</small>
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -1781,6 +1942,78 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
           )}
         </main>
       </div>
+
+      {selectedProduct && (
+        <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)}>
+          <div className="admin-modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-head">
+              <h3>Detalhes do Produto</h3>
+              <button className="icon-button" onClick={() => setSelectedProduct(null)}><X/></button>
+            </div>
+            <div className="admin-modal-body">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ProductImage product={selectedProduct} size="default" eager />
+                </div>
+                <div>
+                  <span className="category-tag">{selectedProduct.category}</span>
+                  <h2 style={{ fontSize: '1.5rem', margin: '0.5rem 0' }}>{selectedProduct.name}</h2>
+                  <p style={{ color: 'var(--muted)', marginBottom: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
+                  
+                  <div className="visual-price" style={{ marginBottom: '1.5rem' }}>
+                    <strong>{money(selectedProduct.minPrice)}</strong>
+                    {selectedProduct.previousPrice && selectedProduct.previousPrice > selectedProduct.minPrice && (
+                      <span className="old-price">era <s>{money(selectedProduct.previousPrice)}</s></span>
+                    )}
+                  </div>
+
+                  <div className="verified-details" style={{ background: 'none', padding: 0 }}>
+                    <div className="detail-item">
+                      <Store size={14} />
+                      <span>{selectedProduct.establishment}</span>
+                    </div>
+                    <div className="detail-item">
+                      <Clock3 size={14} />
+                      <span>Atualizado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+                <h4>Histórico de Variação</h4>
+                <div style={{ height: '120px', width: '100%', marginTop: '1rem', position: 'relative' }}>
+                   <svg viewBox="0 0 500 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+                    <path 
+                      d="M 0 80 Q 125 40 250 60 T 500 20" 
+                      fill="none" 
+                      stroke="var(--blue)" 
+                      strokeWidth="3"
+                    />
+                    <circle cx="0" cy="80" r="4" fill="var(--blue)" />
+                    <circle cx="250" cy="60" r="4" fill="var(--blue)" />
+                    <circle cx="500" cy="20" r="4" fill="var(--blue)" />
+                  </svg>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
+                    <span>Há 30 dias</span>
+                    <span>Há 15 dias</span>
+                    <span>Hoje</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                <button className="button button--primary" style={{ flex: 1 }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
+                  Adicionar à Cesta
+                </button>
+                <button className="button button--outline" onClick={() => { saveAction("alert", "product", String(selectedProduct.id)); setSelectedProduct(null); }}>
+                  <Bell size={18} /> Alertar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1879,7 +2112,7 @@ export default function PrecoCertoApp() {
   let page:ReactNode;
   if(pathname==="/") page=<HomePage {...props}/>;
   else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
-  else if(pathname==="/alertas") page=<GenericPage {...props} metrics={metrics} path={pathname}/>;
+  else if(pathname==="/alertas"||pathname==="/perfil") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
   else page=<GenericPage {...props} metrics={metrics} path={pathname}/>;
