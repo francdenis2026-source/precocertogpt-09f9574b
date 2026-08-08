@@ -511,6 +511,7 @@ iframe[src*="lovable.dev/badge"] {
   gap: 0.4rem;
   font-size: 0.75rem;
   color: var(--tertiary);
+  padding: 0.2rem 0;
 }
 
 .detail-item svg {
