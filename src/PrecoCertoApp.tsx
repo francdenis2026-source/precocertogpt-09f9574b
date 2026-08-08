@@ -231,18 +231,17 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
     loadLogs();
   };
 
-  const handleImport = async () => {
+    const handleImport = async () => {
     setIsImporting(true);
     setImportMsg("Iniciando...");
     setImportProgress(0);
+    setImportTotal(100);
     setImportLog(null);
     const { runPriceImport } = await import("./data/importer");
-    const result = await runPriceImport((msg) => {
+    const result = await runPriceImport((msg, current, total) => {
       setImportMsg(msg);
-      if (msg.includes("Importado:")) {
-        const count = parseInt(msg.match(/\d+/)?.[0] ?? "0", 10);
-        setImportProgress(count);
-      }
+      setImportProgress(current);
+      setImportTotal(total || 100);
     });
     setIsImporting(false);
     if (result.success) {
@@ -251,11 +250,12 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
         duplicates: result.duplicates,
         stores: result.stores,
         products: result.products,
-        duration: result.duration || 0
+        duration: result.duration || 0,
+        errorReport: result.errorReport
       });
-      addAuditLog(`Importação concluída: ${result.count} novos registros`, "success");
+      addAuditLog(`Importação concluída: ${result.count} novos registros`, result.errorReport?.length ? "warning" : "success");
     } else {
-      setImportLog({ error: result.error });
+      setImportLog({ error: result.error, errorReport: result.errorReport });
       addAuditLog(`Falha na importação: ${result.error}`, "error");
     }
     loadLogs();
@@ -395,6 +395,24 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
                 <div style={{marginTop: '0.75rem', padding: '0.5rem', background: '#f0fdf4', color: '#166534', borderRadius: '0.25rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
                   <Check size={14}/> Sincronização concluída com sucesso.
                 </div>
+                {importLog.errorReport && importLog.errorReport.length > 0 && (
+                  <div style={{marginTop: '1rem', border: '1px solid #fecaca', borderRadius: '0.5rem', overflow: 'hidden'}}>
+                    <div style={{background: '#fee2e2', padding: '0.5rem 1rem', fontSize: '0.8rem', borderBottom: '1px solid #fecaca', display: 'flex', justifyContent: 'space-between'}}>
+                      <b>Relatório de Inconsistências</b>
+                      <span>{importLog.errorReport.length} falhas</span>
+                    </div>
+                    <div style={{maxHeight: '150px', overflowY: 'auto', background: 'white', padding: '0.5rem'}}>
+                      {importLog.errorReport.map((err: any, idx: number) => (
+                        <div key={idx} style={{fontSize: '0.75rem', padding: '0.25rem 0', borderBottom: idx < importLog.errorReport.length - 1 ? '1px solid #f1f5f9' : 'none'}}>
+                          <span style={{color: '#dc2626'}}>[{err.entity.toUpperCase()}]</span> {err.message}
+                          <pre style={{background: '#f8fafc', padding: '0.25rem', marginTop: '0.1rem', fontSize: '0.7rem', color: '#64748b'}}>
+                            {JSON.stringify(err.data, null, 2)}
+                          </pre>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
