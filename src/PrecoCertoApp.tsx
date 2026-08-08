@@ -1163,6 +1163,126 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
   const alerts = JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]").filter((a: any) => a.action === "alert");
   const alertProducts = products.filter(p => alerts.some((a: any) => String(a.id) === String(p.id)));
 
+  if (path === "/perfil") {
+    const favorites = JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]");
+    const favProducts = products.filter(p => favorites.includes(String(p.id)));
+    
+    return (
+      <div className="shell page-shell generic-page">
+        <section className="generic-hero">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ width: '80px', height: '80px', background: 'var(--blue-soft)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)' }}>
+              <UserRound size={40} />
+            </div>
+            <div>
+              <span className="eyebrow">Minha Conta</span>
+              <h1>{user?.name || "Usuário PreçoCerto"}</h1>
+              <p>Gerencie seus alertas, favoritos e preferências de economia em Feijó.</p>
+            </div>
+          </div>
+        </section>
+
+        <div className="generic-grid">
+          <section className="generic-main">
+            <div className="section-heading compact">
+              <h2>Ofertas Favoritas ({favProducts.length})</h2>
+              <p>Produtos que você marcou com o coração para acesso rápido.</p>
+            </div>
+            
+            {favProducts.length > 0 ? (
+              <div className="visual-product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+                {favProducts.map(p => (
+                  <article className="visual-product-card" key={p.id}>
+                    <a className="visual-product-image" href={`/produto/${p.slug}`} style={{ height: '120px' }}>
+                      <ProductImage product={p} size="compact" />
+                    </a>
+                    <div className="visual-product-content" style={{ padding: '1rem' }}>
+                      <a className="visual-product-name" href={`/produto/${p.slug}`} style={{ fontSize: '0.9rem', height: '2.5rem' }}>{p.name}</a>
+                      <div className="visual-price">
+                        <strong>{money(p.minPrice)}</strong>
+                      </div>
+                      <div className="visual-product-actions">
+                        <button className="button button--primary button--small" onClick={() => addBasket(p)}><Plus size={14}/> Cesta</button>
+                        <button className="button button--ghost button--small" onClick={() => {
+                          const newFavs = favorites.filter((id: string) => id !== String(p.id));
+                          localStorage.setItem("precocerto:favorites", JSON.stringify(newFavs));
+                          window.location.reload();
+                        }}><Trash2 size={14}/></button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--surface-2)', borderRadius: '12px' }}>
+                <Heart size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                <p>Nenhuma oferta favoritada ainda.</p>
+                <a href="/buscar" className="button button--outline" style={{ marginTop: '1rem' }}>Ver catálogo</a>
+              </div>
+            )}
+
+            <div className="section-heading compact" style={{ marginTop: '3rem' }}>
+              <h2>Histórico de Ações Recentes</h2>
+            </div>
+            <div className="price-table-card">
+              {JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]").slice(0, 5).map((a: any, i: number) => (
+                <div key={i} className="price-row" style={{ padding: '0.75rem 1rem' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                     {a.action === 'favorite' ? <Heart size={14} color="var(--red)"/> : <Bell size={14} color="var(--blue)"/>}
+                     <span style={{ fontSize: '0.85rem' }}>
+                       {a.action === 'favorite' ? 'Favoritou um produto' : 'Ativou alerta de preço'}
+                     </span>
+                   </div>
+                   <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{new Date(a.at).toLocaleDateString()}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <aside className="generic-aside">
+            <span className="eyebrow">Preferências</span>
+            <h2>Configurações</h2>
+            
+            <div className="aside-stat" style={{ cursor: 'pointer' }} onClick={() => window.location.href = "/alertas"}>
+              <span>Alertas de Preço</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <strong>{alerts.length} ativos</strong>
+                <ChevronRight size={14} />
+              </div>
+            </div>
+
+            <div className="aside-stat">
+              <span>Notificações WhatsApp</span>
+              <strong style={{ color: 'var(--green)' }}>Ativado</strong>
+            </div>
+
+            <div className="aside-stat">
+              <span>Bairro Preferencial</span>
+              <strong>Centro, Feijó</strong>
+            </div>
+
+            <div style={{ marginTop: '2rem' }}>
+              <button className="button button--outline button--full" onClick={() => {
+                localStorage.removeItem("precocerto:user");
+                window.location.href = "/";
+              }}>Sair da Conta</button>
+            </div>
+
+            <div style={{ background: 'var(--blue-soft)', padding: '1rem', borderRadius: '12px', marginTop: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'var(--blue)' }}>
+                <ShieldCheck size={16} />
+                <strong style={{ fontSize: '0.85rem' }}>Privacidade</strong>
+              </div>
+              <p style={{ fontSize: '0.7rem', color: 'var(--muted)', lineHeight: '1.4' }}>
+                Seus dados de navegação e preferências são armazenados localmente para garantir sua privacidade.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    );
+  }
+
   if (path === "/alertas") {
     return (
       <div className="shell page-shell generic-page">
