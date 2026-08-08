@@ -13,11 +13,11 @@ import {
 } from "./catalog";
 
 type EstablishmentRow = {
-  id: number;
+  id: string; // Mudado para string (UUID)
   slug: string | null;
   name: string | null;
   neighborhood: string | null;
-  color: string | null;
+  brand_color: string | null; // Corrigido para brand_color
 };
 
 type ProductRow = {
@@ -32,8 +32,8 @@ type ProductRow = {
 };
 
 type PriceRow = {
-  product_id: number;
-  establishment_id: number;
+  product_id: string;
+  establishment_id: string;
   value: number | string | null;
   previous_value: number | string | null;
   captured_at: string | null;
@@ -59,8 +59,8 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
 
   try {
     const [establishments, products, prices] = await Promise.all([
-      supabase.from("establishments").select("id, slug, name, neighborhood, color"),
-      supabase.from("products").select("id, slug, name, brand, category, size, unit, barcode"),
+      supabase.from("establishments").select("id, name, neighborhood, brand_color"),
+      supabase.from("products").select("id, name, brand, category, size, unit, barcode"),
       supabase
         .from("prices")
         .select("product_id, establishment_id, value, previous_value, captured_at"),
@@ -100,7 +100,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
 
         return {
           id: product.id,
-          slug: product.slug ?? String(product.id),
+          slug: product.id,
           name: product.name ?? "Produto sem nome",
           brand: product.brand ?? "—",
           category: product.category ?? "Geral",
@@ -112,10 +112,10 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
           maxPrice: round(Math.max(...values)),
           storeCount: new Set(rows.map(row => row.establishment_id)).size,
           establishmentId: store.id,
-          establishmentSlug: store.slug ?? String(store.id),
+          establishmentSlug: store.id,
           establishment: store.name ?? "Estabelecimento",
           neighborhood: store.neighborhood ?? "—",
-          storeColor: store.color ?? "#1473E6",
+          storeColor: store.brand_color ?? "#1473E6",
           capturedAt: best.captured_at ?? new Date().toISOString(),
           previousPrice: Number.isFinite(previous) ? round(previous) : undefined,
         };
@@ -132,10 +132,10 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
 
     const stores: StoreRow[] = storeRows.map(store => ({
       id: store.id,
-      slug: store.slug ?? String(store.id),
+      slug: store.id,
       name: store.name ?? "Estabelecimento",
       neighborhood: store.neighborhood ?? "—",
-      color: store.color ?? "#1473E6",
+      color: store.brand_color ?? "#1473E6",
       products: new Set(
         priceRows.filter(row => row.establishment_id === store.id).map(row => row.product_id),
       ).size,
