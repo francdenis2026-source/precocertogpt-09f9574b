@@ -19,29 +19,30 @@ export type ImportResult = {
   products: number;
   duration?: number;
   error?: string;
+  errorReport?: Array<{
+    type: string;
+    entity: string;
+    message: string;
+    data: any;
+  }>;
 };
 
 export async function runPriceImport(
-  onProgress: (msg: string) => void,
+  onProgress: (msg: string, current: number, total: number) => void,
 ): Promise<ImportResult> {
   const startTime = Date.now();
+  const errorReport: ImportResult["errorReport"] = [];
 
   try {
-    onProgress("Carregando dados do Excel processado...");
+    onProgress("Carregando dados...", 0, 100);
     
-    // Em um cenário real, isso viria de um upload de arquivo no frontend.
-    // Aqui estamos simulando o acesso aos dados que processamos do arquivo enviado pelo usuário.
-    // Usamos um bloco try-catch para lidar com a ausência do arquivo se necessário.
     let data;
     try {
-      // Nota: No ambiente sandbox, podemos tentar carregar via fetch se exposto, 
-      // mas como o arquivo JSON está no /tmp, precisamos dele no src para o Vite ver, 
-      // ou passar como parâmetro. Para simplificar e garantir que funcione AGORA:
       const response = await fetch('/xlsx_data.json'); 
-      if (!response.ok) throw new Error("JSON não encontrado no caminho temporário.");
+      if (!response.ok) throw new Error("JSON não encontrado.");
       data = await response.json();
     } catch (e) {
-      onProgress("Dados do Excel não encontrados. Usando catálogo local como fallback...");
+      onProgress("Usando catálogo local...", 5, 100);
       const { buildCatalog } = await import("./catalog");
       const local = buildCatalog();
       data = {
@@ -51,20 +52,35 @@ export async function runPriceImport(
       };
     }
 
+    const totalSteps = data.establishments.length + data.products.length + data.prices.length;
+    let processed = 0;
+
     // 1. Sincronizar ESTABELECIMENTOS
-    onProgress(`Sincronizando ${data.establishments.length} estabelecimentos...`);
+    onProgress(`Sincronizando estabelecimentos...`, processed, totalSteps);
     const estUpsert = data.establishments.map((e: any) => ({
       id: e.id,
       name: e.name,
       neighborhood: e.neighborhood,
       brand_color: e.brand_color,
-      kind: 'market' // Valor padrão para satisfazer a constraint not-null
+      kind: e.kind || 'market'
     }));
+
+    // Tentativa um a um para capturar erros específicos por registro se o lote falhar
     const { error: estError } = await supabase.from("establishments").upsert(estUpsert, { onConflict: 'id' });
-    if (estError) throw new Error(`Erro estabelecimentos: ${estError.message}`);
+    if (estError) {
+      // Se falhar em lote, tentamos individualmente para o relatório
+      for (const est of estUpsert) {
+        const { error: singleErr } = await supabase.from("establishments").upsert(est, { onConflict: 'id' });
+        if (singleErr) {
+          errorReport.push({ type: 'error', entity: 'estabelecimento', message: singleErr.message, data: est });
+        }
+      }
+      if (errorReport.length === estUpsert.length) throw new Error(`Erro estabelecimentos: ${estError.message}`);
+    }
+    processed += data.establishments.length;
 
     // 2. Sincronizar PRODUTOS
-    onProgress(`Sincronizando ${data.products.length} produtos...`);
+    onProgress(`Sincronizando produtos...`, processed, totalSteps);
     const prodUpsert = data.products.map((p: any) => ({
       id: p.id,
       name: p.name,
@@ -76,12 +92,19 @@ export async function runPriceImport(
     }));
 
     const { error: prodError } = await supabase.from("products").upsert(prodUpsert);
-    if (prodError) throw new Error(`Erro produtos: ${prodError.message}`);
+    if (prodError) {
+      for (const prod of prodUpsert) {
+        const { error: singleErr } = await supabase.from("products").upsert(prod);
+        if (singleErr) {
+          errorReport.push({ type: 'error', entity: 'produto', message: singleErr.message, data: prod });
+        }
+      }
+      if (errorReport.length > data.establishments.length + prodUpsert.length * 0.5) throw new Error(`Erro produtos: ${prodError.message}`);
+    }
+    processed += data.products.length;
 
     // 3. Sincronizar PREÇOS em lotes
-    onProgress(`Preparando ${data.prices.length} preços...`);
-    
-    // Verificação de duplicidade básica (opcional para carga total)
+    onProgress(`Preparando preços...`, processed, totalSteps);
     const { data: existing } = await supabase.from("prices").select("product_id, establishment_id, value");
     const existingKeys = new Set((existing || []).map(p => `${p.product_id}_${p.establishment_id}_${p.value}`));
 
@@ -89,20 +112,28 @@ export async function runPriceImport(
     const duplicates = data.prices.length - toInsert.length;
 
     if (toInsert.length === 0) {
-      onProgress(`Concluído: Todos os registros já existem.`);
-      return { success: true, count: 0, duplicates, stores: data.establishments.length, products: data.products.length, duration: Date.now() - startTime };
+      onProgress(`Concluído!`, totalSteps, totalSteps);
+      return { success: true, count: 0, duplicates, stores: data.establishments.length, products: data.products.length, duration: Date.now() - startTime, errorReport };
     }
 
-    onProgress(`Enviando ${toInsert.length} novos preços...`);
     const batchSize = 100;
     let inserted = 0;
 
     for (let i = 0; i < toInsert.length; i += batchSize) {
       const batch = toInsert.slice(i, i + batchSize);
       const { error } = await supabase.from("prices").insert(batch);
-      if (error) throw new Error(`Erro lote ${i}: ${error.message}`);
-      inserted += batch.length;
-      onProgress(`Progresso: ${inserted}/${toInsert.length} preços...`);
+      if (error) {
+        // Log individual do lote que falhou
+        for (const p of batch) {
+          const { error: singleErr } = await supabase.from("prices").insert(p);
+          if (singleErr) errorReport.push({ type: 'error', entity: 'preço', message: singleErr.message, data: p });
+          else inserted++;
+        }
+      } else {
+        inserted += batch.length;
+      }
+      processed += batch.length;
+      onProgress(`Importando preços (${inserted}/${toInsert.length})...`, processed, totalSteps);
     }
 
     return {
@@ -111,11 +142,12 @@ export async function runPriceImport(
       duplicates,
       stores: data.establishments.length,
       products: data.products.length,
-      duration: Date.now() - startTime
+      duration: Date.now() - startTime,
+      errorReport
     };
   } catch (err) {
     console.error("Erro na importação:", err);
-    return { success: false, count: 0, duplicates: 0, stores: 0, products: 0, error: err instanceof Error ? err.message : "Erro desconhecido" };
+    return { success: false, count: 0, duplicates: 0, stores: 0, products: 0, error: err instanceof Error ? err.message : "Erro desconhecido", errorReport };
   }
 }
 
