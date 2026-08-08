@@ -155,27 +155,42 @@ function PlansPage() {
 
 function AdminPage({ path }: { path:string }) {
   const [importing, setImporting] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [importStatus, setImportStatus] = useState("");
+  const [connectionInfo, setConnectionInfo] = useState<{ success: boolean; latency: number; tables: Record<string, number>; error?: string } | null>(null);
+  const [importLog, setImportLog] = useState<{ count: number; duplicates: number; stores: number; products: number; duration: number } | null>(null);
+  
   const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
   
   async function handleImport() {
     const { runPriceImport } = await import("./data/importer");
     setImporting(true);
     setImportStatus("Iniciando...");
+    setImportLog(null);
     const result = await runPriceImport((msg) => setImportStatus(msg));
     setImporting(false);
     if (result.success) {
-      if (result.duplicates && result.count === 0) {
-        setImportStatus(`Concluído: Todos os ${result.duplicates} registros já estão no banco.`);
-      } else if (result.duplicates) {
-        setImportStatus(`Sucesso! ${result.count} novos preços criados (${result.duplicates} duplicados ignorados).`);
-      } else {
-        setImportStatus(`Sucesso! ${result.count} preços importados.`);
-      }
+      setImportLog({
+        count: result.count,
+        duplicates: result.duplicates,
+        stores: result.stores,
+        products: result.products,
+        duration: result.duration || 0
+      });
+      setImportStatus("Importação concluída.");
     } else {
       setImportStatus(`Erro: ${result.error}`);
     }
   }
+
+  async function handleTestConnection() {
+    const { testSupabaseConnection } = await import("./data/importer");
+    setTesting(true);
+    const result = await testSupabaseConnection();
+    setConnectionInfo(result);
+    setTesting(false);
+  }
+
 
   const rows = [
     ["Arroz Tio João 5 kg","Central Super","R$ 29,89","Verificado"],
