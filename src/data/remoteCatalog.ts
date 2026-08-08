@@ -71,10 +71,10 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
       return { ...local, source: "local", error: failure.message };
     }
 
-    const storeRows = (establishments.data ?? []) as EstablishmentRow[];
-    const productRows = (products.data ?? []) as ProductRow[];
-    const priceRows = ((prices.data ?? []) as PriceRow[]).filter(
-      row => Number.isFinite(toNumber(row.value)),
+    const storeRows = (establishments.data ?? []) as unknown as EstablishmentRow[];
+    const productRows = (products.data ?? []) as unknown as ProductRow[];
+    const priceRows = ((prices.data ?? []) as unknown as PriceRow[]).filter(row =>
+      Number.isFinite(toNumber(row.value)),
     );
 
     // Sem dados suficientes para montar comparações: mantém o catálogo local.
@@ -88,12 +88,39 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
       .map((product): Product | null => {
         const rows = priceRows.filter(price => price.product_id === product.id);
         if (!rows.length) return null;
-...
+
+        const values = rows.map(row => toNumber(row.value));
+        const best = rows.reduce((lowest, row) =>
+          toNumber(row.value) < toNumber(lowest.value) ? row : lowest,
+        );
+        const store = storeRows.find(item => item.id === best.establishment_id);
+        if (!store) return null;
+
+        const previous = toNumber(best.previous_value);
+
+        return {
+          id: product.id,
+          slug: product.slug ?? String(product.id),
+          name: product.name ?? "Produto sem nome",
+          brand: product.brand ?? "—",
+          category: product.category ?? "Geral",
+          size: product.size ?? "—",
+          unit: product.unit ?? "un",
+          barcode: product.barcode ?? undefined,
+          minPrice: round(Math.min(...values)),
+          avgPrice: round(values.reduce((total, value) => total + value, 0) / values.length),
+          maxPrice: round(Math.max(...values)),
+          storeCount: new Set(rows.map(row => row.establishment_id)).size,
+          establishmentId: store.id,
+          establishmentSlug: store.slug ?? String(store.id),
+          establishment: store.name ?? "Estabelecimento",
+          neighborhood: store.neighborhood ?? "—",
+          storeColor: store.color ?? "#1473E6",
+          capturedAt: best.captured_at ?? new Date().toISOString(),
           previousPrice: Number.isFinite(previous) ? round(previous) : undefined,
         };
       })
       .filter((product): product is Product => product !== null)
-
       .filter(
         product =>
           !q ||
