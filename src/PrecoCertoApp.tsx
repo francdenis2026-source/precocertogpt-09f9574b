@@ -703,6 +703,7 @@ export default function PrecoCertoApp() {
   const handleAdminAuth = (success: boolean) => {
     if (success) {
       setAdminAuth(true);
+      localStorage.setItem("precocerto:admin_authenticated", "true");
       addAuditLog("Login administrativo realizado");
     }
   };
@@ -710,6 +711,7 @@ export default function PrecoCertoApp() {
 
   const handleAdminLogout = () => {
     setAdminAuth(false);
+    localStorage.removeItem("precocerto:admin_authenticated");
   };
 
   // Redirecionamento forçado se tentar acessar admin sem estar logado
