@@ -34,6 +34,21 @@ const adminRouteNames: Record<string, string> = {
 function money(value: number) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value); }
 function count(value: number) { return new Intl.NumberFormat("pt-BR").format(value); }
 
+/**
+ * Registra uma entrada no log de auditoria persistente.
+ */
+function addAuditLog(action: string, type: "success" | "warning" | "error" = "success", user: string = "Franc D’Nis") {
+  try {
+    const key = "precocerto:admin_logs";
+    const logs = JSON.parse(localStorage.getItem(key) ?? "[]");
+    const newLog = { action, type, user, at: new Date().toISOString() };
+    localStorage.setItem(key, JSON.stringify([newLog, ...logs].slice(0, 100)));
+  } catch (err) {
+    console.error("Erro ao salvar log de auditoria:", err);
+  }
+}
+
+
 const productImages: Record<string, string> = {
   "arroz-tio-joao-5kg": "/products/arroz-tio-joao-5kg.png",
   "cafe-3-coracoes-500g": "/products/cafe-3-coracoes-500g.jpg",
@@ -153,46 +168,83 @@ function PlansPage() {
   return <div className="shell page-shell plans-page"><div className="center-heading"><span className="eyebrow">Planos PreçoCerto</span><h1>Economia que se paga na primeira compra</h1><p>Recursos transparentes para consumidores e para o comércio local.</p><div className="segmented large"><button className={!shop?"active":""} onClick={()=>setShop(false)}>Para você</button><button className={shop?"active":""} onClick={()=>setShop(true)}>Para sua loja</button></div></div><div className="plan-grid">{plans.map(plan=><article className={plan.featured?"featured":""} key={plan.name}>{plan.featured&&<span className="recommended">Recomendado</span>}<h2>{plan.name}</h2><p>{plan.desc}</p><div className="plan-price"><strong>{money(plan.price)}</strong><span>/mês</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={`/checkout/${plan.name.toLowerCase().replace(" ","-")}`}>{plan.price===0?"Começar grátis":"Escolher plano"}<ArrowRight/></a><ul>{plan.features.map(f=><li key={f}><Check/> {f}</li>)}</ul></article>)}</div><div className="plan-note"><ShieldCheck/><span><b>Pagamento seguro via Pix</b><small>Ativação automática após confirmação. Cancele quando quiser.</small></span></div></div>;
 }
 
-function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [auditLogs, setAuditLogs] = useState<{ action: string; user: string; at: string; type: string }[]>(() => {
+function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
+  const [auditLogs, setAuditLogs] = useState<any[]>(() => {
     try { return JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]"); } catch { return []; }
   });
+  const [connStatus, setConnStatus] = useState<any>(null);
+  const [isTesting, setIsTesting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState("");
+  const [importProgress, setImportProgress] = useState(0);
+  const [importTotal, setImportTotal] = useState(2838);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [importLog, setImportLog] = useState<any>(null);
+  
+  // Filtros de Auditoria
+  const [dateFilter, setDateFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
 
-  const addAuditLog = (action: string, type: string = "info") => {
-    const newLog = { action, user: "Franc D’Nis", at: new Date().toISOString(), type };
-    const updated = [newLog, ...auditLogs].slice(0, 100);
-    setAuditLogs(updated);
-    localStorage.setItem("precocerto:admin_logs", JSON.stringify(updated));
+  const loadLogs = () => {
+    try {
+      const logs = JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]");
+      setAuditLogs(logs);
+    } catch {
+      setAuditLogs([]);
+    }
   };
 
-  const [importing, setImporting] = useState(false);
-  const [testing, setTesting] = useState(false);
-  const [importStatus, setImportStatus] = useState("");
-  const [importProgress, setImportProgress] = useState(0);
-  const [importTotal, setImportTotal] = useState(0);
-  const [connectionInfo, setConnectionInfo] = useState<{ success: boolean; latency: number; tables: Record<string, number>; error?: string } | null>(null);
-  const [importLog, setImportLog] = useState<{ count: number; duplicates: number; stores: number; products: number; duration: number; error?: string } | null>(null);
-
-  
-  const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
-  
-  async function handleImport() {
-    const { runPriceImport } = await import("./data/importer");
-    setImporting(true);
-    setImportStatus("Iniciando...");
-    setImportLog(null);
-    setImportProgress(0);
-    setImportTotal(2838); // Total estimado de registros
-
-    const result = await runPriceImport((msg) => {
-      setImportStatus(msg);
-      // Extrair progresso se a mensagem contiver números
-      const match = msg.match(/Importado: (\d+)/);
-      if (match) setImportProgress(parseInt(match[1]));
+  const filteredLogs = useMemo(() => {
+    return auditLogs.filter(log => {
+      const matchesDate = !dateFilter || log.at.startsWith(dateFilter);
+      const matchesType = typeFilter === "all" || log.type === typeFilter;
+      return matchesDate && matchesType;
     });
+  }, [auditLogs, dateFilter, typeFilter]);
 
-    setImporting(false);
+  const exportCSV = () => {
+    const headers = ["Data/Hora", "Usuário", "Ação", "Tipo"];
+    const rows = filteredLogs.map(log => [
+      new Date(log.at).toLocaleString("pt-BR"),
+      log.user,
+      log.action,
+      log.type
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `auditoria_precocerto_${new Date().toISOString().split('T')[0]}.csv`);
+    link.click();
+    addAuditLog("Exportação de logs de auditoria realizada");
+    loadLogs();
+  };
+
+  const handleTestConnection = async () => {
+    setIsTesting(true);
+    const { testSupabaseConnection } = await import("./data/importer");
+    const result = await testSupabaseConnection();
+    setConnStatus(result);
+    setIsTesting(false);
+    addAuditLog(`Teste de conexão: ${result.success ? "Sucesso" : "Falha"}`, result.success ? "success" : "error");
+    loadLogs();
+  };
+
+  const handleImport = async () => {
+    setIsImporting(true);
+    setImportMsg("Iniciando...");
+    setImportProgress(0);
+    setImportLog(null);
+    const { runPriceImport } = await import("./data/importer");
+    const result = await runPriceImport((msg) => {
+      setImportMsg(msg);
+      if (msg.includes("Importado:")) {
+        const count = parseInt(msg.match(/\d+/)?.[0] ?? "0", 10);
+        setImportProgress(count);
+      }
+    });
+    setIsImporting(false);
     if (result.success) {
       setImportLog({
         count: result.count,
@@ -201,32 +253,13 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
         products: result.products,
         duration: result.duration || 0
       });
-      setImportStatus("Importação concluída.");
-      addAuditLog(`Importação de ${result.count} preços concluída`, "success");
+      addAuditLog(`Importação concluída: ${result.count} novos registros`, "success");
     } else {
-      setImportLog({
-        count: 0,
-        duplicates: 0,
-        stores: 0,
-        products: 0,
-        duration: 0,
-        error: result.error
-      });
-      setImportStatus(`Erro na importação`);
+      setImportLog({ error: result.error });
       addAuditLog(`Falha na importação: ${result.error}`, "error");
     }
-  }
-
-
-
-  async function handleTestConnection() {
-    const { testSupabaseConnection } = await import("./data/importer");
-    setTesting(true);
-    const result = await testSupabaseConnection();
-    setConnectionInfo(result);
-    setTesting(false);
-    addAuditLog(result.success ? "Teste de conexão: Sucesso" : "Teste de conexão: Falha", result.success ? "success" : "error");
-  }
+    loadLogs();
+  };
 
   const handleLogoutRequest = () => setShowLogoutConfirm(true);
   const confirmLogout = () => {
@@ -237,13 +270,16 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
 
 
 
+
   const rows = [
     ["Arroz Tio João 5 kg","Central Super","R$ 29,89","Verificado"],
     ["Café 3 Corações 500 g","Mercado Rebouças","R$ 15,75","Verificado"],
     ["Leite Integral Italac 1 L","Pague Pouco","R$ 5,69","Revisar"],
     ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
   ];
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo"><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importStatus && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importStatus}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+  const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
+  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo"><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+
   {showLogoutConfirm && (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
       <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', maxWidth: '400px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
@@ -272,34 +308,36 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
     <section className="admin-card">
       <div className="admin-card-head">
         <div><h2>Status da Conexão</h2><p>Leitura em tempo real do Supabase.</p></div>
-        <button className="button button--outline button--small" onClick={handleTestConnection} disabled={testing}>
-          <Activity size={14}/> {testing ? "Testando..." : "Testar Conexão"}
+        <button className="button button--outline button--small" onClick={handleTestConnection} disabled={isTesting}>
+          <Activity size={14}/> {isTesting ? "Testando..." : "Testar Conexão"}
         </button>
+
       </div>
-      {connectionInfo ? (
+      {connStatus ? (
         <div className="connection-status-panel" style={{padding: "1rem"}}>
           <div style={{display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem"}}>
-            <span className={`status ${connectionInfo.success ? "ok" : "review"}`} style={{width: 10, height: 10, borderRadius: "50%", display: "inline-block", background: connectionInfo.success ? "#16a34a" : "#dc2626"}}/>
-            <b>{connectionInfo.success ? "Conectado ao Supabase" : "Erro na Conexão"}</b>
-            {connectionInfo.success && <small style={{marginLeft: "auto", color: "#6b7280"}}>{connectionInfo.latency}ms latência</small>}
+            <span className={`status ${connStatus.success ? "ok" : "review"}`} style={{width: 10, height: 10, borderRadius: "50%", display: "inline-block", background: connStatus.success ? "#16a34a" : "#dc2626"}}/>
+            <b>{connStatus.success ? "Conectado ao Supabase" : "Erro na Conexão"}</b>
+            {connStatus.success && <small style={{marginLeft: "auto", color: "#6b7280"}}>{connStatus.latency}ms latência</small>}
+
           </div>
-          {connectionInfo.success ? (
+          {connStatus.success ? (
             <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem"}}>
               <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
                 <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Lojas</small>
-                <strong>{connectionInfo.tables.establishments}</strong>
+                <strong>{connStatus.tables.establishments}</strong>
               </div>
               <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
                 <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Produtos</small>
-                <strong>{connectionInfo.tables.products}</strong>
+                <strong>{connStatus.tables.products}</strong>
               </div>
               <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
                 <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Preços</small>
-                <strong>{connectionInfo.tables.prices}</strong>
+                <strong>{connStatus.tables.prices}</strong>
               </div>
             </div>
           ) : (
-            <p style={{color: "#dc2626", fontSize: "0.85rem"}}>{connectionInfo.error}</p>
+            <p style={{color: "#dc2626", fontSize: "0.85rem"}}>{connStatus.error}</p>
           )}
         </div>
       ) : (
@@ -312,10 +350,10 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
         <div><h2>Progresso de Importação</h2><p>Processamento de dados em tempo real.</p></div>
       </div>
       <div style={{padding: "1rem"}}>
-        {importing ? (
+        {isImporting ? (
           <div className="import-progress-panel">
             <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem"}}>
-              <span>{importStatus}</span>
+              <span>{importMsg}</span>
               <b>{Math.round((importProgress / importTotal) * 100)}%</b>
             </div>
             <div style={{height: "8px", background: "#f1f5f9", borderRadius: "4px", overflow: "hidden", marginBottom: "0.5rem"}}>
@@ -372,8 +410,9 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
     <div className="admin-card-head">
       <div><h2>Monitoramento operacional</h2><p>Dados mais recentes do catálogo local.</p></div>
       <div style={{display:"flex",gap:"0.75rem"}}>
-        <button className="button button--outline" onClick={handleImport} disabled={importing} title="Disparar importação para o Supabase externo">
-          <Database/> {importing ? "Importando..." : "Importar 2.838 Preços"}
+        <button className="button button--outline" onClick={handleImport} disabled={isImporting} title="Disparar importação para o Supabase externo">
+          <Database/> {isImporting ? "Importando..." : "Importar 2.838 Preços"}
+
         </button>
         <button className="button button--outline"><Download/> Exportar</button>
         <button className="button button--primary"><Plus/> Novo registro</button>
@@ -392,19 +431,35 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
       <div className="admin-card-head"><div><h2>Saúde das integrações</h2><p>Serviços críticos e filas.</p></div></div>
       {[["Banco e Realtime","Operacional","99,99%"],["Mercado Pago","Operacional","100%"],["Fila de IA","Atenção","3 jobs"],["E-mails","Operacional","98,7%"]].map((r,i)=><div className="health-row" key={r[0]}><span className={i===2?"status warning":"status"}/><b>{r[0]}</b><em>{r[1]}</em><strong>{r[2]}</strong></div>)}
     </section>
-    <section className="admin-card">
-      <div className="admin-card-head"><div><h2>Auditoria recente</h2><p>Ações sensíveis registradas.</p></div></div>
-      {auditLogs.slice(0, 4).map((log, i) => (
-        <div className="audit-row" key={i}>
-          <span>{log.type === "error" ? <AlertTriangle color="#dc2626"/> : log.action.includes("Importação") ? <Database/> : <ShieldCheck/>}</span>
-          <div>
-            <b>{log.action}</b>
-            <small>{log.user} • há {Math.round((Date.now() - new Date(log.at).getTime()) / 60000)} min</small>
-          </div>
+    <section className="admin-card" style={{ gridColumn: "span 2" }}>
+      <div className="admin-card-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div><h2>Auditoria Completa</h2><p>Logs de segurança e operações sensíveis.</p></div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <input type="date" value={dateFilter} onChange={e=>setDateFilter(e.target.value)} style={{ padding: '0.25rem', fontSize: '0.8rem', border: '1px solid #ddd', borderRadius: '4px' }}/>
+          <select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} style={{ padding: '0.25rem', fontSize: '0.8rem', border: '1px solid #ddd', borderRadius: '4px' }}>
+            <option value="all">Todos Tipos</option>
+            <option value="success">Sucesso</option>
+            <option value="warning">Aviso</option>
+            <option value="error">Crítico</option>
+          </select>
+          <button className="button button--small" onClick={exportCSV}><Download size={14}/> Exportar CSV</button>
         </div>
-      ))}
-
+      </div>
+      <div style={{ maxHeight: '400px', overflowY: 'auto', marginTop: '1rem' }}>
+        {filteredLogs.length > 0 ? filteredLogs.map((log, i) => (
+          <div className="audit-row" key={i} style={{ borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0' }}>
+            <span style={{ minWidth: '24px' }}>{log.type === "error" ? <AlertTriangle color="#dc2626"/> : log.type === "warning" ? <Bell color="#b45309"/> : <CheckCircle2 color="#16a34a"/>}</span>
+            <div style={{ flex: 1 }}>
+              <b style={{ fontSize: '0.9rem' }}>{log.action}</b>
+              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                {log.user} • {new Date(log.at).toLocaleString("pt-BR")}
+              </div>
+            </div>
+          </div>
+        )) : <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>Nenhum log encontrado para os filtros selecionados.</div>}
+      </div>
     </section>
+
   </div>
 </main></div>;
 }
@@ -602,14 +657,10 @@ export default function PrecoCertoApp() {
   const handleAdminAuth = (success: boolean) => {
     if (success) {
       setAdminAuth(true);
-      // Log de login (não temos addAuditLog aqui, mas podemos fazer via localStorage direto)
-      try {
-        const logs = JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]");
-        const newLog = { action: "Login administrativo realizado", user: "Franc D’Nis", at: new Date().toISOString(), type: "success" };
-        localStorage.setItem("precocerto:admin_logs", JSON.stringify([newLog, ...logs].slice(0, 100)));
-      } catch {}
+      addAuditLog("Login administrativo realizado");
     }
   };
+
 
   const handleAdminLogout = () => {
     setAdminAuth(false);
