@@ -155,27 +155,42 @@ function PlansPage() {
 
 function AdminPage({ path }: { path:string }) {
   const [importing, setImporting] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [importStatus, setImportStatus] = useState("");
+  const [connectionInfo, setConnectionInfo] = useState<{ success: boolean; latency: number; tables: Record<string, number>; error?: string } | null>(null);
+  const [importLog, setImportLog] = useState<{ count: number; duplicates: number; stores: number; products: number; duration: number } | null>(null);
+  
   const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
   
   async function handleImport() {
     const { runPriceImport } = await import("./data/importer");
     setImporting(true);
     setImportStatus("Iniciando...");
+    setImportLog(null);
     const result = await runPriceImport((msg) => setImportStatus(msg));
     setImporting(false);
     if (result.success) {
-      if (result.duplicates && result.count === 0) {
-        setImportStatus(`Concluído: Todos os ${result.duplicates} registros já estão no banco.`);
-      } else if (result.duplicates) {
-        setImportStatus(`Sucesso! ${result.count} novos preços criados (${result.duplicates} duplicados ignorados).`);
-      } else {
-        setImportStatus(`Sucesso! ${result.count} preços importados.`);
-      }
+      setImportLog({
+        count: result.count,
+        duplicates: result.duplicates,
+        stores: result.stores,
+        products: result.products,
+        duration: result.duration || 0
+      });
+      setImportStatus("Importação concluída.");
     } else {
       setImportStatus(`Erro: ${result.error}`);
     }
   }
+
+  async function handleTestConnection() {
+    const { testSupabaseConnection } = await import("./data/importer");
+    setTesting(true);
+    const result = await testSupabaseConnection();
+    setConnectionInfo(result);
+    setTesting(false);
+  }
+
 
   const rows = [
     ["Arroz Tio João 5 kg","Central Super","R$ 29,89","Verificado"],
@@ -183,7 +198,113 @@ function AdminPage({ path }: { path:string }) {
     ["Leite Integral Italac 1 L","Pague Pouco","R$ 5,69","Revisar"],
     ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
   ];
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo"><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/"><ArrowRight/> Voltar ao site</a></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importStatus && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importStatus}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header><div className="admin-kpis"><article><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article><article><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article><article><span>Pendências <AlertTriangle/></span><strong>17</strong><small className="warning">5 com prioridade alta</small></article><article><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article></div><section className="admin-card"><div className="admin-card-head"><div><h2>Monitoramento operacional</h2><p>Dados mais recentes do catálogo local.</p></div><div style={{display:"flex",gap:"0.75rem"}}><button className="button button--outline" onClick={handleImport} disabled={importing} title="Disparar importação para o Supabase externo"><Database/> {importing ? "Importando..." : "Importar 2.838 Preços"}</button><button className="button button--outline"><Download/> Exportar</button><button className="button button--primary"><Plus/> Novo registro</button></div></div><div className="admin-filters"><label><Search/><input placeholder="Buscar produto, loja ou código"/></label><button><SlidersHorizontal/> Filtros</button><button><Clock3/> Últimas 24h</button></div><div className="admin-table"><div className="admin-tr admin-th"><span>Produto</span><span>Estabelecimento</span><span>Preço</span><span>Status</span><span>Atualizado</span><span /></div>{rows.map((r,i)=><div className="admin-tr" key={r[0]}><span><b>{r[0]}</b><small>PC-{1200+i}</small></span><span>{r[1]}</span><span><b>{r[2]}</b></span><span><em className={r[3]==="Verificado"?"ok":"review"}>{r[3]}</em></span><span>há {i*11+4} min</span><span><button aria-label="Abrir registro"><ChevronRight/></button></span></div>)}</div><div className="admin-card-foot"><span>Mostrando 4 de 1.247 registros</span><div><button disabled>Anterior</button><button>Próxima</button></div></div></section><div className="admin-lower"><section className="admin-card"><div className="admin-card-head"><div><h2>Saúde das integrações</h2><p>Serviços críticos e filas.</p></div></div>{[["Banco e Realtime","Operacional","99,99%"],["Mercado Pago","Operacional","100%"],["Fila de IA","Atenção","3 jobs"],["E-mails","Operacional","98,7%"]].map((r,i)=><div className="health-row" key={r[0]}><span className={i===2?"status warning":"status"}/><b>{r[0]}</b><em>{r[1]}</em><strong>{r[2]}</strong></div>)}</section><section className="admin-card"><div className="admin-card-head"><div><h2>Auditoria recente</h2><p>Ações sensíveis registradas.</p></div></div>{["Preço atualizado por moderador","Importação concluída sem erros","Plano anual ativado","Cupom promocional revisado"].map((v,i)=><div className="audit-row" key={v}><span>{i===0?<CircleDollarSign/>:i===1?<Database/>:i===2?<CheckCircle2/>:<Receipt/>}</span><div><b>{v}</b><small>Franc D’Nis • há {i*12+3} min</small></div></div>)}</section></div></main></div>;
+  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo"><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/"><ArrowRight/> Voltar ao site</a></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importStatus && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importStatus}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+  
+  <div className="admin-kpis">
+    <article><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
+    <article><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
+    <article><span>Pendências <AlertTriangle/></span><strong>17</strong><small className="warning">5 com prioridade alta</small></article>
+    <article><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
+  </div>
+
+  <div className="admin-lower" style={{gridTemplateColumns: "1fr 1fr", marginBottom: "1.5rem", display: "grid", gap: "1.5rem"}}>
+    <section className="admin-card">
+      <div className="admin-card-head">
+        <div><h2>Status da Conexão</h2><p>Leitura em tempo real do Supabase.</p></div>
+        <button className="button button--outline button--small" onClick={handleTestConnection} disabled={testing}>
+          <Activity size={14}/> {testing ? "Testando..." : "Testar Conexão"}
+        </button>
+      </div>
+      {connectionInfo ? (
+        <div className="connection-status-panel" style={{padding: "1rem"}}>
+          <div style={{display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem"}}>
+            <span className={`status ${connectionInfo.success ? "ok" : "review"}`} style={{width: 10, height: 10, borderRadius: "50%", display: "inline-block", background: connectionInfo.success ? "#16a34a" : "#dc2626"}}/>
+            <b>{connectionInfo.success ? "Conectado ao Supabase" : "Erro na Conexão"}</b>
+            {connectionInfo.success && <small style={{marginLeft: "auto", color: "#6b7280"}}>{connectionInfo.latency}ms latência</small>}
+          </div>
+          {connectionInfo.success ? (
+            <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem"}}>
+              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
+                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Lojas</small>
+                <strong>{connectionInfo.tables.establishments}</strong>
+              </div>
+              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
+                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Produtos</small>
+                <strong>{connectionInfo.tables.products}</strong>
+              </div>
+              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
+                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Preços</small>
+                <strong>{connectionInfo.tables.prices}</strong>
+              </div>
+            </div>
+          ) : (
+            <p style={{color: "#dc2626", fontSize: "0.85rem"}}>{connectionInfo.error}</p>
+          )}
+        </div>
+      ) : (
+        <div style={{padding: "2rem", textAlign: "center", color: "#6b7280"}}><small>Clique em testar para validar as tabelas externas.</small></div>
+      )}
+    </section>
+
+    <section className="admin-card">
+      <div className="admin-card-head">
+        <div><h2>Log de Importação</h2><p>Resultado da última carga de preços.</p></div>
+      </div>
+      {importLog ? (
+        <div style={{padding: "1rem"}}>
+          <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
+            <span style={{fontSize: "0.85rem"}}>Novos preços inseridos:</span>
+            <strong style={{color: "#16a34a"}}>+{importLog.count}</strong>
+          </div>
+          <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
+            <span style={{fontSize: "0.85rem"}}>Duplicados ignorados:</span>
+            <span style={{color: "#6b7280"}}>{importLog.duplicates}</span>
+          </div>
+          <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
+            <span style={{fontSize: "0.85rem"}}>Total processado:</span>
+            <strong>{importLog.count + importLog.duplicates}</strong>
+          </div>
+          <div style={{borderTop: "1px solid #e5e7eb", marginTop: "0.5rem", paddingTop: "0.5rem", display: "flex", justifyContent: "space-between"}}>
+            <small style={{color: "#6b7280"}}>Execução: {(importLog.duration / 1000).toFixed(2)}s</small>
+            <small style={{color: "#6b7280"}}>{importLog.stores} lojas | {importLog.products} produtos</small>
+          </div>
+        </div>
+      ) : (
+        <div style={{padding: "2rem", textAlign: "center", color: "#6b7280"}}><small>Nenhuma importação realizada nesta sessão.</small></div>
+      )}
+    </section>
+  </div>
+
+  <section className="admin-card">
+    <div className="admin-card-head">
+      <div><h2>Monitoramento operacional</h2><p>Dados mais recentes do catálogo local.</p></div>
+      <div style={{display:"flex",gap:"0.75rem"}}>
+        <button className="button button--outline" onClick={handleImport} disabled={importing} title="Disparar importação para o Supabase externo">
+          <Database/> {importing ? "Importando..." : "Importar 2.838 Preços"}
+        </button>
+        <button className="button button--outline"><Download/> Exportar</button>
+        <button className="button button--primary"><Plus/> Novo registro</button>
+      </div>
+    </div>
+    <div className="admin-filters"><label><Search/><input placeholder="Buscar produto, loja ou código"/></label><button><SlidersHorizontal/> Filtros</button><button><Clock3/> Últimas 24h</button></div>
+    <div className="admin-table">
+      <div className="admin-tr admin-th"><span>Produto</span><span>Estabelecimento</span><span>Preço</span><span>Status</span><span>Atualizado</span><span /></div>
+      {rows.map((r,i)=><div className="admin-tr" key={r[0]}><span><b>{r[0]}</b><small>PC-{1200+i}</small></span><span>{r[1]}</span><span><b>{r[2]}</b></span><span><em className={r[3]==="Verificado"?"ok":"review"}>{r[3]}</em></span><span>há {i*11+4} min</span><span><button aria-label="Abrir registro"><ChevronRight/></button></span></div>)}
+    </div>
+    <div className="admin-card-foot"><span>Mostrando 4 de 1.247 registros</span><div><button disabled>Anterior</button><button>Próxima</button></div></div>
+  </section>
+
+  <div className="admin-lower" style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1.5rem"}}>
+    <section className="admin-card">
+      <div className="admin-card-head"><div><h2>Saúde das integrações</h2><p>Serviços críticos e filas.</p></div></div>
+      {[["Banco e Realtime","Operacional","99,99%"],["Mercado Pago","Operacional","100%"],["Fila de IA","Atenção","3 jobs"],["E-mails","Operacional","98,7%"]].map((r,i)=><div className="health-row" key={r[0]}><span className={i===2?"status warning":"status"}/><b>{r[0]}</b><em>{r[1]}</em><strong>{r[2]}</strong></div>)}
+    </section>
+    <section className="admin-card">
+      <div className="admin-card-head"><div><h2>Auditoria recente</h2><p>Ações sensíveis registradas.</p></div></div>
+      {["Preço atualizado por moderador","Importação concluída sem erros","Plano anual ativado","Cupom promocional revisado"].map((v,i)=><div className="audit-row" key={v}><span>{i===0?<CircleDollarSign/>:i===1?<Database/>:i===2?<CheckCircle2/>:<Receipt/>}</span><div><b>{v}</b><small>Franc D’Nis • há {i*12+3} min</small></div></div>)}
+    </section>
+  </div>
+</main></div>;
 }
 
 function GenericPage({ path, products, stores, addBasket, saveAction }: PageProps & { path:string }) {

@@ -11,9 +11,21 @@ const supabase = createClient(URL, SERVICE_KEY);
  * Importante: Como o SQL direto é restrito via rede no sandbox Lovable para o Supabase externo,
  * esta função usa a REST API com a Service Key para popular as tabelas.
  */
+export type ImportResult = {
+  success: boolean;
+  count: number;
+  duplicates: number;
+  stores: number;
+  products: number;
+  duration?: number;
+  error?: string;
+};
+
 export async function runPriceImport(
   onProgress: (msg: string) => void,
-): Promise<{ success: boolean; count: number; duplicates?: number; error?: string }> {
+): Promise<ImportResult> {
+  const startTime = Date.now();
+
   try {
     onProgress("Iniciando importação...");
 
@@ -78,7 +90,14 @@ export async function runPriceImport(
 
     if (pricesToInsert.length === 0) {
       onProgress(`Concluído: Todos os ${duplicateCount} registros já existem.`);
-      return { success: true, count: 0, duplicates: duplicateCount };
+      return { 
+        success: true, 
+        count: 0, 
+        duplicates: duplicateCount,
+        stores: Object.keys(storeMap).length,
+        products: local.products.length,
+        duration: Date.now() - startTime
+      };
     }
 
     onProgress(`Enviando ${pricesToInsert.length} novos registros em lotes... (${duplicateCount} duplicatas ignoradas)`);
@@ -98,13 +117,63 @@ export async function runPriceImport(
       onProgress(`Importado: ${inserted} novos registros...`);
     }
 
-    return { success: true, count: inserted, duplicates: duplicateCount };
+    return { 
+      success: true, 
+      count: inserted, 
+      duplicates: duplicateCount,
+      stores: Object.keys(storeMap).length,
+      products: local.products.length,
+      duration: Date.now() - startTime
+    };
   } catch (err) {
     console.error("Erro na importação:", err);
     return {
       success: false,
       count: 0,
+      duplicates: 0,
+      stores: 0,
+      products: 0,
       error: err instanceof Error ? err.message : "Erro desconhecido",
     };
   }
 }
+
+/**
+ * Função para testar a conexão com o Supabase.
+ */
+export async function testSupabaseConnection(): Promise<{ 
+  success: boolean; 
+  latency: number; 
+  tables: Record<string, number>; 
+  error?: string 
+}> {
+  const start = Date.now();
+  try {
+    const [stores, products, prices] = await Promise.all([
+      supabase.from("establishments").select("*", { count: "exact", head: true }),
+      supabase.from("products").select("*", { count: "exact", head: true }),
+      supabase.from("prices").select("*", { count: "exact", head: true })
+    ]);
+
+    const error = stores.error || products.error || prices.error;
+    if (error) throw new Error(error.message);
+
+    return {
+      success: true,
+      latency: Date.now() - start,
+      tables: {
+        establishments: stores.count || 0,
+        products: products.count || 0,
+        prices: prices.count || 0
+      }
+    };
+  } catch (err) {
+    return {
+      success: false,
+      latency: Date.now() - start,
+      tables: {},
+      error: err instanceof Error ? err.message : "Falha na conexão"
+    };
+  }
+}
+
