@@ -1822,6 +1822,78 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
           )}
         </main>
       </div>
+
+      {selectedProduct && (
+        <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)}>
+          <div className="admin-modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-head">
+              <h3>Detalhes do Produto</h3>
+              <button className="icon-button" onClick={() => setSelectedProduct(null)}><X/></button>
+            </div>
+            <div className="admin-modal-body">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ProductImage product={selectedProduct} size="default" eager />
+                </div>
+                <div>
+                  <span className="category-tag">{selectedProduct.category}</span>
+                  <h2 style={{ fontSize: '1.5rem', margin: '0.5rem 0' }}>{selectedProduct.name}</h2>
+                  <p style={{ color: 'var(--muted)', marginBottom: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
+                  
+                  <div className="visual-price" style={{ marginBottom: '1.5rem' }}>
+                    <strong>{money(selectedProduct.minPrice)}</strong>
+                    {selectedProduct.previousPrice && selectedProduct.previousPrice > selectedProduct.minPrice && (
+                      <span className="old-price">era <s>{money(selectedProduct.previousPrice)}</s></span>
+                    )}
+                  </div>
+
+                  <div className="verified-details" style={{ background: 'none', padding: 0 }}>
+                    <div className="detail-item">
+                      <Store size={14} />
+                      <span>{selectedProduct.establishment}</span>
+                    </div>
+                    <div className="detail-item">
+                      <Clock3 size={14} />
+                      <span>Atualizado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+                <h4>Histórico de Variação</h4>
+                <div style={{ height: '120px', width: '100%', marginTop: '1rem', position: 'relative' }}>
+                   <svg viewBox="0 0 500 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+                    <path 
+                      d="M 0 80 Q 125 40 250 60 T 500 20" 
+                      fill="none" 
+                      stroke="var(--blue)" 
+                      strokeWidth="3"
+                    />
+                    <circle cx="0" cy="80" r="4" fill="var(--blue)" />
+                    <circle cx="250" cy="60" r="4" fill="var(--blue)" />
+                    <circle cx="500" cy="20" r="4" fill="var(--blue)" />
+                  </svg>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
+                    <span>Há 30 dias</span>
+                    <span>Há 15 dias</span>
+                    <span>Hoje</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                <button className="button button--primary" style={{ flex: 1 }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
+                  Adicionar à Cesta
+                </button>
+                <button className="button button--outline" onClick={() => { saveAction("alert", "product", String(selectedProduct.id)); setSelectedProduct(null); }}>
+                  <Bell size={18} /> Alertar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
