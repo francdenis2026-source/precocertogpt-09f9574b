@@ -24,6 +24,13 @@ export const establishmentSeed: EstablishmentSeed[] = [
   { id: 3, slug: "pague-pouco", name: "Pague Pouco", neighborhood: "Centro", color: "#F4B400" },
   { id: 4, slug: "super-feijoense", name: "Super Feijoense", neighborhood: "Zenaide Paiva", color: "#EF6C3B" },
   { id: 5, slug: "parceirao", name: "Parceirão", neighborhood: "Conquista", color: "#7259C7" },
+  { id: 6, slug: "super-mercado-popular", name: "Popular", neighborhood: "Centro", color: "#D93025" },
+  { id: 7, slug: "supermercado-bom-preco", name: "Bom Preço", neighborhood: "Esperança", color: "#F06292" },
+  { id: 8, slug: "mercantil-feijo", name: "Mercantil Feijó", neighborhood: "Centro", color: "#4285F4" },
+  { id: 9, slug: "auto-servico-uniao", name: "Auto Serviço União", neighborhood: "Zenaide Paiva", color: "#FBBC04" },
+  { id: 10, slug: "comercial-lima", name: "Comercial Lima", neighborhood: "Conquista", color: "#34A853" },
+  { id: 11, slug: "mercado-do-povo", name: "Mercado do Povo", neighborhood: "Esperança", color: "#EA4335" },
+  { id: 12, slug: "vitoria-super", name: "Vitória Super", neighborhood: "Centro", color: "#FB8C00" },
 ];
 
 type ProductSeed = { id: number; slug: string; name: string; brand: string; category: string; size: string; unit: string; barcode?: string };

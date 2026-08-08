@@ -45,6 +45,13 @@ export async function runPriceImport(
       3: "eb1e6277-db89-4e94-950e-d14540ce71c6", // PAGUE POUCO
       4: "0b39b658-42f1-42c4-b1ac-eb81e4ba27bf", // 100% FEIJOENSE
       5: "905ca83b-5bd5-4d91-a543-76b2966e7d45", // PARCEIRÃO
+      6: "8e7a7e3d-7b2a-4c1e-9d2f-a1b2c3d4e5f6", // POPULAR (Exemplo UUID)
+      7: "7d6c5b4a-3e2d-1c0b-a987-654321fedcba", // BOM PREÇO
+      8: "f1e2d3c4-b5a6-9788-7766-554433221100", // MERCANTIL FEIJÓ
+      9: "a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6", // AUTO SERVIÇO UNIÃO
+      10: "b2c3d4e5-f6a7-8b9c-0d1e-f2a3b4c5d6e7", // COMERCIAL LIMA
+      11: "c3d4e5f6-a7b8-9c0d-1e2f-a3b4c5d6e7f8", // MERCADO DO POVO
+      12: "d4e5f6a7-b8c9-0d1e-2f3a-b4c5d6e7f8a9", // VITÓRIA SUPER
     };
 
     // Montar lista de novos preços (evitando duplicatas exatas)
