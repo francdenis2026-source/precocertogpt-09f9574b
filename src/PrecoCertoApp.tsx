@@ -1878,8 +1878,8 @@ export default function PrecoCertoApp() {
 
   let page:ReactNode;
   if(pathname==="/") page=<HomePage {...props}/>;
-  else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props}/>;
-  else if(pathname==="/alertas") page=<GenericPage {...props} path={pathname}/>;
+  else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
+  else if(pathname==="/alertas") page=<GenericPage {...props} metrics={metrics} path={pathname}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
   else page=<GenericPage {...props} path={pathname}/>;
