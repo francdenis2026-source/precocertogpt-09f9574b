@@ -153,7 +153,19 @@ function PlansPage() {
   return <div className="shell page-shell plans-page"><div className="center-heading"><span className="eyebrow">Planos PreçoCerto</span><h1>Economia que se paga na primeira compra</h1><p>Recursos transparentes para consumidores e para o comércio local.</p><div className="segmented large"><button className={!shop?"active":""} onClick={()=>setShop(false)}>Para você</button><button className={shop?"active":""} onClick={()=>setShop(true)}>Para sua loja</button></div></div><div className="plan-grid">{plans.map(plan=><article className={plan.featured?"featured":""} key={plan.name}>{plan.featured&&<span className="recommended">Recomendado</span>}<h2>{plan.name}</h2><p>{plan.desc}</p><div className="plan-price"><strong>{money(plan.price)}</strong><span>/mês</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={`/checkout/${plan.name.toLowerCase().replace(" ","-")}`}>{plan.price===0?"Começar grátis":"Escolher plano"}<ArrowRight/></a><ul>{plan.features.map(f=><li key={f}><Check/> {f}</li>)}</ul></article>)}</div><div className="plan-note"><ShieldCheck/><span><b>Pagamento seguro via Pix</b><small>Ativação automática após confirmação. Cancele quando quiser.</small></span></div></div>;
 }
 
-function AdminPage({ path }: { path:string }) {
+function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<{ action: string; user: string; at: string; type: string }[]>(() => {
+    try { return JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]"); } catch { return []; }
+  });
+
+  const addAuditLog = (action: string, type: string = "info") => {
+    const newLog = { action, user: "Franc D’Nis", at: new Date().toISOString(), type };
+    const updated = [newLog, ...auditLogs].slice(0, 100);
+    setAuditLogs(updated);
+    localStorage.setItem("precocerto:admin_logs", JSON.stringify(updated));
+  };
+
   const [importing, setImporting] = useState(false);
   const [testing, setTesting] = useState(false);
   const [importStatus, setImportStatus] = useState("");
@@ -178,10 +190,13 @@ function AdminPage({ path }: { path:string }) {
         duration: result.duration || 0
       });
       setImportStatus("Importação concluída.");
+      addAuditLog(`Importação de ${result.count} preços concluída`, "success");
     } else {
       setImportStatus(`Erro: ${result.error}`);
+      addAuditLog(`Falha na importação: ${result.error}`, "error");
     }
   }
+
 
   async function handleTestConnection() {
     const { testSupabaseConnection } = await import("./data/importer");
@@ -189,7 +204,16 @@ function AdminPage({ path }: { path:string }) {
     const result = await testSupabaseConnection();
     setConnectionInfo(result);
     setTesting(false);
+    addAuditLog(result.success ? "Teste de conexão: Sucesso" : "Teste de conexão: Falha", result.success ? "success" : "error");
   }
+
+  const handleLogoutRequest = () => setShowLogoutConfirm(true);
+  const confirmLogout = () => {
+    addAuditLog("Logout administrativo realizado");
+    setShowLogoutConfirm(false);
+    onLogout();
+  };
+
 
 
   const rows = [
@@ -198,7 +222,23 @@ function AdminPage({ path }: { path:string }) {
     ["Leite Integral Italac 1 L","Pague Pouco","R$ 5,69","Revisar"],
     ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
   ];
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo"><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/"><ArrowRight/> Voltar ao site</a></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importStatus && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importStatus}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo"><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importStatus && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importStatus}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+  {showLogoutConfirm && (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
+      <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', maxWidth: '400px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+        <div style={{ width: '64px', height: '64px', background: '#fee2e2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+          <AlertTriangle color="#dc2626" size={32} />
+        </div>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Confirmar Logout?</h2>
+        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>Você precisará da senha administrativa para acessar estas ferramentas novamente.</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <button className="button button--outline" onClick={() => setShowLogoutConfirm(false)}>Cancelar</button>
+          <button className="button button--primary" style={{ background: '#dc2626' }} onClick={confirmLogout}>Sim, Deslogar</button>
+        </div>
+      </div>
+    </div>
+  )}
+
   
   <div className="admin-kpis">
     <article><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
@@ -301,7 +341,16 @@ function AdminPage({ path }: { path:string }) {
     </section>
     <section className="admin-card">
       <div className="admin-card-head"><div><h2>Auditoria recente</h2><p>Ações sensíveis registradas.</p></div></div>
-      {["Preço atualizado por moderador","Importação concluída sem erros","Plano anual ativado","Cupom promocional revisado"].map((v,i)=><div className="audit-row" key={v}><span>{i===0?<CircleDollarSign/>:i===1?<Database/>:i===2?<CheckCircle2/>:<Receipt/>}</span><div><b>{v}</b><small>Franc D’Nis • há {i*12+3} min</small></div></div>)}
+      {auditLogs.slice(0, 4).map((log, i) => (
+        <div className="audit-row" key={i}>
+          <span>{log.type === "error" ? <AlertTriangle color="#dc2626"/> : log.action.includes("Importação") ? <Database/> : <ShieldCheck/>}</span>
+          <div>
+            <b>{log.action}</b>
+            <small>{log.user} • há {Math.round((Date.now() - new Date(log.at).getTime()) / 60000)} min</small>
+          </div>
+        </div>
+      ))}
+
     </section>
   </div>
 </main></div>;
@@ -333,16 +382,90 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
   return <div className="shell page-shell generic-page"><section className="generic-hero"><span className="generic-icon">{info[2]}</span><div><span className="eyebrow">{info[0]}</span><h1>{info[1]}</h1><p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p></div><a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a></section><div className="generic-grid"><section className="generic-main"><div className="section-heading compact"><div><h2>{isStore?"Ofertas em destaque":isProduct?"Onde está mais barato":"Destaques de hoje"}</h2><p>Registros compatíveis e verificados recentemente.</p></div></div>{products.slice(0,4).map(p=><article className="compact-product" key={p.id}><span className="product-visual">{p.category.slice(0,1)}</span><div><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size} • {p.establishment}</small><span><ShieldCheck/> Verificado há poucos minutos</span></div><strong>{money(p.minPrice)}</strong><button onClick={()=>saveAction("favorite","product",String(p.id))} aria-label="Favoritar"><Heart/></button><button className="button button--primary" onClick={()=>addBasket(p)}><Plus/> Cesta</button></article>)}</section><aside className="generic-aside"><span className="eyebrow">Visão local</span><h2>Feijó economiza junto</h2><div className="aside-stat"><span>Produtos acompanhados</span><strong>1.247</strong></div><div className="aside-stat"><span>Atualizações hoje</span><strong>214</strong></div><div className="aside-stat"><span>Economia potencial</span><strong>14,8%</strong></div><a href="/cesta-basica" className="button button--dark button--full">Montar cesta inteligente</a></aside></div></div>;
 }
 
-function AuthPage({ path }: { path:string }) {
-  const register = path === "/cadastro" || path === "/registrar"; const [pin,setPin]=useState(""); const [cpf,setCpf]=useState("");
-  function submit(e:FormEvent){e.preventDefault(); window.location.href="/app";}
-  return <div className="auth-page"><div className="auth-brand-panel"><Brand inverse/><div><span className="eyebrow eyebrow--gold">Antes de comprar, compare</span><h1>{register?"Economize desde a primeira lista.":"Que bom ter você de volta."}</h1><p>Preços em tempo real, alertas de queda e cestas inteligentes para comprar melhor em Feijó.</p><ul><li><Check/> Comparação por mercado e embalagem</li><li><Check/> Histórico e alertas personalizados</li><li><Check/> Bônus por envio de nota fiscal</li></ul></div><small>O menor preço, na hora certa.</small></div><main className="auth-form-wrap"><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}><a className="auth-back" href="/" style={{ margin: 0 }}><ArrowRight/> Voltar ao início</a>{!register && <a href="/admin" style={{ fontSize: '0.75rem', color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#94a3b8'} onMouseOut={e => e.currentTarget.style.color = '#cbd5e1'}>Acesso Restrito</a>}</div><form className="auth-form" onSubmit={submit}><span className="eyebrow">{register?"Crie sua conta":"Acesse sua conta"}</span><h2>{register?"Comece grátis":"Entrar no PreçoCerto"}</h2><p>{register?"Leva menos de dois minutos.":"Use seu CPF e PIN de 6 dígitos."}</p>{register&&<label>Nome completo<input required minLength={3} placeholder="Seu nome e sobrenome"/></label>}<label>CPF<input required value={cpf} onChange={e=>setCpf(e.target.value.replace(/\D/g,"").slice(0,11))} inputMode="numeric" placeholder="000.000.000-00"/><small>Usamos seu CPF somente para identificar sua conta.</small></label>{register&&<label>Celular<input inputMode="tel" placeholder="(68) 99999-9999"/></label>}<label>PIN de 6 dígitos<input required value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,6))} inputMode="numeric" type="password" maxLength={6} placeholder="••••••"/><small>Evite sequências como 123456.</small></label><button className="button button--primary button--full" type="submit" disabled={pin.length!==6||cpf.length!==11}>{register?"Criar minha conta":"Entrar com segurança"}<ArrowRight/></button>{!register&&<a href="/resgatar" className="center-link">Esqueci meu PIN</a>}<div className="auth-switch">{register?"Já possui conta? ":"Ainda não tem conta? "}<a href={register?"/login":"/cadastro"}>{register?"Entrar":"Começar grátis"}</a></div></form></main></div>;
+function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: boolean) => void }) {
+  const register = path === "/cadastro" || path === "/registrar";
+  const isAdminLogin = path === "/admin-login";
+  const [pin,setPin]=useState(""); const [cpf,setCpf]=useState("");
+  const [user,setUser]=useState(""); const [pass,setPass]=useState("");
+  const [error, setError] = useState("");
+
+  function submit(e:FormEvent){
+    e.preventDefault();
+    if (isAdminLogin) {
+      if (user === "admin" && pass === "feijo2026") {
+        onAdminAuth(true);
+        window.location.href="/admin";
+      } else {
+        setError("Credenciais administrativas incorretas.");
+      }
+    } else {
+      window.location.href="/app";
+    }
+  }
+
+  return <div className="auth-page">
+    <div className="auth-brand-panel">
+      <Brand inverse/>
+      <div>
+        <span className="eyebrow eyebrow--gold">Antes de comprar, compare</span>
+        <h1>{isAdminLogin ? "Painel de Controle Restrito" : register?"Economize desde a primeira lista.":"Que bom ter você de volta."}</h1>
+        <p>Preços em tempo real, alertas de queda e cestas inteligentes para comprar melhor em Feijó.</p>
+        <ul>
+          <li><Check/> {isAdminLogin ? "Gestão de inventário e preços" : "Comparação por mercado e embalagem"}</li>
+          <li><Check/> {isAdminLogin ? "Auditoria e logs operacionais" : "Histórico e alertas personalizados"}</li>
+          <li><Check/> {isAdminLogin ? "Segurança de dados e backups" : "Bônus por envio de nota fiscal"}</li>
+        </ul>
+      </div>
+      <small>O menor preço, na hora certa.</small>
+    </div>
+    <main className="auth-form-wrap">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <a className="auth-back" href="/" style={{ margin: 0 }}><ArrowRight/> Voltar ao início</a>
+        {!register && !isAdminLogin && <a href="/admin" style={{ fontSize: '0.75rem', color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#94a3b8'} onMouseOut={e => e.currentTarget.style.color = '#cbd5e1'}>Acesso Restrito</a>}
+      </div>
+      <form className="auth-form" onSubmit={submit}>
+        <span className="eyebrow">{isAdminLogin ? "Segurança" : register?"Crie sua conta":"Acesse sua conta"}</span>
+        <h2>{isAdminLogin ? "Login Administrativo" : register?"Comece grátis":"Entrar no PreçoCerto"}</h2>
+        <p>{isAdminLogin ? "Insira suas chaves de acesso para continuar." : register?"Leva menos de dois minutos.":"Use seu CPF e PIN de 6 dígitos."}</p>
+        
+        {error && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><AlertTriangle size={16}/> {error}</div>}
+
+        {isAdminLogin ? (
+          <>
+            <label>Usuário Administrador<input required value={user} onChange={e=>setUser(e.target.value)} placeholder="usuário"/></label>
+            <label>Senha Secreta<input required value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="••••••••"/></label>
+          </>
+        ) : (
+          <>
+            {register&&<label>Nome completo<input required minLength={3} placeholder="Seu nome e sobrenome"/></label>}
+            <label>CPF<input required value={cpf} onChange={e=>setCpf(e.target.value.replace(/\D/g,"").slice(0,11))} inputMode="numeric" placeholder="000.000.000-00"/><small>Usamos seu CPF somente para identificar sua conta.</small></label>
+            {register&&<label>Celular<input inputMode="tel" placeholder="(68) 99999-9999"/></label>}
+            <label>PIN de 6 dígitos<input required value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,6))} inputMode="numeric" type="password" maxLength={6} placeholder="••••••"/><small>Evite sequências como 123456.</small></label>
+          </>
+        )}
+
+        <button className="button button--primary button--full" type="submit" disabled={isAdminLogin ? (!user || !pass) : (pin.length!==6||cpf.length!==11)}>
+          {isAdminLogin ? "Autenticar Acesso" : register?"Criar minha conta":"Entrar com segurança"}
+          <ArrowRight/>
+        </button>
+        
+        {!register && !isAdminLogin && <a href="/resgatar" className="center-link">Esqueci meu PIN</a>}
+        <div className="auth-switch">
+          {isAdminLogin ? <a href="/login">Voltar para login comum</a> : (register?"Já possui conta? ":"Ainda não tem conta? ")}
+          {!isAdminLogin && <a href={register?"/login":"/cadastro"}>{register?"Entrar":"Começar grátis"}</a>}
+        </div>
+      </form>
+    </main>
+  </div>;
 }
+
 
 export default function PrecoCertoApp() {
   const pathname = useLocation().pathname || "/";
   const [products,setProducts]=useState<Product[]>(initialProducts); const [stores,setStores]=useState<StoreRow[]>(initialStores); const [metrics,setMetrics]=useState<PlatformMetrics>(verifiedDatasetMetrics); const [query,setQuery]=useState(""); const [cart,setCart]=useState<Product[]>([]); const [toast,setToast]=useState("");
-  const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
+  const [adminAuth, setAdminAuth] = useState(false);
+  const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; 
+  const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
   useEffect(()=>{ let alive=true; const q=new URLSearchParams(window.location.search).get("q")??""; if(q) setQuery(q);
     // Fonte primária: Supabase do usuário. Fallback automático para o catálogo local.
     fetchCatalog(q).then(data=>{ if(!alive)return; if(data.products.length)setProducts(data.products); if(data.stores.length)setStores(data.stores); setMetrics(data.metrics); if(data.source==="local"&&data.error) console.warn("[PreçoCerto] catálogo local em uso:",data.error); }).catch(err=>console.error("[PreçoCerto] falha ao carregar catálogo:",err));
@@ -352,8 +475,31 @@ export default function PrecoCertoApp() {
   function removeBasket(id:number){setCart(current=>current.filter(i=>i.id!==id));setToast("Item removido da cesta.");}
   function saveAction(action:string,entityType:string,entityId:string){setToast(action==="alert"?"Alerta ativado com sucesso.":"Salvo nos seus favoritos.");try{const key="precocerto:actions";const saved=JSON.parse(localStorage.getItem(key)??"[]") as unknown[];localStorage.setItem(key,JSON.stringify([...saved,{action,entityType,entityId,at:new Date().toISOString()}].slice(-200)));}catch{setToast("A ação ficou salva nesta sessão.");}}
   const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction}),[products,stores,metrics,query]);
-  if(isAdmin) return <><AdminPage path={pathname}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
-  if(isAuth) return <AuthPage path={pathname}/>;
+  const handleAdminAuth = (success: boolean) => {
+    if (success) {
+      setAdminAuth(true);
+      // Log de login (não temos addAuditLog aqui, mas podemos fazer via localStorage direto)
+      try {
+        const logs = JSON.parse(localStorage.getItem("precocerto:admin_logs") ?? "[]");
+        const newLog = { action: "Login administrativo realizado", user: "Franc D’Nis", at: new Date().toISOString(), type: "success" };
+        localStorage.setItem("precocerto:admin_logs", JSON.stringify([newLog, ...logs].slice(0, 100)));
+      } catch {}
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setAdminAuth(false);
+  };
+
+  // Redirecionamento forçado se tentar acessar admin sem estar logado
+  if (isAdmin && !adminAuth) {
+    window.location.href = "/admin-login";
+    return null;
+  }
+
+  if(isAdmin) return <><AdminPage path={pathname} onLogout={handleAdminLogout}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
+  if(isAuth) return <AuthPage path={pathname} onAdminAuth={handleAdminAuth}/>;
+
   let page:ReactNode;
   if(pathname==="/oi") page=<div style={{padding:"4rem",textAlign:"center",fontSize:"2rem",fontFamily:"sans-serif"}}>oi</div>;
   else if(pathname==="/") page=<HomePage {...props}/>;
