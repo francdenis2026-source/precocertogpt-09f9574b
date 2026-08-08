@@ -47,8 +47,8 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
 }
 
 function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
-  return <a className={`brand ${inverse ? "brand--inverse" : ""}`} href="/" aria-label="PreçoCerto — página inicial">
-    <img className={`brand__logo ${compact ? "brand__logo--compact" : ""}`} src={compact ? "/logo-preco-certo-simbolo.svg" : inverse ? "/logo-preco-certo-inversa.svg" : "/logo-preco-certo.svg"} alt="" aria-hidden="true" />
+  return <a className={`brand ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} href="/" aria-label="PreçoCerto — página inicial">
+    <img className={`brand__logo ${compact ? "brand__logo--compact" : ""}`} src={compact ? "/logo-precocerto-emblema.png" : "/logo-precocerto-wordmark.png"} alt="PreçoCerto" width={1152} height={576} />
   </a>;
 }
 
@@ -61,7 +61,12 @@ function Header({ basketCount }: { basketCount: number }) {
       <nav className="desktop-nav" aria-label="Navegação principal">
         <a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas</a><a href="/planos">Planos</a>
       </nav>
-      <div className="header-actions"><a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a><a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a><a className="text-link" href="/login">Entrar</a><a className="button button--primary button--small" href="/cadastro">Começar grátis</a></div>
+      <div className="header-actions">
+        <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
+        <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a>
+        <a className="text-link" href="/login">Entrar</a>
+        <a className="button button--primary button--small" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
+      </div>
       <button className="mobile-menu-button" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open}><Menu /></button>
     </div>
     {open && <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu principal"><button className="drawer-backdrop" aria-label="Fechar menu" onClick={() => setOpen(false)} /><div className="drawer-panel"><div className="drawer-head"><Brand /><button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu"><X /></button></div><nav><a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas de hoje</a><a href="/planos">Planos</a><a href="/colaborar">Enviar nota fiscal</a></nav><a className="button button--primary" href="/cadastro">Criar conta gratuita</a><a className="button button--ghost" href="/login">Já tenho uma conta</a></div></div>}
