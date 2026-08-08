@@ -1541,7 +1541,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 }
 
 
-function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }: PageProps) {
+function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction }: PageProps) {
   const pathname = useLocation().pathname;
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeStore, setActiveStore] = useState("all");
@@ -1550,6 +1550,7 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
   const [chartPeriod, setChartPeriod] = useState("30d");
   const [isLoading, setIsLoading] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const randomFeatured = useRandomFeatured(products);
   
   useEffect(() => {
     const saved = localStorage.getItem("precocerto:favorites");
