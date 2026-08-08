@@ -1286,7 +1286,9 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
       <div className="search-layout">
         <aside className="search-sidebar">
           <div className="filter-group">
-            <h3>Categorias</h3>
+            <div className="filter-header">
+              <h3>Categorias</h3>
+            </div>
             <div className="filter-list">
               {categories.map(c => (
                 <button key={c} className={activeCategory === c ? "active" : ""} onClick={() => setActiveCategory(c)}>
@@ -1296,7 +1298,9 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
             </div>
           </div>
           <div className="filter-group">
-            <h3>Marcas</h3>
+            <div className="filter-header">
+              <h3>Marcas</h3>
+            </div>
             <div className="filter-list">
               {allBrands.map(b => (
                 <button key={b} className={activeBrand === b ? "active" : ""} onClick={() => setActiveBrand(b)}>
@@ -1306,7 +1310,9 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
             </div>
           </div>
           <div className="filter-group">
-            <h3>Estabelecimentos</h3>
+            <div className="filter-header">
+              <h3>Estabelecimentos</h3>
+            </div>
             <div className="filter-list">
               {allStores.map(s => (
                 <button key={s} className={activeStore === s ? "active" : ""} onClick={() => setActiveStore(s)}>
