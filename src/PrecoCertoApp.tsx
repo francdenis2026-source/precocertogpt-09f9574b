@@ -1684,6 +1684,21 @@ export default function PrecoCertoApp() {
     }
   };
 
+  const handleUserLogin = () => {
+    const newUser = { name: "Usuário PreçoCerto" };
+    setUser(newUser);
+    localStorage.setItem("precocerto:user", JSON.stringify(newUser));
+    setToast("Bem-vindo ao PreçoCerto!");
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setAdminAuth(false);
+    localStorage.removeItem("precocerto:user");
+    localStorage.removeItem("precocerto:admin_authenticated");
+    window.location.href = "/";
+  };
+
   const handleAdminLogout = () => {
     setAdminAuth(false);
     localStorage.removeItem("precocerto:admin_authenticated");
