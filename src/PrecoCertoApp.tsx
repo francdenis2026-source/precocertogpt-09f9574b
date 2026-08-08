@@ -1235,7 +1235,7 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
   const allStores = useMemo(() => ["all", ...new Set(stores.map(s => s.name))], [stores]);
 
   const filtered = useMemo(() => {
-    return products.filter(p => {
+    let result = products.filter(p => {
       const q = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const matchesQuery = !query || `${p.name} ${p.brand} ${p.category}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q);
       const matchesCategory = activeCategory === "all" || p.category === activeCategory;
@@ -1243,7 +1243,35 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
       const matchesBrand = activeBrand === "all" || p.brand === activeBrand;
       return matchesQuery && matchesCategory && matchesStore && matchesBrand;
     });
-  }, [products, query, activeCategory, activeStore, activeBrand]);
+
+    if (sortBy === "price") {
+      result.sort((a, b) => a.minPrice - b.minPrice);
+    } else if (sortBy === "date") {
+      result.sort((a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime());
+    } else if (sortBy === "variation") {
+      result.sort((a, b) => {
+        const varA = a.previousPrice ? (a.minPrice - a.previousPrice) / a.previousPrice : 0;
+        const varB = b.previousPrice ? (b.minPrice - b.previousPrice) / b.previousPrice : 0;
+        return varA - varB;
+      });
+    }
+    return result;
+  }, [products, query, activeCategory, activeStore, activeBrand, sortBy]);
+
+  const handleShare = (p?: Product) => {
+    const url = new URL(window.location.origin + window.location.pathname);
+    if (p) {
+      url.searchParams.set("q", p.name);
+    } else {
+      if (query) url.searchParams.set("q", query);
+      if (activeCategory !== "all") url.searchParams.set("cat", activeCategory);
+      if (activeStore !== "all") url.searchParams.set("store", activeStore);
+    }
+    
+    navigator.clipboard.writeText(url.toString()).then(() => {
+      alert("Link de compartilhamento copiado para a área de transferência!");
+    });
+  };
 
   return (
     <div className="shell page-shell">
