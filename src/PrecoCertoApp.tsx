@@ -1087,6 +1087,35 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
               <span>Alerta de dado expirado (7 dias)</span>
               <strong style={{ fontSize: '1rem', color: 'var(--blue)' }}>Ativado</strong>
             </div>
+            <div className="aside-stat" style={{ background: 'var(--gold-soft)', border: '1px solid var(--gold)', marginTop: '1.5rem', padding: '1rem', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
+                <div style={{ background: '#25D366', color: 'white', padding: '6px', borderRadius: '50%' }}><Users size={16} /></div>
+                <strong style={{ fontSize: '0.9rem', color: '#128C7E' }}>Alertas via WhatsApp</strong>
+              </div>
+              <p style={{ fontSize: '0.75rem', lineHeight: '1.3', color: '#444' }}>
+                Receba notificações instantâneas de quedas de preço e dados expirados no seu celular.
+              </p>
+              <button 
+                className="button button--small" 
+                style={{ background: '#25D366', color: 'white', border: 'none', width: '100%', marginTop: '0.8rem' }}
+                onClick={() => window.open(`https://wa.me/5568999999999?text=${encodeURIComponent("Olá! Gostaria de ativar os alertas do PreçoCerto para minha lista de acompanhamento.")}`)}
+              >
+                Ativar WhatsApp
+              </button>
+            </div>
+            <div style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <div className="pulse-dot" style={{ background: 'var(--green)' }} />
+                <strong style={{ fontSize: '0.85rem' }}>Notificações em tempo real</strong>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+                {alertProducts.length > 0 ? (
+                  <p>Monitorando {alertProducts.length} itens. Última variação checada há 4 min.</p>
+                ) : (
+                  <p>Aguardando itens para monitoramento...</p>
+                )}
+              </div>
+            </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '1rem' }}>Os alertas são processados localmente baseados nas últimas coletas realizadas em Feijó.</p>
           </aside>
         </div>
