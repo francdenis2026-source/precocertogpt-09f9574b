@@ -1155,6 +1155,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction }:
     "/favoritos":["Tudo que importa","Seus favoritos",<Heart key="i"/>],
     "/alertas":["Monitoramento de preços e validade","Lista de Acompanhamento",<Bell key="i"/>],
     "/lista":["Compra organizada","Minhas listas",<ListChecks key="i"/>],
+    "/perfil":["Gerencie seus dados","Minha conta",<UserRound key="i"/>],
     "/app":["Seu resumo dos últimos 90 dias","Painel de economia",<LayoutDashboard key="i"/>],
   };
   const defaultInfo:[string,string,ReactNode] = ["PreçoCerto em Feijó","Economia inteligente para sua próxima compra",<Sparkles key="i"/>];
