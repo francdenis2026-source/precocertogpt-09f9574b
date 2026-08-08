@@ -1275,10 +1275,25 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
 
   return (
     <div className="shell page-shell">
-      <section className="search-header">
-        <h1>Comparador de Preços</h1>
-        <p>Encontre o melhor preço entre {stores.length} estabelecimentos em Feijó.</p>
-        <div style={{ maxWidth: '600px', marginTop: '1.5rem' }}>
+      <section className="search-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1>Comparador de Preços</h1>
+          <p>Encontre o melhor preço entre {stores.length} estabelecimentos em Feijó.</p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="button button--outline" onClick={() => handleShare()}>
+            <Share2 size={16} /> Compartilhar busca
+          </button>
+          <div className="sort-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-2)', padding: '0.25rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+            <SlidersHorizontal size={14} color="var(--tertiary)" />
+            <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{ border: 'none', background: 'transparent', outline: 'none', fontWeight: '600' }}>
+              <option value="price">Menor preço</option>
+              <option value="date">Mais recentes</option>
+              <option value="variation">Maior queda</option>
+            </select>
+          </div>
+        </div>
+        <div style={{ width: '100%', maxWidth: '600px', marginTop: '1.5rem' }}>
           <SearchBox value={query} setValue={setQuery} products={products} />
         </div>
       </section>
