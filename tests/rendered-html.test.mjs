@@ -62,7 +62,7 @@ test("ships persistent catalog, brand metadata and social assets", async () => {
   assert.match(schema, /sqliteTable\("products"/);
   assert.match(schema, /sqliteTable\("prices"/);
   assert.match(layout, /PreçoCerto — Economia Real em Feijó/);
-  assert.match(layout, /\/og-premium-v3\.png/);
+  assert.match(layout, /\/og\.png/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
   await access(new URL("../public/og.png", import.meta.url));
   await access(new URL("../public/og-profissional.png", import.meta.url));
