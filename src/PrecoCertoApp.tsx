@@ -1413,6 +1413,7 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
                       </div>
                       <div className="result-actions" style={{ display: 'flex', gap: '0.5rem' }}>
                         <button className="button button--primary" style={{ flex: 1 }} onClick={() => addBasket(p)}><Plus /> Cesta</button>
+                        <button className="button button--outline" title="Ativar alerta de preço e atualização" onClick={() => saveAction("alert", "product", String(p.id))}><Bell size={16} /></button>
                         <button className="button button--outline" title="Compartilhar produto" onClick={() => handleShare(p)}><Share2 size={16} /></button>
                       </div>
                     </div>
