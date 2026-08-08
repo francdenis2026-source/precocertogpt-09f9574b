@@ -1387,6 +1387,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 
 
 function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }: PageProps) {
+  const pathname = useLocation().pathname;
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeStore, setActiveStore] = useState("all");
   const [activeBrand, setActiveBrand] = useState("all");
@@ -1465,8 +1466,8 @@ function SearchPage({ products, stores, query, setQuery, addBasket, saveAction }
     <div className="shell page-shell">
       <section className="search-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1>Comparador de Preços</h1>
-          <p>Encontre o melhor preço entre {stores.length} estabelecimentos em Feijó.</p>
+          <h1>{pathname === "/melhores-precos" ? "Melhores Ofertas de Feijó" : "Comparador de Preços"}</h1>
+          <p>{pathname === "/melhores-precos" ? "Veja os produtos com maior queda de preço e economize agora." : `Encontre o melhor preço entre ${stores.length} estabelecimentos em Feijó.`}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button className="button button--outline" onClick={() => handleShare()}>
