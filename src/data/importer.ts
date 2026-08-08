@@ -57,9 +57,10 @@ export async function runPriceImport(
       id: e.id,
       name: e.name,
       neighborhood: e.neighborhood,
-      brand_color: e.brand_color
+      brand_color: e.brand_color,
+      kind: 'market' // Valor padrão para satisfazer a constraint not-null
     }));
-    const { error: estError } = await supabase.from("establishments").upsert(estUpsert);
+    const { error: estError } = await supabase.from("establishments").upsert(estUpsert, { onConflict: 'id' });
     if (estError) throw new Error(`Erro estabelecimentos: ${estError.message}`);
 
     // 2. Sincronizar PRODUTOS
