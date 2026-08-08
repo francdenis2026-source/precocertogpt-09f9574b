@@ -85,42 +85,15 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
     const q = normalize(query);
 
     const mapped = productRows
-      .map(product => {
+      .map((product): Product | null => {
         const rows = priceRows.filter(price => price.product_id === product.id);
         if (!rows.length) return null;
-
-        const values = rows.map(row => toNumber(row.value));
-        const best = rows.reduce((lowest, row) =>
-          toNumber(row.value) < toNumber(lowest.value) ? row : lowest,
-        );
-        const store = storeRows.find(item => item.id === best.establishment_id);
-        if (!store) return null;
-
-        const previous = toNumber(best.previous_value);
-
-        return {
-          id: product.id,
-          slug: product.slug ?? String(product.id),
-          name: product.name ?? "Produto sem nome",
-          brand: product.brand ?? "—",
-          category: product.category ?? "Geral",
-          size: product.size ?? "—",
-          unit: product.unit ?? "un",
-          barcode: product.barcode ?? undefined,
-          minPrice: round(Math.min(...values)),
-          avgPrice: round(values.reduce((total, value) => total + value, 0) / values.length),
-          maxPrice: round(Math.max(...values)),
-          storeCount: new Set(rows.map(row => row.establishment_id)).size,
-          establishmentId: store.id,
-          establishmentSlug: store.slug ?? String(store.id),
-          establishment: store.name ?? "Estabelecimento",
-          neighborhood: store.neighborhood ?? "—",
-          storeColor: store.color ?? "#1473E6",
-          capturedAt: best.captured_at ?? new Date().toISOString(),
+...
           previousPrice: Number.isFinite(previous) ? round(previous) : undefined,
-        } satisfies Product;
+        };
       })
       .filter((product): product is Product => product !== null)
+
       .filter(
         product =>
           !q ||
