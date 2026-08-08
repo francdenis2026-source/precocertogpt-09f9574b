@@ -29,26 +29,30 @@ export async function runPriceImport(
   try {
     onProgress("Iniciando importação...");
 
-    // 1. Buscar preços existentes para verificação de duplicidade
-    onProgress("Verificando registros existentes no Supabase...");
-    const { data: existingPrices, error: fetchError } = await supabase
-      .from("prices")
-      .select("product_id, establishment_id, value");
-
-    if (fetchError) {
-      console.warn("Erro ao buscar preços existentes:", fetchError);
-    }
-
-    const existingKeys = new Set(
-      (existingPrices || []).map(
-        (p) => `${p.product_id}_${p.establishment_id}_${p.value}`
-      )
-    );
-
-    // 2. Carregar o catálogo local
-    onProgress("Carregando 2.838 registros de preços...");
+    // 1. Carregar o catálogo local para garantir que temos os produtos
     const { buildCatalog } = await import("./catalog");
     const local = buildCatalog();
+    
+    // 2. Sincronizar PRODUTOS primeiro (precisamos do ID neles para a tabela de preços)
+    onProgress("Sincronizando 696 produtos...");
+    const productsToUpsert = local.products.map(p => ({
+      id: p.id,
+      slug: p.slug || `p-${p.id}`,
+      name: p.name,
+      brand: p.brand,
+      category: p.category,
+      size: p.size,
+      unit: p.unit || 'un',
+      barcode: p.barcode
+    }));
+
+    const { error: prodError } = await supabase.from("products").upsert(productsToUpsert, { onConflict: 'id' });
+    if (prodError) throw new Error(`Erro ao sincronizar produtos: ${prodError.message}`);
+
+    // 3. Buscar preços existentes para verificação de duplicidade
+    onProgress("Verificando preços existentes...");
+    const { data: existingPrices } = await supabase.from("prices").select("product_id, establishment_id, value");
+    const existingKeys = new Set((existingPrices || []).map(p => `${p.product_id}_${p.establishment_id}_${p.value}`));
 
     // Mapeamento de lojas (CSV -> Supabase UUID)
     const storeMap: Record<number, string> = {
@@ -57,7 +61,7 @@ export async function runPriceImport(
       3: "eb1e6277-db89-4e94-950e-d14540ce71c6", // PAGUE POUCO
       4: "0b39b658-42f1-42c4-b1ac-eb81e4ba27bf", // 100% FEIJOENSE
       5: "905ca83b-5bd5-4d91-a543-76b2966e7d45", // PARCEIRÃO
-      6: "8e7a7e3d-7b2a-4c1e-9d2f-a1b2c3d4e5f6", // POPULAR (Exemplo UUID)
+      6: "8e7a7e3d-7b2a-4c1e-9d2f-a1b2c3d4e5f6", // POPULAR
       7: "7d6c5b4a-3e2d-1c0b-a987-654321fedcba", // BOM PREÇO
       8: "f1e2d3c4-b5a6-9788-7766-554433221100", // MERCANTIL FEIJÓ
       9: "a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6", // AUTO SERVIÇO UNIÃO
@@ -66,7 +70,7 @@ export async function runPriceImport(
       12: "d4e5f6a7-b8c9-0d1e-2f3a-b4c5d6e7f8a9", // VITÓRIA SUPER
     };
 
-    // Montar lista de novos preços (evitando duplicatas exatas)
+    // Montar lista de novos preços
     const pricesToInsert = [];
     let duplicateCount = 0;
 
@@ -87,6 +91,7 @@ export async function runPriceImport(
         captured_at: new Date().toISOString(),
       });
     }
+
 
     if (pricesToInsert.length === 0) {
       onProgress(`Concluído: Todos os ${duplicateCount} registros já existem.`);
