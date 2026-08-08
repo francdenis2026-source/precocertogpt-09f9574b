@@ -13,7 +13,7 @@ const supabase = createClient(URL, SERVICE_KEY);
  */
 export async function runPriceImport(
   onProgress: (msg: string) => void,
-): Promise<{ success: bool; count: number; error?: string }> {
+): Promise<{ success: boolean; count: number; error?: string }> {
   try {
     onProgress("Iniciando importação...");
 
