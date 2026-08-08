@@ -299,3 +299,61 @@ body{background:radial-gradient(circle at 78% 0,#e8f2ff 0,transparent 30%),var(-
 .brand__logo--compact{width:46px}
 .preview-sidebar .brand__logo--compact{width:43px}
 @media(max-width:540px){.brand__logo{width:164px}.brand__logo--compact{width:42px}}
+
+/* ==========================================================================
+   Refinamento profissional — header, tipografia e contraste da homepage
+   ========================================================================== */
+
+:root{--text:#0f2440;--muted:#4b5b70;--tertiary:#69788c;--green:#0f7a50}
+
+body{font-size:17px;line-height:1.6}
+
+/* Header */
+.site-header{height:80px;background:rgba(255,255,255,.94);border-bottom:1px solid rgba(15,36,64,.09);box-shadow:0 1px 0 rgba(15,36,64,.04),0 12px 30px -24px rgba(15,36,64,.35)}
+.header-inner{gap:22px}
+.brand__logo{height:38px;width:auto;display:block}
+.brand__logo--compact{height:30px}
+.header-location{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:750;color:#33465e;background:var(--surface-2);border:1px solid var(--border);border-radius:99px;padding:6px 12px;white-space:nowrap}
+.header-location svg{color:var(--blue)}
+.desktop-nav{gap:6px;font-size:14.5px;font-weight:700;color:#26374e}
+.desktop-nav a{position:relative;padding:10px 14px;border-radius:10px;transition:.18s ease}
+.desktop-nav a:hover{background:var(--blue-soft);color:var(--blue-hover)}
+.desktop-nav a:after{content:"";position:absolute;left:14px;right:14px;bottom:4px;height:2px;border-radius:2px;background:var(--gold);opacity:0;transition:.18s ease}
+.desktop-nav a:hover:after{opacity:1}
+.header-actions{gap:12px}
+.text-link{color:#26374e}
+.text-link:hover{color:var(--blue)}
+.icon-button{width:44px;height:44px;border-radius:12px}
+.header-actions .button--primary{box-shadow:0 10px 24px -10px rgba(20,115,230,.75);letter-spacing:.1px}
+
+/* Faixa de status */
+.market-pulse{font-size:12.5px}
+
+/* Hero — tipografia maior e contraste mais forte */
+.hero{height:auto;min-height:640px;padding-bottom:56px}
+.hero-wash{background:linear-gradient(90deg,rgba(6,22,40,.985) 0%,rgba(6,22,40,.93) 40%,rgba(6,22,40,.5) 74%,rgba(6,22,40,.28)),linear-gradient(0deg,var(--navy) 0%,transparent 26%)}
+.hero h1{font-size:clamp(50px,5.6vw,76px);letter-spacing:-.04em;font-weight:900}
+.hero h1 span{color:#7dbaff}
+.hero-content>p,.hero-copy>p{font-size:19.5px;line-height:1.55;color:rgba(255,255,255,.9);max-width:620px}
+.hero-live{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#bfe6ff}
+.hero-trust{font-size:13px;color:rgba(255,255,255,.86);gap:26px;margin-top:22px}
+.eyebrow{font-size:11.5px;letter-spacing:1.9px}
+.eyebrow--light{color:#e7f2ff}
+
+/* Métricas */
+.metrics-float{height:auto;padding:26px 30px;border-radius:22px}
+.metrics-float strong{font-size:32px}
+.metrics-float span{font-size:12.5px;color:var(--muted);font-weight:650}
+.metrics-float>small{font-size:10.5px;color:var(--tertiary)}
+
+/* Seções e leitura */
+.section-heading h2{font-size:clamp(31px,3.7vw,44px);letter-spacing:-.035em}
+.section-heading p{font-size:16.5px;color:var(--muted)}
+.eyebrow{color:#1160c9}
+.inline-link{font-size:14.5px}
+.green-price{color:var(--green)}
+.price-badge{color:#075c3b;background:#d7f5e6}
+.visual-product-card .category-tag{color:#3d4f66}
+.benefit-grid p,.basket-plan p{color:var(--muted);font-size:16px}
+
+@media (max-width:1080px){.header-location{display:none}}
