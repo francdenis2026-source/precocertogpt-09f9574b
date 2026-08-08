@@ -382,11 +382,83 @@ function GenericPage({ path, products, stores, addBasket, saveAction }: PageProp
   return <div className="shell page-shell generic-page"><section className="generic-hero"><span className="generic-icon">{info[2]}</span><div><span className="eyebrow">{info[0]}</span><h1>{info[1]}</h1><p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p></div><a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a></section><div className="generic-grid"><section className="generic-main"><div className="section-heading compact"><div><h2>{isStore?"Ofertas em destaque":isProduct?"Onde está mais barato":"Destaques de hoje"}</h2><p>Registros compatíveis e verificados recentemente.</p></div></div>{products.slice(0,4).map(p=><article className="compact-product" key={p.id}><span className="product-visual">{p.category.slice(0,1)}</span><div><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size} • {p.establishment}</small><span><ShieldCheck/> Verificado há poucos minutos</span></div><strong>{money(p.minPrice)}</strong><button onClick={()=>saveAction("favorite","product",String(p.id))} aria-label="Favoritar"><Heart/></button><button className="button button--primary" onClick={()=>addBasket(p)}><Plus/> Cesta</button></article>)}</section><aside className="generic-aside"><span className="eyebrow">Visão local</span><h2>Feijó economiza junto</h2><div className="aside-stat"><span>Produtos acompanhados</span><strong>1.247</strong></div><div className="aside-stat"><span>Atualizações hoje</span><strong>214</strong></div><div className="aside-stat"><span>Economia potencial</span><strong>14,8%</strong></div><a href="/cesta-basica" className="button button--dark button--full">Montar cesta inteligente</a></aside></div></div>;
 }
 
-function AuthPage({ path }: { path:string }) {
-  const register = path === "/cadastro" || path === "/registrar"; const [pin,setPin]=useState(""); const [cpf,setCpf]=useState("");
-  function submit(e:FormEvent){e.preventDefault(); window.location.href="/app";}
-  return <div className="auth-page"><div className="auth-brand-panel"><Brand inverse/><div><span className="eyebrow eyebrow--gold">Antes de comprar, compare</span><h1>{register?"Economize desde a primeira lista.":"Que bom ter você de volta."}</h1><p>Preços em tempo real, alertas de queda e cestas inteligentes para comprar melhor em Feijó.</p><ul><li><Check/> Comparação por mercado e embalagem</li><li><Check/> Histórico e alertas personalizados</li><li><Check/> Bônus por envio de nota fiscal</li></ul></div><small>O menor preço, na hora certa.</small></div><main className="auth-form-wrap"><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}><a className="auth-back" href="/" style={{ margin: 0 }}><ArrowRight/> Voltar ao início</a>{!register && <a href="/admin" style={{ fontSize: '0.75rem', color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#94a3b8'} onMouseOut={e => e.currentTarget.style.color = '#cbd5e1'}>Acesso Restrito</a>}</div><form className="auth-form" onSubmit={submit}><span className="eyebrow">{register?"Crie sua conta":"Acesse sua conta"}</span><h2>{register?"Comece grátis":"Entrar no PreçoCerto"}</h2><p>{register?"Leva menos de dois minutos.":"Use seu CPF e PIN de 6 dígitos."}</p>{register&&<label>Nome completo<input required minLength={3} placeholder="Seu nome e sobrenome"/></label>}<label>CPF<input required value={cpf} onChange={e=>setCpf(e.target.value.replace(/\D/g,"").slice(0,11))} inputMode="numeric" placeholder="000.000.000-00"/><small>Usamos seu CPF somente para identificar sua conta.</small></label>{register&&<label>Celular<input inputMode="tel" placeholder="(68) 99999-9999"/></label>}<label>PIN de 6 dígitos<input required value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,6))} inputMode="numeric" type="password" maxLength={6} placeholder="••••••"/><small>Evite sequências como 123456.</small></label><button className="button button--primary button--full" type="submit" disabled={pin.length!==6||cpf.length!==11}>{register?"Criar minha conta":"Entrar com segurança"}<ArrowRight/></button>{!register&&<a href="/resgatar" className="center-link">Esqueci meu PIN</a>}<div className="auth-switch">{register?"Já possui conta? ":"Ainda não tem conta? "}<a href={register?"/login":"/cadastro"}>{register?"Entrar":"Começar grátis"}</a></div></form></main></div>;
+function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: boolean) => void }) {
+  const register = path === "/cadastro" || path === "/registrar";
+  const isAdminLogin = path === "/admin-login";
+  const [pin,setPin]=useState(""); const [cpf,setCpf]=useState("");
+  const [user,setUser]=useState(""); const [pass,setPass]=useState("");
+  const [error, setError] = useState("");
+
+  function submit(e:FormEvent){
+    e.preventDefault();
+    if (isAdminLogin) {
+      if (user === "admin" && pass === "feijo2026") {
+        onAdminAuth(true);
+        window.location.href="/admin";
+      } else {
+        setError("Credenciais administrativas incorretas.");
+      }
+    } else {
+      window.location.href="/app";
+    }
+  }
+
+  return <div className="auth-page">
+    <div className="auth-brand-panel">
+      <Brand inverse/>
+      <div>
+        <span className="eyebrow eyebrow--gold">Antes de comprar, compare</span>
+        <h1>{isAdminLogin ? "Painel de Controle Restrito" : register?"Economize desde a primeira lista.":"Que bom ter você de volta."}</h1>
+        <p>Preços em tempo real, alertas de queda e cestas inteligentes para comprar melhor em Feijó.</p>
+        <ul>
+          <li><Check/> {isAdminLogin ? "Gestão de inventário e preços" : "Comparação por mercado e embalagem"}</li>
+          <li><Check/> {isAdminLogin ? "Auditoria e logs operacionais" : "Histórico e alertas personalizados"}</li>
+          <li><Check/> {isAdminLogin ? "Segurança de dados e backups" : "Bônus por envio de nota fiscal"}</li>
+        </ul>
+      </div>
+      <small>O menor preço, na hora certa.</small>
+    </div>
+    <main className="auth-form-wrap">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <a className="auth-back" href="/" style={{ margin: 0 }}><ArrowRight/> Voltar ao início</a>
+        {!register && !isAdminLogin && <a href="/admin" style={{ fontSize: '0.75rem', color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#94a3b8'} onMouseOut={e => e.currentTarget.style.color = '#cbd5e1'}>Acesso Restrito</a>}
+      </div>
+      <form className="auth-form" onSubmit={submit}>
+        <span className="eyebrow">{isAdminLogin ? "Segurança" : register?"Crie sua conta":"Acesse sua conta"}</span>
+        <h2>{isAdminLogin ? "Login Administrativo" : register?"Comece grátis":"Entrar no PreçoCerto"}</h2>
+        <p>{isAdminLogin ? "Insira suas chaves de acesso para continuar." : register?"Leva menos de dois minutos.":"Use seu CPF e PIN de 6 dígitos."}</p>
+        
+        {error && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><AlertTriangle size={16}/> {error}</div>}
+
+        {isAdminLogin ? (
+          <>
+            <label>Usuário Administrador<input required value={user} onChange={e=>setUser(e.target.value)} placeholder="usuário"/></label>
+            <label>Senha Secreta<input required value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="••••••••"/></label>
+          </>
+        ) : (
+          <>
+            {register&&<label>Nome completo<input required minLength={3} placeholder="Seu nome e sobrenome"/></label>}
+            <label>CPF<input required value={cpf} onChange={e=>setCpf(e.target.value.replace(/\D/g,"").slice(0,11))} inputMode="numeric" placeholder="000.000.000-00"/><small>Usamos seu CPF somente para identificar sua conta.</small></label>
+            {register&&<label>Celular<input inputMode="tel" placeholder="(68) 99999-9999"/></label>}
+            <label>PIN de 6 dígitos<input required value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,6))} inputMode="numeric" type="password" maxLength={6} placeholder="••••••"/><small>Evite sequências como 123456.</small></label>
+          </>
+        )}
+
+        <button className="button button--primary button--full" type="submit" disabled={isAdminLogin ? (!user || !pass) : (pin.length!==6||cpf.length!==11)}>
+          {isAdminLogin ? "Autenticar Acesso" : register?"Criar minha conta":"Entrar com segurança"}
+          <ArrowRight/>
+        </button>
+        
+        {!register && !isAdminLogin && <a href="/resgatar" className="center-link">Esqueci meu PIN</a>}
+        <div className="auth-switch">
+          {isAdminLogin ? <a href="/login">Voltar para login comum</a> : (register?"Já possui conta? ":"Ainda não tem conta? ")}
+          {!isAdminLogin && <a href={register?"/login":"/cadastro"}>{register?"Entrar":"Começar grátis"}</a>}
+        </div>
+      </form>
+    </main>
+  </div>;
 }
+
 
 export default function PrecoCertoApp() {
   const pathname = useLocation().pathname || "/";
