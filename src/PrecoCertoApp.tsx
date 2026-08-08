@@ -126,8 +126,50 @@ function PriceBadge({ product }: { product: Product }) {
 function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction }: PageProps) {
   const [priceMode, setPriceMode] = useState<"recent" | "lowest">("recent");
   const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [randomFeatured, setRandomFeatured] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const pickRandom = () => {
+      // Logic to pick random attractive products (e.g. products with highest discount)
+      // and ensure diversity of establishments.
+      const attractive = [...products].sort((a, b) => {
+        const aSaving = a.previousPrice ? (a.previousPrice - a.minPrice) / a.previousPrice : 0;
+        const bSaving = b.previousPrice ? (b.previousPrice - b.minPrice) / b.previousPrice : 0;
+        return bSaving - aSaving;
+      });
+
+      // Try to get products from different establishments
+      const selected: Product[] = [];
+      const usedStores = new Set();
+      
+      for (const p of attractive) {
+        if (!usedStores.has(p.establishmentId)) {
+          selected.push(p);
+          usedStores.add(p.establishmentId);
+        }
+        if (selected.length >= 6) break;
+      }
+      
+      // If we don't have enough, fill with others
+      if (selected.length < 6) {
+        for (const p of attractive) {
+          if (!selected.find(s => s.id === p.id)) {
+            selected.push(p);
+          }
+          if (selected.length >= 6) break;
+        }
+      }
+
+      setRandomFeatured(selected.sort(() => Math.random() - 0.5));
+    };
+
+    pickRandom();
+    const interval = setInterval(pickRandom, 3600000); // 60 minutes
+    return () => clearInterval(interval);
+  }, [products]);
+
   const rows = [...products].sort((a,b) => priceMode === "lowest" ? a.minPrice - b.minPrice : Date.parse(b.capturedAt) - Date.parse(a.capturedAt)).slice(0, 6);
-  const featured = products[featuredIndex] ?? products[0];
+  const featured = randomFeatured[featuredIndex] ?? products[0];
   return <>
     <section className="hero">
       <div className="hero-photo" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=2000&auto=format&fit=crop")', backgroundSize: 'cover', backgroundPosition: 'center' }} />
