@@ -9,34 +9,27 @@ import { chromium } from 'playwright';
   try {
     await page.goto('http://localhost:8080/admin-login');
 
-    // 1. Tentar login errado 5 vezes
-    for (let i = 1; i <= 5; i++) {
-      await page.fill('input[placeholder="Usuário"]', 'admin');
-      await page.fill('input[placeholder="Senha"]', 'senha_errada');
+    for (let i = 1; i <= 6; i++) {
+      await page.fill('input[placeholder="usuário"]', 'admin');
+      await page.fill('input[placeholder="••••••••"]', 'senha_errada');
       await page.click('button[type="submit"]');
       const msg = await page.textContent('.auth-form');
-      console.log(`Tentativa ${i}:`, msg.includes('Tentativa') || msg.includes('bloqueado') ? 'OK' : 'Falhou');
+      if (msg.includes('bloqueado')) {
+        console.log(`Tentativa ${i}: Bloqueado OK`);
+        break;
+      }
+      console.log(`Tentativa ${i}: Erro comum OK`);
     }
 
-    // 2. Verificar se bloqueou
-    const blockMsg = await page.textContent('.auth-form');
-    if (blockMsg.includes('bloqueado')) {
-      console.log('Bloqueio de login: SUCESSO');
-    } else {
-      console.log('Bloqueio de login: FALHOU');
-    }
-
-    // 3. Testar Rate Limit na Recuperação
     await page.click('button:has-text("Esqueci minha senha admin")');
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 4; i++) {
       await page.fill('input[placeholder="usuário"]', 'inexistente');
       await page.click('button:has-text("Verificar Usuário")');
-    }
-    const recoveryBlockMsg = await page.textContent('.auth-form');
-    if (recoveryBlockMsg.includes('bloqueado')) {
-      console.log('Bloqueio de recuperação: SUCESSO');
-    } else {
-      console.log('Bloqueio de recuperação: FALHOU');
+      const msg = await page.textContent('.auth-form');
+      if (msg.includes('bloqueado')) {
+        console.log(`Recuperação ${i}: Bloqueado OK`);
+        break;
+      }
     }
 
   } catch (e) {

@@ -308,34 +308,36 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
     <section className="admin-card">
       <div className="admin-card-head">
         <div><h2>Status da Conexão</h2><p>Leitura em tempo real do Supabase.</p></div>
-        <button className="button button--outline button--small" onClick={handleTestConnection} disabled={testing}>
-          <Activity size={14}/> {testing ? "Testando..." : "Testar Conexão"}
+        <button className="button button--outline button--small" onClick={handleTestConnection} disabled={isTesting}>
+          <Activity size={14}/> {isTesting ? "Testando..." : "Testar Conexão"}
         </button>
+
       </div>
-      {connectionInfo ? (
+      {connStatus ? (
         <div className="connection-status-panel" style={{padding: "1rem"}}>
           <div style={{display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem"}}>
-            <span className={`status ${connectionInfo.success ? "ok" : "review"}`} style={{width: 10, height: 10, borderRadius: "50%", display: "inline-block", background: connectionInfo.success ? "#16a34a" : "#dc2626"}}/>
-            <b>{connectionInfo.success ? "Conectado ao Supabase" : "Erro na Conexão"}</b>
-            {connectionInfo.success && <small style={{marginLeft: "auto", color: "#6b7280"}}>{connectionInfo.latency}ms latência</small>}
+            <span className={`status ${connStatus.success ? "ok" : "review"}`} style={{width: 10, height: 10, borderRadius: "50%", display: "inline-block", background: connStatus.success ? "#16a34a" : "#dc2626"}}/>
+            <b>{connStatus.success ? "Conectado ao Supabase" : "Erro na Conexão"}</b>
+            {connStatus.success && <small style={{marginLeft: "auto", color: "#6b7280"}}>{connStatus.latency}ms latência</small>}
+
           </div>
-          {connectionInfo.success ? (
+          {connStatus.success ? (
             <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem"}}>
               <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
                 <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Lojas</small>
-                <strong>{connectionInfo.tables.establishments}</strong>
+                <strong>{connStatus.tables.establishments}</strong>
               </div>
               <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
                 <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Produtos</small>
-                <strong>{connectionInfo.tables.products}</strong>
+                <strong>{connStatus.tables.products}</strong>
               </div>
               <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
                 <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Preços</small>
-                <strong>{connectionInfo.tables.prices}</strong>
+                <strong>{connStatus.tables.prices}</strong>
               </div>
             </div>
           ) : (
-            <p style={{color: "#dc2626", fontSize: "0.85rem"}}>{connectionInfo.error}</p>
+            <p style={{color: "#dc2626", fontSize: "0.85rem"}}>{connStatus.error}</p>
           )}
         </div>
       ) : (
@@ -348,10 +350,10 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
         <div><h2>Progresso de Importação</h2><p>Processamento de dados em tempo real.</p></div>
       </div>
       <div style={{padding: "1rem"}}>
-        {importing ? (
+        {isImporting ? (
           <div className="import-progress-panel">
             <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem"}}>
-              <span>{importStatus}</span>
+              <span>{importMsg}</span>
               <b>{Math.round((importProgress / importTotal) * 100)}%</b>
             </div>
             <div style={{height: "8px", background: "#f1f5f9", borderRadius: "4px", overflow: "hidden", marginBottom: "0.5rem"}}>
@@ -408,8 +410,9 @@ function AdminPage({ path, onLogout }: { path: string; onLogout: () => void }) {
     <div className="admin-card-head">
       <div><h2>Monitoramento operacional</h2><p>Dados mais recentes do catálogo local.</p></div>
       <div style={{display:"flex",gap:"0.75rem"}}>
-        <button className="button button--outline" onClick={handleImport} disabled={importing} title="Disparar importação para o Supabase externo">
-          <Database/> {importing ? "Importando..." : "Importar 2.838 Preços"}
+        <button className="button button--outline" onClick={handleImport} disabled={isImporting} title="Disparar importação para o Supabase externo">
+          <Database/> {isImporting ? "Importando..." : "Importar 2.838 Preços"}
+
         </button>
         <button className="button button--outline"><Download/> Exportar</button>
         <button className="button button--primary"><Plus/> Novo registro</button>
