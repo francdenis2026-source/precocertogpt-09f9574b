@@ -619,10 +619,11 @@ function AuthPage({ path, onAdminAuth }: { path:string; onAdminAuth: (success: b
           </>
         )}
 
-        <button className="button button--primary button--full" type="submit" disabled={isAdminLogin ? (showForgot ? (recoveryStep === 1 ? !recoveryUser : !newPass) : (!user || !pass)) : (pin.length!==6||cpf.length!==11)}>
-          {isAdminLogin ? (showForgot ? (recoveryStep === 1 ? "Verificar Usuário" : "Salvar Nova Senha") : "Autenticar Acesso") : register?"Criar minha conta":"Entrar com segurança"}
+        <button className="button button--primary button--full" type="submit" disabled={isAdminLogin ? (showForgot ? (recoveryStep === 1 ? (!recoveryUser || isSendingEmail) : !newPass) : (!user || !pass)) : (pin.length!==6||cpf.length!==11)}>
+          {isAdminLogin ? (showForgot ? (recoveryStep === 1 ? (isSendingEmail ? "Enviando..." : "Enviar E-mail de Recuperação") : "Salvar Nova Senha") : "Autenticar Acesso") : register?"Criar minha conta":"Entrar com segurança"}
           <ArrowRight/>
         </button>
+
         
         {isAdminLogin && !showForgot && <button type="button" onClick={() => setShowForgot(true)} className="center-link" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', marginTop: '1rem' }}>Esqueci minha senha admin</button>}
         {isAdminLogin && showForgot && <button type="button" onClick={() => { setShowForgot(false); setRecoveryStep(1); setError(""); }} className="center-link" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', marginTop: '1rem' }}>Voltar ao login admin</button>}
