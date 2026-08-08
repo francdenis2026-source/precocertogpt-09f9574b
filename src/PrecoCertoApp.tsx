@@ -1590,7 +1590,15 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
       const matchesCategory = activeCategory === "all" || p.category === activeCategory;
       const matchesStore = activeStore === "all" || p.establishment === activeStore;
       const matchesBrand = activeBrand === "all" || p.brand === activeBrand;
-      return matchesQuery && matchesCategory && matchesStore && matchesBrand;
+      
+      const matchesPrice = p.minPrice >= priceRange[0] && p.minPrice <= priceRange[1];
+      
+      const daysSinceUpdate = Math.floor((new Date().getTime() - new Date(p.capturedAt).getTime()) / (1000 * 60 * 60 * 24));
+      const matchesRecency = updateRecency === "all" 
+        || (updateRecency === "7d" && daysSinceUpdate <= 7)
+        || (updateRecency === "24h" && daysSinceUpdate === 0);
+
+      return matchesQuery && matchesCategory && matchesStore && matchesBrand && matchesPrice && matchesRecency;
     });
 
     if (sortBy === "price") {
