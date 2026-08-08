@@ -73,8 +73,7 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
 
 function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
   return <a className={`brand ${inverse ? "brand--inverse" : ""}`} href="/" aria-label="PreçoCerto — página inicial">
-    <span className="brand__mark" aria-hidden="true"><span>P</span><i /></span>
-    {!compact && <span className="brand__word"><b>Preço</b><strong>Certo</strong><small>Feijó • Acre</small></span>}
+    <img className={`brand__logo ${compact ? "brand__logo--compact" : ""}`} src={compact ? "/logo-preco-certo-simbolo.svg" : inverse ? "/logo-preco-certo-inversa.svg" : "/logo-preco-certo.svg"} alt="" aria-hidden="true" />
   </a>;
 }
 
