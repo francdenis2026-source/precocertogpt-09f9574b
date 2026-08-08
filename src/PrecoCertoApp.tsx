@@ -190,10 +190,13 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
         duration: result.duration || 0
       });
       setImportStatus("Importação concluída.");
+      addAuditLog(`Importação de ${result.count} preços concluída`, "success");
     } else {
       setImportStatus(`Erro: ${result.error}`);
+      addAuditLog(`Falha na importação: ${result.error}`, "error");
     }
   }
+
 
   async function handleTestConnection() {
     const { testSupabaseConnection } = await import("./data/importer");
