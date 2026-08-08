@@ -13,27 +13,28 @@ const supabase = createClient(URL, SERVICE_KEY);
  */
 export async function runPriceImport(
   onProgress: (msg: string) => void,
-): Promise<{ success: boolean; count: number; error?: string }> {
+): Promise<{ success: boolean; count: number; duplicates?: number; error?: string }> {
   try {
     onProgress("Iniciando importação...");
 
-    // 1. Limpar preços existentes
-    // Nota: O Supabase REST não tem 'TRUNCATE', mas podemos usar delete(all) com a service key.
-    onProgress("Limpando registros antigos...");
-    const { error: delError } = await supabase.from("prices").delete().neq("establishment_id", "00000000-0000-0000-0000-000000000000"); // hack para deletar tudo
-    if (delError) {
-      console.warn("Erro ao limpar preços:", delError);
+    // 1. Buscar preços existentes para verificação de duplicidade
+    onProgress("Verificando registros existentes no Supabase...");
+    const { data: existingPrices, error: fetchError } = await supabase
+      .from("prices")
+      .select("product_id, establishment_id, value");
+
+    if (fetchError) {
+      console.warn("Erro ao buscar preços existentes:", fetchError);
     }
 
-    // 2. Carregar o arquivo SQL gerado anteriormente e converter para JSON
-    // Como estamos no navegador, vamos simular a carga dos 2838 itens que processei do CSV.
-    // Para manter o script performático, vamos enviar em lotes.
+    const existingKeys = new Set(
+      (existingPrices || []).map(
+        (p) => `${p.product_id}_${p.establishment_id}_${p.value}`
+      )
+    );
 
+    // 2. Carregar o catálogo local
     onProgress("Carregando 2.838 registros de preços...");
-
-    // Mock dos dados processados (usando o catálogo local como base para o seed remoto)
-    // No mundo real, aqui leríamos o CSV ou o SQL.
-    // Para este caso, vamos usar o catalog.ts exportado como base.
     const { buildCatalog } = await import("./catalog");
     const local = buildCatalog();
 
@@ -46,19 +47,34 @@ export async function runPriceImport(
       5: "905ca83b-5bd5-4d91-a543-76b2966e7d45", // PARCEIRÃO
     };
 
-    // Montar lotes
+    // Montar lista de novos preços (evitando duplicatas exatas)
     const pricesToInsert = [];
+    let duplicateCount = 0;
+
     for (const p of local.products) {
+      const establishmentId = storeMap[Number(p.establishmentId)] || storeMap[1];
+      const key = `${p.id}_${establishmentId}_${p.minPrice}`;
+
+      if (existingKeys.has(key)) {
+        duplicateCount++;
+        continue;
+      }
+
       pricesToInsert.push({
         product_id: p.id,
-        establishment_id: storeMap[Number(p.establishmentId)] || storeMap[1],
+        establishment_id: establishmentId,
         value: p.minPrice,
         previous_value: p.previousPrice || p.maxPrice,
         captured_at: new Date().toISOString(),
       });
     }
 
-    onProgress(`Enviando ${pricesToInsert.length} registros em lotes...`);
+    if (pricesToInsert.length === 0) {
+      onProgress(`Concluído: Todos os ${duplicateCount} registros já existem.`);
+      return { success: true, count: 0, duplicates: duplicateCount };
+    }
+
+    onProgress(`Enviando ${pricesToInsert.length} novos registros em lotes... (${duplicateCount} duplicatas ignoradas)`);
 
     const batchSize = 100;
     let inserted = 0;
@@ -72,10 +88,10 @@ export async function runPriceImport(
       }
 
       inserted += batch.length;
-      onProgress(`Importado: ${inserted} registros...`);
+      onProgress(`Importado: ${inserted} novos registros...`);
     }
 
-    return { success: true, count: inserted };
+    return { success: true, count: inserted, duplicates: duplicateCount };
   } catch (err) {
     console.error("Erro na importação:", err);
     return {
