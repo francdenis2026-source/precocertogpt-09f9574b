@@ -24,6 +24,10 @@ type Product = {
 
 type StoreRow = { id: number; slug: string; name: string; neighborhood: string; color: string; products: number };
 
+type PlatformMetrics = { products: number; prices: number; stores: number };
+
+const verifiedDatasetMetrics: PlatformMetrics = { products: 836, prices: 3080, stores: 12 };
+
 const initialProducts: Product[] = [
   { id: 1, slug: "arroz-tio-joao-5kg", name: "Arroz Tio João Tipo 1", brand: "Tio João", category: "Mercearia", size: "5 kg", unit: "pacote", minPrice: 29.89, avgPrice: 31.32, maxPrice: 32.9, storeCount: 4, establishmentId: 1, establishmentSlug: "central-super", establishment: "Central Super", neighborhood: "Centro", storeColor: "#1473E6", capturedAt: new Date().toISOString(), previousPrice: 32.5 },
   { id: 2, slug: "cafe-3-coracoes-500g", name: "Café 3 Corações Tradicional", brand: "3 Corações", category: "Mercearia", size: "500 g", unit: "pacote", minPrice: 15.75, avgPrice: 16.71, maxPrice: 17.9, storeCount: 3, establishmentId: 2, establishmentSlug: "mercado-reboucas", establishment: "Mercado Rebouças", neighborhood: "Esperança", storeColor: "#16A36A", capturedAt: new Date().toISOString(), previousPrice: 17.2 },
@@ -57,6 +61,7 @@ const adminRouteNames: Record<string, string> = {
 };
 
 function money(value: number) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value); }
+function count(value: number) { return new Intl.NumberFormat("pt-BR").format(value); }
 
 const productImages: Record<string, string> = {
   "arroz-tio-joao-5kg": "/products/arroz-tio-joao-5kg.png",
@@ -116,7 +121,7 @@ function PriceBadge({ product }: { product: Product }) {
   return <span className="price-badge"><TrendingDown size={13} /> {saving.toFixed(0)}% menor</span>;
 }
 
-function HomePage({ products, stores, query, setQuery, addBasket, saveAction }: PageProps) {
+function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction }: PageProps) {
   const [priceMode, setPriceMode] = useState<"recent" | "lowest">("recent");
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const rows = [...products].sort((a,b) => priceMode === "lowest" ? a.minPrice - b.minPrice : Date.parse(b.capturedAt) - Date.parse(a.capturedAt)).slice(0, 6);
@@ -140,7 +145,7 @@ function HomePage({ products, stores, query, setQuery, addBasket, saveAction }: 
         </aside>
       </div>
     </section>
-    <div className="shell metrics-float" aria-label="Métricas da plataforma"><div><span className="metric-icon"><PackageSearch /></span><strong>1.247</strong><span>produtos cadastrados</span></div><div><span className="metric-icon"><Activity /></span><strong>8.932</strong><span>preços monitorados</span></div><div><span className="metric-icon"><Store /></span><strong>{stores.length}</strong><span>estabelecimentos ativos</span></div><small><span /> Apuração hoje, às {new Date().toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"})}</small></div>
+    <div className="shell metrics-float" aria-label="Métricas da plataforma"><div><span className="metric-icon"><Store /></span><strong>{count(metrics.stores)}</strong><span>estabelecimentos cadastrados</span></div><div><span className="metric-icon"><PackageSearch /></span><strong>{count(metrics.products)}</strong><span>itens cadastrados</span></div><div><span className="metric-icon"><Activity /></span><strong>{count(metrics.prices)}</strong><span>preços registrados</span></div><small><span /> Base consolidada até 7 de agosto de 2026</small></div>
     <nav className="shell category-rail" aria-label="Atalhos de compra"><span>Explore por intenção</span><a href="/categoria/mercearia"><PackageSearch /> Mercearia <ArrowRight /></a><a href="/categoria/acougue"><TrendingDown /> Ofertas do dia <ArrowRight /></a><a href="/cesta-basica"><ShoppingBasket /> Cesta essencial <ArrowRight /></a><a href="/estabelecimentos"><Store /> Mercados locais <ArrowRight /></a></nav>
     <section className="section shell featured-products"><div className="section-heading"><div><span className="eyebrow">Mais buscados em Feijó</span><h2>Produtos que valem comparar</h2><p>Embalagens reais, histórico recente e o melhor preço disponível agora.</p></div><a className="inline-link" href="/buscar">Explorar catálogo <ArrowRight /></a></div><div className="visual-product-grid">{products.slice(0,6).map((p,index)=><article className="visual-product-card" key={p.id}><button className="floating-favorite" onClick={()=>saveAction("favorite","product",String(p.id))} aria-label={`Favoritar ${p.name}`}><Heart /></button><a className="visual-product-image" href={`/produto/${p.slug}`}><span className="position-number">0{index+1}</span><ProductImage product={p} /><span className="verified-chip"><ShieldCheck /> Verificado</span></a><div className="visual-product-content"><span className="category-tag">{p.category} • {p.size}</span><a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a><div className="visual-store"><span className="market-dot" style={{background:p.storeColor}}/><span>{p.establishment}<small><MapPin /> {p.neighborhood}</small></span></div><div className="visual-price"><span><small>a partir de</small><strong>{money(p.minPrice)}</strong></span><span><small>média local</small><b>{money(p.avgPrice)}</b></span></div><div className="mini-trend"><svg viewBox="0 0 180 34" aria-hidden="true"><path d={`M2 ${9+index%3*3} C24 ${7+index}, 31 ${22-index}, 54 18 S86 ${8+index}, 108 20 S145 ${27-index},178 ${13+index}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="178" cy={13+index} r="3" fill="currentColor"/></svg><span><TrendingDown /> {Math.max(3,Math.round((1-p.minPrice/p.maxPrice)*100))}% abaixo do maior</span></div><div className="visual-product-actions"><button className="button button--primary" onClick={()=>addBasket(p)}><Plus /> Cesta</button><a href={`/produto/${p.slug}`}>Comparar <ArrowRight /></a></div></div></article>)}</div></section>
     <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Economia pronta para você</span><h2>Cestas otimizadas</h2><p>Combinações que aproveitam o melhor preço de cada mercado de Feijó.</p></div><a className="inline-link" href="/cesta-basica">Ver todas as cestas <ArrowRight /></a></div><div className="basket-grid"><article className="basket-feature"><div className="basket-top"><span className="basket-icon"><ShoppingBasket /></span><PriceBadge product={products[0]} /></div><p>Cesta essencial da semana</p><h3>12 itens em 2 mercados</h3><div className="basket-total"><span>Valor otimizado</span><strong>{money(87.34)}</strong><small>economia estimada de {money(18.62)}</small></div><div className="store-route"><span><b style={{background: stores[0]?.color}}>CS</b> Central Super · 8 itens</span><span><b style={{background: stores[1]?.color}}>MR</b> Rebouças · 4 itens</span></div><a href="/cesta-basica" className="button button--dark">Abrir cesta otimizada <ArrowRight /></a></article><article className="basket-plan"><span className="eyebrow">Planejamento inteligente</span><h3>Quanto você quer gastar?</h3><p>Informe seu orçamento e montamos a melhor cesta possível, explicando cada escolha.</p><div className="budget-chips"><a href="/cesta-basica?orcamento=80">R$ 80</a><a href="/cesta-basica?orcamento=100">R$ 100</a><a href="/cesta-basica?orcamento=150">R$ 150</a><a href="/cesta-basica?orcamento=200">R$ 200</a></div><a href="/cesta-basica" className="inline-link">Montar minha cesta <ArrowRight /></a></article></div></section>
@@ -152,7 +157,7 @@ function HomePage({ products, stores, query, setQuery, addBasket, saveAction }: 
   </>;
 }
 
-type PageProps = { products: Product[]; stores: StoreRow[]; query: string; setQuery: (q:string)=>void; addBasket: (p:Product)=>void; saveAction: (action:string, type:string, id:string)=>void };
+type PageProps = { products: Product[]; stores: StoreRow[]; metrics: PlatformMetrics; query: string; setQuery: (q:string)=>void; addBasket: (p:Product)=>void; saveAction: (action:string, type:string, id:string)=>void };
 
 function SearchPage({ products, query, setQuery, addBasket, saveAction }: PageProps) {
   const filtered = products.filter(p => !query || `${p.name} ${p.category} ${p.brand}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
@@ -217,14 +222,14 @@ function AuthPage({ path }: { path:string }) {
 
 export default function PrecoCertoApp() {
   const pathname = usePathname() || "/";
-  const [products,setProducts]=useState<Product[]>(initialProducts); const [stores,setStores]=useState<StoreRow[]>(initialStores); const [query,setQuery]=useState(""); const [cart,setCart]=useState<Product[]>([]); const [toast,setToast]=useState("");
+  const [products,setProducts]=useState<Product[]>(initialProducts); const [stores,setStores]=useState<StoreRow[]>(initialStores); const [metrics,setMetrics]=useState<PlatformMetrics>(verifiedDatasetMetrics); const [query,setQuery]=useState(""); const [cart,setCart]=useState<Product[]>([]); const [toast,setToast]=useState("");
   const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
-  useEffect(()=>{ const q=new URLSearchParams(window.location.search).get("q")??""; if(q) queueMicrotask(()=>setQuery(q)); fetch(`/api/catalog${q?`?q=${encodeURIComponent(q)}`:""}`).then(r=>r.ok?r.json():null).then(data=>{if(data?.products?.length)setProducts(data.products);if(data?.stores?.length)setStores(data.stores)}).catch(()=>undefined); },[]);
+  useEffect(()=>{ const q=new URLSearchParams(window.location.search).get("q")??""; if(q) queueMicrotask(()=>setQuery(q)); fetch(`/api/catalog${q?`?q=${encodeURIComponent(q)}`:""}`).then(r=>r.ok?r.json():null).then(data=>{if(data?.products?.length)setProducts(data.products);if(data?.stores?.length)setStores(data.stores);if(data?.metrics)setMetrics({products:Math.max(verifiedDatasetMetrics.products,Number(data.metrics.products)||0),prices:Math.max(verifiedDatasetMetrics.prices,Number(data.metrics.prices)||0),stores:Math.max(verifiedDatasetMetrics.stores,Number(data.metrics.stores)||0)})}).catch(()=>undefined); },[]);
   useEffect(()=>{ if(!toast)return; const t=setTimeout(()=>setToast(""),2800); return()=>clearTimeout(t); },[toast]);
   function addBasket(p:Product){setCart(current=>current.some(i=>i.id===p.id)?current:[...current,p]);setToast(`${p.name} foi adicionado à cesta.`);}
   function removeBasket(id:number){setCart(current=>current.filter(i=>i.id!==id));setToast("Item removido da cesta.");}
   async function saveAction(action:string,entityType:string,entityId:string){setToast(action==="alert"?"Alerta ativado com sucesso.":"Salvo nos seus favoritos.");try{await fetch("/api/actions",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action,entityType,entityId})});}catch{setToast("A ação ficou salva nesta sessão.");}}
-  const props = useMemo(()=>({products,stores,query,setQuery,addBasket,saveAction}),[products,stores,query]);
+  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction}),[products,stores,metrics,query]);
   if(isAdmin) return <><AdminPage path={pathname}/>{toast&&<div className="toast"><CheckCircle2/>{toast}</div>}</>;
   if(isAuth) return <AuthPage path={pathname}/>;
   let page:ReactNode;

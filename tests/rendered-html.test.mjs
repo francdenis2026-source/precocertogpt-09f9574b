@@ -25,6 +25,10 @@ test("server-renders the PreçoCerto home with its critical journey", async () =
   assert.match(html, /Busque arroz, café, carne, leite/);
   assert.match(html, /Cestas otimizadas/i);
   assert.match(html, /Preços em tempo real/i);
+  assert.match(html, />12<\/strong><span>estabelecimentos cadastrados/);
+  assert.match(html, />836<\/strong><span>itens cadastrados/);
+  assert.match(html, />3\.080<\/strong><span>preços registrados/);
+  assert.match(html, /Base consolidada até 7 de agosto de 2026/);
   assert.match(html, /Criar minha conta gratuita/i);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
