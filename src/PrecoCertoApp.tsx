@@ -1211,7 +1211,8 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
         }
       }
     } else {
-      window.location.href = "/app";
+      if (onLogin) onLogin();
+      window.location.href = "/";
     }
   }
 
