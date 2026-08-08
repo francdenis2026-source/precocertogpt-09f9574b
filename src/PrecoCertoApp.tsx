@@ -9,6 +9,7 @@ import {
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { buildCatalog, verifiedDatasetMetrics, type PlatformMetrics, type Product, type StoreRow } from "./data/catalog";
+import { fetchCatalog } from "./data/remoteCatalog";
 
 const initialCatalog = buildCatalog();
 const initialProducts: Product[] = initialCatalog.products;
