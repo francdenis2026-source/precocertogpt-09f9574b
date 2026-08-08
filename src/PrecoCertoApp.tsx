@@ -169,8 +169,11 @@ function AdminPage({ path, onLogout }: { path:string; onLogout: () => void }) {
   const [importing, setImporting] = useState(false);
   const [testing, setTesting] = useState(false);
   const [importStatus, setImportStatus] = useState("");
+  const [importProgress, setImportProgress] = useState(0);
+  const [importTotal, setImportTotal] = useState(0);
   const [connectionInfo, setConnectionInfo] = useState<{ success: boolean; latency: number; tables: Record<string, number>; error?: string } | null>(null);
-  const [importLog, setImportLog] = useState<{ count: number; duplicates: number; stores: number; products: number; duration: number } | null>(null);
+  const [importLog, setImportLog] = useState<{ count: number; duplicates: number; stores: number; products: number; duration: number; error?: string } | null>(null);
+
   
   const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
   
