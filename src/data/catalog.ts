@@ -16,7 +16,7 @@ export type CatalogPayload = { products: Product[]; stores: StoreRow[]; metrics:
 
 export const verifiedDatasetMetrics: PlatformMetrics = { products: 836, prices: 3080, stores: 12 };
 
-type EstablishmentSeed = { id: number; slug: string; name: string; neighborhood: string; color: string };
+type EstablishmentSeed = { id: number; slug: string; name: string; neighborhood: string; color: string; kind?: string };
 
 export const establishmentSeed: EstablishmentSeed[] = [
   { id: 1, slug: "central-super", name: "Central Super", neighborhood: "Centro", color: "#1473E6" },
@@ -116,6 +116,7 @@ export function buildCatalog(query = ""): CatalogPayload {
     name: store.name,
     neighborhood: store.neighborhood,
     color: store.color,
+    kind: store.kind || 'market',
     products: new Set(priceSeed.filter(price => price.establishmentId === store.id).map(price => price.productId)).size,
   }));
 
