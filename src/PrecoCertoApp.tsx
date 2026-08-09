@@ -389,21 +389,47 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
   );
 }
 
+type ColorTheme = "light" | "dark";
 
+function getInitialTheme(): ColorTheme {
+  const saved = localStorage.getItem("theme");
+  if (saved === "light" || saved === "dark") return saved;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function useColorTheme() {
+  const [theme, setTheme] = useState<ColorTheme>(getInitialTheme);
+  useEffect(() => {
+    const syncTheme = (event: Event) => setTheme((event as CustomEvent<ColorTheme>).detail);
+    window.addEventListener("precocerto:theme", syncTheme);
+    return () => window.removeEventListener("precocerto:theme", syncTheme);
+  }, []);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+  const toggleTheme = () => {
+    const nextTheme: ColorTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    window.dispatchEvent(new CustomEvent("precocerto:theme", { detail: nextTheme }));
+  };
+  return { theme, toggleTheme };
+}
+
+function ThemeToggle({ compact = false }: { compact?: boolean }) {
+  const { theme, toggleTheme } = useColorTheme();
+  const dark = theme === "dark";
+  return <button type="button" className={`theme-toggle ${compact ? "theme-toggle--compact" : ""}`} onClick={toggleTheme} aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"} title={dark ? "Ativar modo claro" : "Ativar modo escuro"} aria-pressed={dark}>
+    <span className="theme-toggle__track" aria-hidden="true"><span className="theme-toggle__thumb">{dark ? <Moon size={15}/> : <Sun size={15}/>}</span></span>
+    {!compact && <span>{dark ? "Escuro" : "Claro"}</span>}
+  </button>;
+}
 
 
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-  
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
-
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
@@ -421,13 +447,7 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
 
       </nav>
       <div className="header-actions">
-        <button 
-          className="icon-button" 
-          onClick={toggleTheme} 
-          aria-label={theme === 'light' ? "Mudar para modo escuro" : "Mudar para modo claro"}
-        >
-          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-        </button>
+        <ThemeToggle compact />
         <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
         <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a>
         {user ? (
@@ -444,7 +464,7 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
       </div>
       <button className="mobile-menu-button" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open}><Menu /></button>
     </div>
-    {open && <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu principal"><button className="drawer-backdrop" aria-label="Fechar menu" onClick={() => setOpen(false)} /><div className="drawer-panel"><div className="drawer-head"><button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu"><X /></button></div><nav><a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas de hoje</a><a href="/planos">Planos</a><a href="/colaborar">Enviar nota fiscal</a><a href="/admin" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid #eee', color: '#888', fontSize: '0.9rem' }}>Área Administrativa</a></nav><a className="button button--primary" href="/cadastro">Criar conta gratuita</a><a className="button button--ghost" href="/login">Já tenho uma conta</a></div></div>}
+    {open && <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu principal"><button className="drawer-backdrop" aria-label="Fechar menu" onClick={() => setOpen(false)} /><div className="drawer-panel"><div className="drawer-head"><ThemeToggle/><button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu"><X /></button></div><nav><a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas de hoje</a><a href="/planos">Planos</a><a href="/colaborar">Enviar nota fiscal</a><a href="/admin" className="drawer-admin-link">Área Administrativa</a></nav><a className="button button--primary" href="/cadastro">Criar conta gratuita</a><a className="button button--ghost" href="/login">Já tenho uma conta</a></div></div>}
   </header>;
 }
 
