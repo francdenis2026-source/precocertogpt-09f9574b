@@ -38,10 +38,28 @@ export interface BasketResult {
   }>;
 }
 
-/**
- * Motor determinístico da Cesta Inteligente.
- * Calcula a melhor combinação de preços baseada no modo de otimização.
- */
+/** Custo estimado de deslocamento por km (ida e volta já embutido no fator). */
+export const COST_PER_KM = 2.0;
+
+/** Origem padrão: centro de Feijó/AC. */
+export const FEIJO_CENTER: LatLng = { lat: -8.1633, lng: -70.3533 };
+
+/** Coordenadas aproximadas por bairro de Feijó. */
+export function neighborhoodCoords(neighborhood = ""): LatLng {
+  const n = neighborhood.toLowerCase();
+  if (n.includes("centro")) return { lat: -8.164, lng: -70.354 };
+  if (n.includes("segundo")) return { lat: -8.168, lng: -70.358 };
+  if (n.includes("bairro novo")) return { lat: -8.171, lng: -70.349 };
+  return { lat: -8.160, lng: -70.350 };
+}
+
+/** Distância aproximada (km) entre a origem do usuário e o bairro da loja. */
+export function distanceFromOrigin(neighborhood = "", origin?: LatLng): number {
+  const from = origin || FEIJO_CENTER;
+  const to = neighborhoodCoords(neighborhood);
+  const km = Math.sqrt(Math.pow(from.lat - to.lat, 2) + Math.pow(from.lng - to.lng, 2)) * 111;
+  return Math.round(km * 100) / 100;
+}
 export function optimizeBasket(
   catalog: Product[],
   items: BasketItemConfig[],
@@ -106,28 +124,10 @@ export function optimizeBasket(
     }).filter(i => i.product);
   } else if (mode === 'best_value') {
     // Modo: Melhor Custo-Benefício (Considerando Deslocamento)
-    // Custo estimado: R$ 2.00 por km (mock)
-    const COST_PER_KM = 2.0;
-
-    // Localização padrão de Feijó (Centro) se não fornecida
-    const origin = userLocation || { lat: -8.1633, lng: -70.3533 };
-
-    // Mapeamento de coordenadas mock para estabelecimentos em Feijó
-    const getStoreCoords = (neighborhood: string): LatLng => {
-      if (neighborhood.includes("Centro")) return { lat: -8.164, lng: -70.354 };
-      if (neighborhood.includes("Segundo")) return { lat: -8.168, lng: -70.358 };
-      return { lat: -8.160, lng: -70.350 };
-    };
-
-    const calculateDistance = (a: LatLng, b: LatLng) => {
-      // Haversine simplificada
-      return Math.sqrt(Math.pow(a.lat - b.lat, 2) + Math.pow(a.lng - b.lng, 2)) * 111; // ~111km por grau
-    };
-
     selectedItems = mappedItems.map(({ config, matches }) => {
-      const best = matches.sort((a, b) => {
-        const distA = calculateDistance(origin, getStoreCoords(a.neighborhood));
-        const distB = calculateDistance(origin, getStoreCoords(b.neighborhood));
+      const best = matches.slice().sort((a, b) => {
+        const distA = distanceFromOrigin(a.neighborhood, userLocation);
+        const distB = distanceFromOrigin(b.neighborhood, userLocation);
         const scoreA = a.minPrice + (distA * COST_PER_KM);
         const scoreB = b.minPrice + (distB * COST_PER_KM);
         return scoreA - scoreB;
