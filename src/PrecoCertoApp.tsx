@@ -754,12 +754,21 @@ interface PageProps {
   saveAction: (action: string, type: string, id: string) => void;
 }
 
+const modeLabels: Record<OptimizationMode, string> = {
+  cheapest_multi: "Mais barata (multiplas lojas)",
+  cheapest_single: "Loja unica (conveniencia)",
+  best_value: "Melhor custo-beneficio",
+  within_budget: "Dentro do orcamento",
+};
+
 function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void; user: any }) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [mode, setMode] = useState<OptimizationMode>("cheapest_multi");
   const [budget, setBudget] = useState(250);
   const [isSaving, setIsSaving] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
+  const [pdfOrientation, setPdfOrientation] = useState<"portrait" | "landscape">("portrait");
+  
   
   const [basketItems, setBasketItems] = useState<BasketItemConfig[]>(() => {
     const reopened = localStorage.getItem("precocerto:basket_reopen");
