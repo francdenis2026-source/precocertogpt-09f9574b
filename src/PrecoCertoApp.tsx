@@ -76,6 +76,8 @@ function addAuditLog(action: string, type: "success" | "warning" | "error" = "su
 }
 
 
+import ypeNeutroAsset from "./assets/ype-neutro.png.asset.json";
+
 const productImages: Record<string, string> = {
   // Pack 2 Mappings
   "844d8729-b2a0-4a60-9c23-a074c9e0979a": "/products/rabo.jpg",
@@ -106,10 +108,10 @@ const productImages: Record<string, string> = {
   "oleo-liza-900ml": "/products/oleo-liza-900ml.jpg",
   "oleo-soja-liza-900ml": "/products/oleo-liza-900ml.jpg",
   "acucar-uniao-1kg": "/products/acucar-uniao-1kg.jpg",
-  "detergente-ype-500ml": "/products/detergente-vida-neutro-500ml.jpg",
+  "detergente-ype-500ml": ypeNeutroAsset.url,
 
   // Mapeamento por UUID para dados do Supabase (conforme auditoria)
-  "c1d78817-20b9-40b2-b12d-a9bc73152d47": "/products/detergente-vida-neutro-500ml.jpg",
+  "c1d78817-20b9-40b2-b12d-a9bc73152d47": ypeNeutroAsset.url,
   "8519fc88-a26f-433d-a992-6cad775efc83": "/products/neston-3-cereais-nestle-360g.jpg",
   "0ce0efbf-2c25-4b0a-a80f-c5402bc128d1": "/products/biscoito-spantoo-80g.jpg",
   "c309be5b-38cf-4447-b361-e7ce38934f29": "/products/biscoito-spantoo-chocolate-30g.jpg",
@@ -169,7 +171,7 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   const isBean = product.name?.toLowerCase().includes("feijao");
   const isOil = product.name?.toLowerCase().includes("oleo");
   
-  const detergentFallback = "/products/detergente-vida-neutro-500ml.jpg";
+  const detergentFallback = ypeNeutroAsset.url;
   const beanFallback = "/products/feijao-kicaldo-1kg.jpg";
   const oilFallback = "/products/oleo-liza-900ml.jpg";
 
