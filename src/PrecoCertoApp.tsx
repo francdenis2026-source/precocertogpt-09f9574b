@@ -254,9 +254,10 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
 
   return <header className={headerClass}>
     <div className="shell header-inner">
-      <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
+      <span className="header-location" onClick={() => window.location.href = "/estabelecimentos"} style={{ cursor: 'pointer' }}><MapPin size={14} /> Feijó, AC</span>
       <nav className="desktop-nav" aria-label="Navegação principal">
         <a href="/buscar">Comparar preços</a><a href="/melhores-precos">Ofertas</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/planos">Planos</a>
+
       </nav>
       <div className="header-actions">
         <button 
@@ -1658,9 +1659,16 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
                 <div className="visual-product-content">
                   <span className="category-tag">{p.category} • {p.size}</span>
                   <a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a>
+                  <div className="visual-store">
+                    <span className="market-dot" style={{ background: p.storeColor }} />
+                    <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <strong>{p.establishment}</strong><small><MapPin /> {p.neighborhood}</small>
+                    </a>
+                  </div>
                   <div className="visual-price">
                     <span><small>preço atual</small><strong>{money(p.minPrice)}</strong></span>
                   </div>
+
                   <div className="visual-product-actions">
                     <button className="button button--primary" onClick={() => addBasket(p)}><Plus /> Cesta</button>
                     <a href={`/produto/${p.slug}`} className="button button--ghost button--small">Detalhes</a>
