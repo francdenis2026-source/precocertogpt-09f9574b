@@ -2313,7 +2313,6 @@ textarea.admin-input {
 }
 
 @media (max-width: 900px) {
-@media (max-width: 900px) {
   .builder-split, .result-split { grid-template-columns: 1fr; }
   .builder-sidebar { position: static; margin-top: 2rem; }
   .result-kpis { grid-template-columns: 1fr; }
