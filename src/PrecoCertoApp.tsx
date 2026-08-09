@@ -555,22 +555,33 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
     </form>
 
     {focused && (
-      <div className="suggestions" id={hero ? "hero-suggestions" : "page-suggestions"} role="listbox">
-        <div className="suggestions-label">{localValue ? "Sugestões encontradas" : "Buscas populares em Feijó"}</div>
+      <div className="search-results-dynamic" id={hero ? "hero-suggestions" : "page-suggestions"} role="listbox">
+        <div className="suggestions-label" style={{ padding: '0.75rem 1rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--muted)', background: 'var(--surface-2)' }}>
+          {localValue ? "Sugestões em Feijó" : "Produtos em alta"}
+        </div>
         {suggestions.length > 0 ? (
           suggestions.map(p => (
-            <a role="option" aria-selected="false" href={`/buscar?q=${encodeURIComponent(p.name)}`} key={p.id}>
-              <span className="suggestion-icon"><PackageSearch size={18} /></span>
-              <span><strong>{p.name}</strong><small>{p.brand} • {p.size}</small></span>
-              <span className="suggestion-price"><small>a partir de</small><b>{money(p.minPrice)}</b><a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', fontWeight: 'normal', fontStyle: 'normal' }} onClick={(e) => e.stopPropagation()}>{p.establishment}</a></span>
+            <a 
+              role="option" 
+              aria-selected="false" 
+              href={`/buscar?q=${encodeURIComponent(p.name)}`} 
+              key={p.id}
+              className="search-result-item"
+            >
+              <ProductImage product={p} size="compact" />
+              <div style={{ flex: 1 }}>
+                <strong>{p.name}</strong>
+                <small>{p.brand} • {p.category}</small>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <b style={{ color: 'var(--green)', display: 'block' }}>{money(p.minPrice)}</b>
+                <small style={{ fontSize: '0.7rem' }}>{p.establishment}</small>
+              </div>
             </a>
           ))
-        ) : value.length > 2 ? (
-          <div className="no-suggestions-prompt">
-             <small>Nenhuma sugestão para "{value}"</small>
-             <button onClick={() => setValue(value.normalize("NFD").replace(/[\u0300-\u036f]/g, ""))} className="text-link">
-               Tentar sem acentos?
-             </button>
+        ) : localValue.length > 2 ? (
+          <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.9rem' }}>
+            Nenhum resultado direto para "{localValue}"
           </div>
         ) : null}
       </div>
