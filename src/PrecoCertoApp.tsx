@@ -2246,6 +2246,9 @@ export default function PrecoCertoApp() {
   const [query,setQuery]=useState("");
   const [cart,setCart]=useState<Product[]>(() => JSON.parse(localStorage.getItem("precocerto:basket") || "[]"));
   const [toast,setToast]=useState("");
+  const [syncStatus, setSyncStatus] = useState<"online" | "syncing" | "error">("online");
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  
   const [user, setUser] = useState<{name: string} | null>(() => {
     const saved = localStorage.getItem("precocerto:user");
     return saved ? JSON.parse(saved) : null;
@@ -2257,34 +2260,41 @@ export default function PrecoCertoApp() {
 
   useEffect(() => {
     let alive = true;
-    const q = new URLSearchParams(window.location.search).get("q") ?? "";
-    if (q) setQuery(q);
+    let timer: any;
 
-    // Initial load: Fetch everything once to allow client-side filtering
-    // or fetch based on query if using remote search.
-    // Given the previous issue, we want to ensure search results are reactive.
-    const interval = setInterval(() => {
-      fetchCatalog(query).then(data => {
+    const q = new URLSearchParams(window.location.search).get("q") ?? "";
+    if (q && !query) setQuery(q);
+
+    const load = async () => {
+      if (!alive) return;
+      setSyncStatus("syncing");
+      
+      try {
+        const data = await fetchCatalog(query);
         if (!alive) return;
+        
         setProducts(data.products);
         if (data.stores.length) setStores(data.stores);
         setMetrics(data.metrics);
-      }).catch(err => console.error(err));
-    }, query ? 30000 : 300000); // 30s se pesquisando, 5m se parado
-
-    fetchCatalog(query).then(data => {
-      if (!alive) return;
-      setProducts(data.products);
-      if (data.stores.length) setStores(data.stores);
-      setMetrics(data.metrics);
-    }).catch(err => console.error(err));
-
-    return () => { 
-      alive = false; 
-      clearInterval(interval);
+        setSyncStatus("online");
+        setFetchError(null);
+      } catch (err) {
+        if (!alive) return;
+        setSyncStatus("error");
+        setFetchError(err instanceof Error ? err.message : "Falha na conexão");
+      }
+      
+      // Auto-refresh: 30s se pesquisando, 2m se inativo
+      timer = setTimeout(load, query ? 30000 : 120000);
     };
 
+    load();
+    return () => { 
+      alive = false; 
+      clearTimeout(timer);
+    };
   }, [query]);
+
 
   useEffect(() => {
     localStorage.setItem("precocerto:basket", JSON.stringify(cart));
@@ -2310,7 +2320,7 @@ export default function PrecoCertoApp() {
     }
   }
 
-  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction}),[products,stores,metrics,query]);
+  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,fetchError,syncStatus}),[products,stores,metrics,query,fetchError,syncStatus]);
 
   const handleAdminAuth = (success: boolean) => {
     if (success) {
