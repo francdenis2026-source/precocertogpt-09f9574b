@@ -116,33 +116,87 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
 
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
-  return <header className="site-header">
-    <div className="shell header-inner">
-      {/* Logo removida do header a pedido do usuário */}
-      <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
-      <nav className="desktop-nav" aria-label="Navegação principal">
-        <a href="/buscar">Comparar preços</a><a href="/melhores-precos">Ofertas</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/planos">Planos</a>
-      </nav>
-      <div className="header-actions">
-        <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
-        <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a>
-        {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <a href="/perfil" style={{ fontSize: '0.9rem', color: 'var(--muted)', textDecoration: 'none' }}>Olá, <strong>{user.name.split(' ')[0]}</strong></a>
-            <button className="text-link" onClick={onLogout}>Sair</button>
-          </div>
-        ) : (
-          <>
-            <a className="text-link" href="/login">Entrar</a>
-            <a className="button button--primary button--small" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
-          </>
-        )}
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
+
+  return (
+    <header className={`site-header ${isAdminPage ? 'site-header--admin' : ''}`}>
+      <div className="shell header-inner">
+        <div className="header-left">
+          <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
+        </div>
+        
+        <nav className="desktop-nav" aria-label="Navegação principal">
+          <a href="/buscar" className={location.pathname === '/buscar' ? 'active' : ''}>Comparar preços</a>
+          <a href="/melhores-precos" className={location.pathname === '/melhores-precos' ? 'active' : ''}>Ofertas</a>
+          <a href="/cesta-basica" className={location.pathname === '/cesta-basica' ? 'active' : ''}>Cesta inteligente</a>
+          <a href="/estabelecimentos" className={location.pathname === '/estabelecimentos' ? 'active' : ''}>Estabelecimentos</a>
+          <a href="/planos" className={location.pathname === '/planos' ? 'active' : ''}>Planos</a>
+        </nav>
+
+        <div className="header-actions">
+          <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
+          <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}>
+            <ShoppingBasket size={20} />
+            {basketCount > 0 && <span className="basket-badge">{basketCount}</span>}
+          </a>
+          
+          <div className="auth-separator" />
+          
+          {user ? (
+            <div className="user-menu">
+              <a href="/perfil" className="user-profile-link">
+                <div className="avatar">{user.name[0]}</div>
+                <div className="user-info">
+                  <span className="user-greeting">Olá, {user.name.split(' ')[0]}</span>
+                  <span className="user-role">{user.role || 'Membro'}</span>
+                </div>
+              </a>
+              <button className="button button--ghost button--small" onClick={onLogout}>Sair</button>
+            </div>
+          ) : (
+            <>
+              <a className="button button--ghost button--small" href="/login">Entrar</a>
+              <a className="button button--primary button--small" href="/cadastro">
+                Começar grátis <ArrowRight size={16} />
+              </a>
+            </>
+          )}
+        </div>
+
+        <button className="mobile-menu-button" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open}>
+          <Menu />
+        </button>
       </div>
-      <button className="mobile-menu-button" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open}><Menu /></button>
-    </div>
-    {open && <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu principal"><button className="drawer-backdrop" aria-label="Fechar menu" onClick={() => setOpen(false)} /><div className="drawer-panel"><div className="drawer-head">{/* Logo removida do drawer a pedido do usuário */}<button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu"><X /></button></div><nav><a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas de hoje</a><a href="/planos">Planos</a><a href="/colaborar">Enviar nota fiscal</a><a href="/admin" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid #eee', color: '#888', fontSize: '0.9rem' }}>Área Administrativa</a></nav><a className="button button--primary" href="/cadastro">Criar conta gratuita</a><a className="button button--ghost" href="/login">Já tenho uma conta</a></div></div>}
-  </header>;
+
+      {open && (
+        <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu principal">
+          <button className="drawer-backdrop" aria-label="Fechar menu" onClick={() => setOpen(false)} />
+          <div className="drawer-panel">
+            <div className="drawer-head">
+              <button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu"><X /></button>
+            </div>
+            <nav>
+              <a href="/buscar">Comparar preços</a>
+              <a href="/cesta-basica">Cesta inteligente</a>
+              <a href="/estabelecimentos">Estabelecimentos</a>
+              <a href="/melhores-precos">Ofertas de hoje</a>
+              <a href="/planos">Planos</a>
+              <a href="/colaborar">Enviar nota fiscal</a>
+              <div className="drawer-divider" />
+              <a href="/admin" className="admin-link">Área Administrativa</a>
+            </nav>
+            <div className="drawer-actions">
+              <a className="button button--primary w-full" href="/cadastro">Criar conta gratuita</a>
+              <a className="button button--ghost w-full" href="/login">Já tenho uma conta</a>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
 }
+
 
 function Footer() {
   return <footer className="site-footer"><div className="shell footer-grid"><div><Brand inverse /><p>Compare preços reais no comércio de Feijó e transforme cada compra em economia.</p><span className="footer-place"><MapPin size={15} /> Feijó • Acre • Brasil</span></div><div><h3>Descobrir</h3><a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/farmacias">Farmácias de plantão</a></div><div><h3>PreçoCerto</h3><a href="/#como-funciona">Como funciona</a><a href="/lojista">Para empresas</a><a href="/colaborar">Colaborar</a><a href="/fale-conosco">Fale conosco</a></div><div><h3>Conta</h3><a href="/login">Entrar</a><a href="/cadastro">Criar conta</a><a href="/planos">Planos</a><a href="/admin">Área Administrativa</a></div></div><div className="shell footer-bottom"><span>SKAES NET TECHNOLOGY • FRANC D’NIS</span><span>© 2026 PreçoCerto. Todos os direitos reservados.</span></div></footer>;
