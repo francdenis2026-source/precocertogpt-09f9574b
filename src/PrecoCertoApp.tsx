@@ -987,10 +987,10 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket }: Pa
                       </div>
                     ))}
                   </div>
-                  <div className="result-actions">
-                    <button className="button button--primary button--full"><Share2 /> Compartilhar Cesta</button>
-                    <button className="button button--outline button--full"><Printer /> Gerar Lista de Compras</button>
-                    <button className="button button--ghost button--full" onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
+                  <div className="result-actions" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <button className="button button--primary" style={{ width: '100%' }}><Share2 /> Compartilhar Cesta</button>
+                    <button className="button button--ghost" style={{ width: '100%' }}><Printer /> Gerar Lista de Compras</button>
+                    <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
                   </div>
                 </aside>
               </div>
