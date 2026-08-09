@@ -795,6 +795,36 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
     ));
   };
 
+  const handleSaveBasket = async () => {
+    if (!user) {
+      alert("Você precisa estar logado para salvar e compartilhar cestas.");
+      return;
+    }
+    
+    if (!optimizationResult) return;
+
+    try {
+      setIsSaving(true);
+      const basketId = await saveBasket(
+        user.id,
+        `Cesta ${new Date().toLocaleDateString('pt-BR')}`,
+        mode,
+        budget,
+        basketItems,
+        optimizationResult
+      );
+      
+      const link = `${window.location.origin}/cesta/snapshot/${basketId}`;
+      setShareLink(link);
+      alert("Cesta salva com sucesso em snapshots!");
+    } catch (error: any) {
+      console.error(error);
+      alert("Erro ao salvar cesta: " + error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="shell page-shell basket-page">
       <header className="page-title">
