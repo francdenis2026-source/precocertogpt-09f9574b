@@ -2732,7 +2732,7 @@ export default function PrecoCertoApp() {
     }
   }
 
-  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,fetchError,syncStatus}),[products,stores,metrics,query,fetchError,syncStatus]);
+  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,fetchError,syncStatus,user}),[products,stores,metrics,query,fetchError,syncStatus,user]);
 
   const handleAdminAuth = (success: boolean) => {
     if (success) {
