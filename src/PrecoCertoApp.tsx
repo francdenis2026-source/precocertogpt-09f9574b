@@ -879,7 +879,6 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
     doc.setFontSize(12);
     doc.text(`VALOR TOTAL ESTIMADO: ${money(optimizationResult.total)}`, 20, y + 10);
     doc.save(`lista-compras-${date.replace(/\//g, '-')}.pdf`);
-    setToast("PDF gerado com sucesso!");
   };
 
   const handleReopen = async (snapshot: any) => {
@@ -896,7 +895,6 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
     setMode(snapshot.optimization_mode);
     setBudget(snapshot.budget || 250);
     setStep(3); // Vai direto para o resultado
-    setToast("Cesta reaberta para atualização!");
   };
 
   return (
