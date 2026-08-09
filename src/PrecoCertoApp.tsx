@@ -223,6 +223,7 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
 
 
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
+  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   
   useEffect(() => {
