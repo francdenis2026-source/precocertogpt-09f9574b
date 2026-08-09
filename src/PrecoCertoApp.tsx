@@ -769,6 +769,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
   const [budget, setBudget] = useState(250);
   const [isSaving, setIsSaving] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
+  const [shareReadOnly, setShareReadOnly] = useState(true);
   const pdfUserKey = user?.email || user?.id || null;
   // Preferência de orientação salva por usuário e reaplicada nas próximas exportações.
   const [pdfOrientation, setPdfOrientationState] = useState<"portrait" | "landscape">(() =>
