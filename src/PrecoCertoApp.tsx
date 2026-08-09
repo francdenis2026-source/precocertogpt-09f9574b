@@ -81,6 +81,7 @@ const productImages: Record<string, string> = {
   "cafe-3-coracoes-500g": "/products/cafe-3-coracoes-500g.jpg",
   "leite-italac-1l": "/products/leite-italac-1l.jpg",
   "feijao-kicaldo-1kg": "/products/feijao-kicaldo-1kg.jpg",
+  "oleo-liza-900ml": "/products/oleo-liza-900ml.jpg",
   "oleo-soja-liza-900ml": "/products/oleo-liza-900ml.jpg",
   "acucar-uniao-1kg": "/products/acucar-uniao-1kg.jpg",
   "detergente-ype-500ml": "/products/detergente-vida-neutro-500ml.jpg",
