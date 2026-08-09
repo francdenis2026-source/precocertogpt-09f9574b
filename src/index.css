@@ -3,14 +3,57 @@
 :root {
   --primary-font: 'Manrope Variable', sans-serif;
   --body-font: 'Inter Variable', sans-serif;
+  
+  /* Light Theme Tokens */
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --surface-3: #e2e8f0;
+  --navy: #0f172a;
+  --navy-light: #1e293b;
+  --blue: #2563eb;
+  --blue-hover: #1d4ed8;
+  --blue-soft: #eff6ff;
+  --blue-glass: rgba(37, 99, 235, 0.05);
+  --gold: #f59e0b;
+  --gold-soft: #fffbeb;
+  --green: #10b981;
+  --green-soft: #ecfdf5;
+  --red: #ef4444;
+  --orange: #f97316;
+  --text: #334155;
+  --text-main: #1e293b;
+  --muted: #64748b;
+  --tertiary: #94a3b8;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+}
+
+[data-theme='dark'] {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-2: #334155;
+  --surface-3: #475569;
+  --navy: #f8fafc;
+  --navy-light: #f1f5f9;
+  --blue: #3b82f6;
+  --blue-hover: #60a5fa;
+  --blue-soft: rgba(59, 130, 246, 0.1);
+  --blue-glass: rgba(59, 130, 246, 0.05);
+  --text: #94a3b8;
+  --text-main: #f1f5f9;
+  --muted: #64748b;
+  --border: #334155;
+  --border-strong: #475569;
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
 }
 
 body {
   font-family: var(--body-font);
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--primary-font);
+  background-color: var(--bg);
+  color: var(--text-main);
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .price-drop-tag {
@@ -18,7 +61,7 @@ h1, h2, h3, h4, h5, h6 {
   top: 12px;
   left: 12px;
   background: var(--green);
-  color: white;
+  color: #fff;
   padding: 6px 12px;
   border-radius: 50px;
   font-size: 0.75rem;
@@ -163,30 +206,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
+/* Theme-independent layout utilities */
 :root {
-  --bg: #f8fafc;
-  --surface: #ffffff;
-  --surface-2: #f1f5f9;
-  --surface-3: #e2e8f0;
-  --navy: #0f172a;
-  --navy-light: #1e293b;
-  --blue: #2563eb;
-  --blue-hover: #1d4ed8;
-  --blue-soft: #eff6ff;
-  --blue-glass: rgba(37, 99, 235, 0.05);
-  --gold: #f59e0b;
-  --gold-soft: #fffbeb;
-  --green: #10b981;
-  --green-soft: #ecfdf5;
-  --red: #ef4444;
-  --orange: #f97316;
-  --text: #334155;
-  --text-main: #1e293b;
-  --muted: #64748b;
-  --tertiary: #94a3b8;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
-  
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -200,6 +221,17 @@ h1, h2, h3, h4, h5, h6 {
   
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Accessibility: Focus rings */
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 4px;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 * {
