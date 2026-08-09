@@ -1,9 +1,9 @@
 
 import {
-  Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
+  Activity, AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
   ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit, Flag,
   Heart, Home, LayoutDashboard, LineChart, ListChecks, MapPin, Menu, Moon, PackageSearch,
-  Plus, Receipt, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
+  Plus, Printer, Receipt, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Sun, Trash2, TrendingDown, TrendingUp, Upload, UserRound, Users, X,
 } from "lucide-react";
 
@@ -16,6 +16,7 @@ import { isEnabled } from "./config/features";
 import { freshnessLabels, priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
+import { optimizeBasket, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
 
 const initialCatalog = buildCatalog();
 const initialProducts: Product[] = initialCatalog.products;
@@ -752,12 +753,255 @@ interface PageProps {
   saveAction: (action: string, type: string, id: string) => void;
 }
 
-function BasketPage({ products, addBasket }: PageProps & { cart: Product[]; removeBasket:(id:number)=>void }) {
-  const [mode, setMode] = useState("budget"); const [budget, setBudget] = useState(150); const [items, setItems] = useState<Product[]>(products.slice(0,5));
-  const total = items.reduce((sum,p)=>sum+p.minPrice,0); const singleStoreTotal = total * 1.118;
-  function toggle(p:Product){ setItems(current=>current.some(i=>i.id===p.id)?current.filter(i=>i.id!==p.id):[...current,p]); }
-  return <div className="shell page-shell basket-page"><div className="page-title"><div><span className="eyebrow">Cesta básica avançada</span><h1>Planeje a compra inteira</h1><p>Compare cobertura, itens ausentes e o impacto de dividir sua compra.</p></div><span className="location-pill"><MapPin/> Feijó, AC <ChevronDown/></span></div><div className="mode-tabs" role="tablist"><button className={mode==="budget"?"active":""} onClick={()=>setMode("budget")}><CircleDollarSign/> Tenho um valor</button><button className={mode==="items"?"active":""} onClick={()=>setMode("items")}><ListChecks/> Quero escolher itens</button><button className={mode==="stores"?"active":""} onClick={()=>setMode("stores")}><Store/> Comparar mercados</button></div><div className="basket-workspace"><section className="basket-builder">{mode==="budget"&&<><div className="builder-head"><div><span className="step-number">1</span><span><h2>Defina seu orçamento</h2><p>Montaremos a melhor combinação sem ultrapassar esse valor.</p></span></div><strong>{money(budget)}</strong></div><input className="budget-slider" type="range" min="50" max="300" step="10" value={budget} onChange={e=>setBudget(Number(e.target.value))}/><div className="budget-presets">{[50,80,100,150,200,300].map(v=><button className={budget===v?"active":""} onClick={()=>setBudget(v)} key={v}>{money(v)}</button>)}</div></>}{mode==="stores"&&<div className="builder-head"><div><span className="step-number">1</span><span><h2>Ranking por cobertura</h2><p>O custo da mesma cesta em cada supermercado.</p></span></div></div>}{mode==="items"&&<div className="builder-head"><div><span className="step-number">1</span><span><h2>Escolha os essenciais</h2><p>Adicione ou remova itens para recalcular em tempo real.</p></span></div></div>}<hr/><div className="builder-head"><div><span className="step-number">2</span><span><h2>Itens da cesta</h2><p>{items.length} selecionados • compatibilidade por tamanho e categoria</p></span></div><button className="text-button"><Plus/> Adicionar avulso</button></div><div className="basket-items">{products.slice(0,6).map(p=><button className={items.some(i=>i.id===p.id)?"selected":""} onClick={()=>toggle(p)} key={p.id}><span>{items.some(i=>i.id===p.id)?<Check/>:<Plus/>}</span><div><b>{p.name}</b><small>{p.size} • a partir de {money(p.minPrice)}</small></div></button>)}</div><div className="ai-helper"><span><Sparkles/></span><div><b>Assistente da cesta</b><p>Posso ajustar o orçamento, trocar itens e explicar de onde vem a economia.</p></div><button>Conversar <ArrowRight/></button></div></section><aside className="basket-summary"><span className="eyebrow">Melhor combinação</span><h2>{items.length} itens em 2 mercados</h2><div className="coverage"><div><span>Cobertura da cesta</span><b>100%</b></div><i><span style={{width:"100%"}}/></i><small><CheckCircle2/> Nenhum item ausente</small></div><div className="route-stop"><span className="store-logo small" style={{background:"#1473E6"}}>CS</span><div><b>Central Super</b><small>{Math.ceil(items.length*.6)} itens • Centro</small></div><strong>{money(total*.61)}</strong></div><div className="route-stop"><span className="store-logo small" style={{background:"#16A36A"}}>MR</span><div><b>Mercado Rebouças</b><small>{Math.floor(items.length*.4)} itens • Esperança</small></div><strong>{money(total*.39)}</strong></div><div className="summary-total"><span>Total otimizado</span><strong>{money(total)}</strong><small>Orçamento restante: {money(Math.max(0,budget-total))}</small></div><div className="saving-box"><TrendingDown/><span><b>Você economiza {money(singleStoreTotal-total)}</b><small>{Math.round((1-total/singleStoreTotal)*100)}% comparado a comprar tudo em uma loja</small></span></div><button className="button button--primary button--full" onClick={()=>items.forEach(addBasket)}>Usar esta cesta <ArrowRight/></button><div className="summary-links"><button><Share2/> Compartilhar</button><button><Download/> Gerar PDF</button><button><Bell/> Criar alerta</button></div></aside></div></div>;
+function BasketPage({ products, addBasket, cart: initialCart, removeBasket }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void }) {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [mode, setMode] = useState<OptimizationMode>("cheapest_multi");
+  const [budget, setBudget] = useState(250);
+  const [basketItems, setBasketItems] = useState<BasketItemConfig[]>(() => {
+    return initialCart.map(p => ({
+      productName: p.name,
+      category: p.category,
+      quantity: 1,
+      unit: "un",
+      isEssential: true
+    }));
+  });
+
+  const optimizationResult = useMemo(() => {
+    if (basketItems.length === 0) return null;
+    return optimizeBasket(products, basketItems, mode, budget);
+  }, [products, basketItems, mode, budget]);
+
+  const toggleItem = (p: Product) => {
+    setBasketItems(prev => {
+      const exists = prev.find(i => i.productName === p.name);
+      if (exists) return prev.filter(i => i.productName !== p.name);
+      return [...prev, {
+        productName: p.name,
+        category: p.category,
+        quantity: 1,
+        unit: (p.unit as any) || "un",
+        isEssential: true
+      }];
+    });
+  };
+
+  const updateQuantity = (name: string, delta: number) => {
+    setBasketItems(prev => prev.map(i => 
+      i.productName === name ? { ...i, quantity: Math.max(0.5, i.quantity + delta) } : i
+    ));
+  };
+
+  return (
+    <div className="shell page-shell basket-page">
+      <header className="page-title">
+        <div>
+          <span className="eyebrow">Fase 2 — Cesta Inteligente Determinística</span>
+          <h1>Planejador de Compras</h1>
+          <p>Cálculo matemático para encontrar o menor preço real em Feijó.</p>
+        </div>
+        <div className="basket-steps">
+          <div className={`step-pill ${step === 1 ? 'active' : step > 1 ? 'done' : ''}`}>1. Modo</div>
+          <div className={`step-pill ${step === 2 ? 'active' : step > 2 ? 'done' : ''}`}>2. Itens</div>
+          <div className={`step-pill ${step === 3 ? 'active' : ''}`}>3. Otimização</div>
+        </div>
+      </header>
+
+      <div className="basket-content-layout">
+        {step === 1 && (
+          <section className="basket-step-view animate-fade-in">
+            <div className="step-card-header">
+              <h2>Como você quer economizar?</h2>
+              <p>Escolha a estratégia que melhor se adapta à sua necessidade hoje.</p>
+            </div>
+            <div className="mode-selection-grid">
+              <button className={`mode-card ${mode === 'cheapest_multi' ? 'active' : ''}`} onClick={() => setMode('cheapest_multi')}>
+                <div className="mode-icon"><TrendingDown /></div>
+                <div>
+                  <strong>Mais barata (Múltiplas lojas)</strong>
+                  <p>O menor preço absoluto de cada item, mesmo que precise visitar mais lojas.</p>
+                </div>
+                {mode === 'cheapest_multi' && <CheckCircle2 className="check" />}
+              </button>
+              <button className={`mode-card ${mode === 'cheapest_single' ? 'active' : ''}`} onClick={() => setMode('cheapest_single')}>
+                <div className="mode-icon"><Store /></div>
+                <div>
+                  <strong>Loja Única (Conveniência)</strong>
+                  <p>Encontra o estabelecimento que oferece o menor total para sua lista completa.</p>
+                </div>
+                {mode === 'cheapest_single' && <CheckCircle2 className="check" />}
+              </button>
+              <button className={`mode-card ${mode === 'within_budget' ? 'active' : ''}`} onClick={() => setMode('within_budget')}>
+                <div className="mode-icon"><CircleDollarSign /></div>
+                <div>
+                  <strong>Dentro do Orçamento</strong>
+                  <p>Prioriza essenciais e marcas econômicas para não ultrapassar seu limite.</p>
+                </div>
+                {mode === 'within_budget' && <CheckCircle2 className="check" />}
+              </button>
+            </div>
+
+            {mode === 'within_budget' && (
+              <div className="budget-config animate-slide-up">
+                <h3>Defina seu orçamento total</h3>
+                <div className="budget-input-group">
+                  <strong>{money(budget)}</strong>
+                  <input type="range" min="50" max="1000" step="10" value={budget} onChange={e => setBudget(Number(e.target.value))} />
+                </div>
+              </div>
+            )}
+
+            <div className="step-actions">
+              <button className="button button--primary" onClick={() => setStep(2)}>
+                Continuar para escolha de itens <ArrowRight />
+              </button>
+            </div>
+          </section>
+        )}
+
+        {step === 2 && (
+          <section className="basket-step-view animate-fade-in">
+            <div className="builder-split">
+              <div className="builder-main">
+                <div className="step-card-header">
+                  <h2>O que você precisa comprar?</h2>
+                  <p>Adicione itens do catálogo para compor sua cesta.</p>
+                </div>
+                <div className="basket-search-inline">
+                  <SearchBox value="" setValue={(v) => {}} products={products} />
+                </div>
+                <div className="basket-quick-add">
+                  <h3>Sugestões e Essenciais</h3>
+                  <div className="quick-grid">
+                    {products.slice(0, 12).map(p => (
+                      <button 
+                        key={p.id} 
+                        className={`quick-pill ${basketItems.some(i => i.productName === p.name) ? 'active' : ''}`}
+                        onClick={() => toggleItem(p)}
+                      >
+                        {basketItems.some(i => i.productName === p.name) ? <Check size={14}/> : <Plus size={14}/>}
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <aside className="builder-sidebar">
+                <h3>Sua Lista ({basketItems.length})</h3>
+                <div className="selected-items-list">
+                  {basketItems.length === 0 ? (
+                    <div className="empty-list">
+                      <ShoppingBasket size={32} />
+                      <p>Sua lista está vazia</p>
+                    </div>
+                  ) : (
+                    basketItems.map(item => (
+                      <div className="basket-list-item" key={item.productName}>
+                        <div className="item-info">
+                          <strong>{item.productName}</strong>
+                          <small>{item.category}</small>
+                        </div>
+                        <div className="item-qty">
+                          <button onClick={() => updateQuantity(item.productName, -0.5)}>-</button>
+                          <span>{item.quantity}</span>
+                          <button onClick={() => updateQuantity(item.productName, 0.5)}>+</button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <button 
+                  className="button button--primary button--full" 
+                  disabled={basketItems.length === 0}
+                  onClick={() => setStep(3)}
+                >
+                  Ver Otimização <Sparkles />
+                </button>
+                <button className="button button--ghost button--full" onClick={() => setStep(1)}>
+                  <ArrowLeft /> Voltar para o modo
+                </button>
+              </aside>
+            </div>
+          </section>
+        )}
+
+        {step === 3 && optimizationResult && (
+          <section className="basket-step-view animate-fade-in">
+            <div className="optimization-dashboard">
+              <div className="result-kpis">
+                <div className="kpi-card highlight">
+                  <small>Total da Cesta</small>
+                  <strong>{money(optimizationResult.total)}</strong>
+                </div>
+                <div className="kpi-card savings">
+                  <small>Economia Real</small>
+                  <strong>{money(optimizationResult.savings)}</strong>
+                  <span>~{Math.round((optimizationResult.savings / (optimizationResult.total + optimizationResult.savings)) * 100)}% de economia</span>
+                </div>
+                <div className="kpi-card stores">
+                  <small>Estabelecimentos</small>
+                  <strong>{Object.keys(optimizationResult.storeBreakdown).length}</strong>
+                  <span>Locais em Feijó</span>
+                </div>
+              </div>
+
+              <div className="result-split">
+                <div className="result-main">
+                  <h3>Detalhamento da Compra</h3>
+                  <div className="optimized-items-grid">
+                    {optimizationResult.items.map((item, idx) => (
+                      <div className="optimized-item-card" key={idx}>
+                        <div className="item-img">
+                          <ProductImage product={item.product} size="compact" />
+                        </div>
+                        <div className="item-details">
+                          <strong>{item.product.name}</strong>
+                          <span className="store-ref" style={{ color: item.product.storeColor }}>
+                            <Store size={12}/> {item.establishment}
+                          </span>
+                        </div>
+                        <div className="item-pricing">
+                          <small>{item.quantity} {item.product.unit} x {money(item.product.minPrice)}</small>
+                          <strong>{money(item.subtotal)}</strong>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <aside className="result-aside">
+                  <h3>Roteiro Sugerido</h3>
+                  <div className="store-breakdown-list">
+                    {Object.values(optimizationResult.storeBreakdown).map(store => (
+                      <div className="store-route-card" key={store.storeName}>
+                        <div className="route-header">
+                          <span className="store-dot" style={{ background: products.find(p => p.establishment === store.storeName)?.storeColor }} />
+                          <strong>{store.storeName}</strong>
+                        </div>
+                        <div className="route-meta">
+                          <span>{store.itemCount} itens</span>
+                          <strong>{money(store.total)}</strong>
+                        </div>
+                        <button className="button button--ghost button--small">Ver itens desta loja</button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="result-actions" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <button className="button button--primary" style={{ width: '100%' }}><Share2 /> Compartilhar Cesta</button>
+                    <button className="button button--ghost" style={{ width: '100%' }}><Printer /> Gerar Lista de Compras</button>
+                    <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
+    </div>
+  );
 }
+
 
 function PlansPage() {
   const [shop, setShop] = useState(false); const plans = shop ? [{name:"Parceiro Local",price:29.9,desc:"Presença local e catálogo essencial",features:["Perfil verificado","Gestão de catálogo","Métricas essenciais"]},{name:"Parceiro Pro",price:69.9,desc:"Mais alcance e inteligência",features:["Tudo do Local","Promoções em destaque","Tendências de mercado"],featured:true},{name:"Business",price:149.9,desc:"Operação com múltiplas unidades",features:["Tudo do Pro","Equipe e permissões","Relatórios avançados"]}] : [{name:"Grátis",price:0,desc:"Compare antes de comprar",features:["Busca de preços","1 cesta salva","1 consulta de IA"]},{name:"Mensal",price:24.9,desc:"Economia sem compromisso",features:["Consultas ilimitadas","Alertas de queda","Histórico completo"],featured:true},{name:"Anual",price:179.9,desc:"O melhor custo-benefício",features:["Tudo do Mensal","Exportações","Cota ampliada de IA"]}];
@@ -1003,7 +1247,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
     ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
   ];
   const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><button onClick={() => setActiveAdminView("dashboard")} className={activeAdminView==="dashboard"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><LayoutDashboard size={18}/> Visão geral</button><button onClick={() => setActiveAdminView("catalog")} className={activeAdminView==="catalog"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><PackageSearch size={18}/> Catálogo</button><button onClick={() => setActiveAdminView("images")} className={activeAdminView==="images"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><Camera size={18}/> Revisar Fotos</button><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> retornar ao plano</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{activeAdminView === "images" ? "Revisão de Fotos" : title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><button onClick={() => setActiveAdminView("dashboard")} className={activeAdminView==="dashboard"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><LayoutDashboard size={18}/> Visão geral</button><button onClick={() => setActiveAdminView("catalog")} className={activeAdminView==="catalog"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><PackageSearch size={18}/> Catálogo</button><button onClick={() => setActiveAdminView("images")} className={activeAdminView==="images"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><Camera size={18}/> Revisar Fotos</button><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> o que ainda falta do plano</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{activeAdminView === "images" ? "Revisão de Fotos" : title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
 
   {showLogoutConfirm && (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
@@ -2951,6 +3195,7 @@ export default function PrecoCertoApp() {
   if(pathname==="/") page=<HomePage {...props}/>;
   else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
   else if(pathname==="/alertas"||pathname==="/perfil") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user}/>;
+  else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
   else page=<GenericPage {...props} metrics={metrics} path={pathname}/>;
