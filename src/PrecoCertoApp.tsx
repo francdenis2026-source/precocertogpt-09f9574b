@@ -581,12 +581,31 @@ function Footer() {
 }
 
 function MobileBar({ basketCount }: { basketCount: number }) {
+  const { pathname } = useLocation();
+  const isActive = (path: string) => pathname === path || (path !== "/" && pathname.startsWith(path));
+  
   return <nav className="mobile-bar" aria-label="Navegação móvel">
-    <a href="/" className={window.location.pathname === "/" ? "active" : ""}><Home /><span>Início</span></a>
-    <a href="/buscar" className={window.location.pathname === "/buscar" ? "active" : ""}><Search /><span>Buscar</span></a>
-    <a href="/cesta-basica" className={window.location.pathname === "/cesta-basica" ? "active" : ""}><Sparkles /><span>Cesta IA</span></a>
-    <a href="/cesta" className={`mobile-basket ${window.location.pathname === "/cesta" ? "active" : ""}`}><ShoppingBasket />{basketCount > 0 && <b>{basketCount}</b>}<span>Minha Cesta</span></a>
-    <a href="/perfil" className={window.location.pathname === "/perfil" ? "active" : ""}><UserRound /><span>Perfil</span></a>
+    <a href="/" className={isActive("/") ? "active" : ""} aria-current={isActive("/") ? "page" : undefined}>
+      <Home aria-hidden="true" />
+      <span>Início</span>
+    </a>
+    <a href="/buscar" className={isActive("/buscar") ? "active" : ""} aria-current={isActive("/buscar") ? "page" : undefined}>
+      <Search aria-hidden="true" />
+      <span>Buscar</span>
+    </a>
+    <a href="/cesta-basica" className={isActive("/cesta-basica") ? "active" : ""} aria-current={isActive("/cesta-basica") ? "page" : undefined}>
+      <Sparkles aria-hidden="true" />
+      <span>Cesta IA</span>
+    </a>
+    <a href="/cesta" className={`mobile-basket ${isActive("/cesta") ? "active" : ""}`} aria-current={isActive("/cesta") ? "page" : undefined}>
+      <ShoppingBasket aria-hidden="true" />
+      {basketCount > 0 && <b aria-hidden="true">{basketCount}</b>}
+      <span>Minha Cesta</span>
+    </a>
+    <a href="/perfil" className={isActive("/perfil") ? "active" : ""} aria-current={isActive("/perfil") ? "page" : undefined}>
+      <UserRound aria-hidden="true" />
+      <span>Perfil</span>
+    </a>
   </nav>;
 }
 
