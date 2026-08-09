@@ -1828,6 +1828,9 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 
 
 function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, fetchError, syncStatus }: PageProps & { fetchError?: string | null, syncStatus?: string }) {
+  const [compareList, setCompareList] = useState<Product[]>([]);
+  const [showCompareModal, setShowCompareModal] = useState(false);
+
 
   const pathname = useLocation().pathname;
   const [activeCategory, setActiveCategory] = useState("all");
