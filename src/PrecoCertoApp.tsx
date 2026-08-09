@@ -2909,7 +2909,7 @@ export default function PrecoCertoApp() {
   const handleAdminAuth = (success: boolean) => {
     if (success) {
       setAdminAuth(true);
-      localStorage.setItem("precocerto:admin_authenticated", "true");
+      setAdminCheck("done");
       addAuditLog("Login administrativo realizado");
     }
   };
@@ -2925,15 +2925,22 @@ export default function PrecoCertoApp() {
     setUser(null);
     setAdminAuth(false);
     localStorage.removeItem("precocerto:user");
-    localStorage.removeItem("precocerto:admin_authenticated");
+    void signOut();
     window.location.href = "/";
   };
 
   const handleAdminLogout = () => {
     setAdminAuth(false);
-    localStorage.removeItem("precocerto:admin_authenticated");
+    setAdminProfile(null);
+    void signOut();
     window.location.href = "/login";
   };
+
+  if (isAdmin && adminCheck === "checking") {
+    return <div className="admin-boot-gate" role="status" aria-live="polite">
+      <ShieldCheck size={22}/> Validando suas permissões...
+    </div>;
+  }
 
   if (isAdmin && !adminAuth) {
     window.location.href = "/admin-login";
