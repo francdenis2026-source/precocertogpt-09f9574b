@@ -1021,7 +1021,35 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
                     ))}
                   </div>
                   <div className="result-actions" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <button className="button button--primary" style={{ width: '100%' }}><Share2 /> Compartilhar Cesta</button>
+                    {shareLink ? (
+                      <div className="share-success animate-fade-in" style={{ background: 'var(--green-soft)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--green)', marginBottom: '0.5rem' }}>
+                        <p style={{ color: 'var(--green)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <CheckCircle2 size={16}/> Snapshot criado! Link gerado:
+                        </p>
+                        <input 
+                          readOnly 
+                          value={shareLink} 
+                          style={{ width: '100%', padding: '0.5rem', fontSize: '0.75rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'white' }}
+                          onClick={e => (e.target as any).select()}
+                        />
+                        <button 
+                          className="button button--small" 
+                          style={{ marginTop: '0.5rem', width: '100%', background: 'var(--green)', color: 'white' }}
+                          onClick={() => { navigator.clipboard.writeText(shareLink); alert("Link copiado!"); }}
+                        >
+                          Copiar Link
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        className="button button--primary" 
+                        style={{ width: '100%' }} 
+                        disabled={isSaving}
+                        onClick={handleSaveBasket}
+                      >
+                        {isSaving ? "Salvando..." : <><Share2 /> Salvar e Compartilhar</>}
+                      </button>
+                    )}
                     <button className="button button--ghost" style={{ width: '100%' }}><Printer /> Gerar Lista de Compras</button>
                     <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
                   </div>
