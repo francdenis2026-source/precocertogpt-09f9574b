@@ -164,11 +164,22 @@
   background: rgba(255, 255, 255, 0.8); 
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border); 
-  height: 80px; 
+  height: 72px; 
   display: flex; 
   align-items: center; 
   transition: var(--transition);
 }
+
+.site-header--absolute {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom: none;
+}
+
 
 .header-inner { display: flex; align-items: center; gap: 2.5rem; width: 100%; }
 .desktop-nav { display: flex; gap: 2rem; align-items: center; }
@@ -255,10 +266,21 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 2rem;
+  padding: 1.5rem;
   transition: var(--transition);
   box-shadow: var(--shadow-sm);
 }
+
+.benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.benefits-section {
+  padding: 3rem 0;
+}
+
 
 .benefit-card:hover, .step-card:hover, .visual-product-card:hover, .dashboard-card:hover {
   transform: translateY(-6px);
