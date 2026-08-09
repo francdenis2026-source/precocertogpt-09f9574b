@@ -315,57 +315,187 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
   const rows = [...products].sort((a,b) => priceMode === "lowest" ? a.minPrice - b.minPrice : Date.parse(b.capturedAt) - Date.parse(a.capturedAt)).slice(0, 6);
   const featured = randomFeatured[featuredIndex] ?? products[0];
   return <>
-    <section className="hero" style={{ height: 'auto', minHeight: '500px', paddingBottom: '40px' }}>
+    <section className="hero">
       <div className="hero-photo" />
       <div className="hero-wash" />
-      <div className="shell hero-content" style={{ paddingTop: '20px' }}>
-        <div className="hero-copy">
-          <span className="hero-live"><i /> Inteligência de compra em tempo real</span>
-          <span className="eyebrow eyebrow--light"><MapPin size={14} /> Curadoria local • Feijó • Acre</span>
-          <h1>Compre melhor.<br/><span>Gaste menos.</span></h1>
-          <p>Uma leitura precisa do comércio local para você encontrar a melhor combinação de preço, loja e conveniência.</p>
+      <div className="shell hero-content">
+        <div className="hero-copy animate-fade-in">
+          <div className="hero-badge">
+            <span className="pulse-dot" />
+            Inteligência de compra em tempo real
+          </div>
+          <h1>Economize de verdade no comércio de <span>Feijó.</span></h1>
+          <p>Acompanhe preços em tempo real, compare mercados e encontre as melhores ofertas da nossa cidade sem sair de casa.</p>
+          
           <div className="hero-actions">
             <SearchBox value={query} setValue={setQuery} products={products} hero />
-            <a href="/buscar" className="button button--white">Explorar ofertas <ArrowRight size={18} /></a>
+            <div className="hero-secondary-actions">
+              <a href="/buscar" className="button button--white">Explorar todas as ofertas</a>
+              <a href="/cesta-basica" className="button button--ghost">Montar cesta</a>
+            </div>
           </div>
-          <div className="hero-trust"><span><CheckCircle2 /> Preços verificados</span><span><Clock3 /> Atualização contínua</span><span><ShieldCheck /> Dados protegidos</span></div>
+          
+          <div className="hero-trust">
+            <div className="trust-item"><CheckCircle2 size={18} /> <span>Preços verificados hoje</span></div>
+            <div className="trust-item"><Clock3 size={18} /> <span>Atualização 24h</span></div>
+            <div className="trust-item"><ShieldCheck size={18} /> <span>Dados de confiança</span></div>
+          </div>
         </div>
-        <aside className="hero-radar hero-commerce" aria-label="Comparação interativa em destaque">
-          <div className="radar-head"><span><Activity /> Comparação inteligente</span><em>ao vivo</em></div>
-          {featured && <><div className="commerce-product"><ProductImage product={featured} size="hero" eager /><div className="commerce-copy"><span>{featured.category} • {featured.size}</span><h2>{featured.name}</h2><small><ShieldCheck /> preço verificado há 8 min</small></div></div><div className="commerce-prices"><div><small>Melhor preço</small><strong>{money(featured.minPrice)}</strong><span>em {featured.establishment}</span></div><div className="commerce-chart"><svg viewBox="0 0 250 72" role="img" aria-label="Tendência de preço em queda"><defs><linearGradient id="priceArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#54d69a" stopOpacity=".42"/><stop offset="1" stopColor="#54d69a" stopOpacity="0"/></linearGradient></defs><path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55 L246 70 L4 70 Z" fill="url(#priceArea)"/><path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55" fill="none" stroke="#65dfa8" strokeWidth="3" strokeLinecap="round"/><circle cx="246" cy="55" r="5" fill="#65dfa8" stroke="#08243a" strokeWidth="3"/></svg><span><TrendingDown /> caiu {money(Math.max(0,(featured.previousPrice ?? featured.maxPrice)-featured.minPrice))}</span></div></div><div className="commerce-actions"><button className="button button--gold" onClick={()=>addBasket(featured)}><Plus /> Adicionar à cesta</button><a href={`/produto/${featured.slug}`}>Ver comparação <ArrowRight /></a></div></>}
-          <div className="commerce-thumbs">{(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 4).map((product, index) => <button className={featuredIndex === index ? "active" : ""} onClick={() => setFeaturedIndex(index)} aria-pressed={featuredIndex === index} aria-label={`Destacar ${product.name}`} key={product.id}><ProductImage product={product} size="compact" /><span>{product.brand}<small>{money(product.minPrice)}</small></span></button>)}</div>
+
+        <aside className="hero-radar hero-commerce animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="radar-head">
+            <div className="radar-status">
+              <Activity size={16} />
+              <span>RADAR DE PREÇOS</span>
+            </div>
+            <em className="live-label">AO VIVO</em>
+          </div>
+          
+          {featured && (
+            <div className="commerce-featured">
+              <div className="commerce-product">
+                <ProductImage product={featured} size="hero" eager />
+                <div className="commerce-copy">
+                  <span className="commerce-category">{featured.category} • {featured.size}</span>
+                  <h2>{featured.name}</h2>
+                  <div className="verified-status">
+                    <ShieldCheck size={14} />
+                    <span>verificado há 8 min</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="commerce-pricing">
+                <div className="price-main">
+                  <small>Melhor preço agora</small>
+                  <div className="price-value">
+                    <strong>{money(featured.minPrice)}</strong>
+                    <span className="price-store">em {featured.establishment}</span>
+                  </div>
+                </div>
+                
+                <div className="price-trend">
+                  <svg viewBox="0 0 250 72" className="trend-svg">
+                    <defs>
+                      <linearGradient id="priceArea" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stopColor="#10b981" stopOpacity="0.3"/>
+                        <stop offset="1" stopColor="#10b981" stopOpacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55 L246 70 L4 70 Z" fill="url(#priceArea)"/>
+                    <path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round"/>
+                    <circle cx="246" cy="55" r="5" fill="#10b981" stroke="#0f172a" strokeWidth="3"/>
+                  </svg>
+                  <div className="trend-badge">
+                    <TrendingDown size={14} />
+                    <span>caiu {money(Math.max(0, (featured.previousPrice ?? featured.maxPrice) - featured.minPrice))}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="commerce-footer">
+                <button className="button button--gold button--small" onClick={() => addBasket(featured)}>
+                  <Plus size={16} /> Adicionar à cesta
+                </button>
+                <a href={`/produto/${featured.slug}`} className="details-link">
+                  Ver histórico <ChevronRight size={16} />
+                </a>
+              </div>
+            </div>
+          )}
+          
+          <div className="commerce-thumbs">
+            {(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 4).map((product, index) => (
+              <button 
+                className={`thumb-btn ${featuredIndex === index ? "active" : ""}`} 
+                onClick={() => setFeaturedIndex(index)}
+                key={product.id}
+              >
+                <ProductImage product={product} size="compact" />
+                <div className="thumb-info">
+                  <span className="thumb-brand">{product.brand}</span>
+                  <span className="thumb-price">{money(product.minPrice)}</span>
+                </div>
+              </button>
+            ))}
+          </div>
         </aside>
       </div>
     </section>
 
-    <section className="benefits-section">
+    <div className="shell metrics-container animate-fade-in" style={{ animationDelay: '0.4s' }}>
+      <div className="metrics-grid">
+        <div className="metric-item">
+          <div className="metric-icon"><Store /></div>
+          <div className="metric-content">
+            <strong>{count(metrics.stores)}</strong>
+            <span>Lojas parceiras</span>
+          </div>
+        </div>
+        <div className="metric-item">
+          <div className="metric-icon"><PackageSearch /></div>
+          <div className="metric-content">
+            <strong>{count(metrics.products)}</strong>
+            <span>Produtos ativos</span>
+          </div>
+        </div>
+        <div className="metric-item">
+          <div className="metric-icon"><Activity /></div>
+          <div className="metric-content">
+            <strong>{count(metrics.prices)}</strong>
+            <span>Preços coletados</span>
+          </div>
+        </div>
+      </div>
+      <div className="metrics-footer">
+        <span className="live-dot" />
+        Base consolidada e verificada até hoje
+      </div>
+    </div>
+
+    <section className="section benefits-section">
       <div className="shell">
+        <div className="section-header centered">
+          <span className="eyebrow">Por que usar o PreçoCerto?</span>
+          <h2>Ajudamos você a comprar melhor</h2>
+        </div>
         <div className="benefits-grid">
           <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <div className="benefit-icon"><CircleDollarSign size={24} /></div>
             <h3>Economia Real</h3>
-            <p>Compare preços entre mercados e economize até 30% na sua lista mensal.</p>
+            <p>Compare preços entre mercados e economize até 30% na sua lista mensal com dados precisos.</p>
           </div>
           <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <div className="benefit-icon"><Clock3 size={24} /></div>
             <h3>Dados Atualizados</h3>
-            <p>Nossa equipe verifica os preços diariamente nos principais comércios de Feijó.</p>
+            <p>Nossa equipe verifica os preços diariamente nos principais comércios de Feijó para garantir precisão.</p>
           </div>
           <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <div className="benefit-icon"><LayoutDashboard size={24} /></div>
             <h3>Cestas Inteligentes</h3>
-            <p>Monte sua lista e descubra em qual loja ela sai mais barata automaticamente.</p>
+            <p>Monte sua lista e descubra em qual loja ela sai mais barata automaticamente em poucos cliques.</p>
           </div>
           <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <div className="benefit-icon"><ShieldCheck size={24} /></div>
             <h3>Transparência Total</h3>
-            <p>Veja o histórico de preços e saiba se a oferta é realmente vantajosa.</p>
+            <p>Veja o histórico completo de preços e saiba se a oferta é realmente vantajosa para você.</p>
           </div>
         </div>
       </div>
     </section>
-    <div className="shell metrics-float" style={{ marginTop: '0', transform: 'translateY(-20px)' }} aria-label="Métricas da plataforma"><div><span className="metric-icon"><Store /></span><strong>{count(metrics.stores)}</strong><span>estabelecimentos cadastrados</span></div><div><span className="metric-icon"><PackageSearch /></span><strong>{count(metrics.products)}</strong><span>itens cadastrados</span></div><div><span className="metric-icon"><Activity /></span><strong>{count(metrics.prices)}</strong><span>preços registrados</span></div><small><span /> Base consolidada até 7 de agosto de 2026</small></div>
-    <nav className="shell category-rail" aria-label="Atalhos de compra"><span>Explore por intenção</span><a href="/categoria/mercearia"><PackageSearch /> Mercearia <ArrowRight /></a><a href="/categoria/acougue"><TrendingDown /> Ofertas do dia <ArrowRight /></a><a href="/cesta-basica"><ShoppingBasket /> Cesta essencial <ArrowRight /></a><a href="/estabelecimentos"><Store /> Mercados locais <ArrowRight /></a></nav>
+
+    <div className="shell category-rail-container animate-fade-in">
+      <div className="category-rail">
+        <div className="rail-label">Categorias populares</div>
+        <div className="rail-items">
+          <a href="/categoria/mercearia" className="rail-item"><PackageSearch size={18}/><span>Mercearia</span></a>
+          <a href="/categoria/acougue" className="rail-item"><TrendingDown size={18}/><span>Carnes e Frios</span></a>
+          <a href="/categoria/bebidas" className="rail-item"><ShoppingBasket size={18}/><span>Bebidas</span></a>
+          <a href="/categoria/limpeza" className="rail-item"><Store size={18}/><span>Limpeza</span></a>
+        </div>
+      </div>
+    </div>
+
     <section className="section shell featured-products">
       <div className="section-heading">
         <div>
