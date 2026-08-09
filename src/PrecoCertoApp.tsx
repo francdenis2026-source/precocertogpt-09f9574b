@@ -761,6 +761,13 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
   const [shareLink, setShareLink] = useState<string | null>(null);
   
   const [basketItems, setBasketItems] = useState<BasketItemConfig[]>(() => {
+    const reopened = localStorage.getItem("precocerto:basket_reopen");
+    if (reopened) {
+      const data = JSON.parse(reopened);
+      localStorage.removeItem("precocerto:basket_reopen");
+      // Pequeno timeout para garantir que os estados de modo/budget sincronizem se necessário
+      return data.items;
+    }
     return initialCart.map(p => ({
       productName: p.name,
       category: p.category,
@@ -769,6 +776,17 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
       isEssential: true
     }));
   });
+
+  useEffect(() => {
+    const reopened = localStorage.getItem("precocerto:basket_reopen_meta");
+    if (reopened) {
+      const data = JSON.parse(reopened);
+      localStorage.removeItem("precocerto:basket_reopen_meta");
+      setMode(data.mode);
+      setBudget(data.budget);
+      setStep(3);
+    }
+  }, []);
 
   const optimizationResult = useMemo(() => {
     if (basketItems.length === 0) return null;
@@ -825,6 +843,62 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
     }
   };
 
+  const generatePDF = () => {
+    if (!optimizationResult) return;
+    
+    const doc = new jsPDF();
+    const title = "Lista de Compras PrecoCerto";
+    const date = new Date().toLocaleDateString('pt-BR');
+    
+    doc.setFontSize(22);
+    doc.text(title, 20, 20);
+    doc.setFontSize(10);
+    doc.text(`Gerada em: ${date} | Modo: ${mode}`, 20, 30);
+    
+    let y = 45;
+    Object.values(optimizationResult.storeBreakdown).forEach((store: any) => {
+      doc.setFontSize(14);
+      doc.text(store.storeName, 20, y);
+      y += 10;
+      
+      doc.setFontSize(10);
+      optimizationResult.items.filter(i => i.establishment === store.storeName).forEach(item => {
+        doc.text(`- ${item.product.name}: ${item.quantity} ${item.product.unit} (${money(item.subtotal)})`, 25, y);
+        y += 7;
+      });
+      
+      doc.text(`Total na loja: ${money(store.total)}`, 25, y);
+      y += 15;
+      
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+    });
+    
+    doc.setFontSize(12);
+    doc.text(`VALOR TOTAL ESTIMADO: ${money(optimizationResult.total)}`, 20, y + 10);
+    doc.save(`lista-compras-${date.replace(/\//g, '-')}.pdf`);
+    setToast("PDF gerado com sucesso!");
+  };
+
+  const handleReopen = async (snapshot: any) => {
+    // Transforma itens do snapshot em itens de configuração para nova otimização
+    const newItems: BasketItemConfig[] = snapshot.items.map((i: any) => ({
+      productName: i.product_name,
+      category: i.category,
+      quantity: i.quantity,
+      unit: i.unit,
+      isEssential: i.is_essential
+    }));
+    
+    setBasketItems(newItems);
+    setMode(snapshot.optimization_mode);
+    setBudget(snapshot.budget || 250);
+    setStep(3); // Vai direto para o resultado
+    setToast("Cesta reaberta para atualização!");
+  };
+
   return (
     <div className="shell page-shell basket-page">
       <header className="page-title">
@@ -871,6 +945,14 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
                   <p>Prioriza essenciais e marcas econômicas para não ultrapassar seu limite.</p>
                 </div>
                 {mode === 'within_budget' && <CheckCircle2 className="check" />}
+              </button>
+              <button className={`mode-card ${mode === 'best_value' ? 'active' : ''}`} onClick={() => setMode('best_value')}>
+                <div className="mode-icon"><MapPin /></div>
+                <div>
+                  <strong>Custo-Benefício</strong>
+                  <p>Considera o preço e o custo estimado de deslocamento entre os bairros.</p>
+                </div>
+                {mode === 'best_value' && <CheckCircle2 className="check" />}
               </button>
             </div>
 
@@ -1050,7 +1132,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
                         {isSaving ? "Salvando..." : <><Share2 /> Salvar e Compartilhar</>}
                       </button>
                     )}
-                    <button className="button button--ghost" style={{ width: '100%' }}><Printer /> Gerar Lista de Compras</button>
+                    <button className="button button--ghost" style={{ width: '100%' }} onClick={generatePDF}><Download /> Baixar PDF / Imprimir</button>
                     <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
                   </div>
                 </aside>
@@ -1070,6 +1152,31 @@ function SnapshotPage({ products }: PageProps) {
   const [snapshot, setSnapshot] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleReopen = (data: any) => {
+    // Redireciona para /cesta passando os dados via state ou salva no localStorage
+    // Para simplificar no SPA, vamos salvar no localStorage que o BasketPage lê no init
+    const items = data.items.map((i: any) => ({
+      productName: i.product_name,
+      category: i.category,
+      quantity: i.quantity,
+      unit: i.unit,
+      isEssential: i.is_essential
+    }));
+    
+    localStorage.setItem("precocerto:basket_reopen", JSON.stringify({
+      items,
+      mode: data.optimization_mode,
+      budget: data.budget
+    }));
+    localStorage.setItem("precocerto:basket_reopen_meta", JSON.stringify({
+      mode: data.optimization_mode,
+      budget: data.budget
+    }));
+    
+    window.location.href = "/cesta";
+  };
 
   useEffect(() => {
     async function load() {
@@ -1142,7 +1249,9 @@ function SnapshotPage({ products }: PageProps) {
         
         <div className="snapshot-footer" style={{ marginTop: '3rem', textAlign: 'center', padding: '2rem', background: 'var(--surface-2)', borderRadius: '20px' }}>
           <p>Esta é uma visualização estática de uma cesta planejada.</p>
-          <a href="/cesta" className="button button--primary" style={{ marginTop: '1rem' }}>Criar minha própria cesta <Sparkles/></a>
+          <button onClick={() => handleReopen(snapshot)} className="button button--primary" style={{ marginTop: '1rem' }}>
+            Atualizar e Reotimizar Cesta <Sparkles/>
+          </button>
         </div>
       </div>
     </div>
