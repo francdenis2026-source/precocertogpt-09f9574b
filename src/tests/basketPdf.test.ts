@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from "vitest";
 import { planBasketPdf, planFitsWithoutClipping, pageGeometry, A4 } from "../lib/basketPdf";
 import { getPdfOrientation, setPdfOrientation } from "../lib/pdfPrefs";
