@@ -273,6 +273,7 @@ body {
   display: flex; 
   align-items: center; 
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
 }
 
 .site-header--scrolled {
@@ -1048,9 +1049,10 @@ iframe[src*="lovable.dev/badge"] {
 /* Aprimoramentos do Comparador de Preços */
 .search-layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 2rem;
-  margin-top: 2rem;
+  grid-template-columns: 260px 1fr;
+  gap: 3rem;
+  margin-top: 3rem;
+  align-items: start;
 }
 
 .search-sidebar {
