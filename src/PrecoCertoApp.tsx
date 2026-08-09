@@ -430,7 +430,7 @@ function ThemeToggle({ compact = false }: { compact?: boolean }) {
   const dark = theme === "dark";
   return <button type="button" className={`theme-toggle ${compact ? "theme-toggle--compact" : ""}`} onClick={toggleTheme} aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"} title={dark ? "Ativar modo claro" : "Ativar modo escuro"} aria-pressed={dark}>
     <span className="theme-toggle__track" aria-hidden="true"><span className="theme-toggle__thumb">{dark ? <Moon size={15}/> : <Sun size={15}/>}</span></span>
-    {!compact && <span>{dark ? "Escuro" : "Claro"}</span>}
+    {!compact && <span style={{ marginLeft: '4px' }}>{dark ? "Escuro" : "Claro"}</span>}
   </button>;
 }
 
@@ -450,15 +450,16 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
   return <header className={headerClass}>
     <div className="shell header-inner">
       <Brand compact />
-      <span className="header-location" onClick={() => window.location.href = "/estabelecimentos"} style={{ cursor: 'pointer' }}><MapPin size={14} /> Feijó, AC</span>
+      <span className="header-location" onClick={() => window.location.href = "/estabelecimentos"} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--muted)', transition: 'var(--transition)' }} className="hover:text-blue-600"><MapPin size={14} /> Feijó, AC</span>
       <nav className="desktop-nav" aria-label="Navegação principal">
         <a href="/buscar">Comparar preços</a><a href="/melhores-precos">Ofertas</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/planos">Planos</a>
 
       </nav>
-      <div className="header-actions">
+      <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <ThemeToggle compact />
         <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
-        <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a>
+        <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span key={basketCount}>{basketCount}</span>}</a>
+
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <a href="/perfil" style={{ fontSize: '0.9rem', color: 'var(--muted)', textDecoration: 'none' }}>Olá, <strong>{user.name.split(' ')[0]}</strong></a>
