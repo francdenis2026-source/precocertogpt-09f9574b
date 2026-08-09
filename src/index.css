@@ -6,8 +6,8 @@
   
   /* System-inspired Colors from Reference */
   --system-blue: #2563eb;
-  --system-gray: #475569; /* Increased contrast for WCAG AA (from 64748b) */
-  --system-gray-light: #64748b; /* Better contrast for labels */
+  --system-gray: #334155; /* Increased contrast for WCAG AA (from 475569) */
+  --system-gray-light: #475569; /* Better contrast for labels */
   --system-gray-extralight: #e2e8f0;
   
   /* Light Theme Tokens */
@@ -353,11 +353,12 @@ body {
 .theme-toggle__track {
   width: 44px;
   height: 24px;
-  background: var(--border-strong);
+  background: #cbd5e1; /* Increased contrast for toggle track */
   border-radius: 20px;
   position: relative;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
 [data-theme='dark'] .theme-toggle__track {
@@ -433,7 +434,7 @@ body {
 .brand:hover { transform: translateY(-1px); }
 .brand:active { transform: translateY(1px) scale(0.98); }
 .brand__logo-img { 
-  height: 60px; 
+  height: 68px; /* Increased from 60px */
   width: auto; 
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
@@ -449,18 +450,18 @@ body {
   background: rgba(255, 255, 255, 0.8); 
   backdrop-filter: blur(16px) saturate(180%);
   border-bottom: 1px solid rgba(226, 232, 240, 0.8); 
-  height: 72px; 
+  height: 80px; 
   display: flex; 
   align-items: center; 
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
 }
 @media (min-width: 1024px) {
-  .site-header { height: 84px; }
+  .site-header { height: 92px; }
 }
 
 .site-header--scrolled {
-  height: 68px;
+  height: 74px; /* Slightly taller scrolled header to accommodate larger logo */
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 4px 30px -10px rgba(0, 0, 0, 0.1), 0 0 20px rgba(37, 99, 235, 0.05);
   border-bottom-color: var(--border);
