@@ -1064,6 +1064,92 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
 }
 
 
+function SnapshotPage({ products }: PageProps) {
+  const { pathname } = useLocation();
+  const snapshotId = pathname.split('/').pop();
+  const [snapshot, setSnapshot] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      if (!snapshotId) return;
+      try {
+        const data = await getBasketSnapshot(snapshotId);
+        setSnapshot(data);
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [snapshotId]);
+
+  if (loading) return <div className="shell page-shell"><div className="loading-state">Carregando snapshot da cesta...</div></div>;
+  if (error) return <div className="shell page-shell"><div className="error-state">Erro ao carregar snapshot: {error}</div></div>;
+  if (!snapshot) return <div className="shell page-shell"><div className="error-state">Snapshot não encontrado.</div></div>;
+
+  const total = snapshot.snapshots.reduce((sum: number, s: any) => sum + (s.price * (snapshot.items.find((i: any) => i.product_name === s.product_name)?.quantity || 1)), 0);
+
+  return (
+    <div className="shell page-shell basket-page">
+      <header className="page-title">
+        <div>
+          <span className="eyebrow">Snapshot de Cesta Otimizada</span>
+          <h1>{snapshot.name}</h1>
+          <p>Visualização de preços capturados em {new Date(snapshot.created_at).toLocaleDateString('pt-BR')}.</p>
+        </div>
+        <div className="snapshot-badge" style={{ background: 'var(--blue-soft)', color: 'var(--blue)', padding: '0.5rem 1rem', borderRadius: '50px', fontWeight: 700, fontSize: '0.8rem' }}>
+          MODO: {snapshot.optimization_mode === 'cheapest_multi' ? 'Mais Barata' : 'Loja Única'}
+        </div>
+      </header>
+
+      <div className="optimization-dashboard animate-fade-in">
+        <div className="result-kpis" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+          <div className="kpi-card highlight">
+            <small>Total na Data</small>
+            <strong>{money(total)}</strong>
+          </div>
+          <div className="kpi-card">
+            <small>Itens na Cesta</small>
+            <strong>{snapshot.items.length}</strong>
+          </div>
+        </div>
+
+        <div className="result-main">
+          <h3>Itens Salvos</h3>
+          <div className="optimized-items-grid">
+            {snapshot.snapshots.map((s: any, idx: number) => {
+              const config = snapshot.items.find((i: any) => i.product_name === s.product_name);
+              return (
+                <div className="optimized-item-card" key={idx}>
+                  <div className="item-details">
+                    <strong style={{ display: 'block' }}>{s.product_name}</strong>
+                    <span className="store-ref">
+                      <Store size={12}/> {s.establishment_name}
+                    </span>
+                  </div>
+                  <div className="item-pricing">
+                    <small>{config?.quantity} {config?.unit} x {money(s.price)}</small>
+                    <strong>{money(s.price * (config?.quantity || 1))}</strong>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        
+        <div className="snapshot-footer" style={{ marginTop: '3rem', textAlign: 'center', padding: '2rem', background: 'var(--surface-2)', borderRadius: '20px' }}>
+          <p>Esta é uma visualização estática de uma cesta planejada.</p>
+          <a href="/cesta" className="button button--primary" style={{ marginTop: '1rem' }}>Criar minha própria cesta <Sparkles/></a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 function PlansPage() {
   const [shop, setShop] = useState(false); const plans = shop ? [{name:"Parceiro Local",price:29.9,desc:"Presença local e catálogo essencial",features:["Perfil verificado","Gestão de catálogo","Métricas essenciais"]},{name:"Parceiro Pro",price:69.9,desc:"Mais alcance e inteligência",features:["Tudo do Local","Promoções em destaque","Tendências de mercado"],featured:true},{name:"Business",price:149.9,desc:"Operação com múltiplas unidades",features:["Tudo do Pro","Equipe e permissões","Relatórios avançados"]}] : [{name:"Grátis",price:0,desc:"Compare antes de comprar",features:["Busca de preços","1 cesta salva","1 consulta de IA"]},{name:"Mensal",price:24.9,desc:"Economia sem compromisso",features:["Consultas ilimitadas","Alertas de queda","Histórico completo"],featured:true},{name:"Anual",price:179.9,desc:"O melhor custo-benefício",features:["Tudo do Mensal","Exportações","Cota ampliada de IA"]}];
   return <div className="shell page-shell plans-page"><div className="center-heading"><span className="eyebrow">Planos PreçoCerto</span><h1>Economia que se paga na primeira compra</h1><p>Recursos transparentes para consumidores e para o comércio local.</p><div className="segmented large"><button className={!shop?"active":""} onClick={()=>setShop(false)}>Para você</button><button className={shop?"active":""} onClick={()=>setShop(true)}>Para sua loja</button></div></div><div className="plan-grid">{plans.map(plan=><article className={plan.featured?"featured":""} key={plan.name}>{plan.featured&&<span className="recommended">Recomendado</span>}<h2>{plan.name}</h2><p>{plan.desc}</p><div className="plan-price"><strong>{money(plan.price)}</strong><span>/mês</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={`/checkout/${plan.name.toLowerCase().replace(" ","-")}`}>{plan.price===0?"Começar grátis":"Escolher plano"}<ArrowRight/></a><ul>{plan.features.map(f=><li key={f}><Check/> {f}</li>)}</ul></article>)}</div><div className="plan-note"><ShieldCheck/><span><b>Pagamento seguro via Pix</b><small>Ativação automática após confirmação. Cancele quando quiser.</small></span></div></div>;
