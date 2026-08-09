@@ -1379,9 +1379,70 @@ iframe[src*="lovable.dev/badge"] {
 }
 
 .history-chart-container {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
   border-top: 1px dashed var(--border);
+}
+
+.price-comparison-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  background: var(--surface-2);
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.comparison-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.comparison-item small {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.comparison-item strong {
+  font-size: 1.1rem;
+  color: var(--green);
+}
+
+.comparison-item b {
+  font-size: 0.95rem;
+  color: var(--navy);
+}
+
+.comparison-item span {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.comparison-item .location-tag {
+  font-size: 0.6rem;
+  background: var(--blue-soft);
+  color: var(--blue);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comparison-item.min {
+  border-right: 1px solid var(--border);
+}
+
+.comparison-item.max {
+  border-left: 1px solid var(--border);
 }
 
 .chart-header {
