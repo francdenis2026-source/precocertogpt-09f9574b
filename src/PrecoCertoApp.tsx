@@ -116,33 +116,87 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
 
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
-  return <header className="site-header">
-    <div className="shell header-inner">
-      {/* Logo removida do header a pedido do usuário */}
-      <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
-      <nav className="desktop-nav" aria-label="Navegação principal">
-        <a href="/buscar">Comparar preços</a><a href="/melhores-precos">Ofertas</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/planos">Planos</a>
-      </nav>
-      <div className="header-actions">
-        <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
-        <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span>{basketCount}</span>}</a>
-        {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <a href="/perfil" style={{ fontSize: '0.9rem', color: 'var(--muted)', textDecoration: 'none' }}>Olá, <strong>{user.name.split(' ')[0]}</strong></a>
-            <button className="text-link" onClick={onLogout}>Sair</button>
-          </div>
-        ) : (
-          <>
-            <a className="text-link" href="/login">Entrar</a>
-            <a className="button button--primary button--small" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
-          </>
-        )}
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
+
+  return (
+    <header className={`site-header ${isAdminPage ? 'site-header--admin' : ''}`}>
+      <div className="shell header-inner">
+        <div className="header-left">
+          <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
+        </div>
+        
+        <nav className="desktop-nav" aria-label="Navegação principal">
+          <a href="/buscar" className={location.pathname === '/buscar' ? 'active' : ''}>Comparar preços</a>
+          <a href="/melhores-precos" className={location.pathname === '/melhores-precos' ? 'active' : ''}>Ofertas</a>
+          <a href="/cesta-basica" className={location.pathname === '/cesta-basica' ? 'active' : ''}>Cesta inteligente</a>
+          <a href="/estabelecimentos" className={location.pathname === '/estabelecimentos' ? 'active' : ''}>Estabelecimentos</a>
+          <a href="/planos" className={location.pathname === '/planos' ? 'active' : ''}>Planos</a>
+        </nav>
+
+        <div className="header-actions">
+          <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
+          <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}>
+            <ShoppingBasket size={20} />
+            {basketCount > 0 && <span className="basket-badge">{basketCount}</span>}
+          </a>
+          
+          <div className="auth-separator" />
+          
+          {user ? (
+            <div className="user-menu">
+              <a href="/perfil" className="user-profile-link">
+                <div className="avatar">{user.name[0]}</div>
+                <div className="user-info">
+                  <span className="user-greeting">Olá, {user.name.split(' ')[0]}</span>
+                  <span className="user-role">{user.role || 'Membro'}</span>
+                </div>
+              </a>
+              <button className="button button--ghost button--small" onClick={onLogout}>Sair</button>
+            </div>
+          ) : (
+            <>
+              <a className="button button--ghost button--small" href="/login">Entrar</a>
+              <a className="button button--primary button--small" href="/cadastro">
+                Começar grátis <ArrowRight size={16} />
+              </a>
+            </>
+          )}
+        </div>
+
+        <button className="mobile-menu-button" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open}>
+          <Menu />
+        </button>
       </div>
-      <button className="mobile-menu-button" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open}><Menu /></button>
-    </div>
-    {open && <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu principal"><button className="drawer-backdrop" aria-label="Fechar menu" onClick={() => setOpen(false)} /><div className="drawer-panel"><div className="drawer-head">{/* Logo removida do drawer a pedido do usuário */}<button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu"><X /></button></div><nav><a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas de hoje</a><a href="/planos">Planos</a><a href="/colaborar">Enviar nota fiscal</a><a href="/admin" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid #eee', color: '#888', fontSize: '0.9rem' }}>Área Administrativa</a></nav><a className="button button--primary" href="/cadastro">Criar conta gratuita</a><a className="button button--ghost" href="/login">Já tenho uma conta</a></div></div>}
-  </header>;
+
+      {open && (
+        <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu principal">
+          <button className="drawer-backdrop" aria-label="Fechar menu" onClick={() => setOpen(false)} />
+          <div className="drawer-panel">
+            <div className="drawer-head">
+              <button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu"><X /></button>
+            </div>
+            <nav>
+              <a href="/buscar">Comparar preços</a>
+              <a href="/cesta-basica">Cesta inteligente</a>
+              <a href="/estabelecimentos">Estabelecimentos</a>
+              <a href="/melhores-precos">Ofertas de hoje</a>
+              <a href="/planos">Planos</a>
+              <a href="/colaborar">Enviar nota fiscal</a>
+              <div className="drawer-divider" />
+              <a href="/admin" className="admin-link">Área Administrativa</a>
+            </nav>
+            <div className="drawer-actions">
+              <a className="button button--primary w-full" href="/cadastro">Criar conta gratuita</a>
+              <a className="button button--ghost w-full" href="/login">Já tenho uma conta</a>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
 }
+
 
 function Footer() {
   return <footer className="site-footer"><div className="shell footer-grid"><div><Brand inverse /><p>Compare preços reais no comércio de Feijó e transforme cada compra em economia.</p><span className="footer-place"><MapPin size={15} /> Feijó • Acre • Brasil</span></div><div><h3>Descobrir</h3><a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/farmacias">Farmácias de plantão</a></div><div><h3>PreçoCerto</h3><a href="/#como-funciona">Como funciona</a><a href="/lojista">Para empresas</a><a href="/colaborar">Colaborar</a><a href="/fale-conosco">Fale conosco</a></div><div><h3>Conta</h3><a href="/login">Entrar</a><a href="/cadastro">Criar conta</a><a href="/planos">Planos</a><a href="/admin">Área Administrativa</a></div></div><div className="shell footer-bottom"><span>SKAES NET TECHNOLOGY • FRANC D’NIS</span><span>© 2026 PreçoCerto. Todos os direitos reservados.</span></div></footer>;
@@ -156,11 +210,55 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
   const [focused, setFocused] = useState(false);
   const suggestions = products.filter(p => !value || `${p.name} ${p.category} ${p.brand}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))).slice(0, 6);
   function submit(event: FormEvent) { event.preventDefault(); const q = value.trim(); window.location.href = q ? `/buscar?q=${encodeURIComponent(q)}` : "/buscar"; }
-  return <div className={`search-combo ${hero ? "search-combo--hero" : ""}`}>
-    <form onSubmit={submit} role="search"><Search aria-hidden="true" /><label className="sr-only" htmlFor={hero ? "hero-search" : "page-search"}>Buscar produto</label><input id={hero ? "hero-search" : "page-search"} role="combobox" value={value} onChange={e => setValue(e.target.value)} onFocus={() => setFocused(true)} onBlur={() => setTimeout(() => setFocused(false), 120)} placeholder="Busque arroz, café, carne, leite..." autoComplete="off" aria-expanded={focused} aria-controls={hero ? "hero-suggestions" : "page-suggestions"} aria-autocomplete="list" /><button className="button button--primary" type="submit">Comparar preços <ArrowRight size={18} /></button></form>
-    {focused && <div className="suggestions" id={hero ? "hero-suggestions" : "page-suggestions"} role="listbox"><div className="suggestions-label">{value ? "Sugestões encontradas" : "Buscas populares em Feijó"}</div>{suggestions.map(p => <a role="option" aria-selected="false" href={`/buscar?q=${encodeURIComponent(p.name)}`} key={p.id}><span className="suggestion-icon"><PackageSearch size={18} /></span><span><strong>{p.name}</strong><small>{p.brand} • {p.size}</small></span><span className="suggestion-price"><small>a partir de</small><b>{money(p.minPrice)}</b><em>{p.establishment}</em></span></a>)}</div>}
-  </div>;
+  
+  return (
+    <div className={`search-combo ${hero ? "search-combo--hero" : ""}`}>
+      <form onSubmit={submit} role="search" className={focused ? 'focused' : ''}>
+        <Search aria-hidden="true" size={20} />
+        <label className="sr-only" htmlFor={hero ? "hero-search" : "page-search"}>Buscar produto</label>
+        <input 
+          id={hero ? "hero-search" : "page-search"} 
+          role="combobox" 
+          value={value} 
+          onChange={e => setValue(e.target.value)} 
+          onFocus={() => setFocused(true)} 
+          onBlur={() => setTimeout(() => setFocused(false), 200)} 
+          placeholder="Busque arroz, café, carne, leite..." 
+          autoComplete="off" 
+          aria-expanded={focused} 
+          aria-controls={hero ? "hero-suggestions" : "page-suggestions"} 
+          aria-autocomplete="list" 
+        />
+        <button className="button button--primary" type="submit">
+          {hero ? "Comparar preços" : ""} <ArrowRight size={18} />
+        </button>
+      </form>
+      
+      {focused && (
+        <div className="suggestions" id={hero ? "hero-suggestions" : "page-suggestions"} role="listbox">
+          <div className="suggestions-label">{value ? "Sugestões encontradas" : "Buscas populares em Feijó"}</div>
+          <div className="suggestions-list">
+            {suggestions.map(p => (
+              <a role="option" aria-selected="false" href={`/buscar?q=${encodeURIComponent(p.name)}`} key={p.id} className="suggestion-item">
+                <span className="suggestion-icon"><PackageSearch size={18} /></span>
+                <div className="suggestion-content">
+                  <span className="suggestion-name">{p.name}</span>
+                  <span className="suggestion-meta">{p.brand} • {p.size}</span>
+                </div>
+                <div className="suggestion-price">
+                  <small>a partir de</small>
+                  <b>{money(p.minPrice)}</b>
+                  <em>{p.establishment}</em>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
+
 
 function PriceBadge({ product }: { product: Product }) {
   const saving = product.previousPrice ? Math.max(0, ((product.previousPrice - product.minPrice) / product.previousPrice) * 100) : 0;
@@ -217,57 +315,187 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
   const rows = [...products].sort((a,b) => priceMode === "lowest" ? a.minPrice - b.minPrice : Date.parse(b.capturedAt) - Date.parse(a.capturedAt)).slice(0, 6);
   const featured = randomFeatured[featuredIndex] ?? products[0];
   return <>
-    <section className="hero" style={{ height: 'auto', minHeight: '500px', paddingBottom: '40px' }}>
+    <section className="hero">
       <div className="hero-photo" />
       <div className="hero-wash" />
-      <div className="shell hero-content" style={{ paddingTop: '20px' }}>
-        <div className="hero-copy">
-          <span className="hero-live"><i /> Inteligência de compra em tempo real</span>
-          <span className="eyebrow eyebrow--light"><MapPin size={14} /> Curadoria local • Feijó • Acre</span>
-          <h1>Compre melhor.<br/><span>Gaste menos.</span></h1>
-          <p>Uma leitura precisa do comércio local para você encontrar a melhor combinação de preço, loja e conveniência.</p>
+      <div className="shell hero-content">
+        <div className="hero-copy animate-fade-in">
+          <div className="hero-badge">
+            <span className="pulse-dot" />
+            Inteligência de compra em tempo real
+          </div>
+          <h1>Economize de verdade no comércio de <span>Feijó.</span></h1>
+          <p>Acompanhe preços em tempo real, compare mercados e encontre as melhores ofertas da nossa cidade sem sair de casa.</p>
+          
           <div className="hero-actions">
             <SearchBox value={query} setValue={setQuery} products={products} hero />
-            <a href="/buscar" className="button button--white">Explorar ofertas <ArrowRight size={18} /></a>
+            <div className="hero-secondary-actions">
+              <a href="/buscar" className="button button--white">Explorar todas as ofertas</a>
+              <a href="/cesta-basica" className="button button--ghost">Montar cesta</a>
+            </div>
           </div>
-          <div className="hero-trust"><span><CheckCircle2 /> Preços verificados</span><span><Clock3 /> Atualização contínua</span><span><ShieldCheck /> Dados protegidos</span></div>
+          
+          <div className="hero-trust">
+            <div className="trust-item"><CheckCircle2 size={18} /> <span>Preços verificados hoje</span></div>
+            <div className="trust-item"><Clock3 size={18} /> <span>Atualização 24h</span></div>
+            <div className="trust-item"><ShieldCheck size={18} /> <span>Dados de confiança</span></div>
+          </div>
         </div>
-        <aside className="hero-radar hero-commerce" aria-label="Comparação interativa em destaque">
-          <div className="radar-head"><span><Activity /> Comparação inteligente</span><em>ao vivo</em></div>
-          {featured && <><div className="commerce-product"><ProductImage product={featured} size="hero" eager /><div className="commerce-copy"><span>{featured.category} • {featured.size}</span><h2>{featured.name}</h2><small><ShieldCheck /> preço verificado há 8 min</small></div></div><div className="commerce-prices"><div><small>Melhor preço</small><strong>{money(featured.minPrice)}</strong><span>em {featured.establishment}</span></div><div className="commerce-chart"><svg viewBox="0 0 250 72" role="img" aria-label="Tendência de preço em queda"><defs><linearGradient id="priceArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#54d69a" stopOpacity=".42"/><stop offset="1" stopColor="#54d69a" stopOpacity="0"/></linearGradient></defs><path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55 L246 70 L4 70 Z" fill="url(#priceArea)"/><path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55" fill="none" stroke="#65dfa8" strokeWidth="3" strokeLinecap="round"/><circle cx="246" cy="55" r="5" fill="#65dfa8" stroke="#08243a" strokeWidth="3"/></svg><span><TrendingDown /> caiu {money(Math.max(0,(featured.previousPrice ?? featured.maxPrice)-featured.minPrice))}</span></div></div><div className="commerce-actions"><button className="button button--gold" onClick={()=>addBasket(featured)}><Plus /> Adicionar à cesta</button><a href={`/produto/${featured.slug}`}>Ver comparação <ArrowRight /></a></div></>}
-          <div className="commerce-thumbs">{(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 4).map((product, index) => <button className={featuredIndex === index ? "active" : ""} onClick={() => setFeaturedIndex(index)} aria-pressed={featuredIndex === index} aria-label={`Destacar ${product.name}`} key={product.id}><ProductImage product={product} size="compact" /><span>{product.brand}<small>{money(product.minPrice)}</small></span></button>)}</div>
+
+        <aside className="hero-radar hero-commerce animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="radar-head">
+            <div className="radar-status">
+              <Activity size={16} />
+              <span>RADAR DE PREÇOS</span>
+            </div>
+            <em className="live-label">AO VIVO</em>
+          </div>
+          
+          {featured && (
+            <div className="commerce-featured">
+              <div className="commerce-product">
+                <ProductImage product={featured} size="hero" eager />
+                <div className="commerce-copy">
+                  <span className="commerce-category">{featured.category} • {featured.size}</span>
+                  <h2>{featured.name}</h2>
+                  <div className="verified-status">
+                    <ShieldCheck size={14} />
+                    <span>verificado há 8 min</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="commerce-pricing">
+                <div className="price-main">
+                  <small>Melhor preço agora</small>
+                  <div className="price-value">
+                    <strong>{money(featured.minPrice)}</strong>
+                    <span className="price-store">em {featured.establishment}</span>
+                  </div>
+                </div>
+                
+                <div className="price-trend">
+                  <svg viewBox="0 0 250 72" className="trend-svg">
+                    <defs>
+                      <linearGradient id="priceArea" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stopColor="#10b981" stopOpacity="0.3"/>
+                        <stop offset="1" stopColor="#10b981" stopOpacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55 L246 70 L4 70 Z" fill="url(#priceArea)"/>
+                    <path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round"/>
+                    <circle cx="246" cy="55" r="5" fill="#10b981" stroke="#0f172a" strokeWidth="3"/>
+                  </svg>
+                  <div className="trend-badge">
+                    <TrendingDown size={14} />
+                    <span>caiu {money(Math.max(0, (featured.previousPrice ?? featured.maxPrice) - featured.minPrice))}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="commerce-footer">
+                <button className="button button--gold button--small" onClick={() => addBasket(featured)}>
+                  <Plus size={16} /> Adicionar à cesta
+                </button>
+                <a href={`/produto/${featured.slug}`} className="details-link">
+                  Ver histórico <ChevronRight size={16} />
+                </a>
+              </div>
+            </div>
+          )}
+          
+          <div className="commerce-thumbs">
+            {(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 4).map((product, index) => (
+              <button 
+                className={`thumb-btn ${featuredIndex === index ? "active" : ""}`} 
+                onClick={() => setFeaturedIndex(index)}
+                key={product.id}
+              >
+                <ProductImage product={product} size="compact" />
+                <div className="thumb-info">
+                  <span className="thumb-brand">{product.brand}</span>
+                  <span className="thumb-price">{money(product.minPrice)}</span>
+                </div>
+              </button>
+            ))}
+          </div>
         </aside>
       </div>
     </section>
 
-    <section className="benefits-section">
+    <div className="shell metrics-container animate-fade-in" style={{ animationDelay: '0.4s' }}>
+      <div className="metrics-grid">
+        <div className="metric-item">
+          <div className="metric-icon"><Store /></div>
+          <div className="metric-content">
+            <strong>{count(metrics.stores)}</strong>
+            <span>Lojas parceiras</span>
+          </div>
+        </div>
+        <div className="metric-item">
+          <div className="metric-icon"><PackageSearch /></div>
+          <div className="metric-content">
+            <strong>{count(metrics.products)}</strong>
+            <span>Produtos ativos</span>
+          </div>
+        </div>
+        <div className="metric-item">
+          <div className="metric-icon"><Activity /></div>
+          <div className="metric-content">
+            <strong>{count(metrics.prices)}</strong>
+            <span>Preços coletados</span>
+          </div>
+        </div>
+      </div>
+      <div className="metrics-footer">
+        <span className="live-dot" />
+        Base consolidada e verificada até hoje
+      </div>
+    </div>
+
+    <section className="section benefits-section">
       <div className="shell">
+        <div className="section-header centered">
+          <span className="eyebrow">Por que usar o PreçoCerto?</span>
+          <h2>Ajudamos você a comprar melhor</h2>
+        </div>
         <div className="benefits-grid">
           <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <div className="benefit-icon"><CircleDollarSign size={24} /></div>
             <h3>Economia Real</h3>
-            <p>Compare preços entre mercados e economize até 30% na sua lista mensal.</p>
+            <p>Compare preços entre mercados e economize até 30% na sua lista mensal com dados precisos.</p>
           </div>
           <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <div className="benefit-icon"><Clock3 size={24} /></div>
             <h3>Dados Atualizados</h3>
-            <p>Nossa equipe verifica os preços diariamente nos principais comércios de Feijó.</p>
+            <p>Nossa equipe verifica os preços diariamente nos principais comércios de Feijó para garantir precisão.</p>
           </div>
           <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <div className="benefit-icon"><LayoutDashboard size={24} /></div>
             <h3>Cestas Inteligentes</h3>
-            <p>Monte sua lista e descubra em qual loja ela sai mais barata automaticamente.</p>
+            <p>Monte sua lista e descubra em qual loja ela sai mais barata automaticamente em poucos cliques.</p>
           </div>
           <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <div className="benefit-icon"><ShieldCheck size={24} /></div>
             <h3>Transparência Total</h3>
-            <p>Veja o histórico de preços e saiba se a oferta é realmente vantajosa.</p>
+            <p>Veja o histórico completo de preços e saiba se a oferta é realmente vantajosa para você.</p>
           </div>
         </div>
       </div>
     </section>
-    <div className="shell metrics-float" style={{ marginTop: '0', transform: 'translateY(-20px)' }} aria-label="Métricas da plataforma"><div><span className="metric-icon"><Store /></span><strong>{count(metrics.stores)}</strong><span>estabelecimentos cadastrados</span></div><div><span className="metric-icon"><PackageSearch /></span><strong>{count(metrics.products)}</strong><span>itens cadastrados</span></div><div><span className="metric-icon"><Activity /></span><strong>{count(metrics.prices)}</strong><span>preços registrados</span></div><small><span /> Base consolidada até 7 de agosto de 2026</small></div>
-    <nav className="shell category-rail" aria-label="Atalhos de compra"><span>Explore por intenção</span><a href="/categoria/mercearia"><PackageSearch /> Mercearia <ArrowRight /></a><a href="/categoria/acougue"><TrendingDown /> Ofertas do dia <ArrowRight /></a><a href="/cesta-basica"><ShoppingBasket /> Cesta essencial <ArrowRight /></a><a href="/estabelecimentos"><Store /> Mercados locais <ArrowRight /></a></nav>
+
+    <div className="shell category-rail-container animate-fade-in">
+      <div className="category-rail">
+        <div className="rail-label">Categorias populares</div>
+        <div className="rail-items">
+          <a href="/categoria/mercearia" className="rail-item"><PackageSearch size={18}/><span>Mercearia</span></a>
+          <a href="/categoria/acougue" className="rail-item"><TrendingDown size={18}/><span>Carnes e Frios</span></a>
+          <a href="/categoria/bebidas" className="rail-item"><ShoppingBasket size={18}/><span>Bebidas</span></a>
+          <a href="/categoria/limpeza" className="rail-item"><Store size={18}/><span>Limpeza</span></a>
+        </div>
+      </div>
+    </div>
+
     <section className="section shell featured-products">
       <div className="section-heading">
         <div>
@@ -605,159 +833,160 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
 
 
 
-  const rows = [
-    ["Arroz Tio João 5 kg","Central Super","R$ 29,89","Verificado"],
-    ["Café 3 Corações 500 g","Mercado Rebouças","R$ 15,75","Verificado"],
-    ["Leite Integral Italac 1 L","Pague Pouco","R$ 5,69","Revisar"],
-    ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
+  const kpiData = [
+    { title: "Preços ativos", value: "8.932", trend: "+12,4%", trendType: "positive", icon: <Activity size={18}/> },
+    { title: "Produtos cobertos", value: "1.247", trend: "82% da cesta", trendType: "neutral", icon: <PackageSearch size={18}/> },
+    { title: "Fotos Pendentes", value: allProducts.filter(p => !p.image_url).length, trend: "Ação necessária", trendType: "warning", icon: <Camera size={18}/>, link: '/admin/fotos-pendentes' },
+    { title: "Estabelecimentos", value: allStores.length, trend: "100% online", trendType: "positive", icon: <Store size={18}/> }
   ];
+
   const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo" className={path==="/admin/catalogo" || path==="/admin/fotos-pendentes" ?"active":""}><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
-
-  {showLogoutConfirm && (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', maxWidth: '400px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-        <div style={{ width: '64px', height: '64px', background: '#fee2e2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-          <AlertTriangle color="#dc2626" size={32} />
-        </div>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Confirmar Logout?</h2>
-        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>Você precisará da senha administrativa para acessar estas ferramentas novamente.</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <button className="button button--outline" onClick={() => setShowLogoutConfirm(false)}>Cancelar</button>
-          <button className="button button--primary" style={{ background: '#dc2626' }} onClick={confirmLogout}>Sim, Deslogar</button>
-        </div>
-      </div>
-    </div>
-  )}
-
   
-  <div className="admin-kpis">
-    <article onClick={() => setActiveKpiDetail({ title: "Preços Ativos", data: rows })} style={{ cursor: 'pointer' }}><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
-    <article onClick={() => setActiveKpiDetail({ title: "Produtos Cobertos", data: initialProducts.slice(0, 10) })} style={{ cursor: 'pointer' }}><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
-    <article onClick={() => window.location.href = '/admin/fotos-pendentes'} style={{ cursor: 'pointer', border: '1px solid #f59e0b', background: '#fffbeb' }}><span>Fotos Pendentes <Camera color="#d97706"/></span><strong>{allProducts.filter(p => !p.image_url).length}</strong><small className="warning" style={{ color: '#d97706' }}>Itens sem imagem real</small></article>
-    <article onClick={() => setActiveKpiDetail({ title: "Estabelecimentos", data: initialStores })} style={{ cursor: 'pointer' }}><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
-
-  </div>
-
-  <div className="admin-lower" style={{gridTemplateColumns: "1fr 1fr", marginBottom: "1.5rem", display: "grid", gap: "1.5rem"}}>
-    <section className="admin-card">
-      <div className="admin-card-head">
-        <div><h2>Status da Conexão</h2><p>Leitura em tempo real do Supabase.</p></div>
-        <button className="button button--outline button--small" onClick={handleTestConnection} disabled={isTesting}>
-          <Activity size={14}/> {isTesting ? "Testando..." : "Testar Conexão"}
-        </button>
-
-      </div>
-      {connStatus ? (
-        <div className="connection-status-panel" style={{padding: "1rem"}}>
-          <div style={{display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem"}}>
-            <span className={`status ${connStatus.success ? "ok" : "review"}`} style={{width: 10, height: 10, borderRadius: "50%", display: "inline-block", background: connStatus.success ? "#16a34a" : "#dc2626"}}/>
-            <b>{connStatus.success ? "Conectado ao Supabase" : "Erro na Conexão"}</b>
-            {connStatus.success && <small style={{marginLeft: "auto", color: "#6b7280"}}>{connStatus.latency}ms latência</small>}
-
-          </div>
-          {connStatus.success ? (
-            <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem"}}>
-              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
-                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Lojas</small>
-                <strong>{connStatus.tables.establishments}</strong>
-              </div>
-              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
-                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Produtos</small>
-                <strong>{connStatus.tables.products}</strong>
-              </div>
-              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
-                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Preços</small>
-                <strong>{connStatus.tables.prices}</strong>
-              </div>
-            </div>
-          ) : (
-            <p style={{color: "#dc2626", fontSize: "0.85rem"}}>{connStatus.error}</p>
-          )}
+  return (
+    <div className="admin-shell">
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-head" style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="avatar" style={{ background: 'white', color: 'var(--secondary)' }}>PC</div>
+          <div style={{ flex: 1 }}><strong style={{ display: 'block', fontSize: '1rem' }}>PreçoCerto</strong><small style={{ color: 'var(--text-light)', fontSize: '0.7rem' }}>ADMIN PANEL</small></div>
         </div>
-      ) : (
-        <div style={{padding: "2rem", textAlign: "center", color: "#6b7280"}}><small>Clique em testar para validar as tabelas externas.</small></div>
-      )}
-    </section>
+        
+        <nav>
+          <span>Operação</span>
+          <a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard size={18}/> Visão geral</a>
+          <a href="/admin/clientes"><Users size={18}/> Clientes</a>
+          <a href="/admin/catalogo" className={path==="/admin/catalogo" || path==="/admin/fotos-pendentes" ?"active":""}><PackageSearch size={18}/> Catálogo</a>
+          <a href="/admin/precos"><CircleDollarSign size={18}/> Preços</a>
+          <a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database size={18}/> Importações</a>
+          
+          <span>Inteligência</span>
+          <a href="/admin/analytics"><BarChart3 size={18}/> Analytics</a>
+          <a href="/admin/ia"><Sparkles size={18}/> IA e cotas</a>
+          <a href="/admin/webhooks"><Activity size={18}/> Webhooks</a>
+          <a href="/admin/auditoria"><ShieldCheck size={18}/> Auditoria</a>
+        </nav>
+        
+        <a className="admin-back" href="/"><ArrowRight size={16}/> Voltar ao site</a>
+        <button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', border: '1px solid rgba(252,165,165,0.2)', width: '100%', marginTop: '1rem' }}>
+          <X size={16}/> Encerrar Sessão
+        </button>
+      </aside>
 
-    <section className="admin-card">
-      <div className="admin-card-head">
-        <div><h2>Progresso de Importação</h2><p>Processamento de dados em tempo real.</p></div>
-      </div>
-      <div style={{padding: "1rem"}}>
-        {isImporting ? (
-          <div className="import-progress-panel">
-            <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem"}}>
-              <span>{importMsg}</span>
-              <b>{Math.round((importProgress / importTotal) * 100)}%</b>
-            </div>
-            <div style={{height: "8px", background: "#f1f5f9", borderRadius: "4px", overflow: "hidden", marginBottom: "0.5rem"}}>
-              <div style={{height: "100%", background: "#1473e6", width: `${(importProgress / importTotal) * 100}%`, transition: "width 0.3s ease"}} />
-            </div>
-            <small style={{color: "#64748b"}}>{importProgress} de {importTotal} registros processados</small>
+      <main className="admin-main">
+        <header>
+          <div>
+            <small>Admin / Operação</small>
+            <h1>{title}</h1>
           </div>
-        ) : importLog ? (
-          <div style={{padding: "0"}}>
-            {importLog.error ? (
-              <div style={{background: "#fee2e2", padding: "1rem", borderRadius: "0.5rem", border: "1px solid #fecaca"}}>
-                <div style={{display: "flex", alignItems: "center", gap: "0.5rem", color: "#b91c1c", marginBottom: "0.5rem"}}>
-                  <AlertTriangle size={18} />
-                  <strong>Erro Crítico na Importação</strong>
-                </div>
-                <p style={{fontSize: "0.85rem", color: "#991b1b", margin: 0}}>{importLog.error}</p>
-                <small style={{display: "block", marginTop: "0.75rem", color: "#b91c1c", fontSize: "0.75rem"}}>
-                  Verifique a conexão com o banco ou permissões de RLS.
-                </small>
-              </div>
-            ) : (
-              <>
-                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-                  <span style={{fontSize: "0.85rem"}}>Novos preços inseridos:</span>
-                  <strong style={{color: "#16a34a"}}>+{importLog.count}</strong>
-                </div>
-                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-                  <span style={{fontSize: "0.85rem"}}>Duplicados ignorados:</span>
-                  <span style={{color: "#6b7280"}}>{importLog.duplicates}</span>
-                </div>
-                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-                  <span style={{fontSize: "0.85rem"}}>Total processado:</span>
-                  <strong>{importLog.count + importLog.duplicates}</strong>
-                </div>
-                <div style={{borderTop: "1px solid #e5e7eb", marginTop: "0.5rem", paddingTop: "0.5rem", display: "flex", justifyContent: "space-between"}}>
-                  <small style={{color: "#6b7280"}}>Execução: {(importLog.duration / 1000).toFixed(2)}s</small>
-                  <small style={{color: "#6b7280"}}>{importLog.stores} lojas | {importLog.products} produtos</small>
-                </div>
-                <div style={{marginTop: '0.75rem', padding: '0.5rem', background: '#f0fdf4', color: '#166534', borderRadius: '0.25rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                  <Check size={14}/> Sincronização concluída com sucesso.
-                </div>
-                {importLog.errorReport && importLog.errorReport.length > 0 && (
-                  <div style={{marginTop: '1rem', border: '1px solid #fecaca', borderRadius: '0.5rem', overflow: 'hidden'}}>
-                    <div style={{background: '#fee2e2', padding: '0.5rem 1rem', fontSize: '0.8rem', borderBottom: '1px solid #fecaca', display: 'flex', justifyContent: 'space-between'}}>
-                      <b>Relatório de Inconsistências</b>
-                      <span>{importLog.errorReport.length} falhas</span>
-                    </div>
-                    <div style={{maxHeight: '150px', overflowY: 'auto', background: 'white', padding: '0.5rem'}}>
-                      {importLog.errorReport.map((err: any, idx: number) => (
-                        <div key={idx} style={{fontSize: '0.75rem', padding: '0.25rem 0', borderBottom: idx < importLog.errorReport.length - 1 ? '1px solid #f1f5f9' : 'none'}}>
-                          <span style={{color: '#dc2626'}}>[{err.entity.toUpperCase()}]</span> {err.message}
-                          <pre style={{background: '#f8fafc', padding: '0.25rem', marginTop: '0.1rem', fontSize: '0.7rem', color: '#64748b'}}>
-                            {JSON.stringify(err.data, null, 2)}
-                          </pre>
-                        </div>
-                      ))}
-                    </div>
+          <div className="admin-user-info">
+            {importMsg && <span className="badge badge--warning">{importMsg}</span>}
+            <button className="icon-button"><Bell size={20}/></button>
+            <div className="admin-user-pill">
+              <strong>Franc D’Nis</strong>
+              <div className="admin-user-avatar">FD</div>
+            </div>
+          </div>
+        </header>
+
+        <div className="admin-kpi-grid">
+          {kpiData.map((kpi, idx) => (
+            <article 
+              key={idx} 
+              className="admin-kpi-card" 
+              onClick={() => kpi.link ? window.location.href = kpi.link : setActiveKpiDetail({ title: kpi.title, data: [] })}
+            >
+              <span>{kpi.title} {kpi.icon}</span>
+              <strong>{kpi.value}</strong>
+              <small className={kpi.trendType}>{kpi.trend}</small>
+            </article>
+          ))}
+        </div>
+
+        <div className="admin-lower" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
+          <section className="admin-card">
+            <div className="admin-card-head">
+              <div><h2>Conexão Supabase</h2><p>Estado do banco de dados externo.</p></div>
+              <button className="button button--ghost button--small" onClick={handleTestConnection} disabled={isTesting}>
+                <Activity size={14}/> {isTesting ? "Testando..." : "Verificar"}
+              </button>
+            </div>
+            <div style={{ padding: '1.5rem' }}>
+              {connStatus ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div className={`pulse-dot`} style={{ background: connStatus.success ? 'var(--success)' : 'var(--danger)' }}></div>
+                    <strong style={{ fontSize: '0.9rem' }}>{connStatus.success ? "Sincronizado" : "Erro de conexão"}</strong>
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        ) : (
-          <div style={{padding: "1rem", textAlign: "center", color: "#6b7280"}}><small>Aguardando início do processo de carga.</small></div>
-        )}
-      </div>
-    </section>
+                  {connStatus.success && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                      <div style={{ background: 'var(--bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                        <small style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Produtos</small>
+                        <strong style={{ fontSize: '1.1rem' }}>{connStatus.tables.products}</strong>
+                      </div>
+                      <div style={{ background: 'var(--bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                        <small style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Lojas</small>
+                        <strong style={{ fontSize: '1.1rem' }}>{connStatus.tables.establishments}</strong>
+                      </div>
+                      <div style={{ background: 'var(--bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                        <small style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Preços</small>
+                        <strong style={{ fontSize: '1.1rem' }}>{connStatus.tables.prices}</strong>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-light)' }}><small>Clique em verificar para checar o banco.</small></div>}
+            </div>
+          </section>
 
-  </div>
+          <section className="admin-card">
+            <div className="admin-card-head">
+              <div><h2>Importação de Preços</h2><p>Carga massiva via Excel.</p></div>
+            </div>
+            <div style={{ padding: '1.5rem' }}>
+              {isImporting ? (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <small style={{ fontWeight: 700 }}>{importMsg}</small>
+                    <small style={{ fontWeight: 800 }}>{Math.round((importProgress / importTotal) * 100)}%</small>
+                  </div>
+                  <div style={{ height: '8px', background: 'var(--bg)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', background: 'var(--primary)', width: `${(importProgress / importTotal) * 100}%`, transition: 'width 0.3s ease' }}></div>
+                  </div>
+                </div>
+              ) : importLog ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Processados:</span><strong>{importLog.count + importLog.duplicates}</strong></div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--success)' }}><span>Novos preços:</span><strong>+{importLog.count}</strong></div>
+                   <button className="button button--ghost button--small" style={{ marginTop: '0.5rem' }} onClick={() => setImportLog(null)}>Limpar Log</button>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '1rem' }}>
+                  <button className="button button--primary button--full" onClick={handleImport} disabled={isImporting}>
+                    <Database size={18}/> Iniciar Carga de Preços
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {showLogoutConfirm && (
+          <div className="admin-modal-overlay">
+
+            <div className="admin-modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
+              <div className="admin-modal-body">
+                <div style={{ width: '64px', height: '64px', background: '#fee2e2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                  <AlertTriangle color="#dc2626" size={32} />
+                </div>
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Encerrar Sessão?</h2>
+                <p style={{ color: '#6b7280', marginBottom: '2rem' }}>Você precisará da senha administrativa para acessar estas ferramentas novamente.</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <button className="button button--outline" onClick={() => setShowLogoutConfirm(false)}>Cancelar</button>
+                  <button className="button button--primary" style={{ background: '#dc2626' }} onClick={confirmLogout}>Sim, Sair</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
   <section className="admin-card">
     <div className="admin-card-head">
@@ -1177,10 +1406,11 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       </div>
     </div>
   )}
-</main></div>;
-
-
+      </main>
+    </div>
+  );
 }
+
 
 function GenericPage({ path, products, stores, metrics, addBasket, saveAction, user }: PageProps & { path:string, user?: any }) {
   const randomFeatured = useRandomFeatured(products);
@@ -1799,28 +2029,32 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
   return (
     <div className="shell page-shell">
-      <section className="search-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1>{pathname === "/melhores-precos" ? "Melhores Ofertas de Feijó" : "Comparador de Preços"}</h1>
-          <p>{pathname === "/melhores-precos" ? "Veja os produtos com maior queda de preço e economize agora." : `Encontre o melhor preço entre ${stores.length} estabelecimentos em Feijó.`}</p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button className="button button--outline" onClick={() => handleShare()}>
-            <Share2 size={16} /> Compartilhar busca
-          </button>
-          <div className="sort-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-2)', padding: '0.25rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-            <SlidersHorizontal size={14} color="var(--tertiary)" />
-            <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{ border: 'none', background: 'transparent', outline: 'none', fontWeight: '600' }}>
-              <option value="price">Menor preço</option>
-              <option value="date">Mais recentes</option>
-              <option value="variation">Maior queda</option>
-            </select>
+      <section className="search-header" style={{ marginBottom: '3rem', borderBottom: '1px solid var(--border)', paddingBottom: '2.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
+          <div style={{ flex: 1, minWidth: '300px' }}>
+            <span className="eyebrow">{pathname === "/melhores-precos" ? "Top Descontos" : "Radar de Mercado"}</span>
+            <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>{pathname === "/melhores-precos" ? "Melhores Ofertas de Feijó" : "Encontre o Melhor Preço"}</h1>
+            <p style={{ maxWidth: '600px' }}>{pathname === "/melhores-precos" ? "Veja os produtos com maior queda de preço e economize agora." : `Analisando em tempo real os preços de ${stores.length} estabelecimentos em Feijó.`}</p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+            <button className="button button--ghost" onClick={() => handleShare()}>
+              <Share2 size={18} />
+            </button>
+            <div className="sort-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'white', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+              <SlidersHorizontal size={14} color="var(--primary)" />
+              <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{ border: 'none', background: 'transparent', outline: 'none', fontWeight: '700', fontSize: '0.85rem', color: 'var(--secondary)' }}>
+                <option value="price">Menor preço</option>
+                <option value="date">Mais recentes</option>
+                <option value="variation">Maior queda</option>
+              </select>
+            </div>
           </div>
         </div>
-        <div style={{ width: '100%', maxWidth: '600px', marginTop: '1.5rem' }}>
+        <div style={{ width: '100%', maxWidth: '800px', marginTop: '2.5rem' }}>
           <SearchBox value={query} setValue={setQuery} products={products} />
         </div>
       </section>
+
 
       <div className="search-layout">
         <aside className="search-sidebar">
