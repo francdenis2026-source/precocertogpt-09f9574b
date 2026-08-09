@@ -69,11 +69,24 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   }} /><i aria-hidden="true" /></span>;
 }
 
+import logoAsset from "./assets/logo-ref.png.asset.json";
+
 function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
-  return <a className={`brand ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} href="/" aria-label="PreçoCerto — página inicial">
-    <img className={`brand__logo ${compact ? "brand__logo--compact" : ""}`} src={compact ? "/logo-precocerto-emblema.png" : "/logo-precocerto-wordmark.png"} alt="PreçoCerto" width={1152} height={576} />
-  </a>;
+  return (
+    <a 
+      className={`brand ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} 
+      href="/" 
+      aria-label="PreçoCerto — página inicial"
+    >
+      <img 
+        className="brand__logo-img"
+        src={logoAsset.url} 
+        alt="PreçoCerto" 
+      />
+    </a>
+  );
 }
+
 
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
