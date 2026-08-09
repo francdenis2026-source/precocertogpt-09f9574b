@@ -400,7 +400,7 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
 type ColorTheme = "light" | "dark";
 
 function getInitialTheme(): ColorTheme {
-  const saved = localStorage.getItem("theme");
+  const saved = localStorage.getItem("precocerto:theme");
   if (saved === "light" || saved === "dark") return saved;
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
@@ -415,7 +415,7 @@ function useColorTheme() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
-    localStorage.setItem("theme", theme);
+    localStorage.setItem("precocerto:theme", theme);
   }, [theme]);
   const toggleTheme = () => {
     const nextTheme: ColorTheme = theme === "light" ? "dark" : "light";

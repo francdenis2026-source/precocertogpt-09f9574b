@@ -250,12 +250,13 @@ body {
   --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Accessibility: Professional Focus rings for all interactive elements */
+/* Accessibility: High-Visibility Focus rings for all interactive elements */
 :focus-visible {
-  outline: 2px solid var(--blue);
-  outline-offset: 3px;
-  box-shadow: 0 0 0 4px var(--blue-soft);
-  transition: outline-offset 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  outline: 3px solid var(--blue);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px var(--blue-soft), 0 0 0 2px var(--bg);
+  transition: outline-offset 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+  z-index: 50;
 }
 
 .button:focus-visible, 
@@ -263,7 +264,7 @@ body {
 .theme-toggle:focus-visible,
 .brand:focus-visible,
 .desktop-nav a:focus-visible {
-  outline-offset: 2px;
+  outline-offset: 4px;
 }
 
 .brand:focus-visible {
