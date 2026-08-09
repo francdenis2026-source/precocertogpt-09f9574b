@@ -1695,3 +1695,13 @@ textarea.admin-input {
   border-color: var(--blue);
   box-shadow: 0 0 0 3px var(--blue-soft);
 }
+
+.admin-boot-gate {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--muted);
+}
