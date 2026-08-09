@@ -377,7 +377,7 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   );
 }
 
-function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
+function Brand({ compact = false, inverse = false, className = "" }: { compact?: boolean; inverse?: boolean; className?: string }) {
   return (
     <div 
       className={`brand ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} 
