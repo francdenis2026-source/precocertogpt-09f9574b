@@ -389,7 +389,9 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
 
 
 function PriceBadge({ product }: { product: Product }) {
+  if (!product) return null;
   const saving = product.previousPrice ? Math.max(0, ((product.previousPrice - product.minPrice) / product.previousPrice) * 100) : 0;
+  if (saving <= 0) return null;
   return <span className="price-badge"><TrendingDown size={13} /> {saving.toFixed(0)}% menor</span>;
 }
 
