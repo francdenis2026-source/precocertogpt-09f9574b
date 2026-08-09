@@ -1734,13 +1734,21 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
           <aside className="generic-aside">
             <span className="eyebrow">Configurações</span>
             <h2>Preferências de Alerta</h2>
+            <div className="section-heading compact" style={{ marginTop: '2rem' }}>
+              <h3>Central de Notificações</h3>
+            </div>
+            
             <div className="aside-stat">
               <span>Notificar queda de preço</span>
-              <strong style={{ fontSize: '1rem', color: 'var(--blue)' }}>Ativado</strong>
+              <div className="toggle-switch active"></div>
             </div>
             <div className="aside-stat">
               <span>Alerta de dado expirado (7 dias)</span>
-              <strong style={{ fontSize: '1rem', color: 'var(--blue)' }}>Ativado</strong>
+              <div className="toggle-switch active"></div>
+            </div>
+            <div className="aside-stat">
+              <span>Alertas via E-mail</span>
+              <div className="toggle-switch"></div>
             </div>
             <div className="aside-stat" style={{ background: 'var(--gold-soft)', border: '1px solid var(--gold)', marginTop: '1.5rem', padding: '1rem', borderRadius: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
