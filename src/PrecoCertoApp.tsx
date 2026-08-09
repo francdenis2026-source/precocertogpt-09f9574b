@@ -2116,7 +2116,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 }
 
 
-function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, fetchError, syncStatus }: PageProps & { fetchError?: string | null, syncStatus?: string }) {
+function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, fetchError, syncStatus, user }: PageProps & { fetchError?: string | null, syncStatus?: string, user?: any }) {
   const [compareList, setCompareList] = useState<Product[]>([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
 
