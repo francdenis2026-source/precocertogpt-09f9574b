@@ -3586,7 +3586,18 @@ export default function PrecoCertoApp() {
     localStorage.setItem("precocerto:basket", JSON.stringify(cart));
   }, [cart]);
 
-  useEffect(()=>{ if(!toast)return; const t=setTimeout(()=>setToast(""),2800); return()=>clearTimeout(t); },[toast]);
+  const [toastExit, setToastExit] = useState(false);
+  useEffect(() => {
+    if (!toast) return;
+    setToastExit(false);
+    const exitTimer = setTimeout(() => setToastExit(true), 2400);
+    const clearTimer = setTimeout(() => setToast(""), 2800);
+    return () => {
+      clearTimeout(exitTimer);
+      clearTimeout(clearTimer);
+    };
+  }, [toast]);
+
   
   function addBasket(p:Product){setCart(current=>current.some(i=>i.id===p.id)?current:[...current,p]);setToast(`${p.name} adicionado.`);}
   function removeBasket(id:number|string){setCart(current=>current.filter(i=>String(i.id)!==String(id)));setToast("Removido.");}
@@ -3665,6 +3676,12 @@ export default function PrecoCertoApp() {
     <main>{page}</main>
     <Footer/>
     <MobileBar basketCount={cart.length}/>
-    {toast&&<div className="toast"><CheckCircle2/>{toast}</div>}
+    {toast && (
+      <div className={`toast ${toastExit ? "toast--exit" : ""}`} role="alert" aria-live="polite">
+        <CheckCircle2 />
+        <span>{toast}</span>
+      </div>
+    )}
+
   </div>;
 }
