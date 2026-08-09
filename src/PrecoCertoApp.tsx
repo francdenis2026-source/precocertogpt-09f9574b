@@ -91,7 +91,7 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
 
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
-  return <header className="site-header">
+  return <header className="site-header" style={{ position: 'absolute', background: 'transparent', border: 'none', backdropFilter: 'none' }}>
     <div className="shell header-inner">
       {/* Logo removida do header a pedido do usuário */}
       <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
