@@ -166,7 +166,6 @@ const productImages: Record<string, string> = {
 function ProductImage({ product, size = "default", eager = false }: { product: Product | any; size?: "compact" | "default" | "hero" | "basket"; eager?: boolean }) {
   const fallback = "/products/arroz-tio-joao-5kg.png";
   
-  // Identificamos se o produto é um detergente pelo nome ou categoria para evitar o fallback de arroz
   const isDetergent = product.name?.toLowerCase().includes("detergente") || product.category?.toLowerCase().includes("limpeza");
   const isBean = product.name?.toLowerCase().includes("feijao");
   const isOil = product.name?.toLowerCase().includes("oleo");
@@ -185,12 +184,22 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
               productImages[String(product.id)] || 
               selectedFallback;
   
-  return <span className={`product-photo product-photo--${size}`}><img src={src} alt={`Embalagem de ${product.name}`} loading={eager ? "eager" : "lazy"} onError={(e) => {
-    const target = e.target as HTMLImageElement;
-    if (target.src !== selectedFallback) {
-      target.src = selectedFallback;
-    }
-  }} /><i aria-hidden="true" /></span>;
+  return (
+    <div className={`product-photo product-photo--${size}`}>
+      <img 
+        src={src} 
+        alt={`Embalagem de ${product.name}`} 
+        loading={eager ? "eager" : "lazy"} 
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          if (target.src !== selectedFallback) {
+            target.src = selectedFallback;
+          }
+        }} 
+      />
+      <div className="product-photo-overlay" aria-hidden="true" />
+    </div>
+  );
 }
 
 import logoAsset from "./assets/logo-clean.png.asset.json";
@@ -214,8 +223,18 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
 
 
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
-  const [open, setOpen] = useState(false);
-  return <header className={`site-header ${window.location.pathname === "/" ? "site-header--absolute" : ""}`}>
+  const [scrolled, setScrolled] = useState(false);
+  
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const isHome = window.location.pathname === "/";
+  const headerClass = `site-header ${isHome ? "site-header--absolute" : ""} ${scrolled ? "site-header--scrolled" : ""}`;
+
+  return <header className={headerClass}>
     <div className="shell header-inner">
       {/* Logo removida do header a pedido do usuário */}
       <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
