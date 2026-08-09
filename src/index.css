@@ -196,12 +196,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  mix-blend-mode: multiply;
-  filter: contrast(1.05) brightness(1.02);
+  /* Removed mix-blend-mode: multiply since we now have real transparency */
 }
 
 .product-photo img {
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
+  transition: transform 0.3s ease, filter 0.3s ease;
+  will-change: transform, filter;
+}
+
+.product-photo img.is-processed {
+  /* When background is removed, we can afford a bit more contrast and natural shadows */
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.15)) contrast(1.02);
 }
 
 .product-photo-overlay {
