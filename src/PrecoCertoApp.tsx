@@ -774,20 +774,22 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       </div>
     </div>
     
-    <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', padding: '0 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
-      <button 
-        onClick={() => setAdminActiveTab("products")}
-        style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'products' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'products' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'products' ? '600' : '400', background: 'none' }}
-      >
-        Produtos ({filteredProducts.length})
-      </button>
-      <button 
-        onClick={() => setAdminActiveTab("stores")}
-        style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'stores' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'stores' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'stores' ? '600' : '400', background: 'none' }}
-      >
-        Lojas ({filteredStores.length})
-      </button>
-    </div>
+    {path !== "/admin/fotos-pendentes" && (
+      <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', padding: '0 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
+        <button 
+          onClick={() => setAdminActiveTab("products")}
+          style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'products' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'products' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'products' ? '600' : '400', background: 'none' }}
+        >
+          Produtos ({filteredProducts.length})
+        </button>
+        <button 
+          onClick={() => setAdminActiveTab("stores")}
+          style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'stores' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'stores' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'stores' ? '600' : '400', background: 'none' }}
+        >
+          Lojas ({filteredStores.length})
+        </button>
+      </div>
+    )}
 
     <div className="admin-filters">
       <label style={{ flex: 1 }}>
