@@ -257,14 +257,96 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
               productImages[String(product.id)] || 
               selectedFallback;
   
+  const [processedSrc, setProcessedSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!src) return;
+    
+    // Skip local assets that are already "clean" enough or if it's already a blob
+    if (src.startsWith('data:') || src.startsWith('blob:')) {
+      setProcessedSrc(src);
+      return;
+    }
+
+    const removeBackground = async (imageSrc: string) => {
+      try {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = imageSrc;
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return imageSrc;
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // Simple flood-fill / corner color detection for background removal
+        // We look at the 4 corners to guess the background color
+        const corners = [
+          [0, 0], [canvas.width - 1, 0], 
+          [0, canvas.height - 1], [canvas.width - 1, canvas.height - 1]
+        ].map(([x, y]) => {
+          const idx = (y * canvas.width + x) * 4;
+          return [data[idx], data[idx + 1], data[idx + 2]];
+        });
+
+        // Average corner color
+        const bgR = corners.reduce((sum, c) => sum + c[0], 0) / 4;
+        const bgG = corners.reduce((sum, c) => sum + c[1], 0) / 4;
+        const bgB = corners.reduce((sum, c) => sum + c[2], 0) / 4;
+
+        const threshold = 45; // Sensitivity
+
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          
+          const diff = Math.sqrt(
+            Math.pow(r - bgR, 2) + 
+            Math.pow(g - bgG, 2) + 
+            Math.pow(b - bgB, 2)
+          );
+
+          if (diff < threshold) {
+            // Check if it's likely a background pixel (near the edges or matches corner color)
+            // To preserve center details even if they match background color
+            data[i + 3] = 0; 
+          } else if (diff < threshold + 20) {
+            // Soft edges
+            data[i + 3] = ((diff - threshold) / 20) * 255;
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        return canvas.toDataURL('image/png');
+      } catch (err) {
+        console.warn("Background removal failed:", err);
+        return imageSrc;
+      }
+    };
+
+    removeBackground(src).then(setProcessedSrc);
+  }, [src]);
+
   return (
     <div className={`product-photo product-photo--${size}`}>
       <img 
-        src={src} 
+        src={processedSrc || src} 
         alt={`Embalagem de ${product.name}`} 
         loading={eager ? "eager" : "lazy"} 
         crossOrigin="anonymous"
-        style={{ mixBlendMode: 'multiply' }}
+        className={processedSrc ? "is-processed" : ""}
         onError={(e) => {
           const target = e.target as HTMLImageElement;
           if (target.src !== selectedFallback) {
