@@ -762,8 +762,8 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   <section className="admin-card">
     <div className="admin-card-head">
       <div>
-        <h2>Gestão de Catálogo</h2>
-        <p>Produtos e estabelecimentos registrados no sistema.</p>
+        <h2>{path === "/admin/fotos-pendentes" ? "Fotos Pendentes" : "Gestão de Catálogo"}</h2>
+        <p>{path === "/admin/fotos-pendentes" ? "Produtos aguardando imagem real para melhor visualização." : "Produtos e estabelecimentos registrados no sistema."}</p>
       </div>
       <div style={{display:"flex",gap:"0.75rem"}}>
         <button className="button button--outline" onClick={handleImport} disabled={isImporting} title="Disparar importação para o Supabase externo">
