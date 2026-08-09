@@ -377,8 +377,6 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   );
 }
 
-import logoAsset from "./assets/logo-clean.png.asset.json";
-
 function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
   return (
     <div 
@@ -392,7 +390,7 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
     >
       <img 
         className="brand__logo-img"
-        src={logoAsset.url} 
+        src={compact ? "/logo-preco-certo-simbolo.svg" : inverse ? "/logo-preco-certo-inversa.svg" : "/logo-preco-certo.svg"}
         alt="PreçoCerto" 
       />
     </div>
