@@ -2122,18 +2122,24 @@ export default function PrecoCertoApp() {
   const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; 
   const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
 
-  useEffect(()=>{
-    let alive=true;
-    const q=new URLSearchParams(window.location.search).get("q")??"";
-    if(q) setQuery(q);
-    fetchCatalog(q).then(data=>{
-      if(!alive)return;
-      if(data.products.length) setProducts(data.products);
-      if(data.stores.length) setStores(data.stores);
+  useEffect(() => {
+    let alive = true;
+    const q = new URLSearchParams(window.location.search).get("q") ?? "";
+    if (q) setQuery(q);
+
+    // Initial load: Fetch everything once to allow client-side filtering
+    // or fetch based on query if using remote search.
+    // Given the previous issue, we want to ensure search results are reactive.
+    fetchCatalog(query).then(data => {
+      if (!alive) return;
+      // We only update if we got data or if we're doing a search that might return empty
+      setProducts(data.products);
+      if (data.stores.length) setStores(data.stores);
       setMetrics(data.metrics);
-    }).catch(err=>console.error(err));
-    return()=>{alive=false;};
-  },[]);
+    }).catch(err => console.error(err));
+
+    return () => { alive = false; };
+  }, [query]);
 
   useEffect(() => {
     localStorage.setItem("precocerto:basket", JSON.stringify(cart));

@@ -128,11 +128,17 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
       })
       .filter((product): product is Product => product !== null)
       .filter(
-        product =>
-          !q ||
-          [product.name, product.category, product.brand].some(field =>
-            normalize(field).includes(q),
-          ),
+        product => {
+          if (!q) return true;
+          const searchFields = [
+            product.name,
+            product.category,
+            product.brand,
+            product.barcode
+          ].filter(Boolean) as string[];
+          
+          return searchFields.some(field => normalize(field).includes(q));
+        }
       )
       .sort((a, b) => a.minPrice - b.minPrice || a.name.localeCompare(b.name, "pt-BR"));
 
