@@ -86,11 +86,17 @@ import alpesMacaAsset from "./assets/alpes-maca.png.asset.json";
 import minuanoMarinhaAsset from "./assets/minuano-marinha.png.asset.json";
 import ypeLimaoAsset from "./assets/ype-limao.png.asset.json";
 
+import alcatraAsset from "./assets/alcatra.jpg.asset.json";
+import alhoAsset from "./assets/alho-_kg_.jpg.asset.json";
+import arrozTioUrbano5kgAsset from "./assets/arroz-tio-urbano-branco-5kg.jpg.asset.json";
+import biscoitoAtrevidosAsset from "./assets/biscoito-atrevidos-sabores-90g.jpg.asset.json";
+import cebolaAsset from "./assets/cebola-_kg_.jpg.asset.json";
+import coxaoDuroAsset from "./assets/coxao-duro.jpg.asset.json";
+import feijaoBernardoAsset from "./assets/feijao-carioca-bernardo-1kg.jpg.asset.json";
+import frangoSadiaAsset from "./assets/caixa-de-frango-sadia.jpg.asset.json";
+import frangoSearaPackAsset from "./assets/caixa-de-frango-seara.jpg.asset.json";
+
 import itamaratyMorangoAsset from "./assets/biscoito_itamaraty_morango.png.asset.json";
-import escureto35gAsset from "./assets/biscoito_escureto_35g.png.asset.json";
-import esponjaBrilhusAsset from "./assets/esponja_brilhus.png.asset.json";
-import paoCestaAsset from "./assets/pao_cesta.png.asset.json";
-import nissinCarneAsset from "./assets/nissin_lamen_carne.png.asset.json";
 
 const productImages: Record<string, string> = {
   // Pack 2 Mappings
@@ -109,6 +115,15 @@ const productImages: Record<string, string> = {
   "esponja-brilhus": esponjaBrilhusAsset.url,
   "pao-cesta": paoCestaAsset.url,
   "nissin-carne": nissinCarneAsset.url,
+  "alcatra": alcatraAsset.url,
+  "alho-kg": alhoAsset.url,
+  "arroz-tio-urbano-5kg": arrozTioUrbano5kgAsset.url,
+  "biscoito-atrevidos": biscoitoAtrevidosAsset.url,
+  "cebola-kg": cebolaAsset.url,
+  "coxao-duro": coxaoDuroAsset.url,
+  "feijao-bernardo-1kg": feijaoBernardoAsset.url,
+  "frango-sadia-caixa": frangoSadiaAsset.url,
+  "frango-seara-caixa": frangoSearaPackAsset.url,
   "4b5508ae-5214-4bb0-9857-38eee60743bb": "/products/biscoito-itamarati-recheado.jpg",
   "2b13198e-2499-437c-ae9f-baeabec7b783": "/products/biscoito-brandini-salt-plus-360g.jpg",
   "639fa99b-96ea-4488-922f-f22f091f5da1": "/products/biscoito-vitarella-cream-cracker-330g.jpg",
