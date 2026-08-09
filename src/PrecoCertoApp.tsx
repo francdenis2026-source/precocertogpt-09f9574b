@@ -763,7 +763,7 @@ const modeLabels: Record<OptimizationMode, string> = {
   within_budget: "Dentro do orcamento",
 };
 
-function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void; user: any }) {
+function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clearBasket, user }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void; clearBasket:()=>void; user: any }) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [mode, setMode] = useState<OptimizationMode>("cheapest_multi");
   const [budget, setBudget] = useState(250);
