@@ -156,3 +156,99 @@ export function planFitsWithoutClipping(plan: PdfPlan): boolean {
   const usable = plan.geometry.pageHeight - plan.geometry.marginTop - plan.geometry.marginBottom;
   return plan.pages.every(p => p.blocks.reduce((s, b) => s + b.height, 0) <= usable);
 }
+
+export interface RenderOptions {
+  dateLabel: string;
+  timeLabel: string;
+  money: (v: number) => string;
+}
+
+/** Desenha um plano de páginas em um documento jsPDF já criado em A4. */
+export function renderPlanToPdf(doc: any, plan: PdfPlan, opts: RenderOptions) {
+  const g = plan.geometry;
+  const right = g.pageWidth - g.marginX;
+  const money = opts.money;
+
+  const drawHeader = () => {
+    doc.setFillColor(20, 115, 230);
+    doc.rect(0, 0, g.pageWidth, g.headerHeight, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(15);
+    doc.text("PrecoCerto - Lista de Compras", g.marginX, 14);
+    doc.setFontSize(9);
+    doc.text(`Feijo/AC - ${opts.dateLabel} ${opts.timeLabel}`, right, 14, { align: "right" });
+    doc.setTextColor(30, 30, 30);
+    doc.setFontSize(9);
+    doc.text(`Modo de otimizacao: ${plan.modeLabel}`, g.marginX, g.headerHeight + 8);
+    doc.setDrawColor(225, 225, 225);
+    doc.line(g.marginX, g.headerHeight + 11, right, g.headerHeight + 11);
+  };
+
+  const drawFooter = (pageNumber: number, totalPages: number) => {
+    doc.setFontSize(8);
+    doc.setTextColor(120, 120, 120);
+    doc.text(
+      "Os precos e a disponibilidade podem mudar no estabelecimento. Confira antes de comprar.",
+      g.marginX,
+      g.pageHeight - 8,
+    );
+    doc.text(`Pagina ${pageNumber} de ${totalPages}`, right, g.pageHeight - 8, { align: "right" });
+    doc.setTextColor(30, 30, 30);
+  };
+
+  plan.pages.forEach((page, pageIndex) => {
+    if (pageIndex > 0) doc.addPage();
+    drawHeader();
+    let y = g.marginTop;
+
+    page.blocks.forEach(block => {
+      switch (block.type) {
+        case "storeHeader": {
+          doc.setFillColor(243, 246, 250);
+          doc.rect(g.marginX, y - 5, g.contentWidth, 9, "F");
+          doc.setFontSize(11);
+          const title = `${block.storeName}${block.neighborhood ? ` - ${block.neighborhood}` : ""}`;
+          doc.text(title, g.marginX + 2, y + 1, { maxWidth: g.contentWidth - 30 });
+          doc.text(`${block.itemCount} itens`, right - 2, y + 1, { align: "right" });
+          break;
+        }
+        case "item": {
+          doc.setFontSize(9);
+          doc.text("[  ]", g.marginX + 2, y);
+          doc.text(block.label, g.marginX + 12, y, { maxWidth: g.contentWidth - 45 });
+          doc.text(money(block.amount), right - 2, y, { align: "right" });
+          break;
+        }
+        case "storeSubtotal": {
+          doc.setFontSize(10);
+          doc.text(`Subtotal: ${money(block.total)}`, right - 2, y, { align: "right" });
+          break;
+        }
+        case "travel": {
+          doc.setFontSize(8);
+          doc.text(
+            `Distancia estimada: ${block.distanceKm} km - Deslocamento: ${money(block.travelCost)}`,
+            g.marginX + 2,
+            y,
+          );
+          break;
+        }
+        case "divider": {
+          doc.setDrawColor(210, 210, 210);
+          doc.line(g.marginX, y, right, y);
+          break;
+        }
+        case "summary": {
+          doc.setFontSize(block.emphasis ? 12 : 11);
+          doc.text(`${block.label}: ${money(block.value)}`, g.marginX, y);
+          break;
+        }
+      }
+      y += block.height;
+    });
+
+    drawFooter(pageIndex + 1, plan.pages.length);
+  });
+
+  return doc;
+}
