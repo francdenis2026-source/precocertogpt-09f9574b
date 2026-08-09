@@ -4,8 +4,9 @@ import {
   ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit,
   Heart, Home, LayoutDashboard, LineChart, ListChecks, MapPin, Menu, PackageSearch,
   Plus, Receipt, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
-  SlidersHorizontal, Sparkles, Store, Trash2, TrendingDown, Upload, UserRound, Users, X,
+  SlidersHorizontal, Sparkles, Store, Trash2, TrendingDown, TrendingUp, Upload, UserRound, Users, X,
 } from "lucide-react";
+
 import { FormEvent, ReactNode, useEffect, useMemo, useState, useRef, type ChangeEvent } from "react";
 import { useLocation } from "react-router-dom";
 import { buildCatalog, verifiedDatasetMetrics, type PlatformMetrics, type Product, type StoreRow } from "./data/catalog";
@@ -1828,6 +1829,9 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 
 
 function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, fetchError, syncStatus }: PageProps & { fetchError?: string | null, syncStatus?: string }) {
+  const [compareList, setCompareList] = useState<Product[]>([]);
+  const [showCompareModal, setShowCompareModal] = useState(false);
+
 
   const pathname = useLocation().pathname;
   const [activeCategory, setActiveCategory] = useState("all");
@@ -2123,9 +2127,24 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                         </div>
                         <div className="result-actions" style={{ display: 'flex', gap: '0.5rem' }}>
                           <button className="button button--primary" style={{ flex: 1 }} onClick={() => addBasket(p)}><Plus /> Cesta</button>
-                          <button className="button button--outline" title="Ativar alerta de preço e atualização" onClick={() => saveAction("alert", "product", String(p.id))}><Bell size={16} /></button>
+                          <button 
+                            className={`button ${compareList.some(i => i.id === p.id) ? "button--primary" : "button--outline"}`} 
+                            title="Comparar com outros produtos" 
+                            onClick={() => {
+                              if (compareList.some(i => i.id === p.id)) {
+                                setCompareList(prev => prev.filter(i => i.id !== p.id));
+                              } else if (compareList.length < 4) {
+                                setCompareList(prev => [...prev, p]);
+                              } else {
+                                alert("Você pode comparar até 4 produtos por vez.");
+                              }
+                            }}
+                          >
+                            <LineChart size={16} />
+                          </button>
                           <button className="button button--outline" title="Compartilhar produto" onClick={() => handleShare(p)}><Share2 size={16} /></button>
                         </div>
+
                       </div>
                     </article>
                   );
@@ -2234,9 +2253,116 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
           </div>
         </div>
       )}
+      {compareList.length > 0 && (
+        <div className="compare-bar" style={{
+          position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
+          background: 'var(--surface-1)', border: '2px solid var(--blue)', padding: '1rem',
+          borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.15)', zIndex: 100,
+          display: 'flex', alignItems: 'center', gap: '1.5rem', maxWidth: '90vw',
+          animation: 'slideUp 0.3s ease-out'
+        }}>
+          <div style={{ display: 'flex', gap: '0.5rem', overflow: 'hidden' }}>
+            {compareList.map(p => (
+              <div key={p.id} style={{ position: 'relative', width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                <ProductImage product={p} size="compact" />
+                <button 
+                  onClick={() => setCompareList(prev => prev.filter(i => i.id !== p.id))}
+                  style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', padding: '2px', cursor: 'pointer', borderRadius: '0 0 0 4px' }}
+                >
+                  <X size={10} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+            {compareList.length} {compareList.length === 1 ? 'produto selecionado' : 'produtos selecionados'}
+          </div>
+          <button className="button button--primary" onClick={() => setShowCompareModal(true)}>
+            Comparar agora <LineChart size={18} />
+          </button>
+        </div>
+      )}
+
+      {showCompareModal && (
+        <div className="admin-modal-overlay" onClick={() => setShowCompareModal(false)}>
+          <div className="admin-modal-content" style={{ maxWidth: '900px', width: '95vw' }} onClick={e => e.stopPropagation()}>
+            <div className="admin-modal-head">
+              <h3><LineChart size={20} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Comparativo de Preços e Variação</h3>
+              <button className="icon-button" onClick={() => setShowCompareModal(false)}><X/></button>
+            </div>
+            <div className="admin-modal-body">
+              <div className="compare-table-wrapper" style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                      <th style={{ padding: '1rem', textAlign: 'left' }}>Produto</th>
+                      {compareList.map(p => (
+                        <th key={p.id} style={{ padding: '1rem', textAlign: 'center', minWidth: '150px' }}>
+                          <ProductImage product={p} size="compact" />
+                          <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>{p.name}</div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '1rem', fontWeight: 600 }}>Melhor Preço</td>
+                      {compareList.map(p => (
+                        <td key={p.id} style={{ padding: '1rem', textAlign: 'center' }}>
+                          <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--blue)' }}>{money(p.minPrice)}</div>
+                          <small style={{ color: 'var(--tertiary)', fontWeight: 600 }}>{p.establishment}</small>
+                        </td>
+                      ))}
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '1rem', fontWeight: 600 }}>Média em Feijó</td>
+                      {compareList.map(p => (
+                        <td key={p.id} style={{ padding: '1rem', textAlign: 'center' }}>{money(p.avgPrice)}</td>
+                      ))}
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '1rem', fontWeight: 600 }}>Ranking Local</td>
+                      {compareList.map(p => {
+                        const rank = products.filter(i => i.category === p.category).sort((a,b) => a.minPrice - b.minPrice).findIndex(i => i.id === p.id) + 1;
+                        return (
+                          <td key={p.id} style={{ padding: '1rem', textAlign: 'center' }}>
+                            <span style={{ background: rank === 1 ? 'var(--blue)' : 'var(--surface-2)', color: rank === 1 ? 'white' : 'inherit', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700 }}>
+                              #{rank} na categoria
+                            </span>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '1rem', fontWeight: 600 }}>Tendência</td>
+                      {compareList.map(p => {
+                        const diff = p.previousPrice ? ((p.minPrice - p.previousPrice) / p.previousPrice) * 100 : 0;
+                        return (
+                          <td key={p.id} style={{ padding: '1rem', textAlign: 'center' }}>
+                            {diff !== 0 ? (
+                              <div style={{ color: diff < 0 ? 'var(--green)' : 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', fontWeight: 700 }}>
+                                {diff < 0 ? <TrendingDown size={14} /> : <TrendingUp size={14} />}
+                                {Math.abs(Math.round(diff))}%
+                              </div>
+                            ) : 'Estável'}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ marginTop: '2rem', textAlign: 'right' }}>
+                <button className="button button--ghost" onClick={() => setCompareList([])}>Limpar comparação</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 
 
 export default function PrecoCertoApp() {
