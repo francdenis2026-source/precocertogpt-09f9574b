@@ -1500,9 +1500,51 @@ function SnapshotPage({ products }: PageProps) {
 }
 
 
+type PlanAudience = "consumer" | "merchant" | "sponsor";
+
+const planCatalog: Record<PlanAudience, Array<{name:string; eyebrow:string; price:number | null; period:string; description:string; features:string[]; cta:string; href:string; featured?:boolean}>> = {
+  consumer: [
+    { name:"Essencial", eyebrow:"Grátis para começar", price:0, period:"para sempre", description:"Para pesquisar preços locais e planejar compras sem pagar mensalidade.", features:["Busca ilimitada no catálogo público","Comparação entre estabelecimentos","Cesta de compras no dispositivo","Acesso às ofertas verificadas"], cta:"Criar conta grátis", href:"/cadastro" },
+    { name:"Consulta Inteligente", eyebrow:"Pague somente quando usar", price:4.9, period:"por consulta", description:"Para quem não quer assinatura e precisa de uma cesta otimizada em momentos específicos.", features:["1 análise completa de cesta","Sugestão por orçamento disponível","Comparação entre várias lojas","Resumo pronto para compartilhar"], cta:"Solicitar acesso", href:"/fale-conosco", featured:true },
+    { name:"Economia+", eyebrow:"Uso frequente", price:19.9, period:"por mês", description:"Para famílias que comparam preços toda semana e querem acompanhar sua economia.", features:["Cestas inteligentes recorrentes","Alertas de queda de preço","Histórico de compras e economia","Exportação de listas e cestas"], cta:"Entrar na lista de interesse", href:"/fale-conosco" },
+  ],
+  merchant: [
+    { name:"Presença Local", eyebrow:"Perfil comercial", price:59.9, period:"por mês", description:"Para manter informações, catálogo e preços organizados no PreçoCerto.", features:["Página verificada do estabelecimento","Gestão de catálogo e preços","Logomarca e dados comerciais","Relatório mensal de visualizações"], cta:"Cadastrar meu comércio", href:"/fale-conosco" },
+    { name:"Comercial Pro", eyebrow:"Mais visibilidade", price:129.9, period:"por mês", description:"Para transformar o catálogo em uma vitrine ativa e entender a procura dos consumidores.", features:["Tudo do Presença Local","Ofertas em destaque identificadas","Métricas de busca e interesse","Prioridade na atualização do catálogo"], cta:"Quero ser parceiro", href:"/fale-conosco", featured:true },
+    { name:"Rede & Equipe", eyebrow:"Operação avançada", price:null, period:"sob consulta", description:"Para empresas com várias unidades, equipes ou necessidade de relatórios personalizados.", features:["Múltiplos estabelecimentos","Usuários e permissões por função","Relatórios comparativos avançados","Implantação e suporte dedicado"], cta:"Falar sobre minha operação", href:"/fale-conosco" },
+  ],
+  sponsor: [
+    { name:"Destaque Local", eyebrow:"Campanha transparente", price:149.9, period:"por campanha", description:"Destaque sua marca em uma categoria ou período, sempre identificada como publicidade.", features:["Selo de conteúdo patrocinado","Período e alcance definidos","Relatório básico da campanha","Sem interferir no ranking de menor preço"], cta:"Planejar campanha", href:"/fale-conosco", featured:true },
+    { name:"Cota Cidade", eyebrow:"Presença institucional", price:null, period:"sob consulta", description:"Para marcas que desejam apoiar a informação de preços e a economia local em Feijó.", features:["Marca em áreas institucionais","Campanha personalizada","Relatório de alcance e interação","Regras claras de transparência"], cta:"Solicitar proposta", href:"/fale-conosco" },
+  ],
+};
+
 function PlansPage() {
-  const [shop, setShop] = useState(false); const plans = shop ? [{name:"Parceiro Local",price:29.9,desc:"Presença local e catálogo essencial",features:["Perfil verificado","Gestão de catálogo","Métricas essenciais"]},{name:"Parceiro Pro",price:69.9,desc:"Mais alcance e inteligência",features:["Tudo do Local","Promoções em destaque","Tendências de mercado"],featured:true},{name:"Business",price:149.9,desc:"Operação com múltiplas unidades",features:["Tudo do Pro","Equipe e permissões","Relatórios avançados"]}] : [{name:"Grátis",price:0,desc:"Compare antes de comprar",features:["Busca de preços","1 cesta salva","1 consulta de IA"]},{name:"Mensal",price:24.9,desc:"Economia sem compromisso",features:["Consultas ilimitadas","Alertas de queda","Histórico completo"],featured:true},{name:"Anual",price:179.9,desc:"O melhor custo-benefício",features:["Tudo do Mensal","Exportações","Cota ampliada de IA"]}];
-  return <div className="shell page-shell plans-page"><div className="center-heading"><span className="eyebrow">Planos PreçoCerto</span><h1>Economia que se paga na primeira compra</h1><p>Recursos transparentes para consumidores e para o comércio local.</p><div className="segmented large"><button className={!shop?"active":""} onClick={()=>setShop(false)}>Para você</button><button className={shop?"active":""} onClick={()=>setShop(true)}>Para sua loja</button></div></div><div className="plan-grid">{plans.map(plan=><article className={plan.featured?"featured":""} key={plan.name}>{plan.featured&&<span className="recommended">Recomendado</span>}<h2>{plan.name}</h2><p>{plan.desc}</p><div className="plan-price"><strong>{money(plan.price)}</strong><span>/mês</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={`/checkout/${plan.name.toLowerCase().replace(" ","-")}`}>{plan.price===0?"Começar grátis":"Escolher plano"}<ArrowRight/></a><ul>{plan.features.map(f=><li key={f}><Check/> {f}</li>)}</ul></article>)}</div><div className="plan-note"><ShieldCheck/><span><b>Pagamento seguro via Pix</b><small>Ativação automática após confirmação. Cancele quando quiser.</small></span></div></div>;
+  const [audience, setAudience] = useState<PlanAudience>("consumer");
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const plans = planCatalog[audience];
+  const faqs = [
+    ["Ainda posso usar o PreçoCerto gratuitamente?", "Sim. A pesquisa pública, a comparação de preços e a cesta no dispositivo permanecem no plano Essencial."],
+    ["Os planos pagos já fazem cobrança automática?", "Ainda não. Os valores apresentam a proposta comercial; o cadastro de interesse é confirmado pela equipe antes de qualquer cobrança."],
+    ["Um patrocinador pode alterar o ranking de preços?", "Não. Conteúdo patrocinado será identificado e nunca substituirá o ranking baseado nos preços cadastrados."],
+    ["O comerciante precisa pagar para aparecer?", "Não. Estabelecimentos podem continuar no catálogo público. Os planos comerciais adicionam gestão, destaque identificado e métricas."],
+  ];
+
+  return <div className="plans-page">
+    <section className="plans-hero"><div className="shell plans-hero__inner"><div><span className="eyebrow eyebrow--light">Planos PreçoCerto</span><h1>Economia para quem compra.<br/><span>Crescimento para quem vende.</span></h1><p>Escolha uma forma simples de usar a plataforma. Sem esconder preços, sem misturar publicidade com o ranking e sem obrigar ninguém a assinar.</p><div className="plans-trust"><span><ShieldCheck/> Preços transparentes</span><span><CheckCircle2/> Plano gratuito permanente</span><span><TrendingDown/> Feito para a realidade local</span></div></div><aside><CircleDollarSign/><strong>Comece sem pagar</strong><p>Pesquise, compare e monte sua cesta. Recursos avançados entram apenas quando realmente fizerem sentido para você.</p><a href="#escolher-plano">Ver opções <ArrowRight/></a></aside></div></section>
+
+    <main className="shell plans-content" id="escolher-plano">
+      <header className="plans-heading"><div><span className="eyebrow">Escolha seu objetivo</span><h2>Um modelo justo para cada público</h2><p>Alterne entre consumidor, comércio local e patrocínio institucional.</p></div><div className="plans-audience" role="tablist" aria-label="Tipo de plano"><button role="tab" aria-selected={audience==="consumer"} className={audience==="consumer"?"active":""} onClick={()=>setAudience("consumer")}><UserRound/> Para consumidores</button><button role="tab" aria-selected={audience==="merchant"} className={audience==="merchant"?"active":""} onClick={()=>setAudience("merchant")}><Store/> Para estabelecimentos</button><button role="tab" aria-selected={audience==="sponsor"} className={audience==="sponsor"?"active":""} onClick={()=>setAudience("sponsor")}><Sparkles/> Patrocínios</button></div></header>
+
+      <div className={`professional-plan-grid professional-plan-grid--${plans.length}`}>{plans.map(plan=><article className={`professional-plan-card ${plan.featured?"featured":""}`} key={plan.name}>{plan.featured&&<span className="recommended"><Sparkles/> Melhor escolha</span>}<span className="plan-eyebrow">{plan.eyebrow}</span><h3>{plan.name}</h3><p>{plan.description}</p><div className="professional-plan-price">{plan.price===null?<strong>Personalizado</strong>:<><small>A partir de</small><strong>{money(plan.price)}</strong></>}<span>{plan.period}</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={plan.href}>{plan.cta}<ArrowRight/></a><div className="plan-divider"/><b>O que está incluído</b><ul>{plan.features.map(feature=><li key={feature}><CheckCircle2/> {feature}</li>)}</ul></article>)}</div>
+
+      <section className="plans-principles"><div><span className="eyebrow">Compromissos da plataforma</span><h2>Monetização sem perder a confiança</h2></div><div className="principle-grid"><article><TrendingDown/><h3>Ranking independente</h3><p>O menor preço continua sendo definido pelos dados, nunca por pagamento.</p></article><article><Receipt/><h3>Uso avulso</h3><p>Quem não quiser assinatura poderá pagar apenas por uma consulta inteligente.</p></article><article><Store/><h3>Comércio valorizado</h3><p>Planos profissionais melhoram presença e gestão sem apagar estabelecimentos gratuitos.</p></article><article><ShieldCheck/><h3>Publicidade identificada</h3><p>Toda ação patrocinada aparece com sinalização clara para o consumidor.</p></article></div></section>
+
+      <section className="plans-faq"><div><span className="eyebrow">Dúvidas frequentes</span><h2>Antes de escolher</h2><p>Respostas diretas sobre acesso, cobrança e transparência.</p></div><div>{faqs.map(([question,answer],index)=><article className={openFaq===index?"open":""} key={question}><button onClick={()=>setOpenFaq(openFaq===index?null:index)} aria-expanded={openFaq===index}><span>{question}</span><ChevronDown/></button>{openFaq===index&&<p>{answer}</p>}</article>)}</div></section>
+
+      <section className="plans-cta"><div><span className="eyebrow eyebrow--light">Ainda não sabe qual escolher?</span><h2>Conte o que você precisa.</h2><p>Vamos indicar o formato adequado sem compromisso e sem cobrança automática.</p></div><a className="button button--primary" href="/fale-conosco">Falar com o PreçoCerto <ArrowRight/></a></section>
+    </main>
+  </div>;
 }
 
 function AdminPage({ path, onLogout, products: allProducts, stores: allStores }: { path: string; onLogout: () => void; products: Product[]; stores: StoreRow[] }) {
@@ -2443,7 +2485,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
 
             <div className="aside-stat">
               <span>Notificações WhatsApp</span>
-              <strong style={{ color: 'var(--green)' }}>Ativado</strong>
+              <strong style={{ color: 'var(--muted)' }}>Em preparação</strong>
             </div>
 
             <div className="aside-stat">
@@ -2576,9 +2618,9 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
               <button 
                 className="button button--small" 
                 style={{ background: '#25D366', color: 'white', border: 'none', width: '100%', marginTop: '0.8rem' }}
-                onClick={() => window.open(`https://wa.me/5568999999999?text=${encodeURIComponent("Olá! Gostaria de ativar os alertas do PreçoCerto para minha lista de acompanhamento.")}`)}
+                onClick={() => window.location.href = "/fale-conosco"}
               >
-                Ativar WhatsApp
+                Solicitar ativação
               </button>
             </div>
             <div style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px', marginTop: '1rem' }}>
@@ -3736,6 +3778,7 @@ export default function PrecoCertoApp() {
   let page:ReactNode;
   if(pathname==="/") page=<HomePage {...props}/>;
   else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
+  else if(pathname==="/planos" && isEnabled("consumerPlans")) page=<PlansPage/>;
   else if(pathname==="/alertas"||pathname==="/perfil") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user}/>;
   else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
   else if(pathname.startsWith("/cesta/snapshot/")) page=<SnapshotPage {...props}/>;

@@ -22,7 +22,7 @@ export const features: Record<FeatureKey, boolean> = {
   /** Cesta Inteligente determinística (Fase 2). */
   smartBasket: envFlag("VITE_FEATURE_SMART_BASKET", false),
   /** Catálogo de planos do consumidor (Fase 3). */
-  consumerPlans: envFlag("VITE_FEATURE_CONSUMER_PLANS", false),
+  consumerPlans: envFlag("VITE_FEATURE_CONSUMER_PLANS", true),
   /** Carteira de créditos (Fase 3). */
   credits: envFlag("VITE_FEATURE_CREDITS", false),
   /** Área do comerciante (Fase 4). */
