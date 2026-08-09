@@ -136,6 +136,10 @@ const productImages: Record<string, string> = {
   "159e9aa1-7848-4b39-b101-291e21f8b217": "/products/cup-noodles-nissin-costela-70g.jpg",
   "72a3291b-4f84-433c-9ba3-e445935fe0d9": "/products/seleta-de-legumes-em-conserva-ole-200g.jpg",
   "054fdaa5-99b2-45a8-909e-30981c8b7625": "/products/feijao-carioca-bernardo-1kg.jpg",
+  "feijao-kicaldo-1kg": "/products/feijao-kicaldo-1kg.jpg",
+  "feijao-carioca-bernardo-1kg": "/products/feijao-carioca-bernardo-1kg.jpg",
+  "oleo-liza-900ml": "/products/oleo-liza-900ml.jpg",
+  "oleo-soja-liza-900ml": "/products/oleo-liza-900ml.jpg",
 };
 
 function ProductImage({ product, size = "default", eager = false }: { product: Product | any; size?: "compact" | "default" | "hero" | "basket"; eager?: boolean }) {
