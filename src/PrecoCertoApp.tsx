@@ -467,9 +467,11 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
 
   return <header className={headerClass}>
     <div className="shell header-inner">
-      <Brand compact />
-      <span onClick={() => window.location.href = "/estabelecimentos"} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--muted)', transition: 'var(--transition)' }} className="header-location hover:text-blue-600"><MapPin size={14} /> Feijó, AC</span>
-      <nav className="desktop-nav" aria-label="Navegação principal">
+      <div className="header-brand-zone">
+        <Brand compact />
+        <button type="button" onClick={() => window.location.href = "/estabelecimentos"} className="header-location"><MapPin size={14} /> <span>Feijó, AC</span></button>
+      </div>
+      <nav className="desktop-nav desktop-nav--premium" aria-label="Navegação principal">
         {navLinks.map(link => {
           const isActive = currentPath === link.href || (link.href !== "/" && currentPath.startsWith(link.href));
           return (
@@ -484,10 +486,10 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
           );
         })}
       </nav>
-      <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="header-actions">
         <ThemeToggle compact />
-        <a className="icon-button" href="/buscar" aria-label="Buscar"><Search size={20} /></a>
-        <a className="icon-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`}><ShoppingBasket size={20} />{basketCount > 0 && <span key={basketCount}>{basketCount}</span>}</a>
+        <a className="icon-button header-action-button header-search-button" href="/buscar" aria-label="Buscar produtos" title="Buscar produtos"><Search size={20} /></a>
+        <a className="icon-button header-action-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`} title="Abrir cesta"><ShoppingBasket size={20} />{basketCount > 0 && <span key={basketCount}>{basketCount}</span>}</a>
 
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -496,8 +498,8 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
           </div>
         ) : (
           <>
-            <a className="text-link" href="/login">Entrar</a>
-            <a className="button button--primary button--small" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
+            <a className="text-link header-login-link" href="/login">Entrar</a>
+            <a className="button button--primary button--small header-signup-button" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
           </>
         )}
       </div>
