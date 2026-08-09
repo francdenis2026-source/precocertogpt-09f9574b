@@ -2178,35 +2178,6 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                 </div>
               </div>
             </div>
-          </div>
-        </aside>
-          <div className="filter-group">
-            <div className="filter-header">
-              <h3>Faixa de Preço</h3>
-            </div>
-            <div style={{ padding: '0 0.5rem' }}>
-              <input 
-                type="range" 
-                min="0" 
-                max="500" 
-                value={priceRange[1]} 
-                onChange={e => setPriceRange([0, Number(e.target.value)])}
-                style={{ width: '100%' }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
-                <span>R$ 0</span>
-                <span>Até {money(priceRange[1])}</span>
-              </div>
-            </div>
-          </div>
-          <div className="filter-group">
-            <div className="filter-header">
-              <h3>Recência</h3>
-            </div>
-            <div className="filter-list">
-              <button className={updateRecency === "all" ? "active" : ""} onClick={() => setUpdateRecency("all")}>Todos</button>
-              <button className={updateRecency === "24h" ? "active" : ""} onClick={() => setUpdateRecency("24h")}>Hoje</button>
-              <button className={updateRecency === "7d" ? "active" : ""} onClick={() => setUpdateRecency("7d")}>Última semana</button>
             </div>
           </div>
         </aside>
