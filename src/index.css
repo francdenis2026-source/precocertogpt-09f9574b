@@ -1150,6 +1150,26 @@ iframe[src*="lovable.dev/badge"] {
   margin: 1rem 0;
 }
 
+.establishment-link-highlight {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--blue);
+  text-decoration: none;
+  background: var(--blue-soft);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.establishment-link-highlight:hover {
+  background: var(--blue);
+  color: white;
+  border-color: var(--blue);
+}
+
 .metric-badge {
   display: flex;
   align-items: center;
