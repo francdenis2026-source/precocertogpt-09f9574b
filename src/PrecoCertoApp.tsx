@@ -116,7 +116,7 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
 
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
-  return <header className="site-header">
+  return <header className={`site-header ${window.location.pathname === "/" ? "site-header--absolute" : ""}`}>
     <div className="shell header-inner">
       {/* Logo removida do header a pedido do usuário */}
       <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
@@ -217,10 +217,10 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
   const rows = [...products].sort((a,b) => priceMode === "lowest" ? a.minPrice - b.minPrice : Date.parse(b.capturedAt) - Date.parse(a.capturedAt)).slice(0, 6);
   const featured = randomFeatured[featuredIndex] ?? products[0];
   return <>
-    <section className="hero" style={{ height: 'auto', minHeight: '500px', paddingBottom: '40px' }}>
+    <section className="hero">
       <div className="hero-photo" />
       <div className="hero-wash" />
-      <div className="shell hero-content" style={{ paddingTop: '20px' }}>
+      <div className="shell hero-content">
         <div className="hero-copy">
           <span className="hero-live"><i /> Inteligência de compra em tempo real</span>
           <span className="eyebrow eyebrow--light"><MapPin size={14} /> Curadoria local • Feijó • Acre</span>
