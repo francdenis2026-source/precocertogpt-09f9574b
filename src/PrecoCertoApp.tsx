@@ -251,7 +251,7 @@ function MobileBar({ basketCount }: { basketCount: number }) {
 function SearchBox({ value, setValue, products, hero = false }: { value: string; setValue: (v: string) => void; products: Product[]; hero?: boolean }) {
   const [focused, setFocused] = useState(false);
   const [localValue, setLocalValue] = useState(value);
-  const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
+  const debounceTimer = useRef<any>();
 
   // Debounce para evitar consultas excessivas ao digitar
   useEffect(() => {
@@ -1838,7 +1838,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [sortBy, setSortBy] = useState<"price" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
   const [chartPeriod, setChartPeriod] = useState("30d");
   const [isSearching, setIsSearching] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
