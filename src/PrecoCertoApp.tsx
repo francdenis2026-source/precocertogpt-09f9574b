@@ -1296,6 +1296,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                       </div>
                     </div>
                     <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
+                    <button type="button" className="link-danger" style={{ width: '100%', justifyContent: 'center', marginTop: '.5rem' }} onClick={clearAll}><Trash2 size={14} /> Limpar cesta</button>
                   </div>
                 </aside>
               </div>
