@@ -89,7 +89,8 @@ export async function runPriceImport(
       category: p.category,
       size: p.size,
       unit: p.unit,
-      barcode: p.barcode
+      barcode: p.barcode,
+      image_url: p.image_url
     }));
 
     const { error: prodError } = await supabase.from("products").upsert(prodUpsert);

@@ -60,8 +60,13 @@ const productImages: Record<string, string> = {
 };
 
 function ProductImage({ product, size = "default", eager = false }: { product: Product | any; size?: "compact" | "default" | "hero" | "basket"; eager?: boolean }) {
-  const src = product.image_url || productImages[product.slug] || "/products/arroz-tio-joao-5kg.png";
-  return <span className={`product-photo product-photo--${size}`}><img src={src} alt={`Embalagem de ${product.name}`} loading={eager ? "eager" : "lazy"} /><i aria-hidden="true" /></span>;
+  const src = product.image_url || productImages[product.slug] || productImages[String(product.id)] || "/products/arroz-tio-joao-5kg.png";
+  return <span className={`product-photo product-photo--${size}`}><img src={src} alt={`Embalagem de ${product.name}`} loading={eager ? "eager" : "lazy"} onError={(e) => {
+    const target = e.target as HTMLImageElement;
+    if (target.src !== "/products/arroz-tio-joao-5kg.png") {
+      target.src = "/products/arroz-tio-joao-5kg.png";
+    }
+  }} /><i aria-hidden="true" /></span>;
 }
 
 function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
