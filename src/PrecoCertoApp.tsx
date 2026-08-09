@@ -18,18 +18,43 @@ const initialProducts: Product[] = initialCatalog.products;
 const initialStores: StoreRow[] = initialCatalog.stores;
 
 const adminRouteNames: Record<string, string> = {
-  "/admin": "Visão geral", "/admin/gestao": "Licenças e assinaturas", "/admin/acessos-temporarios": "Acessos temporários",
-  "/admin/analytics": "Analytics", "/admin/auditoria": "Auditoria geral", "/admin/auditoria-acessos": "Auditoria de acessos",
-  "/admin/auditoria-numeros": "Consistência de números", "/admin/cadastro-foto": "Cadastro por foto",
-  "/admin/catalogo": "Catálogo de produtos", "/admin/categorizacao": "Categorização inteligente", "/admin/cesta": "Cesta básica",
-  "/admin/cesta-auditoria": "Auditoria da cesta", "/admin/clientes": "Contas e clientes", "/admin/cobertura": "Cobertura por loja",
-  "/admin/consistencia": "Consistência operacional", "/admin/contas": "Contas e segurança", "/admin/conversoes": "Conversões",
-  "/admin/cupom": "Leitura de cupom", "/admin/cupom-lote": "Cupons em lote", "/admin/historico-precos": "Histórico de preços",
-  "/admin/ia": "Inteligência artificial", "/admin/icones-categoria": "Ícones de categoria", "/admin/image-jobs": "Fila de imagens",
-  "/admin/importacoes": "Importações", "/admin/lote-inserir": "Inserção em lote", "/admin/metricas": "Métricas",
-  "/admin/operacao": "Operação", "/admin/preco-rapido": "Preço rápido", "/admin/precos": "Gestão de preços",
-  "/admin/promocoes": "Promoções", "/admin/promocoes-codigos": "Códigos promocionais", "/admin/rank-check": "Validação de ranking",
-  "/admin/reports": "Denúncias de preço", "/admin/sinonimos": "Sinônimos de busca", "/admin/vitrine": "Vitrine pública", "/admin/webhooks": "Webhooks",
+  "/admin": "Visão geral", 
+  "/admin/gestao": "Licenças e assinaturas", 
+  "/admin/acessos-temporarios": "Acessos temporários",
+  "/admin/analytics": "Analytics", 
+  "/admin/auditoria": "Auditoria geral", 
+  "/admin/auditoria-acessos": "Auditoria de acessos",
+  "/admin/auditoria-numeros": "Consistência de números", 
+  "/admin/cadastro-foto": "Cadastro por foto",
+  "/admin/catalogo": "Catálogo de produtos", 
+  "/admin/fotos-pendentes": "Fotos Pendentes",
+  "/admin/categorizacao": "Categorização inteligente", 
+  "/admin/cesta": "Cesta básica",
+  "/admin/cesta-auditoria": "Auditoria da cesta", 
+  "/admin/clientes": "Contas e clientes", 
+  "/admin/cobertura": "Cobertura por loja",
+  "/admin/consistencia": "Consistência operacional", 
+  "/admin/contas": "Contas e segurança", 
+  "/admin/conversoes": "Conversões",
+  "/admin/cupom": "Leitura de cupom", 
+  "/admin/cupom-lote": "Cupons em lote", 
+  "/admin/historico-precos": "Histórico de preços",
+  "/admin/ia": "Inteligência artificial", 
+  "/admin/icones-categoria": "Ícones de categoria", 
+  "/admin/image-jobs": "Fila de imagens",
+  "/admin/importacoes": "Importações", 
+  "/admin/lote-inserir": "Inserção em lote", 
+  "/admin/metricas": "Métricas",
+  "/admin/operacao": "Operação", 
+  "/admin/preco-rapido": "Preço rápido", 
+  "/admin/precos": "Gestão de preços",
+  "/admin/promocoes": "Promoções", 
+  "/admin/promocoes-codigos": "Códigos promocionais", 
+  "/admin/rank-check": "Validação de ranking",
+  "/admin/reports": "Denúncias de preço", 
+  "/admin/sinonimos": "Sinônimos de busca", 
+  "/admin/vitrine": "Vitrine pública", 
+  "/admin/webhooks": "Webhooks",
 };
 
 function money(value: number) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value); }
@@ -438,7 +463,8 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
         p.name.toLowerCase().includes(adminSearch.toLowerCase()) || 
         p.barcode?.includes(adminSearch);
       const storeMatch = adminFilterStore === "all" || p.establishment === adminFilterStore;
-      return searchMatch && storeMatch;
+      const photoMatch = path !== "/admin/fotos-pendentes" || !p.image_url;
+      return searchMatch && storeMatch && photoMatch;
     });
   }, [sortedProducts, adminSearch, adminFilterStore]);
 
@@ -492,10 +518,10 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       const fileName = `${productId}-${Math.random()}.${fileExt}`;
       const filePath = `products/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file);
+      const { error: uploadError } = await supabase.storage.from('products').upload(filePath, file);
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath);
+      const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(filePath);
 
       const { error: updateError } = await supabase.from('products').update({ image_url: publicUrl }).eq('id', productId);
       if (updateError) throw updateError;
@@ -586,7 +612,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
     ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
   ];
   const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo"><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo" className={path==="/admin/catalogo" || path==="/admin/fotos-pendentes" ?"active":""}><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
 
   {showLogoutConfirm && (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
@@ -608,7 +634,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   <div className="admin-kpis">
     <article onClick={() => setActiveKpiDetail({ title: "Preços Ativos", data: rows })} style={{ cursor: 'pointer' }}><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
     <article onClick={() => setActiveKpiDetail({ title: "Produtos Cobertos", data: initialProducts.slice(0, 10) })} style={{ cursor: 'pointer' }}><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
-    <article onClick={() => window.location.href = '#admin-auditoria'} style={{ cursor: 'pointer' }}><span>Pendências <AlertTriangle/></span><strong>17</strong><small className="warning">5 com prioridade alta</small></article>
+    <article onClick={() => window.location.href = '/admin/fotos-pendentes'} style={{ cursor: 'pointer', border: '1px solid #f59e0b', background: '#fffbeb' }}><span>Fotos Pendentes <Camera color="#d97706"/></span><strong>{allProducts.filter(p => !p.image_url).length}</strong><small className="warning" style={{ color: '#d97706' }}>Itens sem imagem real</small></article>
     <article onClick={() => setActiveKpiDetail({ title: "Estabelecimentos", data: initialStores })} style={{ cursor: 'pointer' }}><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
 
   </div>
@@ -736,8 +762,8 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   <section className="admin-card">
     <div className="admin-card-head">
       <div>
-        <h2>Gestão de Catálogo</h2>
-        <p>Produtos e estabelecimentos registrados no sistema.</p>
+        <h2>{path === "/admin/fotos-pendentes" ? "Fotos Pendentes" : "Gestão de Catálogo"}</h2>
+        <p>{path === "/admin/fotos-pendentes" ? "Produtos aguardando imagem real para melhor visualização." : "Produtos e estabelecimentos registrados no sistema."}</p>
       </div>
       <div style={{display:"flex",gap:"0.75rem"}}>
         <button className="button button--outline" onClick={handleImport} disabled={isImporting} title="Disparar importação para o Supabase externo">
@@ -748,20 +774,22 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       </div>
     </div>
     
-    <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', padding: '0 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
-      <button 
-        onClick={() => setAdminActiveTab("products")}
-        style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'products' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'products' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'products' ? '600' : '400', background: 'none' }}
-      >
-        Produtos ({filteredProducts.length})
-      </button>
-      <button 
-        onClick={() => setAdminActiveTab("stores")}
-        style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'stores' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'stores' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'stores' ? '600' : '400', background: 'none' }}
-      >
-        Lojas ({filteredStores.length})
-      </button>
-    </div>
+    {path !== "/admin/fotos-pendentes" && (
+      <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', padding: '0 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
+        <button 
+          onClick={() => setAdminActiveTab("products")}
+          style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'products' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'products' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'products' ? '600' : '400', background: 'none' }}
+        >
+          Produtos ({filteredProducts.length})
+        </button>
+        <button 
+          onClick={() => setAdminActiveTab("stores")}
+          style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'stores' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'stores' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'stores' ? '600' : '400', background: 'none' }}
+        >
+          Lojas ({filteredStores.length})
+        </button>
+      </div>
+    )}
 
     <div className="admin-filters">
       <label style={{ flex: 1 }}>
