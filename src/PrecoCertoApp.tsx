@@ -438,22 +438,51 @@ function ThemeToggle({ compact = false }: { compact?: boolean }) {
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    
+    // Listen for history changes if needed, but for simple SPA this works:
+    const handleLocationChange = () => setCurrentPath(window.location.pathname);
+    window.addEventListener("popstate", handleLocationChange);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("popstate", handleLocationChange);
+    };
   }, []);
 
-  const isHome = window.location.pathname === "/";
+  const isHome = currentPath === "/";
   const headerClass = `site-header ${isHome ? "site-header--absolute" : ""} ${scrolled ? "site-header--scrolled" : ""}`;
+
+  const navLinks = [
+    { label: "Comparar preços", href: "/buscar" },
+    { label: "Ofertas", href: "/melhores-precos" },
+    { label: "Cesta inteligente", href: "/cesta-basica" },
+    { label: "Estabelecimentos", href: "/estabelecimentos" },
+    { label: "Planos", href: "/planos" }
+  ];
 
   return <header className={headerClass}>
     <div className="shell header-inner">
       <Brand compact />
       <span onClick={() => window.location.href = "/estabelecimentos"} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--muted)', transition: 'var(--transition)' }} className="header-location hover:text-blue-600"><MapPin size={14} /> Feijó, AC</span>
       <nav className="desktop-nav" aria-label="Navegação principal">
-        <a href="/buscar">Comparar preços</a><a href="/melhores-precos">Ofertas</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/planos">Planos</a>
-
+        {navLinks.map(link => {
+          const isActive = currentPath === link.href || (link.href !== "/" && currentPath.startsWith(link.href));
+          return (
+            <a 
+              key={link.href} 
+              href={link.href} 
+              className={isActive ? "active" : ""} 
+              aria-current={isActive ? "page" : undefined}
+            >
+              {link.label}
+            </a>
+          );
+        })}
       </nav>
       <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <ThemeToggle compact />
