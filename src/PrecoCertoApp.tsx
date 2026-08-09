@@ -2126,9 +2126,24 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                         </div>
                         <div className="result-actions" style={{ display: 'flex', gap: '0.5rem' }}>
                           <button className="button button--primary" style={{ flex: 1 }} onClick={() => addBasket(p)}><Plus /> Cesta</button>
-                          <button className="button button--outline" title="Ativar alerta de preço e atualização" onClick={() => saveAction("alert", "product", String(p.id))}><Bell size={16} /></button>
+                          <button 
+                            className={`button ${compareList.some(i => i.id === p.id) ? "button--primary" : "button--outline"}`} 
+                            title="Comparar com outros produtos" 
+                            onClick={() => {
+                              if (compareList.some(i => i.id === p.id)) {
+                                setCompareList(prev => prev.filter(i => i.id !== p.id));
+                              } else if (compareList.length < 4) {
+                                setCompareList(prev => [...prev, p]);
+                              } else {
+                                alert("Você pode comparar até 4 produtos por vez.");
+                              }
+                            }}
+                          >
+                            <LineChart size={16} />
+                          </button>
                           <button className="button button--outline" title="Compartilhar produto" onClick={() => handleShare(p)}><Share2 size={16} /></button>
                         </div>
+
                       </div>
                     </article>
                   );
