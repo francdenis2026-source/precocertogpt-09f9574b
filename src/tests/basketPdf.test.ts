@@ -1,4 +1,3 @@
-// @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from "vitest";
 import { planBasketPdf, planFitsWithoutClipping, pageGeometry, A4 } from "../lib/basketPdf";
 import { getPdfOrientation, setPdfOrientation } from "../lib/pdfPrefs";
@@ -111,7 +110,15 @@ describe("plano do PDF da Cesta Inteligente", () => {
 });
 
 describe("preferência de orientação por usuário", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    const store = new Map<string, string>();
+    (globalThis as any).localStorage = {
+      getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
+      setItem: (k: string, v: string) => void store.set(k, v),
+      removeItem: (k: string) => void store.delete(k),
+      clear: () => store.clear(),
+    };
+  });
 
   it("usa retrato por padrão", () => {
     expect(getPdfOrientation("cliente@precocerto.com.br")).toBe("portrait");
