@@ -753,16 +753,19 @@ interface PageProps {
   saveAction: (action: string, type: string, id: string) => void;
 }
 
-function BasketPage({ products, addBasket, cart: initialCart, removeBasket }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void }) {
+function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void; user: any }) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [mode, setMode] = useState<OptimizationMode>("cheapest_multi");
   const [budget, setBudget] = useState(250);
+  const [isSaving, setIsSaving] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  
   const [basketItems, setBasketItems] = useState<BasketItemConfig[]>(() => {
     return initialCart.map(p => ({
       productName: p.name,
       category: p.category,
       quantity: 1,
-      unit: "un",
+      unit: (p.unit as any) || "un",
       isEssential: true
     }));
   });
