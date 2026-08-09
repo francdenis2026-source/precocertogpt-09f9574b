@@ -272,8 +272,8 @@ h1,h2,h3,.brand__word b,.brand__word strong{font-family:"Manrope Variable",Manro
 
 .hero{height:738px;background:#061827;border-bottom:0}
 .hero:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,transparent 49.95%,rgba(255,255,255,.08) 50%,transparent 50.05%);opacity:.35}
-.hero-photo{background-image:url('/supermercado-premium.jpg');background-position:center 61%;filter:saturate(.78) contrast(1.08) brightness(.88);transform:scale(1.015);animation:hero-cinema 18s ease-out both}
-.hero-wash{background:linear-gradient(90deg,rgba(3,17,29,.985) 0%,rgba(4,21,35,.96) 39%,rgba(5,22,35,.63) 64%,rgba(5,22,35,.18) 100%),linear-gradient(0deg,rgba(5,24,39,.92),transparent 42%)}
+.hero-photo{background-image:url('https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=2000&auto=format&fit=crop');background-position:center 61%;filter:saturate(.95) contrast(1.02) brightness(0.95);transform:scale(1);animation:hero-cinema 18s ease-out both}
+.hero-wash{background:linear-gradient(90deg,rgba(3,17,29,0.75) 0%,rgba(4,21,35,0.65) 39%,rgba(5,22,35,0.3) 64%,rgba(5,22,35,0.1) 100%),linear-gradient(0deg,rgba(5,24,39,0.5),transparent 42%)}
 .hero-content{padding-top:92px;grid-template-columns:minmax(0,1.42fr) minmax(330px,.58fr);gap:80px}
 .hero-copy{max-width:790px}
 .hero-live{margin-bottom:24px;color:#adc0ce;font-size:9px;letter-spacing:1.7px}
