@@ -429,8 +429,12 @@ function ThemeToggle({ compact = false }: { compact?: boolean }) {
   const { theme, toggleTheme } = useColorTheme();
   const dark = theme === "dark";
   return <button type="button" className={`theme-toggle ${compact ? "theme-toggle--compact" : ""}`} onClick={toggleTheme} aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"} title={dark ? "Ativar modo claro" : "Ativar modo escuro"} aria-pressed={dark}>
-    <span className="theme-toggle__track" aria-hidden="true"><span className="theme-toggle__thumb">{dark ? <Moon size={15}/> : <Sun size={15}/>}</span></span>
-    {!compact && <span style={{ marginLeft: '4px' }}>{dark ? "Escuro" : "Claro"}</span>}
+    <span className="theme-toggle__track" aria-hidden="true">
+      <span className="theme-toggle__indicator" />
+      <span className="theme-toggle__option theme-toggle__option--light"><Sun size={14}/></span>
+      <span className="theme-toggle__option theme-toggle__option--dark"><Moon size={14}/></span>
+    </span>
+    {!compact && <span className="theme-toggle__label">{dark ? "Modo escuro" : "Modo claro"}</span>}
   </button>;
 }
 

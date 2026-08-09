@@ -2650,3 +2650,22 @@ h1,h2,h3,.brand__word b,.brand__word strong,.button{font-family:var(--primary-fo
 @media(max-width:980px){.desktop-nav--premium a:nth-child(3){display:none}.header-location{display:none!important}}
 @media(max-width:820px){.site-header{height:66px!important}.header-actions{display:none!important}.desktop-nav--premium{display:none!important}.mobile-menu-button{display:grid}.header-inner>.header-brand-zone .brand__logo-img{width:44px!important;height:44px!important;max-width:44px!important}}
 @media(prefers-reduced-motion:reduce){.site-header,.header-brand-zone .brand,.header-location,.desktop-nav--premium a,.header-actions *,.mobile-menu-button{transition:none!important}}
+
+/* Seletor de tema — controle segmentado profissional */
+.theme-toggle{gap:9px!important;padding:4px 11px 4px 4px!important;border:1px solid var(--border)!important;border-radius:13px!important;background:linear-gradient(180deg,var(--surface),color-mix(in srgb,var(--surface-2) 72%,var(--surface)))!important;color:var(--text-main)!important;box-shadow:0 4px 13px rgba(5,38,74,.07),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .2s cubic-bezier(.4,0,.2,1),border-color .2s ease,box-shadow .2s ease!important}
+.theme-toggle:hover{transform:translateY(-1px)!important;border-color:color-mix(in srgb,var(--green) 42%,var(--border))!important;box-shadow:0 8px 19px rgba(49,181,34,.11),0 0 0 3px color-mix(in srgb,var(--green-soft) 45%,transparent)!important}
+.theme-toggle:active{transform:translateY(0) scale(.98)!important}
+.theme-toggle__track{position:relative!important;display:grid!important;grid-template-columns:repeat(2,28px)!important;align-items:center!important;width:58px!important;height:30px!important;padding:2px!important;border:1px solid color-mix(in srgb,var(--border) 85%,transparent)!important;border-radius:10px!important;background:color-mix(in srgb,var(--surface-2) 78%,var(--surface))!important;color:var(--muted)!important;overflow:hidden;box-shadow:inset 0 2px 5px rgba(5,38,74,.07)!important}
+.theme-toggle__indicator{position:absolute;z-index:0;left:2px;top:2px;width:26px;height:24px;border-radius:7px;background:linear-gradient(145deg,#fff,#fff8e5);box-shadow:0 3px 8px rgba(5,38,74,.14),inset 0 0 0 1px rgba(245,158,11,.18);transition:transform .26s cubic-bezier(.4,0,.2,1),background .25s ease,box-shadow .25s ease}
+.theme-toggle__option{position:relative;z-index:1;width:28px;height:24px;display:grid;place-items:center;transition:color .22s ease,transform .22s ease}.theme-toggle__option--light{color:#d68a00}.theme-toggle__option--dark{color:var(--tertiary)}
+.theme-toggle__label{font-size:11px;font-weight:820;white-space:nowrap}
+[data-theme='dark'] .theme-toggle__track{background:#091b30!important;border-color:#29455f!important;color:#8da2b6!important;box-shadow:inset 0 2px 7px rgba(0,0,0,.3)!important}
+[data-theme='dark'] .theme-toggle__indicator{transform:translateX(28px);background:linear-gradient(145deg,#173d61,#0e2c49);box-shadow:0 3px 10px rgba(0,0,0,.35),inset 0 0 0 1px rgba(101,220,84,.2)}
+[data-theme='dark'] .theme-toggle__option--light{color:#74889c}[data-theme='dark'] .theme-toggle__option--dark{color:#8af079}
+.theme-toggle:hover .theme-toggle__option--light,.theme-toggle:hover .theme-toggle__option--dark{transform:scale(1.08)}
+.theme-toggle--compact{width:66px!important;height:40px!important;min-height:40px!important;padding:4px!important;justify-content:center!important;border-radius:12px!important}
+.header-actions .theme-toggle--compact{width:66px!important;height:40px!important;padding:4px!important}.header-actions .theme-toggle--compact .theme-toggle__track{width:58px!important;height:30px!important;background:color-mix(in srgb,var(--surface-2) 78%,var(--surface))!important;box-shadow:inset 0 2px 5px rgba(5,38,74,.07)!important}
+[data-theme='dark'] .header-actions .theme-toggle--compact .theme-toggle__track{background:#091b30!important;box-shadow:inset 0 2px 7px rgba(0,0,0,.3)!important}
+.theme-toggle:focus-visible{outline:3px solid color-mix(in srgb,var(--green) 38%,transparent)!important;outline-offset:2px!important}
+@media(max-width:420px){.theme-toggle:not(.theme-toggle--compact) .theme-toggle__label{display:none}.theme-toggle:not(.theme-toggle--compact){padding:4px!important}}
+@media(prefers-reduced-motion:reduce){.theme-toggle,.theme-toggle__indicator,.theme-toggle__option{transition:none!important}}
