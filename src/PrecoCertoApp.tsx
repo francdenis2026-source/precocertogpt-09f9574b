@@ -901,7 +901,74 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
           ))}
         </div>
 
-        {showLogoutConfirm && (
+        <div className="admin-lower" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
+          <section className="admin-card">
+            <div className="admin-card-head">
+              <div><h2>Conexão Supabase</h2><p>Estado do banco de dados externo.</p></div>
+              <button className="button button--ghost button--small" onClick={handleTestConnection} disabled={isTesting}>
+                <Activity size={14}/> {isTesting ? "Testando..." : "Verificar"}
+              </button>
+            </div>
+            <div style={{ padding: '1.5rem' }}>
+              {connStatus ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div className={`pulse-dot`} style={{ background: connStatus.success ? 'var(--success)' : 'var(--danger)' }}></div>
+                    <strong style={{ fontSize: '0.9rem' }}>{connStatus.success ? "Sincronizado" : "Erro de conexão"}</strong>
+                  </div>
+                  {connStatus.success && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                      <div style={{ background: 'var(--bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                        <small style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Produtos</small>
+                        <strong style={{ fontSize: '1.1rem' }}>{connStatus.tables.products}</strong>
+                      </div>
+                      <div style={{ background: 'var(--bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                        <small style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Lojas</small>
+                        <strong style={{ fontSize: '1.1rem' }}>{connStatus.tables.establishments}</strong>
+                      </div>
+                      <div style={{ background: 'var(--bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                        <small style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Preços</small>
+                        <strong style={{ fontSize: '1.1rem' }}>{connStatus.tables.prices}</strong>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-light)' }}><small>Clique em verificar para checar o banco.</small></div>}
+            </div>
+          </section>
+
+          <section className="admin-card">
+            <div className="admin-card-head">
+              <div><h2>Importação de Preços</h2><p>Carga massiva via Excel.</p></div>
+            </div>
+            <div style={{ padding: '1.5rem' }}>
+              {isImporting ? (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <small style={{ fontWeight: 700 }}>{importMsg}</small>
+                    <small style={{ fontWeight: 800 }}>{Math.round((importProgress / importTotal) * 100)}%</small>
+                  </div>
+                  <div style={{ height: '8px', background: 'var(--bg)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', background: 'var(--primary)', width: `${(importProgress / importTotal) * 100}%`, transition: 'width 0.3s ease' }}></div>
+                  </div>
+                </div>
+              ) : importLog ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Processados:</span><strong>{importLog.count + importLog.duplicates}</strong></div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--success)' }}><span>Novos preços:</span><strong>+{importLog.count}</strong></div>
+                   <button className="button button--ghost button--small" style={{ marginTop: '0.5rem' }} onClick={() => setImportLog(null)}>Limpar Log</button>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '1rem' }}>
+                  <button className="button button--primary button--full" onClick={handleImport} disabled={isImporting}>
+                    <Database size={18}/> Iniciar Carga de Preços
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
           <div className="admin-modal-overlay">
             <div className="admin-modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
               <div className="admin-modal-body">
