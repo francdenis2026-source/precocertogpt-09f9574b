@@ -1,11 +1,11 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 test.describe('PreçoCerto Search E2E', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }: { page: Page }) => {
     await page.goto('/buscar');
   });
 
-  test('should search with debounce', async ({ page }) => {
+  test('should search with debounce', async ({ page }: { page: Page }) => {
     const searchInput = page.getByPlaceholder(/Buscar produtos ou marcas/i);
     await searchInput.fill('arroz');
     
@@ -18,7 +18,7 @@ test.describe('PreçoCerto Search E2E', () => {
     await expect(page.getByText('Tio João')).toBeVisible();
   });
 
-  test('should handle pagination', async ({ page }) => {
+  test('should handle pagination', async ({ page }: { page: Page }) => {
     const nextButton = page.getByRole('button', { name: /próximo/i });
     if (await nextButton.isVisible()) {
       await nextButton.click();
@@ -26,7 +26,7 @@ test.describe('PreçoCerto Search E2E', () => {
     }
   });
 
-  test('should sort products', async ({ page }) => {
+  test('should sort products', async ({ page }: { page: Page }) => {
     const sortSelect = page.getByLabel(/ordenar/i);
     if (await sortSelect.isVisible()) {
       await sortSelect.selectOption('price-asc');
@@ -38,13 +38,13 @@ test.describe('PreçoCerto Search E2E', () => {
     }
   });
 
-  test('should show no results message with suggestions', async ({ page }) => {
+  test('should show no results message with suggestions', async ({ page }: { page: Page }) => {
     await page.getByPlaceholder(/Buscar produtos ou marcas/i).fill('produtoinexistente123');
     await expect(page.getByText(/nenhum resultado/i)).toBeVisible();
     await expect(page.getByText(/sugestões/i)).toBeVisible();
   });
 
-  test('should apply filters', async ({ page }) => {
+  test('should apply filters', async ({ page }: { page: Page }) => {
     const filterButton = page.getByLabel(/filtros/i);
     if (await filterButton.isVisible()) {
       await filterButton.click();
