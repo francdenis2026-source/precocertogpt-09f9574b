@@ -853,114 +853,18 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
     }
   };
 
-  /** Monta o PDF pronto para impressão (cabeçalho + agrupamento por estabelecimento). */
+  /** Monta o PDF A4 pronto para impressão (cabeçalho + agrupamento + margens automáticas). */
   const buildPDF = (orientation: "portrait" | "landscape") => {
     if (!optimizationResult) return null;
 
+    const plan = planBasketPdf(optimizationResult, mode, orientation);
     const doc = new jsPDF({ orientation, unit: "mm", format: "a4" });
-    const pageW = doc.internal.pageSize.getWidth();
-    const pageH = doc.internal.pageSize.getHeight();
-    const margin = 15;
     const now = new Date();
     const dateLabel = now.toLocaleDateString("pt-BR");
     const timeLabel = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-    const modeLabel = modeLabels[mode];
 
-    // Cabeçalho institucional (repetido em cada página)
-    const drawHeader = () => {
-      doc.setFillColor(20, 115, 230);
-      doc.rect(0, 0, pageW, 22, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(15);
-      doc.text("PrecoCerto - Lista de Compras", margin, 14);
-      doc.setFontSize(9);
-      doc.text(`Feijo/AC - ${dateLabel} ${timeLabel}`, pageW - margin, 14, { align: "right" });
-      doc.setTextColor(30, 30, 30);
-      doc.setFontSize(9);
-      doc.text(`Modo de otimizacao: ${modeLabel}`, margin, 30);
-      doc.setDrawColor(225, 225, 225);
-      doc.line(margin, 33, pageW - margin, 33);
-    };
+    renderPlanToPdf(doc, plan, { dateLabel, timeLabel, money });
 
-    const drawFooter = () => {
-      doc.setFontSize(8);
-      doc.setTextColor(120, 120, 120);
-      doc.text(
-        "Os precos e a disponibilidade podem mudar no estabelecimento. Confira antes de comprar.",
-        margin,
-        pageH - 8,
-      );
-      doc.setTextColor(30, 30, 30);
-    };
-
-    drawHeader();
-    let y = 43;
-
-    const ensureSpace = (needed: number) => {
-      if (y + needed > pageH - 18) {
-        drawFooter();
-        doc.addPage();
-        drawHeader();
-        y = 43;
-      }
-    };
-
-    Object.values(optimizationResult.storeBreakdown).forEach((store: any) => {
-      ensureSpace(22);
-      doc.setFillColor(243, 246, 250);
-      doc.rect(margin, y - 5, pageW - margin * 2, 9, "F");
-      doc.setFontSize(11);
-      doc.text(`${store.storeName}${store.neighborhood ? ` - ${store.neighborhood}` : ""}`, margin + 2, y + 1);
-      doc.text(`${store.itemCount} itens`, pageW - margin - 2, y + 1, { align: "right" });
-      y += 12;
-
-      doc.setFontSize(9);
-      optimizationResult.items
-        .filter(i => i.establishment === store.storeName)
-        .forEach(item => {
-          ensureSpace(8);
-          doc.text("[  ]", margin + 2, y);
-          doc.text(`${item.product.name} - ${item.quantity} ${item.product.unit}`, margin + 12, y);
-          doc.text(money(item.subtotal), pageW - margin - 2, y, { align: "right" });
-          y += 6.5;
-        });
-
-      ensureSpace(12);
-      doc.setFontSize(10);
-      doc.text(`Subtotal: ${money(store.total)}`, pageW - margin - 2, y + 2, { align: "right" });
-      if (mode === "best_value" && store.distanceKm != null) {
-        doc.setFontSize(8);
-        doc.text(
-          `Distancia estimada: ${store.distanceKm} km - Deslocamento: ${money(store.estimatedTravelCost || 0)}`,
-          margin + 2,
-          y + 2,
-        );
-      }
-      y += 12;
-    });
-
-    ensureSpace(28);
-    doc.setDrawColor(200, 200, 200);
-    doc.line(margin, y, pageW - margin, y);
-    y += 8;
-    doc.setFontSize(11);
-    doc.text(`Total dos produtos: ${money(optimizationResult.total)}`, margin, y);
-    y += 7;
-    if (mode === "best_value") {
-      doc.text(`Custo de deslocamento estimado: ${money(optimizationResult.travelCost || 0)}`, margin, y);
-      y += 7;
-      doc.setFontSize(12);
-      doc.text(
-        `Custo final estimado: ${money(optimizationResult.total + (optimizationResult.travelCost || 0))}`,
-        margin,
-        y,
-      );
-    } else {
-      doc.setFontSize(12);
-      doc.text(`Economia estimada: ${money(optimizationResult.savings)}`, margin, y);
-    }
-
-    drawFooter();
     return { doc, fileName: `lista-compras-precocerto-${dateLabel.replace(/\//g, "-")}.pdf` };
   };
 
