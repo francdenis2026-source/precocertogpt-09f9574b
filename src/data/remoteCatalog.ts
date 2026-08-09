@@ -82,9 +82,33 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
 
     const q = normalize(query);
 
-    const mapped = productRows
+    // Agrupa preços por produto normalizado para tratar itens divergentes (duplicados com IDs diferentes)
+    const productPriceMap = new Map<string, PriceRow[]>();
+    
+    productRows.forEach(product => {
+      const key = `${normalize(product.name || "")}|${normalize(product.brand || "")}|${normalize(product.size || "")}|${normalize(product.unit || "")}`;
+      const rows = priceRows.filter(price => String(price.product_id) === String(product.id));
+      
+      if (!productPriceMap.has(key)) {
+        productPriceMap.set(key, []);
+      }
+      productPriceMap.get(key)!.push(...rows);
+    });
+
+    // Mapeia os produtos usando a primeira ocorrência de cada produto normalizado e seus preços agregados
+    const uniqueProductRows = Array.from(
+      productRows.reduce((map, p) => {
+        const key = `${normalize(p.name || "")}|${normalize(p.brand || "")}|${normalize(p.size || "")}|${normalize(p.unit || "")}`;
+        if (!map.has(key)) map.set(key, p);
+        return map;
+      }, new Map<string, ProductRow>()).values()
+    );
+
+    const mapped = uniqueProductRows
       .map((product): Product | null => {
-        const rows = priceRows.filter(price => String(price.product_id) === String(product.id));
+        const key = `${normalize(product.name || "")}|${normalize(product.brand || "")}|${normalize(product.size || "")}|${normalize(product.unit || "")}`;
+        const rows = productPriceMap.get(key) || [];
+        
         if (!rows.length) return null;
 
         const values = rows.map(row => toNumber(row.value));
@@ -119,7 +143,9 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
           image_url: product.image_url || undefined,
           source: best.source ?? "Coleta Manual",
           updated_at: best.captured_at || undefined,
-          price_history: rows.map(r => ({ date: r.captured_at || new Date().toISOString(), value: toNumber(r.value) })).sort((a,b) => Date.parse(a.date) - Date.parse(b.date))
+          price_history: rows
+            .map(r => ({ date: r.captured_at || new Date().toISOString(), value: toNumber(r.value) }))
+            .sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
         };
       })
       .filter((product): product is Product => product !== null)
