@@ -833,39 +833,74 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
 
 
 
-  const rows = [
-    ["Arroz Tio João 5 kg","Central Super","R$ 29,89","Verificado"],
-    ["Café 3 Corações 500 g","Mercado Rebouças","R$ 15,75","Verificado"],
-    ["Leite Integral Italac 1 L","Pague Pouco","R$ 5,69","Revisar"],
-    ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
+  const kpiData = [
+    { title: "Preços ativos", value: "8.932", trend: "+12,4%", trendType: "positive", icon: <Activity size={18}/> },
+    { title: "Produtos cobertos", value: "1.247", trend: "82% da cesta", trendType: "neutral", icon: <PackageSearch size={18}/> },
+    { title: "Fotos Pendentes", value: allProducts.filter(p => !p.image_url).length, trend: "Ação necessária", trendType: "warning", icon: <Camera size={18}/>, link: '/admin/fotos-pendentes' },
+    { title: "Estabelecimentos", value: allStores.length, trend: "100% online", trendType: "positive", icon: <Store size={18}/> }
   ];
+
   const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo" className={path==="/admin/catalogo" || path==="/admin/fotos-pendentes" ?"active":""}><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
-
-  {showLogoutConfirm && (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: 'white', padding: '2rem', borderRadius: '1rem', maxWidth: '400px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
-        <div style={{ width: '64px', height: '64px', background: '#fee2e2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-          <AlertTriangle color="#dc2626" size={32} />
-        </div>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Confirmar Logout?</h2>
-        <p style={{ color: '#6b7280', marginBottom: '2rem' }}>Você precisará da senha administrativa para acessar estas ferramentas novamente.</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <button className="button button--outline" onClick={() => setShowLogoutConfirm(false)}>Cancelar</button>
-          <button className="button button--primary" style={{ background: '#dc2626' }} onClick={confirmLogout}>Sim, Deslogar</button>
-        </div>
-      </div>
-    </div>
-  )}
-
   
-  <div className="admin-kpis">
-    <article onClick={() => setActiveKpiDetail({ title: "Preços Ativos", data: rows })} style={{ cursor: 'pointer' }}><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
-    <article onClick={() => setActiveKpiDetail({ title: "Produtos Cobertos", data: initialProducts.slice(0, 10) })} style={{ cursor: 'pointer' }}><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
-    <article onClick={() => window.location.href = '/admin/fotos-pendentes'} style={{ cursor: 'pointer', border: '1px solid #f59e0b', background: '#fffbeb' }}><span>Fotos Pendentes <Camera color="#d97706"/></span><strong>{allProducts.filter(p => !p.image_url).length}</strong><small className="warning" style={{ color: '#d97706' }}>Itens sem imagem real</small></article>
-    <article onClick={() => setActiveKpiDetail({ title: "Estabelecimentos", data: initialStores })} style={{ cursor: 'pointer' }}><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
+  return (
+    <div className="admin-shell">
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-head" style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="avatar" style={{ background: 'white', color: 'var(--secondary)' }}>PC</div>
+          <div style={{ flex: 1 }}><strong style={{ display: 'block', fontSize: '1rem' }}>PreçoCerto</strong><small style={{ color: 'var(--text-light)', fontSize: '0.7rem' }}>ADMIN PANEL</small></div>
+        </div>
+        
+        <nav>
+          <span>Operação</span>
+          <a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard size={18}/> Visão geral</a>
+          <a href="/admin/clientes"><Users size={18}/> Clientes</a>
+          <a href="/admin/catalogo" className={path==="/admin/catalogo" || path==="/admin/fotos-pendentes" ?"active":""}><PackageSearch size={18}/> Catálogo</a>
+          <a href="/admin/precos"><CircleDollarSign size={18}/> Preços</a>
+          <a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database size={18}/> Importações</a>
+          
+          <span>Inteligência</span>
+          <a href="/admin/analytics"><BarChart3 size={18}/> Analytics</a>
+          <a href="/admin/ia"><Sparkles size={18}/> IA e cotas</a>
+          <a href="/admin/webhooks"><Activity size={18}/> Webhooks</a>
+          <a href="/admin/auditoria"><ShieldCheck size={18}/> Auditoria</a>
+        </nav>
+        
+        <a className="admin-back" href="/"><ArrowRight size={16}/> Voltar ao site</a>
+        <button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', border: '1px solid rgba(252,165,165,0.2)', width: '100%', marginTop: '1rem' }}>
+          <X size={16}/> Encerrar Sessão
+        </button>
+      </aside>
 
-  </div>
+      <main className="admin-main">
+        <header>
+          <div>
+            <small>Admin / Operação</small>
+            <h1>{title}</h1>
+          </div>
+          <div className="admin-user-info">
+            {importMsg && <span className="badge badge--warning">{importMsg}</span>}
+            <button className="icon-button"><Bell size={20}/></button>
+            <div className="admin-user-pill">
+              <strong>Franc D’Nis</strong>
+              <div className="admin-user-avatar">FD</div>
+            </div>
+          </div>
+        </header>
+
+        <div className="admin-kpi-grid">
+          {kpiData.map((kpi, idx) => (
+            <article 
+              key={idx} 
+              className="admin-kpi-card" 
+              onClick={() => kpi.link ? window.location.href = kpi.link : setActiveKpiDetail({ title: kpi.title, data: [] })}
+            >
+              <span>{kpi.title} {kpi.icon}</span>
+              <strong>{kpi.value}</strong>
+              <small className={kpi.trendType}>{kpi.trend}</small>
+            </article>
+          ))}
+        </div>
+
 
   <div className="admin-lower" style={{gridTemplateColumns: "1fr 1fr", marginBottom: "1.5rem", display: "grid", gap: "1.5rem"}}>
     <section className="admin-card">
