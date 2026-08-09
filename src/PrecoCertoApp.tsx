@@ -2073,6 +2073,15 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
   return (
     <div className="shell page-shell">
+      {fetchError && (
+        <div className="status-banner status-banner--error" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px', border: '1px solid #fecaca', fontSize: '0.9rem' }}>
+          <AlertTriangle size={20} />
+          <div>
+            <strong>Erro de conexão com o banco de dados:</strong> {fetchError}. 
+            <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem' }}>Exibindo dados locais de contingência enquanto tentamos restabelecer a conexão.</p>
+          </div>
+        </div>
+      )}
       <section className="search-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1>{pathname === "/melhores-precos" ? "Melhores Ofertas de Feijó" : "Comparador de Preços"}</h1>
@@ -2166,12 +2175,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
         </aside>
 
         <main className="search-results">
-          {fetchError ? (
-            <div className="status-banner status-banner--error" style={{ margin: '0 0 2rem 0' }}>
-              <AlertTriangle size={18} />
-              <span>Erro ao atualizar dados: {fetchError}. Exibindo última versão estável.</span>
-            </div>
-          ) : null}
+          {/* O aviso de erro foi movido para o topo da página para maior visibilidade */}
 
           {isSearching ? (
             <div className="search-loading">
@@ -2529,11 +2533,19 @@ export default function PrecoCertoApp() {
         const data = await fetchCatalog(query);
         if (!alive) return;
         
-        setProducts(data.products);
-        if (data.stores.length) setStores(data.stores);
+        if (data.products && data.products.length > 0) {
+          setProducts(data.products);
+          setFetchError(null);
+        } else if (data.error) {
+          setFetchError(data.error);
+        }
+        
+        if (data.stores && data.stores.length > 0) {
+          setStores(data.stores);
+        }
+        
         setMetrics(data.metrics);
         setSyncStatus("online");
-        setFetchError(null);
       } catch (err) {
         if (!alive) return;
         setSyncStatus("error");
