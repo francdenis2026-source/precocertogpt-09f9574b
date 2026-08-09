@@ -2143,69 +2143,40 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
       <div className="search-layout">
         <aside className="search-sidebar">
-          <div className="filter-group">
-            <div className="filter-header">
-              <h3>Categorias</h3>
-            </div>
-            <div className="filter-list">
-              {categories.map(c => (
-                <button key={c} className={activeCategory === c ? "active" : ""} onClick={() => setActiveCategory(c)}>
-                  {c === "all" ? "Todas" : c}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="filter-group">
-            <div className="filter-header">
-              <h3>Marcas</h3>
-            </div>
-            <div className="filter-list">
-              {allBrands.map(b => (
-                <button key={b} className={activeBrand === b ? "active" : ""} onClick={() => setActiveBrand(b)}>
-                  {b === "all" ? "Todas" : b}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="filter-group">
-            <div className="filter-header">
-              <h3>Estabelecimentos</h3>
-            </div>
-            <div className="filter-list">
-              {allStores.map(s => (
-                <button key={s} className={activeStore === s ? "active" : ""} onClick={() => setActiveStore(s)}>
-                  {s === "all" ? "Todos" : s}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="filter-group">
-            <div className="filter-header">
-              <h3>Faixa de Preço</h3>
-            </div>
-            <div style={{ padding: '0 0.5rem' }}>
-              <input 
-                type="range" 
-                min="0" 
-                max="500" 
-                value={priceRange[1]} 
-                onChange={e => setPriceRange([0, Number(e.target.value)])}
-                style={{ width: '100%' }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
-                <span>R$ 0</span>
-                <span>Até {money(priceRange[1])}</span>
+          <div className="sidebar-sticky">
+            <div className="filter-card">
+              <div className="filter-section">
+                <h3>Categorias</h3>
+                <div className="filter-pills">
+                  {categories.map(c => (
+                    <button key={c} className={activeCategory === c ? "active" : ""} onClick={() => setActiveCategory(c)}>
+                      {c === "all" ? "Todas" : c}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="filter-group">
-            <div className="filter-header">
-              <h3>Recência</h3>
-            </div>
-            <div className="filter-list">
-              <button className={updateRecency === "all" ? "active" : ""} onClick={() => setUpdateRecency("all")}>Todos</button>
-              <button className={updateRecency === "24h" ? "active" : ""} onClick={() => setUpdateRecency("24h")}>Hoje</button>
-              <button className={updateRecency === "7d" ? "active" : ""} onClick={() => setUpdateRecency("7d")}>Última semana</button>
+
+              <div className="filter-section">
+                <h3>Estabelecimentos</h3>
+                <div className="filter-pills">
+                  {allStores.map(s => (
+                    <button key={s} className={activeStore === s ? "active" : ""} onClick={() => setActiveStore(s)}>
+                      {s === "all" ? "Todos" : s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="filter-section">
+                <h3>Marcas</h3>
+                <div className="filter-pills">
+                  {allBrands.slice(0, 15).map(b => (
+                    <button key={b} className={activeBrand === b ? "active" : ""} onClick={() => setActiveBrand(b)}>
+                      {b === "all" ? "Todas" : b}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </aside>
@@ -2244,24 +2215,19 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                         <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <small>{p.brand} • {p.size}</small>
-                          <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', textDecoration: 'none' }}>
+                          <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--blue)', textDecoration: 'none' }}>
                             {p.establishment}
                           </a>
 
                         </div>
-                        <div className="verified-details">
-                          <div className="detail-item" title="Local de coleta">
-                            <MapPin size={12} />
-                            <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.establishment}</a>
-
-                          </div>
-                          <div className="detail-item" title="Data da última atualização">
+                        <div className="card-metrics">
+                          <div className="metric-badge" title="Última verificação">
                             <Clock3 size={12} />
-                            <span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')} às {new Date(p.capturedAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+                            <span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')}</span>
                           </div>
-                          <div className="detail-item" title="Origem do dado">
+                          <div className="metric-badge" title="Origem dos dados">
                             <ShieldCheck size={12} />
-                            <span>Origem: {p.source || "Coleta Direta"}</span>
+                            <span>{p.source || "Coleta Direta"}</span>
                           </div>
                         </div>
                         
