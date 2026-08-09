@@ -1136,9 +1136,12 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
           name, brand, category, size, barcode
         });
         if (error) alert("Erro ao salvar: " + error.message);
-        else {
+          if (newProductPhoto) {
+            await handleFileUpload({ target: { files: [newProductPhoto.file] } } as any, String(result.id));
+          }
           addAuditLog(`Novo produto cadastrado: ${name}`);
           setShowAddProduct(false);
+          setNewProductPhoto(null);
           loadLogs();
           window.location.reload();
         }
