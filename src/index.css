@@ -470,21 +470,22 @@ body {
 }
 .desktop-nav a:hover { 
   color: var(--blue); 
+  background: var(--blue-soft);
   transform: translateY(-1px);
 }
 .desktop-nav a::after { 
   content: ''; 
   position: absolute; 
-  bottom: 0; 
-  left: 50%; 
-  width: 0; 
+  bottom: 0px; 
+  left: 10%; 
+  width: 80%; 
   height: 2px; 
   background: var(--blue); 
-  transition: var(--transition);
-  transform: translateX(-50%);
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transform: scaleX(0);
   border-radius: 2px;
 }
-.desktop-nav a:hover::after { width: 80%; }
+.desktop-nav a:hover::after { transform: scaleX(1); }
 
 
 /* Professional Buttons */
