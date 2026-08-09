@@ -2329,9 +2329,9 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                       <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => handleFavorite(String(p.id))}>
                         <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
                       </button>
-                      <div className="result-image"><ProductImage product={p} /></div>
+                      <div className="result-image" onClick={() => setSelectedProduct(p)} style={{ cursor: 'pointer' }}><ProductImage product={p} size="default" /></div>
                       <div className="result-content">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }} onClick={() => setSelectedProduct(p)} style={{ cursor: 'pointer' }}>
                           <span className="category-tag">{p.category}</span>
                           {isOutdated && (
                             <span className="outdated-badge" title="Este preço pode ter mudado">
