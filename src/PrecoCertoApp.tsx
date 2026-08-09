@@ -6,7 +6,7 @@ import {
   Plus, Receipt, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Trash2, TrendingDown, Upload, UserRound, Users, X,
 } from "lucide-react";
-import { FormEvent, ReactNode, useEffect, useMemo, useState, useRef } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useState, useRef, type ChangeEvent } from "react";
 import { useLocation } from "react-router-dom";
 import { buildCatalog, verifiedDatasetMetrics, type PlatformMetrics, type Product, type StoreRow } from "./data/catalog";
 import { fetchCatalog } from "./data/remoteCatalog";
