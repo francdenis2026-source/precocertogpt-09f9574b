@@ -196,8 +196,12 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   const isBean = lowerName.includes("feijao");
   const isOil = lowerName.includes("oleo");
   const isChicken = lowerName.includes("frango");
+  const isBiscuit = lowerName.includes("biscoito") || lowerName.includes("bolacha");
+  const isPasta = lowerName.includes("macarrão") || lowerName.includes("macarrao") || lowerName.includes("nissin") || lowerName.includes("lámen") || lowerName.includes("lamen");
+  const isBread = lowerName.includes("pão") || lowerName.includes("pao");
+  const isSponge = lowerName.includes("esponja");
   
-  // Specific fallbacks based on brand/scent
+  // Specific fallbacks based on brand/scent/type
   let detergentFallback = ypeNeutroAsset.url;
   if (lowerName.includes("pinho sol")) detergentFallback = pinhoSolFloralAsset.url;
   else if (lowerName.includes("alpes")) {
@@ -210,6 +214,15 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
     if (lowerName.includes("limão") || lowerName.includes("limao")) detergentFallback = ypeLimaoAsset.url;
   }
 
+  let biscuitFallback = "/products/biscoito-wafer-bauducco-sabores-70g.jpg";
+  if (lowerName.includes("itamaraty") && lowerName.includes("morango")) biscuitFallback = itamaratyMorangoAsset.url;
+  else if (lowerName.includes("escureto")) biscuitFallback = escureto35gAsset.url;
+
+  let pastaFallback = "/products/molho-de-tomate-tarantella-tradicional-300g.jpg"; // Generic fallback
+  if (isPasta && (lowerName.includes("carne") || lowerName.includes("nissin"))) pastaFallback = nissinCarneAsset.url;
+
+  const spongeFallback = esponjaBrilhusAsset.url;
+  const breadFallback = paoCestaAsset.url;
   const beanFallback = "/products/feijao-kicaldo-1kg.jpg";
   const oilFallback = "/products/oleo-liza-900ml.jpg";
   const chickenFallback = frangoSearaAsset.url;
@@ -219,6 +232,10 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   else if (isBean) selectedFallback = beanFallback;
   else if (isOil) selectedFallback = oilFallback;
   else if (isChicken) selectedFallback = chickenFallback;
+  else if (isBiscuit) selectedFallback = biscuitFallback;
+  else if (isPasta) selectedFallback = pastaFallback;
+  else if (isBread) selectedFallback = breadFallback;
+  else if (isSponge) selectedFallback = spongeFallback;
 
   const src = product.image_url || 
               productImages[product.slug] || 
