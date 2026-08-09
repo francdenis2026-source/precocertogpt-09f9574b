@@ -547,7 +547,7 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
 
     {focused && (
       <div className="suggestions" id={hero ? "hero-suggestions" : "page-suggestions"} role="listbox">
-        <div className="suggestions-label">{value ? "Sugestões encontradas" : "Buscas populares em Feijó"}</div>
+        <div className="suggestions-label">{localValue ? "Sugestões encontradas" : "Buscas populares em Feijó"}</div>
         {suggestions.length > 0 ? (
           suggestions.map(p => (
             <a role="option" aria-selected="false" href={`/buscar?q=${encodeURIComponent(p.name)}`} key={p.id}>
@@ -3530,23 +3530,21 @@ export default function PrecoCertoApp() {
     let alive = true;
     let timer: any;
 
-    const q = new URLSearchParams(window.location.search).get("q") ?? "";
-    if (q && !query) setQuery(q);
+    const initialQuery = new URLSearchParams(window.location.search).get("q") ?? "";
+    if (initialQuery) setQuery(initialQuery);
 
     const load = async () => {
       if (!alive) return;
       setSyncStatus("syncing");
       
       try {
-        const data = await fetchCatalog(query);
+        // A busca é filtrada pela própria interface. Manter o catálogo completo
+        // evita que cada nova letra pesquise sobre um resultado já reduzido.
+        const data = await fetchCatalog();
         if (!alive) return;
         
-        if (data.products && data.products.length > 0) {
-          setProducts(data.products);
-          setFetchError(null);
-        } else if (data.error) {
-          setFetchError(data.error);
-        }
+        setProducts(data.products);
+        setFetchError(data.error ?? null);
         
         if (data.stores && data.stores.length > 0) {
           setStores(data.stores);
@@ -3560,8 +3558,7 @@ export default function PrecoCertoApp() {
         setFetchError(err instanceof Error ? err.message : "Falha na conexão");
       }
       
-      // Auto-refresh: 30s se pesquisando, 2m se inativo
-      timer = setTimeout(load, query ? 30000 : 120000);
+      timer = setTimeout(load, 120000);
     };
 
     load();
@@ -3569,7 +3566,7 @@ export default function PrecoCertoApp() {
       alive = false; 
       clearTimeout(timer);
     };
-  }, [query]);
+  }, []);
 
 
   useEffect(() => {

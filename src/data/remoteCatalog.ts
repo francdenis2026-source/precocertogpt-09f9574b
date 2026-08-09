@@ -43,9 +43,31 @@ export type CatalogResult = CatalogPayload & { source: CatalogSource; error?: st
 
 const round = (value: number) => Math.round(value * 100) / 100;
 const toNumber = (value: number | string | null) => (value === null ? NaN : Number(value));
+const DATABASE_PAGE_SIZE = 1000;
 
 export const normalize = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+/**
+ * O PostgREST limita o número de linhas devolvidas por requisição. Lemos em
+ * páginas para que produtos e preços acima desse limite também apareçam.
+ */
+async function fetchAllRows(table: "establishments" | "products" | "prices", columns: string) {
+  const rows: unknown[] = [];
+
+  for (let from = 0; ; from += DATABASE_PAGE_SIZE) {
+    const response = await supabase!
+      .from(table)
+      .select(columns)
+      .range(from, from + DATABASE_PAGE_SIZE - 1);
+
+    if (response.error) return { data: rows, error: response.error };
+
+    const page = response.data ?? [];
+    rows.push(...page);
+    if (page.length < DATABASE_PAGE_SIZE) return { data: rows, error: null };
+  }
+}
 
 /** Lê establishments/products/prices do Supabase e agrega no formato da UI. */
 export async function fetchCatalog(query = ""): Promise<CatalogResult> {
@@ -57,11 +79,9 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
 
   try {
     const [establishments, products, prices] = await Promise.all([
-      supabase.from("establishments").select("id, name, neighborhood, brand_color"),
-      supabase.from("products").select("id, name, brand, category, size, unit, barcode, image_url"),
-      supabase
-        .from("prices")
-        .select("product_id, establishment_id, value, previous_value, captured_at"),
+      fetchAllRows("establishments", "id, name, neighborhood, brand_color"),
+      fetchAllRows("products", "id, name, brand, category, size, unit, barcode, image_url"),
+      fetchAllRows("prices", "product_id, establishment_id, value, previous_value, captured_at"),
     ]);
 
     const failure = establishments.error ?? products.error ?? prices.error;
@@ -115,7 +135,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
         const best = rows.reduce((lowest, row) =>
           toNumber(row.value) < toNumber(lowest.value) ? row : lowest,
         );
-        const store = storeRows.find(item => item.id === best.establishment_id);
+        const store = storeRows.find(item => String(item.id) === String(best.establishment_id));
         if (!store) return null;
 
         const previous = toNumber(best.previous_value);
@@ -171,7 +191,9 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
       neighborhood: store.neighborhood ?? "—",
       color: store.brand_color ?? "#1473E6",
       products: new Set(
-        priceRows.filter(row => row.establishment_id === store.id).map(row => row.product_id),
+        priceRows
+          .filter(row => String(row.establishment_id) === String(store.id))
+          .map(row => row.product_id),
       ).size,
     }));
 
