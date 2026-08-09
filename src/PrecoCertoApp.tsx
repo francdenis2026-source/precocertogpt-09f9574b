@@ -2398,9 +2398,22 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                           </p>
                         </div>
 
-                        <div className="price-row" style={{ marginTop: '1.5rem' }}>
-                          <div className="main-price"><small>Melhor preço</small><strong>{money(p.minPrice)}</strong></div>
-                          <div className="avg-price"><small>Média local</small><b>{money(p.avgPrice)}</b></div>
+                        <div className="price-row" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                          <div className="price-comparison-bar">
+                            <div className="comparison-item min" title={`Encontrado em: ${p.establishment}`}>
+                              <small>Mais Barato</small>
+                              <strong>{money(p.minPrice)}</strong>
+                              <span className="location-tag">{p.establishment}</span>
+                            </div>
+                            <div className="comparison-item avg">
+                              <small>Média Local</small>
+                              <b>{money(p.avgPrice)}</b>
+                            </div>
+                            <div className="comparison-item max">
+                              <small>Mais Caro</small>
+                              <span>{money(p.maxPrice)}</span>
+                            </div>
+                          </div>
                         </div>
                         <div className="result-actions" style={{ display: 'flex', gap: '0.5rem' }}>
                           <button className="button button--primary" style={{ flex: 1 }} onClick={() => addBasket(p)}><Plus /> Cesta</button>
