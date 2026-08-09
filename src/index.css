@@ -122,12 +122,60 @@ a { color: inherit; text-decoration: none; transition: var(--transition); }
 .button--ghost { background: transparent; border-color: var(--border); }
 .button--ghost:hover { background: var(--surface-hover); border-color: var(--border-hover); }
 
-/* Product Cards */
-.visual-product-card { border-radius: var(--radius-lg); background: var(--surface); border: 1px solid var(--border); transition: var(--transition); padding: 1.5rem; }
-.visual-product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary-light); }
-.product-photo { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--bg); border-radius: var(--radius); margin-bottom: 1rem; }
-.product-photo img { max-width: 80%; height: auto; }
-.price-badge { background: var(--success-light); color: var(--success); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); }
+/* Metrics Container */
+.metrics-container { margin-top: -40px; position: relative; z-index: 10; }
+.metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); border: 1px solid var(--border); overflow: hidden; }
+.metric-item { display: flex; align-items: center; gap: 1.5rem; padding: 2rem; border-right: 1px solid var(--border); transition: var(--transition); }
+.metric-item:last-child { border-right: none; }
+.metric-item:hover { background: var(--bg); }
+.metric-icon { width: 56px; height: 56px; border-radius: var(--radius-lg); background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; }
+.metric-content { display: flex; flex-direction: column; }
+.metric-content strong { font-size: 2rem; color: var(--secondary); line-height: 1; letter-spacing: -0.02em; }
+.metric-content span { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.metrics-footer { margin-top: 1rem; text-align: right; font-size: 0.75rem; color: var(--text-light); font-weight: 600; display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
+.live-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+/* Category Rail */
+.category-rail-container { margin-top: 4rem; }
+.category-rail { background: white; border-radius: var(--radius-lg); border: 1px solid var(--border); display: flex; align-items: center; padding: 0.5rem; gap: 1rem; }
+.rail-label { padding: 0 1.5rem; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); border-right: 1px solid var(--border); white-space: nowrap; }
+.rail-items { display: flex; gap: 0.5rem; flex: 1; }
+.rail-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 700; color: var(--secondary); transition: var(--transition); }
+.rail-item:hover { background: var(--primary-light); color: var(--primary); }
+
+/* Benefits Section */
+.section-header { margin-bottom: 3rem; }
+.section-header.centered { text-align: center; }
+.section-header .eyebrow { display: block; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+.section-header h2 { font-size: 2.5rem; }
+
+.benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
+.benefit-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem; transition: var(--transition); }
+.benefit-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-xl); border-color: var(--primary-light); }
+.benefit-icon { width: 56px; height: 56px; border-radius: var(--radius-md); background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; transition: var(--transition); }
+.benefit-card:hover .benefit-icon { background: var(--primary); color: white; transform: rotate(8deg) scale(1.1); }
+.benefit-card h3 { font-size: 1.25rem; margin-bottom: 1rem; }
+.benefit-card p { font-size: 0.95rem; color: var(--text-muted); }
+
+/* Visual Product Card Overrides/Enhancements */
+.visual-product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem; }
+.floating-favorite { position: absolute; top: 1rem; right: 1rem; z-index: 10; width: 40px; height: 40px; border-radius: 50%; background: white; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-light); transition: var(--transition); cursor: pointer; }
+.floating-favorite:hover { color: var(--danger); border-color: var(--danger-light); transform: scale(1.1); }
+.floating-favorite.active { color: var(--danger); background: var(--danger-light); border-color: transparent; }
+
+.position-number { position: absolute; top: 1rem; left: 1.5rem; font-size: 3rem; font-weight: 900; color: var(--secondary); opacity: 0.05; pointer-events: none; }
+.category-tag { display: block; font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+.visual-product-name { display: block; font-size: 1.15rem; font-weight: 800; color: var(--secondary); margin-bottom: 1rem; line-height: 1.3; height: 3rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.visual-store { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; padding: 0.75rem; background: var(--bg); border-radius: var(--radius-md); }
+.market-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.visual-store span { display: flex; flex-direction: column; line-height: 1.2; }
+.visual-store strong { font-size: 0.85rem; font-weight: 700; color: var(--secondary); }
+.visual-store small { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 0.25rem; }
+
+.visual-price span { display: flex; flex-direction: column; line-height: 1; }
+.visual-price small { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem; }
+.visual-price strong { font-size: 1.75rem; color: var(--primary); font-weight: 900; letter-spacing: -0.02em; }
+
 
 /* Footer */
 .site-footer { background: var(--secondary); color: white; padding-block: 5rem 2rem; margin-top: 5rem; }
