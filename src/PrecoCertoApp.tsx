@@ -7,7 +7,7 @@ import {
   SlidersHorizontal, Sparkles, Store, Sun, Trash2, TrendingDown, TrendingUp, Upload, UserRound, Users, X,
 } from "lucide-react";
 
-import { FormEvent, ReactNode, useEffect, useMemo, useState, useRef, type ChangeEvent } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useState, useRef, type ChangeEvent, type CSSProperties } from "react";
 import { useLocation } from "react-router-dom";
 import { buildCatalog, verifiedDatasetMetrics, type PlatformMetrics, type Product, type StoreRow } from "./data/catalog";
 import { fetchCatalog } from "./data/remoteCatalog";
@@ -2259,6 +2259,72 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
 
 }
 
+function EstablishmentPage({ store, products, addBasket }: { store?: StoreRow; products: Product[]; addBasket: (product: Product) => void }) {
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("Todas");
+  const [sort, setSort] = useState<"featured" | "lowest" | "name">("featured");
+  const storeProducts = useMemo(() => products.filter(product => String(product.establishmentId) === String(store?.id)), [products, store?.id]);
+  const categories = useMemo(() => {
+    const counts = new Map<string, number>();
+    storeProducts.forEach(product => counts.set(product.category || "Outros", (counts.get(product.category || "Outros") ?? 0) + 1));
+    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR"));
+  }, [storeProducts]);
+  const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const visibleProducts = useMemo(() => {
+    const query = normalize(search.trim());
+    const filtered = storeProducts.filter(product => {
+      const matchesCategory = category === "Todas" || (product.category || "Outros") === category;
+      const searchable = normalize([product.name, product.brand, product.category, product.size, product.barcode].filter(Boolean).join(" "));
+      return matchesCategory && (!query || searchable.includes(query));
+    });
+    return [...filtered].sort((a, b) => sort === "lowest" ? a.minPrice - b.minPrice : sort === "name" ? a.name.localeCompare(b.name, "pt-BR") : Date.parse(b.capturedAt) - Date.parse(a.capturedAt));
+  }, [storeProducts, category, search, sort]);
+  const logoUrl = store ? getStoreLogoUrl(store.name) : undefined;
+  const lowestPrice = storeProducts.length ? Math.min(...storeProducts.map(product => product.minPrice)) : 0;
+  const latestUpdate = storeProducts.reduce((latest, product) => Math.max(latest, Date.parse(product.capturedAt) || 0), 0);
+
+  if (!store) return <div className="shell store-page"><section className="store-empty-state"><Store/><h1>Estabelecimento não encontrado</h1><p>Este endereço não corresponde a uma loja ativa no catálogo.</p><a className="button button--primary" href="/estabelecimentos">Ver estabelecimentos</a></section></div>;
+
+  return <main className="store-page">
+    <section className="store-detail-hero" style={{ "--store-color": store.color } as CSSProperties}>
+      <div className="shell store-detail-hero__inner">
+        <a className="store-detail-back" href="/estabelecimentos"><ArrowLeft/> Estabelecimentos</a>
+        <div className="store-detail-brand">
+          <div className={`store-detail-logo${logoUrl ? " has-image" : ""}`} style={{ background: store.color }}>
+            {logoUrl ? <img src={logoUrl} alt={`Logomarca ${store.name}`} /> : store.name.split(" ").map(word => word[0]).join("").slice(0, 2)}
+          </div>
+          <div><span className="store-detail-status"><ShieldCheck/> Estabelecimento monitorado</span><h1>{store.name}</h1><p><MapPin/> {store.neighborhood}, Feijó–AC</p></div>
+        </div>
+        <div className="store-detail-stats" aria-label="Resumo do catálogo">
+          <span><b>{count(storeProducts.length)}</b><small>produtos</small></span>
+          <span><b>{categories.length}</b><small>categorias</small></span>
+          <span><b>{lowestPrice ? money(lowestPrice) : "—"}</b><small>menor preço</small></span>
+          <span><b>{latestUpdate ? new Date(latestUpdate).toLocaleDateString("pt-BR") : "—"}</b><small>última coleta</small></span>
+        </div>
+      </div>
+    </section>
+
+    <section className="shell store-catalog-section">
+      <div className="store-catalog-heading"><div><span className="eyebrow">Catálogo da loja</span><h2>Encontre um produto rapidamente</h2><p>Busque por nome, marca, categoria ou código de barras.</p></div><span className="store-result-count"><b>{visibleProducts.length}</b> de {storeProducts.length} produtos</span></div>
+      <div className="store-search-panel">
+        <label className="store-search"><Search/><input value={search} onChange={event => setSearch(event.target.value)} placeholder={`Buscar em ${store.name}…`} aria-label={`Buscar produtos em ${store.name}`} />{search && <button onClick={() => setSearch("")} aria-label="Limpar busca"><X/></button>}</label>
+        <label className="store-sort"><SlidersHorizontal/><span className="sr-only">Ordenar produtos</span><select value={sort} onChange={event => setSort(event.target.value as typeof sort)}><option value="featured">Mais recentes</option><option value="lowest">Menor preço</option><option value="name">Ordem alfabética</option></select></label>
+      </div>
+      <nav className="store-category-nav" aria-label="Categorias do estabelecimento">
+        <button className={category === "Todas" ? "active" : ""} onClick={() => setCategory("Todas")}><PackageSearch/> Todos <b>{storeProducts.length}</b></button>
+        {categories.map(([name, total]) => <button key={name} className={category === name ? "active" : ""} onClick={() => setCategory(name)}>{name}<b>{total}</b></button>)}
+      </nav>
+
+      {visibleProducts.length ? <div className="store-product-grid">
+        {visibleProducts.map(product => <article className="store-product-card" key={product.id}>
+          <a className="store-product-card__image" href={`/produto/${product.slug}`}><ProductImage product={product}/><span className="verified-chip"><ShieldCheck/> Verificado</span></a>
+          <div className="store-product-card__body"><span className="category-tag">{product.category || "Outros"} · {product.size}</span><a href={`/produto/${product.slug}`} className="store-product-card__name">{product.name}</a><p>{product.brand || "Marca não informada"}</p><div className="store-product-card__price"><span><small>Preço atual</small><strong>{money(product.minPrice)}</strong></span>{product.previousPrice && product.previousPrice > product.minPrice && <em><TrendingDown/> {Math.round((1 - product.minPrice / product.previousPrice) * 100)}% menor</em>}</div><div className="store-product-card__actions"><button className="button button--primary" onClick={() => addBasket(product)}><Plus/> Cesta</button><a className="button button--ghost" href={`/produto/${product.slug}`}>Comparar</a></div></div>
+        </article>)}
+      </div> : <div className="store-empty-state"><Search/><h3>Nenhum produto encontrado</h3><p>Tente outro nome ou selecione uma categoria diferente.</p><button className="button button--outline" onClick={() => { setSearch(""); setCategory("Todas"); }}>Limpar filtros</button></div>}
+    </section>
+  </main>;
+}
+
 function GenericPage({ path, products, stores, metrics, addBasket, saveAction, user }: PageProps & { path:string, user?: any }) {
   const randomFeatured = useRandomFeatured(products);
   const isStore = path.startsWith("/estabelecimento/") || path.startsWith("/loja/");
@@ -2538,71 +2604,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
   if (path.startsWith("/estabelecimento/")) {
     const slug = path.split("/").pop();
     const store = stores.find(s => s.slug === slug);
-    const storeProducts = products.filter(p => String(p.establishmentId) === String(store?.id));
-
-    return (
-      <div className="shell page-shell">
-        <section className="generic-hero" style={{ background: store?.color || 'var(--navy)', color: 'white' }}>
-           <div className="store-hero-content" style={{ display: 'flex', alignItems: 'center', gap: '2rem', padding: '2rem 0' }}>
-             <div className="store-avatar" style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.2)', border: '2px solid white', borderRadius: '50%', fontSize: '1.5rem', fontWeight: 'bold' }}>
-               {store?.name.split(" ").map(v=>v[0]).join("").slice(0,2)}
-             </div>
-             <div>
-               <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.8)' }}>Estabelecimento em Feijó</span>
-               <h1 style={{ color: 'white', margin: '0.5rem 0' }}>{store?.name}</h1>
-               <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.1rem' }}>
-                 <MapPin size={18} style={{ verticalAlign: 'middle', marginRight: '6px' }}/> 
-                 {store?.neighborhood} • {storeProducts.length} produtos mapeados
-               </p>
-             </div>
-           </div>
-        </section>
-
-        <section className="section">
-          <div className="section-heading">
-            <div>
-              <h2>Produtos em {store?.name}</h2>
-              <p>Compare os preços deste mercado com a média da cidade.</p>
-            </div>
-          </div>
-          <div className="visual-product-grid">
-            {storeProducts.map(p => (
-              <article className="visual-product-card" key={p.id}>
-                <a className="visual-product-image" href={`/produto/${p.slug}`}>
-                  <ProductImage product={p} />
-                  <span className="verified-chip"><ShieldCheck /> Verificado</span>
-                </a>
-                <div className="visual-product-content">
-                  <span className="category-tag">{p.category} • {p.size}</span>
-                  <a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a>
-                  <div className="visual-store">
-                    <span className="market-dot" style={{ background: p.storeColor }} />
-                    <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <strong>{p.establishment}</strong><small><MapPin /> {p.neighborhood}</small>
-                    </a>
-                  </div>
-                  <div className="visual-price">
-                    <span><small>preço atual</small><strong>{money(p.minPrice)}</strong></span>
-                  </div>
-
-                  <div className="visual-product-actions">
-                    <button className="button button--primary" onClick={() => addBasket(p)}><Plus /> Cesta</button>
-                    <a href={`/produto/${p.slug}`} className="button button--ghost button--small">Detalhes</a>
-                  </div>
-                </div>
-              </article>
-            ))}
-            {storeProducts.length === 0 && (
-              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', background: 'var(--surface-2)', borderRadius: '1rem' }}>
-                <PackageSearch size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                <p>Nenhum produto encontrado para este estabelecimento no momento.</p>
-                <a href="/buscar" className="button button--outline" style={{ marginTop: '1rem' }}>Explorar catálogo</a>
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
-    );
+    return <EstablishmentPage store={store} products={products} addBasket={addBasket}/>;
   }
 
   return (
