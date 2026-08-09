@@ -2437,7 +2437,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                       {compareList.map(p => (
                         <td key={p.id} style={{ padding: '1rem', textAlign: 'center' }}>
                           <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--blue)' }}>{money(p.minPrice)}</div>
-                          <small style={{ color: 'var(--tertiary)', fontWeight: 600 }}>{p.establishment}</small>
+                          <small style={{ color: 'var(--tertiary)', fontWeight: 600 }}><a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.establishment}</a></small>
                         </td>
                       ))}
                     </tr>
