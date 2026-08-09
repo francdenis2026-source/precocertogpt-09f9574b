@@ -1618,6 +1618,69 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
     );
   }
 
+  if (path.startsWith("/estabelecimento/")) {
+    const slug = path.split("/").pop();
+    const store = stores.find(s => s.slug === slug);
+    const storeProducts = products.filter(p => String(p.establishmentId) === String(store?.id));
+
+    return (
+      <div className="shell page-shell">
+        <section className="generic-hero" style={{ background: store?.color || 'var(--navy)', color: 'white' }}>
+           <div className="store-hero-content" style={{ display: 'flex', alignItems: 'center', gap: '2rem', padding: '2rem 0' }}>
+             <div className="store-avatar" style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.2)', border: '2px solid white', borderRadius: '50%', fontSize: '1.5rem', fontWeight: 'bold' }}>
+               {store?.name.split(" ").map(v=>v[0]).join("").slice(0,2)}
+             </div>
+             <div>
+               <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.8)' }}>Estabelecimento em Feijó</span>
+               <h1 style={{ color: 'white', margin: '0.5rem 0' }}>{store?.name}</h1>
+               <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.1rem' }}>
+                 <MapPin size={18} style={{ verticalAlign: 'middle', marginRight: '6px' }}/> 
+                 {store?.neighborhood} • {storeProducts.length} produtos mapeados
+               </p>
+             </div>
+           </div>
+        </section>
+
+        <section className="section">
+          <div className="section-heading">
+            <div>
+              <h2>Produtos em {store?.name}</h2>
+              <p>Compare os preços deste mercado com a média da cidade.</p>
+            </div>
+          </div>
+          <div className="visual-product-grid">
+            {storeProducts.map(p => (
+              <article className="visual-product-card" key={p.id}>
+                <a className="visual-product-image" href={`/produto/${p.slug}`}>
+                  <ProductImage product={p} />
+                  <span className="verified-chip"><ShieldCheck /> Verificado</span>
+                </a>
+                <div className="visual-product-content">
+                  <span className="category-tag">{p.category} • {p.size}</span>
+                  <a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a>
+                  <div className="visual-price">
+                    <span><small>preço atual</small><strong>{money(p.minPrice)}</strong></span>
+                  </div>
+                  <div className="visual-product-actions">
+                    <button className="button button--primary" onClick={() => addBasket(p)}><Plus /> Cesta</button>
+                    <a href={`/produto/${p.slug}`} className="button button--ghost button--small">Detalhes</a>
+                  </div>
+                </div>
+              </article>
+            ))}
+            {storeProducts.length === 0 && (
+              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', background: 'var(--surface-2)', borderRadius: '1rem' }}>
+                <PackageSearch size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                <p>Nenhum produto encontrado para este estabelecimento no momento.</p>
+                <a href="/buscar" className="button button--outline" style={{ marginTop: '1rem' }}>Explorar catálogo</a>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="shell page-shell generic-page">
       <section className="generic-hero">
@@ -1629,6 +1692,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
         </div>
         <a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a>
       </section>
+
       <div className="generic-grid">
         <section className="generic-main">
           <div className="section-heading compact">
