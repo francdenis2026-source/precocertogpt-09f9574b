@@ -60,6 +60,11 @@ export function distanceFromOrigin(neighborhood = "", origin?: LatLng): number {
   const km = Math.sqrt(Math.pow(from.lat - to.lat, 2) + Math.pow(from.lng - to.lng, 2)) * 111;
   return Math.round(km * 100) / 100;
 }
+
+/**
+ * Motor determinístico da Cesta Inteligente.
+ * Calcula a melhor combinação de preços baseada no modo de otimização.
+ */
 export function optimizeBasket(
   catalog: Product[],
   items: BasketItemConfig[],
