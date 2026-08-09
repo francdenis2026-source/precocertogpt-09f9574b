@@ -2215,24 +2215,19 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                         <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <small>{p.brand} • {p.size}</small>
-                          <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', textDecoration: 'none' }}>
+                          <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--blue)', textDecoration: 'none' }}>
                             {p.establishment}
                           </a>
 
                         </div>
-                        <div className="verified-details">
-                          <div className="detail-item" title="Local de coleta">
-                            <MapPin size={12} />
-                            <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.establishment}</a>
-
-                          </div>
-                          <div className="detail-item" title="Data da última atualização">
+                        <div className="card-metrics">
+                          <div className="metric-badge" title="Última verificação">
                             <Clock3 size={12} />
-                            <span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')} às {new Date(p.capturedAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+                            <span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')}</span>
                           </div>
-                          <div className="detail-item" title="Origem do dado">
+                          <div className="metric-badge" title="Origem dos dados">
                             <ShieldCheck size={12} />
-                            <span>Origem: {p.source || "Coleta Direta"}</span>
+                            <span>{p.source || "Coleta Direta"}</span>
                           </div>
                         </div>
                         
