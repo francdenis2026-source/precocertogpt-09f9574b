@@ -623,10 +623,11 @@ body {
 
 
 .benefit-card:hover, .step-card:hover, .visual-product-card:hover, .dashboard-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--blue-soft);
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+  border-color: var(--blue);
 }
+
 
 .benefit-icon {
   width: 52px;
