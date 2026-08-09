@@ -196,12 +196,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  mix-blend-mode: multiply;
+  filter: contrast(1.05) brightness(1.02);
+}
+
+.product-photo img {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
 }
 
 .product-photo-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, transparent 30%, rgba(15, 23, 42, 0.03) 100%);
+  background: radial-gradient(circle at center, transparent 40%, rgba(15, 23, 42, 0.02) 100%);
   pointer-events: none;
 }
 
