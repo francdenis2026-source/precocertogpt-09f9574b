@@ -1,8 +1,6 @@
-
 import { describe, it, expect } from 'vitest';
+import { normalize } from '../data/remoteCatalog';
 
-const normalize = (value: string) =>
-  value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
 describe('Normalização de Busca', () => {
   it('deve normalizar acentos corretamente', () => {
