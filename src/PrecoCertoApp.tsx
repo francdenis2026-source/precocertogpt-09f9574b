@@ -377,10 +377,10 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   );
 }
 
-function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
+function Brand({ compact = false, inverse = false, className = "" }: { compact?: boolean; inverse?: boolean; className?: string }) {
   return (
     <div 
-      className={`brand ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} 
+      className={`brand ${className} ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} 
       onClick={() => window.location.href = "/"}
       style={{ cursor: 'pointer' }}
       role="link"
@@ -488,15 +488,17 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
   return <header className={headerClass} role="banner">
     <div className="shell header-inner">
       <div className="header-brand-zone">
-        <Brand compact />
-        <button 
-          type="button" 
-          onClick={() => window.location.href = "/estabelecimentos"} 
-          className="header-location"
-          aria-label="Ver estabelecimentos em Feijó, Acre"
-        >
-          <MapPin size={14} aria-hidden="true" /> <span>Feijó, AC</span>
-        </button>
+        <Brand compact className="header-logo-container" />
+        <div className="header-location-wrapper">
+          <button 
+            type="button" 
+            onClick={() => window.location.href = "/estabelecimentos"} 
+            className="header-location"
+            aria-label="Ver estabelecimentos em Feijó, Acre"
+          >
+            <MapPin size={14} aria-hidden="true" /> <span>Feijó, AC</span>
+          </button>
+        </div>
       </div>
       <nav className="desktop-nav desktop-nav--premium" aria-label="Navegação principal">
         {navLinks.map(link => {
@@ -579,7 +581,13 @@ function Footer() {
 }
 
 function MobileBar({ basketCount }: { basketCount: number }) {
-  return <nav className="mobile-bar" aria-label="Navegação móvel"><a href="/"><Home /><span>Início</span></a><a href="/buscar"><Search /><span>Buscar</span></a><a href="/alertas"><Bell /><span>Alertas</span></a><a href="/cesta" className="mobile-basket"><ShoppingBasket />{basketCount > 0 && <b>{basketCount}</b>}<span>Cesta</span></a><a href="/app"><UserRound /><span>Painel</span></a></nav>;
+  return <nav className="mobile-bar" aria-label="Navegação móvel">
+    <a href="/" className={window.location.pathname === "/" ? "active" : ""}><Home /><span>Início</span></a>
+    <a href="/buscar" className={window.location.pathname === "/buscar" ? "active" : ""}><Search /><span>Buscar</span></a>
+    <a href="/cesta-basica" className={window.location.pathname === "/cesta-basica" ? "active" : ""}><Sparkles /><span>Cesta IA</span></a>
+    <a href="/cesta" className={`mobile-basket ${window.location.pathname === "/cesta" ? "active" : ""}`}><ShoppingBasket />{basketCount > 0 && <b>{basketCount}</b>}<span>Minha Cesta</span></a>
+    <a href="/perfil" className={window.location.pathname === "/perfil" ? "active" : ""}><UserRound /><span>Perfil</span></a>
+  </nav>;
 }
 
 function SearchBox({ value, setValue, products, hero = false }: { value: string; setValue: (v: string) => void; products: Product[]; hero?: boolean }) {
