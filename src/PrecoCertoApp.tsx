@@ -2824,6 +2824,18 @@ export default function PrecoCertoApp() {
 
   useEffect(() => {
     let alive = true;
+    loadSessionProfile().then(profile => {
+      if (!alive) return;
+      setAdminProfile(profile);
+      setAdminAuth(Boolean(profile?.isAdmin));
+      setAdminCheck("done");
+    });
+    return () => { alive = false; };
+  }, []);
+
+
+  useEffect(() => {
+    let alive = true;
     let timer: any;
 
     const q = new URLSearchParams(window.location.search).get("q") ?? "";
