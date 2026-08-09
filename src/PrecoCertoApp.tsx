@@ -1060,27 +1060,49 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
               </div>
               
               <aside className="builder-sidebar">
-                <h3>Sua Lista ({basketItems.length})</h3>
+                <div className="builder-sidebar-head">
+                  <h3>Sua Lista ({basketItems.length})</h3>
+                  {basketItems.length > 0 && (
+                    <button type="button" className="link-danger" onClick={clearAll}>
+                      <Trash2 size={14} /> Limpar cesta
+                    </button>
+                  )}
+                </div>
                 <div className="selected-items-list">
                   {basketItems.length === 0 ? (
                     <div className="empty-list">
                       <ShoppingBasket size={32} />
                       <p>Sua lista está vazia</p>
+                      <small>Adicione produtos aqui ou pelo botão “Cesta” nas buscas.</small>
                     </div>
                   ) : (
-                    basketItems.map(item => (
-                      <div className="basket-list-item" key={item.productName}>
-                        <div className="item-info">
-                          <strong>{item.productName}</strong>
-                          <small>{item.category}</small>
+                    basketItems.map(item => {
+                      const prod = findProduct(item.productName);
+                      return (
+                        <div className="basket-list-item" key={item.productName}>
+                          {prod && <ProductImage product={prod} size="compact" />}
+                          <div className="item-info">
+                            <strong>{item.productName}</strong>
+                            <small>{item.category}</small>
+                            {prod && (
+                              <small className="item-price">
+                                {money(prod.minPrice)} · {prod.establishment}
+                              </small>
+                            )}
+                          </div>
+                          <div className="item-controls">
+                            <div className="item-qty">
+                              <button onClick={() => updateQuantity(item.productName, -0.5)} aria-label={`Diminuir ${item.productName}`}>-</button>
+                              <span>{item.quantity}</span>
+                              <button onClick={() => updateQuantity(item.productName, 0.5)} aria-label={`Aumentar ${item.productName}`}>+</button>
+                            </div>
+                            <button className="item-remove" onClick={() => removeItem(item.productName)} aria-label={`Remover ${item.productName}`}>
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="item-qty">
-                          <button onClick={() => updateQuantity(item.productName, -0.5)}>-</button>
-                          <span>{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.productName, 0.5)}>+</button>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
                 <button 
