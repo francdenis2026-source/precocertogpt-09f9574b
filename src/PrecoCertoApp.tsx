@@ -1002,7 +1002,6 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket }: Pa
   );
 }
 
-}
 
 function PlansPage() {
   const [shop, setShop] = useState(false); const plans = shop ? [{name:"Parceiro Local",price:29.9,desc:"Presença local e catálogo essencial",features:["Perfil verificado","Gestão de catálogo","Métricas essenciais"]},{name:"Parceiro Pro",price:69.9,desc:"Mais alcance e inteligência",features:["Tudo do Local","Promoções em destaque","Tendências de mercado"],featured:true},{name:"Business",price:149.9,desc:"Operação com múltiplas unidades",features:["Tudo do Pro","Equipe e permissões","Relatórios avançados"]}] : [{name:"Grátis",price:0,desc:"Compare antes de comprar",features:["Busca de preços","1 cesta salva","1 consulta de IA"]},{name:"Mensal",price:24.9,desc:"Economia sem compromisso",features:["Consultas ilimitadas","Alertas de queda","Histórico completo"],featured:true},{name:"Anual",price:179.9,desc:"O melhor custo-benefício",features:["Tudo do Mensal","Exportações","Cota ampliada de IA"]}];
