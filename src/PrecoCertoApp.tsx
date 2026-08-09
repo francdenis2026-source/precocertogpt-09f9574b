@@ -1132,11 +1132,13 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
 
         const { supabase } = await import("./lib/supabase");
         if (!supabase) return;
-        const { error } = await supabase.from('products').insert({
+        const { data: result, error } = await supabase.from('products').insert({
           name, brand, category, size, barcode
-        });
+        }).select('id').single();
+
         if (error) alert("Erro ao salvar: " + error.message);
-          if (newProductPhoto) {
+        else {
+          if (newProductPhoto && result) {
             await handleFileUpload({ target: { files: [newProductPhoto.file] } } as any, String(result.id));
           }
           addAuditLog(`Novo produto cadastrado: ${name}`);
