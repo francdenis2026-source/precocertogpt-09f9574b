@@ -1253,8 +1253,10 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
 
 
 function SnapshotPage({ products }: PageProps) {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const snapshotId = pathname.split('/').pop();
+  // Link somente leitura: ?ro=1 desativa a reotimização e a edição de itens.
+  const readOnly = new URLSearchParams(search).get("ro") === "1";
   const [snapshot, setSnapshot] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
