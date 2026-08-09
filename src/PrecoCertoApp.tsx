@@ -2012,98 +2012,120 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
               <div className="spinner" />
               <p>Otimizando busca para Feijó...</p>
             </div>
-          ) : filtered.length > 0 ? (
-            <div className="results-grid">
-              {filtered.map(p => {
-                const daysSinceUpdate = Math.floor((new Date().getTime() - new Date(p.capturedAt).getTime()) / (1000 * 60 * 60 * 24));
-                const isOutdated = daysSinceUpdate >= 7;
+          ) : paginated.length > 0 ? (
+            <>
+              <div className="results-grid">
+                {paginated.map(p => {
+                  const daysSinceUpdate = Math.floor((new Date().getTime() - new Date(p.capturedAt).getTime()) / (1000 * 60 * 60 * 24));
+                  const isOutdated = daysSinceUpdate >= 7;
 
-                return (
-                  <article className="result-card" key={p.id}>
-                    <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => handleFavorite(String(p.id))}>
-                      <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
-                    </button>
-                    <div className="result-image"><ProductImage product={p} /></div>
-                    <div className="result-content">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <span className="category-tag">{p.category}</span>
-                        {isOutdated && (
-                          <span className="outdated-badge" title="Este preço pode ter mudado">
-                            <Clock3 size={10} /> {daysSinceUpdate} dias sem verificar
+                  return (
+                    <article className="result-card" key={p.id}>
+                      <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => handleFavorite(String(p.id))}>
+                        <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
+                      </button>
+                      <div className="result-image"><ProductImage product={p} /></div>
+                      <div className="result-content">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <span className="category-tag">{p.category}</span>
+                          {isOutdated && (
+                            <span className="outdated-badge" title="Este preço pode ter mudado">
+                              <Clock3 size={10} /> {daysSinceUpdate} dias sem verificar
+                            </span>
+                          )}
+                        </div>
+                        <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <small>{p.brand} • {p.size}</small>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            {p.establishment}
                           </span>
-                        )}
-                      </div>
-                      <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <small>{p.brand} • {p.size}</small>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                          {p.establishment}
-                        </span>
-                      </div>
-                      <div className="verified-details">
-                        <div className="detail-item" title="Local de coleta">
-                          <MapPin size={12} />
-                          <span>{p.establishment}</span>
                         </div>
-                        <div className="detail-item" title="Data da última atualização">
-                          <Clock3 size={12} />
-                          <span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')} às {new Date(p.capturedAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+                        <div className="verified-details">
+                          <div className="detail-item" title="Local de coleta">
+                            <MapPin size={12} />
+                            <span>{p.establishment}</span>
+                          </div>
+                          <div className="detail-item" title="Data da última atualização">
+                            <Clock3 size={12} />
+                            <span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')} às {new Date(p.capturedAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+                          </div>
+                          <div className="detail-item" title="Origem do dado">
+                            <ShieldCheck size={12} />
+                            <span>Origem: {p.source || "Coleta Direta"}</span>
+                          </div>
                         </div>
-                        <div className="detail-item" title="Origem do dado">
-                          <ShieldCheck size={12} />
-                          <span>Origem: {p.source || "Coleta Direta"}</span>
+                        
+                        <div className="history-chart-container">
+                          <div className="chart-header">
+                            <h4><LineChart size={14} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Histórico em Feijó</h4>
+                            <select className="chart-period-select" value={chartPeriod} onChange={e => setChartPeriod(e.target.value)}>
+                              <option value="7d">7 dias</option>
+                              <option value="30d">30 dias</option>
+                              <option value="90d">90 dias</option>
+                            </select>
+                          </div>
+                          <div className="mini-sparkline">
+                            <svg viewBox="0 0 100 30" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+                              <path 
+                                d={`M 0 20 Q 25 ${15 + (p.id as any % 5)} 50 ${20 - (p.id as any % 8)} T 100 ${10 + (p.id as any % 10)}`} 
+                                fill="none" 
+                                stroke="var(--blue)" 
+                                strokeWidth="2"
+                              />
+                              <circle cx="100" cy={10 + (p.id as any % 10)} r="2" fill="var(--blue)" />
+                            </svg>
+                          </div>
+                          <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
+                            Variação de {Math.round((1 - p.minPrice / p.maxPrice) * 100)}% no período.
+                          </p>
                         </div>
-                      </div>
-                      
-                      <div className="history-chart-container">
-                        <div className="chart-header">
-                          <h4><LineChart size={14} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Histórico em Feijó</h4>
-                          <select className="chart-period-select" value={chartPeriod} onChange={e => setChartPeriod(e.target.value)}>
-                            <option value="7d">7 dias</option>
-                            <option value="30d">30 dias</option>
-                            <option value="90d">90 dias</option>
-                          </select>
-                        </div>
-                        <div className="mini-sparkline">
-                          <svg viewBox="0 0 100 30" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-                            <path 
-                              d={`M 0 20 Q 25 ${15 + (p.id as any % 5)} 50 ${20 - (p.id as any % 8)} T 100 ${10 + (p.id as any % 10)}`} 
-                              fill="none" 
-                              stroke="var(--blue)" 
-                              strokeWidth="2"
-                            />
-                            <circle cx="100" cy={10 + (p.id as any % 10)} r="2" fill="var(--blue)" />
-                          </svg>
-                        </div>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
-                          Variação de {Math.round((1 - p.minPrice / p.maxPrice) * 100)}% no período.
-                        </p>
-                      </div>
 
-                      <div className="price-row" style={{ marginTop: '1.5rem' }}>
-                        <div className="main-price"><small>Melhor preço</small><strong>{money(p.minPrice)}</strong></div>
-                        <div className="avg-price"><small>Média local</small><b>{money(p.avgPrice)}</b></div>
+                        <div className="price-row" style={{ marginTop: '1.5rem' }}>
+                          <div className="main-price"><small>Melhor preço</small><strong>{money(p.minPrice)}</strong></div>
+                          <div className="avg-price"><small>Média local</small><b>{money(p.avgPrice)}</b></div>
+                        </div>
+                        <div className="result-actions" style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button className="button button--primary" style={{ flex: 1 }} onClick={() => addBasket(p)}><Plus /> Cesta</button>
+                          <button className="button button--outline" title="Ativar alerta de preço e atualização" onClick={() => saveAction("alert", "product", String(p.id))}><Bell size={16} /></button>
+                          <button className="button button--outline" title="Compartilhar produto" onClick={() => handleShare(p)}><Share2 size={16} /></button>
+                        </div>
                       </div>
-                      <div className="result-actions" style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="button button--primary" style={{ flex: 1 }} onClick={() => addBasket(p)}><Plus /> Cesta</button>
-                        <button className="button button--outline" title="Ativar alerta de preço e atualização" onClick={() => saveAction("alert", "product", String(p.id))}><Bell size={16} /></button>
-                        <button className="button button--outline" title="Compartilhar produto" onClick={() => handleShare(p)}><Share2 size={16} /></button>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="admin-pagination" style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+                  <button className="button button--outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Anterior</button>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button 
+                        key={page} 
+                        className={`button ${currentPage === page ? 'button--primary' : 'button--ghost'}`}
+                        style={{ minWidth: '40px', padding: '0.5rem' }}
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  <button className="button button--outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Próximo</button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="no-results">
               <PackageSearch size={48} />
               <h2>Nenhum produto encontrado</h2>
-              <p>Tente outros filtros ou limpe sua busca.</p>
+              <p>Não encontramos "{query}". Tente variações como "{normalize(query)}" ou outros termos.</p>
               <button className="button button--outline" onClick={() => { setQuery(""); setActiveCategory("all"); setActiveStore("all"); setActiveBrand("all"); }}>Limpar tudo</button>
             </div>
           )}
         </main>
       </div>
+
 
       {selectedProduct && (
         <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)}>
