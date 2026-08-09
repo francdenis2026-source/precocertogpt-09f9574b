@@ -371,7 +371,7 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
             <a role="option" aria-selected="false" href={`/buscar?q=${encodeURIComponent(p.name)}`} key={p.id}>
               <span className="suggestion-icon"><PackageSearch size={18} /></span>
               <span><strong>{p.name}</strong><small>{p.brand} • {p.size}</small></span>
-              <span className="suggestion-price"><small>a partir de</small><b>{money(p.minPrice)}</b><em>{p.establishment}</em></span>
+              <span className="suggestion-price"><small>a partir de</small><b>{money(p.minPrice)}</b><a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', fontWeight: 'normal', fontStyle: 'normal' }} onClick={(e) => e.stopPropagation()}>{p.establishment}</a></span>
             </a>
           ))
         ) : value.length > 2 ? (
@@ -1548,7 +1548,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
                   <span className="product-visual">{p.category.slice(0,1)}</span>
                   <div>
                     <a href={`/produto/${p.slug}`}>{p.name}</a>
-                    <small>{p.brand} • {p.size} • {p.establishment}</small>
+                    <small>{p.brand} • {p.size} • <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', fontWeight: 'bold' }}>{p.establishment}</a></small>
                     <span style={{ color: days >= 7 ? 'var(--red)' : 'var(--green)', fontWeight: 600 }}>
                       {days >= 7 ? <AlertTriangle size={12}/> : <CheckCircle2 size={12}/>} 
                       {days === 0 ? "Atualizado hoje" : days === 1 ? "Atualizado ontem" : `Atualizado há ${days} dias`}
@@ -1714,7 +1714,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
               <span className="product-visual">{p.category.slice(0,1)}</span>
               <div>
                 <a href={`/produto/${p.slug}`}>{p.name}</a>
-                <small>{p.brand} • {p.size} • <strong>{p.establishment}</strong></small>
+                <small>{p.brand} • {p.size} • <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', fontWeight: 'bold' }}>{p.establishment}</a></small>
                 <span><ShieldCheck/> Verificado recentemente</span>
               </div>
               <div style={{ textAlign: 'right' }}>
