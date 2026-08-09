@@ -1,5 +1,5 @@
 import { Product } from "../data/catalog";
-import { unitPrice, isComparable, MeasureBase } from "./pricing";
+import { unitPrice, MeasureBase } from "./pricing";
 
 export type OptimizationMode = 'cheapest_single' | 'cheapest_multi' | 'best_value' | 'within_budget';
 
@@ -131,4 +131,74 @@ export function optimizeBasket(
     items: selectedItems,
     storeBreakdown
   };
+}
+
+export async function saveBasket(
+  userId: string,
+  name: string,
+  mode: OptimizationMode,
+  budget: number,
+  items: BasketItemConfig[],
+  result: BasketResult
+) {
+  const { data: basket, error: bError } = await (window as any).supabase
+    .from('smart_baskets')
+    .insert({
+      user_id: userId,
+      name,
+      budget,
+      optimization_mode: mode
+    })
+    .select()
+    .single();
+
+  if (bError) throw bError;
+
+  const basketId = basket.id;
+
+  // Insert items
+  const { error: iError } = await (window as any).supabase
+    .from('smart_basket_items')
+    .insert(items.map(i => ({
+      basket_id: basketId,
+      product_name: i.productName,
+      category: i.category,
+      quantity: i.quantity,
+      unit: i.unit,
+      is_essential: i.isEssential
+    })));
+
+  if (iError) throw iError;
+
+  // Insert snapshots
+  const { error: sError } = await (window as any).supabase
+    .from('basket_snapshots')
+    .insert(result.items.map(item => ({
+      basket_id: basketId,
+      product_id: item.product.id,
+      product_name: item.product.name,
+      establishment_id: item.product.establishmentId || '00000000-0000-0000-0000-000000000000',
+      establishment_name: item.establishment,
+      price: item.product.minPrice,
+      unit_price: (unitPrice(item.product.minPrice, item.product.size) as any)?.value || 0
+    })));
+
+  if (sError) throw sError;
+
+  return basketId;
+}
+
+export async function getBasketSnapshot(basketId: string) {
+  const { data, error } = await (window as any).supabase
+    .from('smart_baskets')
+    .select(`
+      *,
+      items:smart_basket_items(*),
+      snapshots:basket_snapshots(*)
+    `)
+    .eq('id', basketId)
+    .single();
+
+  if (error) throw error;
+  return data;
 }

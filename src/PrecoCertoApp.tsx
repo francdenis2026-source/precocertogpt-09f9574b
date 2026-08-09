@@ -16,7 +16,7 @@ import { isEnabled } from "./config/features";
 import { freshnessLabels, priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
-import { optimizeBasket, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
+import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
 
 const initialCatalog = buildCatalog();
 const initialProducts: Product[] = initialCatalog.products;
@@ -753,16 +753,19 @@ interface PageProps {
   saveAction: (action: string, type: string, id: string) => void;
 }
 
-function BasketPage({ products, addBasket, cart: initialCart, removeBasket }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void }) {
+function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void; user: any }) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [mode, setMode] = useState<OptimizationMode>("cheapest_multi");
   const [budget, setBudget] = useState(250);
+  const [isSaving, setIsSaving] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  
   const [basketItems, setBasketItems] = useState<BasketItemConfig[]>(() => {
     return initialCart.map(p => ({
       productName: p.name,
       category: p.category,
       quantity: 1,
-      unit: "un",
+      unit: (p.unit as any) || "un",
       isEssential: true
     }));
   });
@@ -790,6 +793,36 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket }: Pa
     setBasketItems(prev => prev.map(i => 
       i.productName === name ? { ...i, quantity: Math.max(0.5, i.quantity + delta) } : i
     ));
+  };
+
+  const handleSaveBasket = async () => {
+    if (!user) {
+      alert("Você precisa estar logado para salvar e compartilhar cestas.");
+      return;
+    }
+    
+    if (!optimizationResult) return;
+
+    try {
+      setIsSaving(true);
+      const basketId = await saveBasket(
+        user.id,
+        `Cesta ${new Date().toLocaleDateString('pt-BR')}`,
+        mode,
+        budget,
+        basketItems,
+        optimizationResult
+      );
+      
+      const link = `${window.location.origin}/cesta/snapshot/${basketId}`;
+      setShareLink(link);
+      alert("Cesta salva com sucesso em snapshots!");
+    } catch (error: any) {
+      console.error(error);
+      alert("Erro ao salvar cesta: " + error.message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -988,7 +1021,35 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket }: Pa
                     ))}
                   </div>
                   <div className="result-actions" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <button className="button button--primary" style={{ width: '100%' }}><Share2 /> Compartilhar Cesta</button>
+                    {shareLink ? (
+                      <div className="share-success animate-fade-in" style={{ background: 'var(--green-soft)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--green)', marginBottom: '0.5rem' }}>
+                        <p style={{ color: 'var(--green)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <CheckCircle2 size={16}/> Snapshot criado! Link gerado:
+                        </p>
+                        <input 
+                          readOnly 
+                          value={shareLink} 
+                          style={{ width: '100%', padding: '0.5rem', fontSize: '0.75rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'white' }}
+                          onClick={e => (e.target as any).select()}
+                        />
+                        <button 
+                          className="button button--small" 
+                          style={{ marginTop: '0.5rem', width: '100%', background: 'var(--green)', color: 'white' }}
+                          onClick={() => { navigator.clipboard.writeText(shareLink); alert("Link copiado!"); }}
+                        >
+                          Copiar Link
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        className="button button--primary" 
+                        style={{ width: '100%' }} 
+                        disabled={isSaving}
+                        onClick={handleSaveBasket}
+                      >
+                        {isSaving ? "Salvando..." : <><Share2 /> Salvar e Compartilhar</>}
+                      </button>
+                    )}
                     <button className="button button--ghost" style={{ width: '100%' }}><Printer /> Gerar Lista de Compras</button>
                     <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
                   </div>
@@ -997,6 +1058,92 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket }: Pa
             </div>
           </section>
         )}
+      </div>
+    </div>
+  );
+}
+
+
+function SnapshotPage({ products }: PageProps) {
+  const { pathname } = useLocation();
+  const snapshotId = pathname.split('/').pop();
+  const [snapshot, setSnapshot] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      if (!snapshotId) return;
+      try {
+        const data = await getBasketSnapshot(snapshotId);
+        setSnapshot(data);
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [snapshotId]);
+
+  if (loading) return <div className="shell page-shell"><div className="loading-state">Carregando snapshot da cesta...</div></div>;
+  if (error) return <div className="shell page-shell"><div className="error-state">Erro ao carregar snapshot: {error}</div></div>;
+  if (!snapshot) return <div className="shell page-shell"><div className="error-state">Snapshot não encontrado.</div></div>;
+
+  const total = snapshot.snapshots.reduce((sum: number, s: any) => sum + (s.price * (snapshot.items.find((i: any) => i.product_name === s.product_name)?.quantity || 1)), 0);
+
+  return (
+    <div className="shell page-shell basket-page">
+      <header className="page-title">
+        <div>
+          <span className="eyebrow">Snapshot de Cesta Otimizada</span>
+          <h1>{snapshot.name}</h1>
+          <p>Visualização de preços capturados em {new Date(snapshot.created_at).toLocaleDateString('pt-BR')}.</p>
+        </div>
+        <div className="snapshot-badge" style={{ background: 'var(--blue-soft)', color: 'var(--blue)', padding: '0.5rem 1rem', borderRadius: '50px', fontWeight: 700, fontSize: '0.8rem' }}>
+          MODO: {snapshot.optimization_mode === 'cheapest_multi' ? 'Mais Barata' : 'Loja Única'}
+        </div>
+      </header>
+
+      <div className="optimization-dashboard animate-fade-in">
+        <div className="result-kpis" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+          <div className="kpi-card highlight">
+            <small>Total na Data</small>
+            <strong>{money(total)}</strong>
+          </div>
+          <div className="kpi-card">
+            <small>Itens na Cesta</small>
+            <strong>{snapshot.items.length}</strong>
+          </div>
+        </div>
+
+        <div className="result-main">
+          <h3>Itens Salvos</h3>
+          <div className="optimized-items-grid">
+            {snapshot.snapshots.map((s: any, idx: number) => {
+              const config = snapshot.items.find((i: any) => i.product_name === s.product_name);
+              return (
+                <div className="optimized-item-card" key={idx}>
+                  <div className="item-details">
+                    <strong style={{ display: 'block' }}>{s.product_name}</strong>
+                    <span className="store-ref">
+                      <Store size={12}/> {s.establishment_name}
+                    </span>
+                  </div>
+                  <div className="item-pricing">
+                    <small>{config?.quantity} {config?.unit} x {money(s.price)}</small>
+                    <strong>{money(s.price * (config?.quantity || 1))}</strong>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        
+        <div className="snapshot-footer" style={{ marginTop: '3rem', textAlign: 'center', padding: '2rem', background: 'var(--surface-2)', borderRadius: '20px' }}>
+          <p>Esta é uma visualização estática de uma cesta planejada.</p>
+          <a href="/cesta" className="button button--primary" style={{ marginTop: '1rem' }}>Criar minha própria cesta <Sparkles/></a>
+        </div>
       </div>
     </div>
   );
@@ -3195,10 +3342,11 @@ export default function PrecoCertoApp() {
   if(pathname==="/") page=<HomePage {...props}/>;
   else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
   else if(pathname==="/alertas"||pathname==="/perfil") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user}/>;
-  else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket}/>;
+  else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
+  else if(pathname.startsWith("/cesta/snapshot/")) page=<SnapshotPage {...props}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
-  else page=<GenericPage {...props} metrics={metrics} path={pathname}/>;
+  else page=<GenericPage {...props} metrics={metrics} path={pathname} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
 
   return <div className="app">
     <Header basketCount={cart.length} user={user} onLogout={handleLogout}/>
