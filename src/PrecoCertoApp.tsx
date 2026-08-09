@@ -763,7 +763,7 @@ const modeLabels: Record<OptimizationMode, string> = {
   within_budget: "Dentro do orcamento",
 };
 
-function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void; user: any }) {
+function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clearBasket, user }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void; clearBasket:()=>void; user: any }) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [mode, setMode] = useState<OptimizationMode>("cheapest_multi");
   const [budget, setBudget] = useState(250);
@@ -815,6 +815,26 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
     return optimizeBasket(products, basketItems, mode, budget);
   }, [products, basketItems, mode, budget]);
 
+  // Mantém a lista sincronizada com os produtos enviados à cesta em outras páginas.
+  useEffect(() => {
+    setBasketItems(prev => {
+      const missing = initialCart
+        .filter(p => !prev.some(i => i.productName === p.name))
+        .map(p => ({
+          productName: p.name,
+          category: p.category,
+          quantity: 1,
+          unit: (p.unit as any) || "un",
+          isEssential: true,
+        }));
+      return missing.length ? [...prev, ...missing] : prev;
+    });
+  }, [initialCart]);
+
+  /** Produto do catálogo correspondente ao item da lista (para foto, preço e loja). */
+  const findProduct = (name: string) =>
+    initialCart.find(p => p.name === name) || products.find(p => p.name === name);
+
   const toggleItem = (p: Product) => {
     setBasketItems(prev => {
       const exists = prev.find(i => i.productName === p.name);
@@ -827,6 +847,20 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
         isEssential: true
       }];
     });
+  };
+
+  const removeItem = (name: string) => {
+    setBasketItems(prev => prev.filter(i => i.productName !== name));
+    const inCart = initialCart.find(p => p.name === name);
+    if (inCart) removeBasket(inCart.id);
+  };
+
+  const clearAll = () => {
+    if (!basketItems.length) return;
+    if (!window.confirm("Limpar todos os itens da cesta?")) return;
+    setBasketItems([]);
+    clearBasket();
+    setStep(2);
   };
 
   const updateQuantity = (name: string, delta: number) => {
@@ -1026,27 +1060,49 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
               </div>
               
               <aside className="builder-sidebar">
-                <h3>Sua Lista ({basketItems.length})</h3>
+                <div className="builder-sidebar-head">
+                  <h3>Sua Lista ({basketItems.length})</h3>
+                  {basketItems.length > 0 && (
+                    <button type="button" className="link-danger" onClick={clearAll}>
+                      <Trash2 size={14} /> Limpar cesta
+                    </button>
+                  )}
+                </div>
                 <div className="selected-items-list">
                   {basketItems.length === 0 ? (
                     <div className="empty-list">
                       <ShoppingBasket size={32} />
                       <p>Sua lista está vazia</p>
+                      <small>Adicione produtos aqui ou pelo botão “Cesta” nas buscas.</small>
                     </div>
                   ) : (
-                    basketItems.map(item => (
-                      <div className="basket-list-item" key={item.productName}>
-                        <div className="item-info">
-                          <strong>{item.productName}</strong>
-                          <small>{item.category}</small>
+                    basketItems.map(item => {
+                      const prod = findProduct(item.productName);
+                      return (
+                        <div className="basket-list-item" key={item.productName}>
+                          {prod && <ProductImage product={prod} size="compact" />}
+                          <div className="item-info">
+                            <strong>{item.productName}</strong>
+                            <small>{item.category}</small>
+                            {prod && (
+                              <small className="item-price">
+                                {money(prod.minPrice)} · {prod.establishment}
+                              </small>
+                            )}
+                          </div>
+                          <div className="item-controls">
+                            <div className="item-qty">
+                              <button onClick={() => updateQuantity(item.productName, -0.5)} aria-label={`Diminuir ${item.productName}`}>-</button>
+                              <span>{item.quantity}</span>
+                              <button onClick={() => updateQuantity(item.productName, 0.5)} aria-label={`Aumentar ${item.productName}`}>+</button>
+                            </div>
+                            <button className="item-remove" onClick={() => removeItem(item.productName)} aria-label={`Remover ${item.productName}`}>
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="item-qty">
-                          <button onClick={() => updateQuantity(item.productName, -0.5)}>-</button>
-                          <span>{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.productName, 0.5)}>+</button>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
                 <button 
@@ -1240,6 +1296,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
                       </div>
                     </div>
                     <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
+                    <button type="button" className="link-danger" style={{ width: '100%', justifyContent: 'center', marginTop: '.5rem' }} onClick={clearAll}><Trash2 size={14} /> Limpar cesta</button>
                   </div>
                 </aside>
               </div>
@@ -3502,6 +3559,7 @@ export default function PrecoCertoApp() {
   
   function addBasket(p:Product){setCart(current=>current.some(i=>i.id===p.id)?current:[...current,p]);setToast(`${p.name} adicionado.`);}
   function removeBasket(id:number|string){setCart(current=>current.filter(i=>String(i.id)!==String(id)));setToast("Removido.");}
+  function clearBasket(){setCart([]);localStorage.removeItem("precocerto:basket");setToast("Cesta limpa.");}
   
   function saveAction(action:string,type:string,id:string){
     const key="precocerto:actions";
@@ -3565,7 +3623,7 @@ export default function PrecoCertoApp() {
   if(pathname==="/") page=<HomePage {...props}/>;
   else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
   else if(pathname==="/alertas"||pathname==="/perfil") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user}/>;
-  else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
+  else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
   else if(pathname.startsWith("/cesta/snapshot/")) page=<SnapshotPage {...props}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;

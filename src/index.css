@@ -1845,13 +1845,56 @@ textarea.admin-input {
   padding-right: 0.5rem;
 }
 
+.builder-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.link-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--danger, #d64545);
+}
+
+.link-danger:hover { text-decoration: underline; }
+
 .basket-list-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: .75rem;
   padding: 0.75rem 0;
   border-bottom: 1px solid var(--border);
 }
+
+.basket-list-item .item-info { flex: 1; min-width: 0; }
+.basket-list-item .item-info strong { display: block; font-size: .92rem; }
+.basket-list-item .item-price { color: var(--success, #1c8a5a); font-weight: 600; }
+
+.item-controls { display: flex; align-items: center; gap: .5rem; }
+
+.item-remove {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--danger, #d64545);
+}
+
+.empty-list small { display: block; margin-top: .35rem; opacity: .7; }
+
 
 .item-qty {
   display: flex;
