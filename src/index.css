@@ -1201,10 +1201,36 @@ iframe[src*="lovable.dev/badge"] {
 @media (max-width: 900px) {
   .search-layout {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   .search-sidebar {
-    display: none; /* Poderíamos adicionar um drawer futuramente */
+    display: none;
   }
+  .hide-mobile {
+    display: none;
+  }
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.result-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.result-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.result-actions {
+  margin-top: auto;
 }
 
 .outdated-badge {

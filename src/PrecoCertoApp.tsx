@@ -2082,25 +2082,35 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
           </div>
         </div>
       )}
-      <section className="search-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1>{pathname === "/melhores-precos" ? "Melhores Ofertas de Feijó" : "Comparador de Preços"}</h1>
-          <p>{pathname === "/melhores-precos" ? "Veja os produtos com maior queda de preço e economize agora." : `Encontre o melhor preço entre ${stores.length} estabelecimentos em Feijó.`}</p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button className="button button--outline" onClick={() => handleShare()}>
-            <Share2 size={16} /> Compartilhar busca
-          </button>
-          <div className="sort-group" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-2)', padding: '0.25rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
-            <SlidersHorizontal size={14} color="var(--tertiary)" />
-            <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{ border: 'none', background: 'transparent', outline: 'none', fontWeight: '600' }}>
-              <option value="price">Menor preço</option>
-              <option value="date">Mais recentes</option>
-              <option value="variation">Maior queda</option>
-            </select>
+      <section className="search-header" style={{ marginBottom: '2.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '2rem' }}>
+          <div style={{ flex: '1', minWidth: '300px' }}>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>
+              {pathname === "/melhores-precos" ? "Melhores Ofertas" : "Comparador de Preços"}
+            </h1>
+            <p style={{ fontSize: '1.1rem', color: 'var(--muted)', maxWidth: '600px' }}>
+              {pathname === "/melhores-precos" 
+                ? "Economize agora com os produtos que tiveram as maiores quedas de preço em Feijó." 
+                : `Encontre o menor valor entre ${stores.length} estabelecimentos locais em tempo real.`}
+            </p>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <button className="button button--outline" onClick={() => handleShare()} style={{ height: '48px' }}>
+              <Share2 size={18} /> <span className="hide-mobile">Compartilhar</span>
+            </button>
+            <div className="sort-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'var(--surface)', padding: '0 1rem', height: '48px', borderRadius: '12px', border: '1.5px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+              <SlidersHorizontal size={16} color="var(--tertiary)" />
+              <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{ border: 'none', background: 'transparent', outline: 'none', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', color: 'var(--navy)' }}>
+                <option value="price">Menor preço</option>
+                <option value="date">Mais recentes</option>
+                <option value="variation">Maior queda</option>
+              </select>
+            </div>
           </div>
         </div>
-        <div style={{ width: '100%', maxWidth: '600px', marginTop: '1.5rem' }}>
+
+        <div className="search-box-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
           <SearchBox value={query} setValue={setQuery} products={products} />
         </div>
       </section>
