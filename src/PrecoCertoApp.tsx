@@ -769,7 +769,16 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
   const [budget, setBudget] = useState(250);
   const [isSaving, setIsSaving] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
-  const [pdfOrientation, setPdfOrientation] = useState<"portrait" | "landscape">("portrait");
+  const pdfUserKey = user?.email || user?.id || null;
+  // Preferência de orientação salva por usuário e reaplicada nas próximas exportações.
+  const [pdfOrientation, setPdfOrientationState] = useState<"portrait" | "landscape">(() =>
+    getPdfOrientation(pdfUserKey),
+  );
+  useEffect(() => setPdfOrientationState(getPdfOrientation(pdfUserKey)), [pdfUserKey]);
+  const setPdfOrientation = (o: "portrait" | "landscape") => {
+    setPdfOrientationState(o);
+    savePdfOrientation(o, pdfUserKey);
+  };
   
   
   const [basketItems, setBasketItems] = useState<BasketItemConfig[]>(() => {
