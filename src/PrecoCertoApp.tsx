@@ -729,288 +729,204 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   )}
 
   
-  <div className="admin-kpis">
-    <article onClick={() => setActiveKpiDetail({ title: "Preços Ativos", data: rows })} style={{ cursor: 'pointer' }}><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
-    <article onClick={() => setActiveKpiDetail({ title: "Produtos Cobertos", data: initialProducts.slice(0, 10) })} style={{ cursor: 'pointer' }}><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
-    <article onClick={() => window.location.href = '/admin/fotos-pendentes'} style={{ cursor: 'pointer', border: '1px solid #f59e0b', background: '#fffbeb' }}><span>Fotos Pendentes <Camera color="#d97706"/></span><strong>{allProducts.filter(p => !p.image_url).length}</strong><small className="warning" style={{ color: '#d97706' }}>Itens sem imagem real</small></article>
-    <article onClick={() => setActiveKpiDetail({ title: "Estabelecimentos", data: initialStores })} style={{ cursor: 'pointer' }}><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
-
-  </div>
-
-  <div className="admin-lower" style={{gridTemplateColumns: "1fr 1fr", marginBottom: "1.5rem", display: "grid", gap: "1.5rem"}}>
-    <section className="admin-card">
-      <div className="admin-card-head">
-        <div><h2>Status da Conexão</h2><p>Leitura em tempo real do Supabase.</p></div>
-        <button className="button button--outline button--small" onClick={handleTestConnection} disabled={isTesting}>
-          <Activity size={14}/> {isTesting ? "Testando..." : "Testar Conexão"}
-        </button>
-
+  {activeAdminView === "dashboard" && (
+    <>
+      <div className="admin-kpis">
+        <article onClick={() => setActiveKpiDetail({ title: "Preços Ativos", data: rows })} style={{ cursor: 'pointer' }}><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
+        <article onClick={() => setActiveKpiDetail({ title: "Produtos Cobertos", data: initialProducts.slice(0, 10) })} style={{ cursor: 'pointer' }}><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
+        <article onClick={() => setActiveAdminView("images")} style={{ cursor: 'pointer', border: '1px solid #f59e0b', background: '#fffbeb' }}><span>Fotos Pendentes <Camera color="#d97706"/></span><strong>{allProducts.filter(p => !p.image_url).length}</strong><small className="warning" style={{ color: '#d97706' }}>Itens sem imagem real</small></article>
+        <article onClick={() => setActiveKpiDetail({ title: "Estabelecimentos", data: initialStores })} style={{ cursor: 'pointer' }}><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
       </div>
-      {connStatus ? (
-        <div className="connection-status-panel" style={{padding: "1rem"}}>
-          <div style={{display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem"}}>
-            <span className={`status ${connStatus.success ? "ok" : "review"}`} style={{width: 10, height: 10, borderRadius: "50%", display: "inline-block", background: connStatus.success ? "#16a34a" : "#dc2626"}}/>
-            <b>{connStatus.success ? "Conectado ao Supabase" : "Erro na Conexão"}</b>
-            {connStatus.success && <small style={{marginLeft: "auto", color: "#6b7280"}}>{connStatus.latency}ms latência</small>}
 
+      <div className="admin-lower" style={{gridTemplateColumns: "1fr 1fr", marginBottom: "1.5rem", display: "grid", gap: "1.5rem"}}>
+        <section className="admin-card">
+          <div className="admin-card-head">
+            <div><h2>Status da Conexão</h2><p>Leitura em tempo real do Supabase.</p></div>
+            <button className="button button--outline button--small" onClick={handleTestConnection} disabled={isTesting}>
+              <Activity size={14}/> {isTesting ? "Testando..." : "Testar Conexão"}
+            </button>
           </div>
-          {connStatus.success ? (
-            <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem"}}>
-              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
-                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Lojas</small>
-                <strong>{connStatus.tables.establishments}</strong>
+          {connStatus ? (
+            <div className="connection-status-panel" style={{padding: "1rem"}}>
+              <div style={{display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem"}}>
+                <span className={`status ${connStatus.success ? "ok" : "review"}`} style={{width: 10, height: 10, borderRadius: "50%", display: "inline-block", background: connStatus.success ? "#16a34a" : "#dc2626"}}/>
+                <b>{connStatus.success ? "Conectado ao Supabase" : "Erro na Conexão"}</b>
+                {connStatus.success && <small style={{marginLeft: "auto", color: "#6b7280"}}>{connStatus.latency}ms latência</small>}
               </div>
-              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
-                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Produtos</small>
-                <strong>{connStatus.tables.products}</strong>
-              </div>
-              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
-                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Preços</small>
-                <strong>{connStatus.tables.prices}</strong>
-              </div>
+              {connStatus.success ? (
+                <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem"}}>
+                  <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
+                    <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Lojas</small>
+                    <strong>{connStatus.tables.establishments}</strong>
+                  </div>
+                  <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
+                    <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Produtos</small>
+                    <strong>{connStatus.tables.products}</strong>
+                  </div>
+                  <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
+                    <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Preços</small>
+                    <strong>{connStatus.tables.prices}</strong>
+                  </div>
+                </div>
+              ) : (
+                <p style={{color: "#dc2626", fontSize: "0.85rem"}}>{connStatus.error}</p>
+              )}
             </div>
           ) : (
-            <p style={{color: "#dc2626", fontSize: "0.85rem"}}>{connStatus.error}</p>
+            <div style={{padding: "2rem", textAlign: "center", color: "#6b7280"}}><small>Clique em testar para validar as tabelas externas.</small></div>
           )}
-        </div>
-      ) : (
-        <div style={{padding: "2rem", textAlign: "center", color: "#6b7280"}}><small>Clique em testar para validar as tabelas externas.</small></div>
-      )}
-    </section>
+        </section>
 
-    <section className="admin-card">
-      <div className="admin-card-head">
-        <div><h2>Progresso de Importação</h2><p>Processamento de dados em tempo real.</p></div>
-      </div>
-      <div style={{padding: "1rem"}}>
-        {isImporting ? (
-          <div className="import-progress-panel">
-            <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem"}}>
-              <span>{importMsg}</span>
-              <b>{Math.round((importProgress / importTotal) * 100)}%</b>
-            </div>
-            <div style={{height: "8px", background: "#f1f5f9", borderRadius: "4px", overflow: "hidden", marginBottom: "0.5rem"}}>
-              <div style={{height: "100%", background: "#1473e6", width: `${(importProgress / importTotal) * 100}%`, transition: "width 0.3s ease"}} />
-            </div>
-            <small style={{color: "#64748b"}}>{importProgress} de {importTotal} registros processados</small>
+        <section className="admin-card">
+          <div className="admin-card-head">
+            <div><h2>Progresso de Importação</h2><p>Processamento de dados em tempo real.</p></div>
           </div>
-        ) : importLog ? (
-          <div style={{padding: "0"}}>
-            {importLog.error ? (
-              <div style={{background: "#fee2e2", padding: "1rem", borderRadius: "0.5rem", border: "1px solid #fecaca"}}>
-                <div style={{display: "flex", alignItems: "center", gap: "0.5rem", color: "#b91c1c", marginBottom: "0.5rem"}}>
-                  <AlertTriangle size={18} />
-                  <strong>Erro Crítico na Importação</strong>
+          <div style={{padding: "1rem"}}>
+            {isImporting ? (
+              <div className="import-progress-panel">
+                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem"}}>
+                  <span>{importMsg}</span>
+                  <b>{Math.round((importProgress / importTotal) * 100)}%</b>
                 </div>
-                <p style={{fontSize: "0.85rem", color: "#991b1b", margin: 0}}>{importLog.error}</p>
-                <small style={{display: "block", marginTop: "0.75rem", color: "#b91c1c", fontSize: "0.75rem"}}>
-                  Verifique a conexão com o banco ou permissões de RLS.
-                </small>
+                <div style={{height: "8px", background: "#f1f5f9", borderRadius: "4px", overflow: "hidden", marginBottom: "0.5rem"}}>
+                  <div style={{height: "100%", background: "#1473e6", width: `${(importProgress / importTotal) * 100}%`, transition: "width 0.3s ease"}} />
+                </div>
+                <small style={{color: "#64748b"}}>{importProgress} de {importTotal} registros processados</small>
+              </div>
+            ) : importLog ? (
+              <div style={{padding: "0"}}>
+                {importLog.error ? (
+                  <div style={{background: "#fee2e2", padding: "1rem", borderRadius: "0.5rem", border: "1px solid #fecaca"}}>
+                    <div style={{display: "flex", alignItems: "center", gap: "0.5rem", color: "#b91c1c", marginBottom: "0.5rem"}}>
+                      <AlertTriangle size={18} />
+                      <strong>Erro Crítico na Importação</strong>
+                    </div>
+                    <p style={{fontSize: "0.85rem", color: "#991b1b", margin: 0}}>{importLog.error}</p>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
+                      <span style={{fontSize: "0.85rem"}}>Novos preços inseridos:</span>
+                      <strong style={{color: "#16a34a"}}>+{importLog.count}</strong>
+                    </div>
+                    <div style={{borderTop: "1px solid #e5e7eb", marginTop: "0.5rem", paddingTop: "0.5rem", display: "flex", justifyContent: "space-between"}}>
+                      <small style={{color: "#6b7280"}}>Execução: {(importLog.duration / 1000).toFixed(2)}s</small>
+                      <small style={{color: "#6b7280"}}>{importLog.stores} lojas | {importLog.products} produtos</small>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
-              <>
-                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-                  <span style={{fontSize: "0.85rem"}}>Novos preços inseridos:</span>
-                  <strong style={{color: "#16a34a"}}>+{importLog.count}</strong>
-                </div>
-                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-                  <span style={{fontSize: "0.85rem"}}>Duplicados ignorados:</span>
-                  <span style={{color: "#6b7280"}}>{importLog.duplicates}</span>
-                </div>
-                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-                  <span style={{fontSize: "0.85rem"}}>Total processado:</span>
-                  <strong>{importLog.count + importLog.duplicates}</strong>
-                </div>
-                <div style={{borderTop: "1px solid #e5e7eb", marginTop: "0.5rem", paddingTop: "0.5rem", display: "flex", justifyContent: "space-between"}}>
-                  <small style={{color: "#6b7280"}}>Execução: {(importLog.duration / 1000).toFixed(2)}s</small>
-                  <small style={{color: "#6b7280"}}>{importLog.stores} lojas | {importLog.products} produtos</small>
-                </div>
-                <div style={{marginTop: '0.75rem', padding: '0.5rem', background: '#f0fdf4', color: '#166534', borderRadius: '0.25rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                  <Check size={14}/> Sincronização concluída com sucesso.
-                </div>
-                {importLog.errorReport && importLog.errorReport.length > 0 && (
-                  <div style={{marginTop: '1rem', border: '1px solid #fecaca', borderRadius: '0.5rem', overflow: 'hidden'}}>
-                    <div style={{background: '#fee2e2', padding: '0.5rem 1rem', fontSize: '0.8rem', borderBottom: '1px solid #fecaca', display: 'flex', justifyContent: 'space-between'}}>
-                      <b>Relatório de Inconsistências</b>
-                      <span>{importLog.errorReport.length} falhas</span>
-                    </div>
-                    <div style={{maxHeight: '150px', overflowY: 'auto', background: 'white', padding: '0.5rem'}}>
-                      {importLog.errorReport.map((err: any, idx: number) => (
-                        <div key={idx} style={{fontSize: '0.75rem', padding: '0.25rem 0', borderBottom: idx < importLog.errorReport.length - 1 ? '1px solid #f1f5f9' : 'none'}}>
-                          <span style={{color: '#dc2626'}}>[{err.entity.toUpperCase()}]</span> {err.message}
-                          <pre style={{background: '#f8fafc', padding: '0.25rem', marginTop: '0.1rem', fontSize: '0.7rem', color: '#64748b'}}>
-                            {JSON.stringify(err.data, null, 2)}
-                          </pre>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
+              <div style={{padding: "1rem", textAlign: "center", color: "#6b7280"}}><small>Aguardando início do processo de carga.</small></div>
             )}
           </div>
+        </section>
+      </div>
+    </>
+  )}
+
+  {(activeAdminView === "catalog" || activeAdminView === "images") && (
+    <section className="admin-card">
+      <div className="admin-card-head">
+        <div>
+          <h2>{activeAdminView === "images" ? "Revisão Visual de Fotos" : "Gestão de Catálogo"}</h2>
+          <p>{activeAdminView === "images" ? "Compare e atualize as imagens dos produtos cadastrados." : "Produtos e estabelecimentos registrados no sistema."}</p>
+        </div>
+        <div style={{display:"flex",gap:"0.75rem"}}>
+          <button className="button button--primary" onClick={() => setShowAddProduct(true)}><Plus/> Novo produto</button>
+          {activeAdminView === "catalog" && <button className="button button--primary" onClick={() => setShowAddStore(true)} style={{ background: '#10b981' }}><Store/> Nova Loja</button>}
+        </div>
+      </div>
+      
+      {activeAdminView === "catalog" && (
+        <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', padding: '0 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
+          <button onClick={() => setAdminActiveTab("products")} style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'products' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'products' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'products' ? '600' : '400', background: 'none' }}>
+            Produtos ({filteredProducts.length})
+          </button>
+          <button onClick={() => setAdminActiveTab("stores")} style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'stores' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'stores' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'stores' ? '600' : '400', background: 'none' }}>
+            Lojas ({filteredStores.length})
+          </button>
+        </div>
+      )}
+
+      <div className="admin-filters">
+        <label style={{ flex: 1 }}><Search/><input placeholder="Buscar por nome ou marca..." value={adminSearch} onChange={e => setAdminSearch(e.target.value)} /></label>
+        {activeAdminView === "images" && (
+          <select value={adminFilterStore} onChange={e => setAdminFilterStore(e.target.value)} style={{ padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+            <option value="all">Status da Foto</option>
+            <option value="missing">Sem Foto Real</option>
+            <option value="present">Com Foto Real</option>
+          </select>
+        )}
+      </div>
+
+      <div className={activeAdminView === "images" ? "admin-image-grid" : "admin-table"} style={activeAdminView === "images" ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem', padding: '1.5rem' } : {}}>
+        {activeAdminView === "images" ? (
+          filteredProducts.filter(p => adminFilterStore === 'missing' ? !p.image_url : adminFilterStore === 'present' ? !!p.image_url : true).map(p => (
+            <div key={p.id} className="admin-card" style={{ padding: '1rem', textAlign: 'center', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-2)', borderRadius: '8px', cursor: 'pointer' }} onClick={() => setEditingItem({ type: 'product', data: p })}>
+                <ProductImage product={p} size="default" />
+              </div>
+              <div>
+                <b style={{ fontSize: '0.9rem', display: 'block' }}>{p.name}</b>
+                <small style={{ color: 'var(--muted)' }}>{p.brand} • {p.size}</small>
+              </div>
+              <button className="button button--outline button--small" style={{ width: '100%' }} onClick={() => setEditingItem({ type: 'product', data: p })}>
+                <Camera size={14}/> {p.image_url ? "Trocar Foto" : "Inserir Foto"}
+              </button>
+            </div>
+          ))
+        ) : adminActiveTab === 'products' ? (
+          <>
+            <div className="admin-tr admin-th">
+              <span onClick={() => requestSort('name')}>Produto</span>
+              <span onClick={() => requestSort('brand')}>Marca / Cat.</span>
+              <span onClick={() => requestSort('establishment')}>Mercado Base</span>
+              <span onClick={() => requestSort('minPrice')}>Preço Min.</span>
+              <span style={{ textAlign: 'right' }}>Ações</span>
+            </div>
+            {paginatedProducts.map((p: any) => (
+              <div className="admin-tr" key={p.id}>
+                <span><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><div onClick={() => setPhotoViewer({ url: p.image_url || "/products/arroz-tio-joao-5kg.png", name: p.name })} style={{ cursor: 'pointer' }}><ProductImage product={p} size="compact" /></div><div><b>{p.name}</b><small style={{ display: 'block' }}>{p.barcode || 'Sem código'}</small></div></div></span>
+                <span>{p.brand}<br/><small>{p.category}</small></span>
+                <span>{p.establishment}</span>
+                <span><b>{money(p.minPrice)}</b></span>
+                <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
+                  <button className="icon-button" onClick={() => setEditingItem({ type: 'product', data: p })}><Edit size={16}/></button>
+                  <button className="icon-button" onClick={() => setConfirmDelete({ type: 'product', id: String(p.id), name: p.name })} style={{ color: '#dc2626' }}><Trash2 size={16}/></button>
+                </span>
+              </div>
+            ))}
+          </>
         ) : (
-          <div style={{padding: "1rem", textAlign: "center", color: "#6b7280"}}><small>Aguardando início do processo de carga.</small></div>
+          <>
+            <div className="admin-tr admin-th"><span>Estabelecimento</span><span>Bairro</span><span>Tipo</span><span style={{ textAlign: 'right' }}>Ações</span></div>
+            {paginatedStores.map((s: any) => (
+              <div className="admin-tr" key={s.id}>
+                <span><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color }} /><b>{s.name}</b></div></span>
+                <span>{s.neighborhood}</span>
+                <span>{s.kind === 'market' ? 'Supermercado' : s.kind}</span>
+                <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
+                  <button className="icon-button" onClick={() => setEditingItem({ type: 'store', data: s })}><Edit size={16}/></button>
+                  <button className="icon-button" onClick={() => setConfirmDelete({ type: 'store', id: String(s.id), name: s.name })} style={{ color: '#dc2626' }}><Trash2 size={16}/></button>
+                </span>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+      <div className="admin-card-foot" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>Mostrando {activeAdminView === "images" ? filteredProducts.length : (adminActiveTab === 'products' ? paginatedProducts.length : paginatedStores.length)} registros</span>
+        {activeAdminView === "catalog" && totalPages > 1 && (
+          <div style={{ display: 'flex', gap: '0.25rem' }}>
+            <button className="button button--outline button--small" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>Anterior</button>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.5rem', fontSize: '0.85rem' }}>Página {currentPage} de {totalPages}</div>
+            <button className="button button--outline button--small" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}>Próxima</button>
+          </div>
         )}
       </div>
     </section>
-
-  </div>
-
-  <section className="admin-card">
-    <div className="admin-card-head">
-      <div>
-        <h2>{path === "/admin/fotos-pendentes" ? "Fotos Pendentes" : "Gestão de Catálogo"}</h2>
-        <p>{path === "/admin/fotos-pendentes" ? "Produtos aguardando imagem real para melhor visualização." : "Produtos e estabelecimentos registrados no sistema."}</p>
-      </div>
-      <div style={{display:"flex",gap:"0.75rem"}}>
-        <button className="button button--outline" onClick={handleImport} disabled={isImporting} title="Disparar importação para o Supabase externo">
-          <Database/> {isImporting ? "Importando..." : "Importar Dados Excel"}
-        </button>
-        <button className="button button--primary" onClick={() => setShowAddProduct(true)}><Plus/> Novo produto</button>
-        <button className="button button--primary" onClick={() => setShowAddStore(true)} style={{ background: '#10b981' }}><Store/> Nova Loja</button>
-      </div>
-    </div>
-    
-    {path !== "/admin/fotos-pendentes" && (
-      <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', padding: '0 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
-        <button 
-          onClick={() => setAdminActiveTab("products")}
-          style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'products' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'products' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'products' ? '600' : '400', background: 'none' }}
-        >
-          Produtos ({filteredProducts.length})
-        </button>
-        <button 
-          onClick={() => setAdminActiveTab("stores")}
-          style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'stores' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'stores' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'stores' ? '600' : '400', background: 'none' }}
-        >
-          Lojas ({filteredStores.length})
-        </button>
-      </div>
-    )}
-
-    <div className="admin-filters">
-      <label style={{ flex: 1 }}>
-        <Search/>
-        <input 
-          placeholder={adminActiveTab === 'products' ? "Buscar por nome ou código de barras..." : "Buscar loja pelo nome..."} 
-          value={adminSearch}
-          onChange={e => setAdminSearch(e.target.value)}
-        />
-      </label>
-      {adminActiveTab === 'products' && (
-        <select 
-          value={adminFilterStore} 
-          onChange={e => setAdminFilterStore(e.target.value)}
-          style={{ padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}
-        >
-          <option value="all">Todos os Mercados</option>
-          {allStores.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
-        </select>
-      )}
-      <button className="button button--outline" onClick={() => { setAdminSearch(""); setAdminFilterStore("all"); }}><SlidersHorizontal/> Limpar</button>
-    </div>
-
-    <div className="admin-table">
-      {adminActiveTab === 'products' ? (
-        <>
-          <div className="admin-tr admin-th">
-            <span onClick={() => requestSort('name')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Produto {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span onClick={() => requestSort('brand')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Marca / Cat. {sortConfig?.key === 'brand' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span onClick={() => requestSort('establishment')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Mercado Base {sortConfig?.key === 'establishment' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span onClick={() => requestSort('minPrice')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Preço Min. {sortConfig?.key === 'minPrice' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span style={{ textAlign: 'right' }}>Ações</span>
-          </div>
-          {paginatedProducts.map((p: any) => (
-            <div className="admin-tr" key={p.id}>
-              <span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div 
-                    onClick={() => setPhotoViewer({ url: p.image_url || "/products/arroz-tio-joao-5kg.png", name: p.name })}
-                    style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
-                    onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
-                    onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-                  >
-                    <ProductImage product={p} size="compact" />
-                  </div>
-                  <div>
-                    <b>{p.name}</b>
-                    <small style={{ display: 'block' }}>{p.barcode || 'Sem código'}</small>
-                  </div>
-                </div>
-              </span>
-              <span>{p.brand}<br/><small>{p.category}</small></span>
-              <span>{p.establishment}</span>
-              <span><b>{money(p.minPrice)}</b></span>
-              <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
-                <button className="icon-button" onClick={() => setEditingItem({ type: 'product', data: p })} title="Editar"><Edit size={16}/></button>
-                <button className="icon-button" onClick={() => setConfirmDelete({ type: 'product', id: String(p.id), name: p.name })} style={{ color: '#dc2626' }} title="Excluir"><Trash2 size={16}/></button>
-              </span>
-            </div>
-          ))}
-        </>
-      ) : (
-        <>
-          <div className="admin-tr admin-th">
-            <span onClick={() => requestSort('name')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Estabelecimento {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span onClick={() => requestSort('neighborhood')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Bairro {sortConfig?.key === 'neighborhood' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span>Tipo</span>
-            <span style={{ textAlign: 'right' }}>Ações</span>
-          </div>
-          {paginatedStores.map((s: any) => (
-            <div className="admin-tr" key={s.id}>
-              <span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color }} />
-                  <b>{s.name}</b>
-                </div>
-              </span>
-              <span>{s.neighborhood}</span>
-              <span>{s.kind === 'market' ? 'Supermercado' : s.kind}</span>
-              <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
-                <button className="icon-button" onClick={() => setEditingItem({ type: 'store', data: s })} title="Editar"><Edit size={16}/></button>
-                <button className="icon-button" onClick={() => setConfirmDelete({ type: 'store', id: String(s.id), name: s.name })} style={{ color: '#dc2626' }} title="Excluir"><Trash2 size={16}/></button>
-              </span>
-            </div>
-          ))}
-        </>
-      )}
-
-    </div>
-    <div className="admin-card-foot" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span>Mostrando {adminActiveTab === 'products' ? paginatedProducts.length : paginatedStores.length} de {adminActiveTab === 'products' ? filteredProducts.length : filteredStores.length} registros</span>
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
-          <button 
-            className="button button--outline button--small" 
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-          >Anterior</button>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.5rem', fontSize: '0.85rem', color: '#64748b' }}>
-            Página {currentPage} de {totalPages}
-          </div>
-          <button 
-            className="button button--outline button--small" 
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-          >Próxima</button>
-        </div>
-      )}
-    </div>
-
-  </section>
+  )}
 
   <div className="admin-lower" style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1.5rem"}}>
     <section className="admin-card">
