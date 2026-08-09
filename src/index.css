@@ -264,7 +264,7 @@ body {
 .theme-toggle:focus-visible,
 .brand:focus-visible,
 .desktop-nav a:focus-visible {
-  outline-offset: 2px;
+  outline-offset: 4px;
 }
 
 .brand:focus-visible {
