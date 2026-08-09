@@ -10,7 +10,8 @@ test.describe('PreçoCerto Search E2E', () => {
     await searchInput.fill('arroz');
     
     // Check loading state or results
-    await expect(page.locator('.product-card')).count().then(c => expect(c).toBeGreaterThan(0));
+    const count = await page.locator('.product-card').count();
+    expect(count).toBeGreaterThan(0);
     
     await searchInput.fill('arroz tio joao');
     // Results should update
@@ -32,7 +33,7 @@ test.describe('PreçoCerto Search E2E', () => {
       // Wait for re-render
       await page.waitForTimeout(500);
       const prices = await page.locator('.price-value').allTextContents();
-      const numericPrices = prices.map(p => parseFloat(p.replace(/[^\d,]/g, '').replace(',', '.')));
+      const numericPrices = prices.map((p: string) => parseFloat(p.replace(/[^\d,]/g, '').replace(',', '.')));
       expect(numericPrices[0]).toBeLessThanOrEqual(numericPrices[numericPrices.length - 1]);
     }
   });
@@ -48,7 +49,8 @@ test.describe('PreçoCerto Search E2E', () => {
     if (await filterButton.isVisible()) {
       await filterButton.click();
       await page.getByLabel(/categoria/i).selectOption('Alimentos');
-      await expect(page.locator('.product-card')).count().then(c => expect(c).toBeGreaterThan(0));
+      const count = await page.locator('.product-card').count();
+      expect(count).toBeGreaterThan(0);
     }
   });
 });
