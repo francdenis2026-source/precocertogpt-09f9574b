@@ -1,7 +1,3 @@
-// Camada de leitura do catálogo a partir do Supabase do usuário.
-// Estratégia defensiva: se as tabelas ainda não existirem (ou RLS bloquear),
-// caímos no catálogo local (`buildCatalog`) para a interface nunca ficar vazia.
-
 import { supabase } from "../lib/supabase";
 import {
   buildCatalog,
@@ -13,11 +9,11 @@ import {
 } from "./catalog";
 
 type EstablishmentRow = {
-  id: string; // Mudado para string (UUID)
+  id: string;
   slug: string | null;
   name: string | null;
   neighborhood: string | null;
-  brand_color: string | null; // Corrigido para brand_color
+  brand_color: string | null;
 };
 
 type ProductRow = {
@@ -48,7 +44,7 @@ export type CatalogResult = CatalogPayload & { source: CatalogSource; error?: st
 const round = (value: number) => Math.round(value * 100) / 100;
 const toNumber = (value: number | string | null) => (value === null ? NaN : Number(value));
 
-const normalize = (value: string) =>
+export const normalize = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
 /** Lê establishments/products/prices do Supabase e agrega no formato da UI. */
