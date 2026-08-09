@@ -465,11 +465,18 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
     { label: "Planos", href: "/planos" }
   ];
 
-  return <header className={headerClass}>
+  return <header className={headerClass} role="banner">
     <div className="shell header-inner">
       <div className="header-brand-zone">
         <Brand compact />
-        <button type="button" onClick={() => window.location.href = "/estabelecimentos"} className="header-location"><MapPin size={14} /> <span>Feijó, AC</span></button>
+        <button 
+          type="button" 
+          onClick={() => window.location.href = "/estabelecimentos"} 
+          className="header-location"
+          aria-label="Ver estabelecimentos em Feijó, Acre"
+        >
+          <MapPin size={14} aria-hidden="true" /> <span>Feijó, AC</span>
+        </button>
       </div>
       <nav className="desktop-nav desktop-nav--premium" aria-label="Navegação principal">
         {navLinks.map(link => {
@@ -488,24 +495,62 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
       </nav>
       <div className="header-actions">
         <ThemeToggle compact />
-        <a className="icon-button header-action-button header-search-button" href="/buscar" aria-label="Buscar produtos" title="Buscar produtos"><Search size={20} /></a>
-        <a className="icon-button header-action-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`} title="Abrir cesta"><ShoppingBasket size={20} />{basketCount > 0 && <span key={basketCount}>{basketCount}</span>}</a>
+        <a className="icon-button header-action-button header-search-button" href="/buscar" aria-label="Pesquisar produtos" title="Buscar produtos"><Search size={20} aria-hidden="true" /></a>
+        <a className="icon-button header-action-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`} title="Abrir cesta"><ShoppingBasket size={20} aria-hidden="true" />{basketCount > 0 && <span key={basketCount} aria-hidden="true">{basketCount}</span>}</a>
 
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <a href="/perfil" style={{ fontSize: '0.9rem', color: 'var(--muted)', textDecoration: 'none' }}>Olá, <strong>{user.name.split(' ')[0]}</strong></a>
-            <button className="text-link" onClick={onLogout}>Sair</button>
+            <a href="/perfil" aria-label={`Perfil de ${user.name.split(' ')[0]}`} style={{ fontSize: '0.9rem', color: 'var(--muted)', textDecoration: 'none' }}>Olá, <strong aria-hidden="true">{user.name.split(' ')[0]}</strong></a>
+            <button className="text-link" onClick={onLogout} aria-label="Encerrar sessão">Sair</button>
           </div>
         ) : (
           <>
-            <a className="text-link header-login-link" href="/login">Entrar</a>
-            <a className="button button--primary button--small header-signup-button" href="/cadastro">Começar grátis <ArrowRight size={16} /></a>
+            <a className="text-link header-login-link" href="/login" aria-label="Entrar na sua conta">Entrar</a>
+            <a className="button button--primary button--small header-signup-button" href="/cadastro" aria-label="Criar conta gratuita">Começar grátis <ArrowRight size={16} aria-hidden="true" /></a>
           </>
         )}
       </div>
-      <button className="mobile-menu-button" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open}><Menu /></button>
+      <button 
+        className="mobile-menu-button" 
+        onClick={() => setOpen(true)} 
+        aria-label="Abrir menu de navegação" 
+        aria-expanded={open}
+      >
+        <Menu aria-hidden="true" />
+      </button>
     </div>
-    {open && <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Menu principal"><button className="drawer-backdrop" aria-label="Fechar menu" onClick={() => setOpen(false)} /><div className="drawer-panel"><div className="drawer-head"><ThemeToggle/><button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu"><X /></button></div><nav><a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/melhores-precos">Ofertas de hoje</a><a href="/planos">Planos</a><a href="/colaborar">Enviar nota fiscal</a><a href="/admin" className="drawer-admin-link">Área Administrativa</a></nav><a className="button button--primary" href="/cadastro">Criar conta gratuita</a><a className="button button--ghost" href="/login">Já tenho uma conta</a></div></div>}
+    {open && (
+      <div 
+        className="mobile-drawer" 
+        role="dialog" 
+        aria-modal="true" 
+        aria-label="Menu principal"
+        onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+      >
+        <button className="drawer-backdrop" aria-label="Fechar menu" onClick={() => setOpen(false)} tabIndex={-1} />
+        <div className="drawer-panel">
+          <div className="drawer-head">
+            <ThemeToggle/>
+            <button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu de navegação">
+              <X aria-hidden="true" />
+            </button>
+          </div>
+          <nav aria-label="Links rápidos">
+            <a href="/buscar" onClick={() => setOpen(false)}>Comparar preços</a>
+            <a href="/cesta-basica" onClick={() => setOpen(false)}>Cesta inteligente</a>
+            <a href="/estabelecimentos" onClick={() => setOpen(false)}>Estabelecimentos</a>
+            <a href="/melhores-precos" onClick={() => setOpen(false)}>Ofertas de hoje</a>
+            <a href="/planos" onClick={() => setOpen(false)}>Planos</a>
+            <a href="/colaborar" onClick={() => setOpen(false)}>Enviar nota fiscal</a>
+            <a href="/admin" className="drawer-admin-link" onClick={() => setOpen(false)}>Área Administrativa</a>
+          </nav>
+          <div className="flex flex-col gap-3 mt-auto pt-6">
+            <a className="button button--primary" href="/cadastro" onClick={() => setOpen(false)}>Criar conta gratuita</a>
+            <a className="button button--ghost" href="/login" onClick={() => setOpen(false)}>Já tenho uma conta</a>
+          </div>
+        </div>
+      </div>
+    )}
   </header>;
 }
 
