@@ -144,18 +144,27 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   
   // Identificamos se o produto é um detergente pelo nome ou categoria para evitar o fallback de arroz
   const isDetergent = product.name?.toLowerCase().includes("detergente") || product.category?.toLowerCase().includes("limpeza");
+  const isBean = product.name?.toLowerCase().includes("feijao");
+  const isOil = product.name?.toLowerCase().includes("oleo");
+  
   const detergentFallback = "/products/detergente-vida-neutro-500ml.jpg";
+  const beanFallback = "/products/feijao-kicaldo-1kg.jpg";
+  const oilFallback = "/products/oleo-liza-900ml.jpg";
+
+  let selectedFallback = fallback;
+  if (isDetergent) selectedFallback = detergentFallback;
+  else if (isBean) selectedFallback = beanFallback;
+  else if (isOil) selectedFallback = oilFallback;
 
   const src = product.image_url || 
               productImages[product.slug] || 
               productImages[String(product.id)] || 
-              (isDetergent ? detergentFallback : fallback);
+              selectedFallback;
   
   return <span className={`product-photo product-photo--${size}`}><img src={src} alt={`Embalagem de ${product.name}`} loading={eager ? "eager" : "lazy"} onError={(e) => {
     const target = e.target as HTMLImageElement;
-    const currentFallback = isDetergent ? detergentFallback : fallback;
-    if (target.src !== currentFallback) {
-      target.src = currentFallback;
+    if (target.src !== selectedFallback) {
+      target.src = selectedFallback;
     }
   }} /><i aria-hidden="true" /></span>;
 }
