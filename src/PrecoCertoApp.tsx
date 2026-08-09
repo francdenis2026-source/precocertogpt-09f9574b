@@ -210,19 +210,24 @@ import logoAsset from "./assets/logo-clean.png.asset.json";
 
 function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
   return (
-    <a 
+    <div 
       className={`brand ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} 
-      href="/" 
+      onClick={() => window.location.href = "/"}
+      style={{ cursor: 'pointer' }}
+      role="link"
+      tabIndex={0}
       aria-label="PreçoCerto — página inicial"
+      onKeyDown={(e) => e.key === 'Enter' && (window.location.href = "/")}
     >
       <img 
         className="brand__logo-img"
         src={logoAsset.url} 
         alt="PreçoCerto" 
       />
-    </a>
+    </div>
   );
 }
+
 
 
 
@@ -249,9 +254,10 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
 
   return <header className={headerClass}>
     <div className="shell header-inner">
-      <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
+      <span className="header-location" onClick={() => window.location.href = "/estabelecimentos"} style={{ cursor: 'pointer' }}><MapPin size={14} /> Feijó, AC</span>
       <nav className="desktop-nav" aria-label="Navegação principal">
         <a href="/buscar">Comparar preços</a><a href="/melhores-precos">Ofertas</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/planos">Planos</a>
+
       </nav>
       <div className="header-actions">
         <button 
@@ -365,7 +371,7 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
             <a role="option" aria-selected="false" href={`/buscar?q=${encodeURIComponent(p.name)}`} key={p.id}>
               <span className="suggestion-icon"><PackageSearch size={18} /></span>
               <span><strong>{p.name}</strong><small>{p.brand} • {p.size}</small></span>
-              <span className="suggestion-price"><small>a partir de</small><b>{money(p.minPrice)}</b><em>{p.establishment}</em></span>
+              <span className="suggestion-price"><small>a partir de</small><b>{money(p.minPrice)}</b><a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', fontWeight: 'normal', fontStyle: 'normal' }} onClick={(e) => e.stopPropagation()}>{p.establishment}</a></span>
             </a>
           ))
         ) : value.length > 2 ? (
@@ -511,13 +517,17 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
               )}
               <span className="verified-chip"><ShieldCheck /> Verificado</span>
             </a>
+
             <div className="visual-product-content">
               <span className="category-tag">{p.category} • {p.size}</span>
               <a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a>
               <div className="visual-store">
                 <span className="market-dot" style={{ background: p.storeColor }} />
-                <span><strong>{p.establishment}</strong><small><MapPin /> {p.neighborhood}</small></span>
+                <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <span><strong>{p.establishment}</strong><small><MapPin /> {p.neighborhood}</small></span>
+                </a>
               </div>
+
               <div className="visual-price">
                 <span><small>a partir de</small><strong>{money(p.minPrice)}</strong></span>
                 {p.previousPrice && p.previousPrice > p.minPrice && (
@@ -541,7 +551,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
       </div>
     </section>
     <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Economia pronta para você</span><h2>Cestas otimizadas</h2><p>Combinações que aproveitam o melhor preço de cada mercado de Feijó.</p></div><a className="inline-link" href="/cesta-basica">Ver todas as cestas <ArrowRight /></a></div><div className="basket-grid"><article className="basket-feature"><div className="basket-top"><span className="basket-icon"><ShoppingBasket /></span><PriceBadge product={products[0]} /></div><p>Cesta essencial da semana</p><h3>12 itens em 2 mercados</h3><div className="basket-total"><span>Valor otimizado</span><strong>{money(87.34)}</strong><small>economia estimada de {money(18.62)}</small></div><div className="store-route"><span><b style={{background: stores[0]?.color}}>CS</b> Central Super · 8 itens</span><span><b style={{background: stores[1]?.color}}>MR</b> Rebouças · 4 itens</span></div><a href="/cesta-basica" className="button button--dark">Abrir cesta otimizada <ArrowRight /></a></article><article className="basket-plan"><span className="eyebrow">Planejamento inteligente</span><h3>Quanto você quer gastar?</h3><p>Informe seu orçamento e montamos a melhor cesta possível, explicando cada escolha.</p><div className="budget-chips"><a href="/cesta-basica?orcamento=80">R$ 80</a><a href="/cesta-basica?orcamento=100">R$ 100</a><a href="/cesta-basica?orcamento=150">R$ 150</a><a href="/cesta-basica?orcamento=200">R$ 200</a></div><a href="/cesta-basica" className="inline-link">Montar minha cesta <ArrowRight /></a></article></div></section>
-    <section className="section section--soft"><div className="shell"><div className="section-heading"><div><span className="eyebrow">Agora em Feijó</span><h2>Preços em tempo real</h2><p>Compare registros recentes e encontre o menor preço com transparência.</p></div><div className="segmented"><button className={priceMode === "recent" ? "active" : ""} onClick={() => setPriceMode("recent")}>Recentes</button><button className={priceMode === "lowest" ? "active" : ""} onClick={() => setPriceMode("lowest")}>Menor preço</button></div></div><div className="price-table-card"><div className="price-table-head"><span>Produto</span><span>Mercado</span><span>Preço</span><span>Atualizado</span><span>Ação</span></div>{rows.map((p, index) => <div className="price-row" key={p.id}><div className="product-cell"><ProductImage product={p} size="compact" /><span><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size}</small></span></div><div className="market-cell"><span className="market-dot" style={{background:p.storeColor}} /> <span>{p.establishment}<small>{p.neighborhood}</small></span></div><div><strong className="green-price">{money(p.minPrice)}</strong>{index < 3 && <PriceBadge product={p} />}</div><div><span className="freshness"><Clock3 /> há {8 + index * 7} min</span></div><div className="row-actions"><button onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}><Heart /></button><button onClick={() => addBasket(p)} aria-label={`Adicionar ${p.name} à cesta`}><Plus /></button></div></div>)}<div className="table-footer"><a href="/buscar">Abrir catálogo completo <ArrowRight /></a><span><ShieldCheck /> Dados auditáveis e verificados</span></div></div></div></section>
+    <section className="section section--soft"><div className="shell"><div className="section-heading"><div><span className="eyebrow">Agora em Feijó</span><h2>Preços em tempo real</h2><p>Compare registros recentes e encontre o menor preço com transparência.</p></div><div className="segmented"><button className={priceMode === "recent" ? "active" : ""} onClick={() => setPriceMode("recent")}>Recentes</button><button className={priceMode === "lowest" ? "active" : ""} onClick={() => setPriceMode("lowest")}>Menor preço</button></div></div><div className="price-table-card"><div className="price-table-head"><span>Produto</span><span>Mercado</span><span>Preço</span><span>Atualizado</span><span>Ação</span></div>{rows.map((p, index) => <div className="price-row" key={p.id}><div className="product-cell"><ProductImage product={p} size="compact" /><span><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size}</small></span></div><div className="market-cell"><span className="market-dot" style={{background:p.storeColor}} /> <span><a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', fontWeight: 'bold' }}>{p.establishment}</a><small>{p.neighborhood}</small></span></div><div><strong className="green-price">{money(p.minPrice)}</strong>{index < 3 && <PriceBadge product={p} />}</div><div><span className="freshness"><Clock3 /> há {8 + index * 7} min</span></div><div className="row-actions"><button onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}><Heart /></button><button onClick={() => addBasket(p)} aria-label={`Adicionar ${p.name} à cesta`}><Plus /></button></div></div>)}<div className="table-footer"><a href="/buscar">Abrir catálogo completo <ArrowRight /></a><span><ShieldCheck /> Dados auditáveis e verificados</span></div></div></div></section>
     <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Rede local</span><h2>Estabelecimentos monitorados</h2><p>Preço e disponibilidade perto de você, bairro por bairro.</p></div><a className="inline-link" href="/estabelecimentos">Ver diretório <ArrowRight /></a></div><div className="store-grid">{stores.map(store => <a className="store-card" href={`/estabelecimento/${store.slug}`} key={store.id}><span className="store-logo" style={{background:store.color}}>{store.name.split(" ").map(v=>v[0]).join("").slice(0,2)}</span><span><strong>{store.name}</strong><small><MapPin /> {store.neighborhood}</small></span><ChevronRight /></a>)}</div></section>
     <section className="section shell" id="como-funciona">
       <div className="section-heading center">
@@ -1542,7 +1552,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
                   <span className="product-visual">{p.category.slice(0,1)}</span>
                   <div>
                     <a href={`/produto/${p.slug}`}>{p.name}</a>
-                    <small>{p.brand} • {p.size} • {p.establishment}</small>
+                    <small>{p.brand} • {p.size} • <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', fontWeight: 'bold' }}>{p.establishment}</a></small>
                     <span style={{ color: days >= 7 ? 'var(--red)' : 'var(--green)', fontWeight: 600 }}>
                       {days >= 7 ? <AlertTriangle size={12}/> : <CheckCircle2 size={12}/>} 
                       {days === 0 ? "Atualizado hoje" : days === 1 ? "Atualizado ontem" : `Atualizado há ${days} dias`}
@@ -1613,6 +1623,76 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
     );
   }
 
+  if (path.startsWith("/estabelecimento/")) {
+    const slug = path.split("/").pop();
+    const store = stores.find(s => s.slug === slug);
+    const storeProducts = products.filter(p => String(p.establishmentId) === String(store?.id));
+
+    return (
+      <div className="shell page-shell">
+        <section className="generic-hero" style={{ background: store?.color || 'var(--navy)', color: 'white' }}>
+           <div className="store-hero-content" style={{ display: 'flex', alignItems: 'center', gap: '2rem', padding: '2rem 0' }}>
+             <div className="store-avatar" style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.2)', border: '2px solid white', borderRadius: '50%', fontSize: '1.5rem', fontWeight: 'bold' }}>
+               {store?.name.split(" ").map(v=>v[0]).join("").slice(0,2)}
+             </div>
+             <div>
+               <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.8)' }}>Estabelecimento em Feijó</span>
+               <h1 style={{ color: 'white', margin: '0.5rem 0' }}>{store?.name}</h1>
+               <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.1rem' }}>
+                 <MapPin size={18} style={{ verticalAlign: 'middle', marginRight: '6px' }}/> 
+                 {store?.neighborhood} • {storeProducts.length} produtos mapeados
+               </p>
+             </div>
+           </div>
+        </section>
+
+        <section className="section">
+          <div className="section-heading">
+            <div>
+              <h2>Produtos em {store?.name}</h2>
+              <p>Compare os preços deste mercado com a média da cidade.</p>
+            </div>
+          </div>
+          <div className="visual-product-grid">
+            {storeProducts.map(p => (
+              <article className="visual-product-card" key={p.id}>
+                <a className="visual-product-image" href={`/produto/${p.slug}`}>
+                  <ProductImage product={p} />
+                  <span className="verified-chip"><ShieldCheck /> Verificado</span>
+                </a>
+                <div className="visual-product-content">
+                  <span className="category-tag">{p.category} • {p.size}</span>
+                  <a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a>
+                  <div className="visual-store">
+                    <span className="market-dot" style={{ background: p.storeColor }} />
+                    <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <strong>{p.establishment}</strong><small><MapPin /> {p.neighborhood}</small>
+                    </a>
+                  </div>
+                  <div className="visual-price">
+                    <span><small>preço atual</small><strong>{money(p.minPrice)}</strong></span>
+                  </div>
+
+                  <div className="visual-product-actions">
+                    <button className="button button--primary" onClick={() => addBasket(p)}><Plus /> Cesta</button>
+                    <a href={`/produto/${p.slug}`} className="button button--ghost button--small">Detalhes</a>
+                  </div>
+                </div>
+              </article>
+            ))}
+            {storeProducts.length === 0 && (
+              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', background: 'var(--surface-2)', borderRadius: '1rem' }}>
+                <PackageSearch size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                <p>Nenhum produto encontrado para este estabelecimento no momento.</p>
+                <a href="/buscar" className="button button--outline" style={{ marginTop: '1rem' }}>Explorar catálogo</a>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="shell page-shell generic-page">
       <section className="generic-hero">
@@ -1624,6 +1704,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
         </div>
         <a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a>
       </section>
+
       <div className="generic-grid">
         <section className="generic-main">
           <div className="section-heading compact">
@@ -1637,7 +1718,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
               <span className="product-visual">{p.category.slice(0,1)}</span>
               <div>
                 <a href={`/produto/${p.slug}`}>{p.name}</a>
-                <small>{p.brand} • {p.size} • <strong>{p.establishment}</strong></small>
+                <small>{p.brand} • {p.size} • <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', fontWeight: 'bold' }}>{p.establishment}</a></small>
                 <span><ShieldCheck/> Verificado recentemente</span>
               </div>
               <div style={{ textAlign: 'right' }}>
@@ -2121,14 +2202,16 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                         <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <small>{p.brand} • {p.size}</small>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', textDecoration: 'none' }}>
                             {p.establishment}
-                          </span>
+                          </a>
+
                         </div>
                         <div className="verified-details">
                           <div className="detail-item" title="Local de coleta">
                             <MapPin size={12} />
-                            <span>{p.establishment}</span>
+                            <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.establishment}</a>
+
                           </div>
                           <div className="detail-item" title="Data da última atualização">
                             <Clock3 size={12} />
@@ -2354,7 +2437,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                       {compareList.map(p => (
                         <td key={p.id} style={{ padding: '1rem', textAlign: 'center' }}>
                           <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--blue)' }}>{money(p.minPrice)}</div>
-                          <small style={{ color: 'var(--tertiary)', fontWeight: 600 }}>{p.establishment}</small>
+                          <small style={{ color: 'var(--tertiary)', fontWeight: 600 }}><a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.establishment}</a></small>
                         </td>
                       ))}
                     </tr>
