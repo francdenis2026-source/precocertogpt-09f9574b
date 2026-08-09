@@ -1355,9 +1355,15 @@ function SnapshotPage({ products }: PageProps) {
         
         <div className="snapshot-footer" style={{ marginTop: '3rem', textAlign: 'center', padding: '2rem', background: 'var(--surface-2)', borderRadius: '20px' }}>
           <p>Esta é uma visualização estática de uma cesta planejada.</p>
-          <button onClick={() => handleReopen(snapshot)} className="button button--primary" style={{ marginTop: '1rem' }}>
-            Atualizar e Reotimizar Cesta <Sparkles/>
-          </button>
+          {readOnly ? (
+            <p style={{ marginTop: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: 'var(--muted)' }}>
+              <ShieldCheck size={16} /> Link somente leitura: não é possível reotimizar nem alterar itens.
+            </p>
+          ) : (
+            <button onClick={() => handleReopen(snapshot)} className="button button--primary" style={{ marginTop: '1rem' }}>
+              Atualizar e Reotimizar Cesta <Sparkles/>
+            </button>
+          )}
         </div>
       </div>
     </div>
