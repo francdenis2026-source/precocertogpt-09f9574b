@@ -1984,3 +1984,111 @@ textarea.admin-input {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Cesta Inteligente: exportação PDF e resumo de deslocamento ===== */
+.pdf-export-box {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1rem;
+  background: var(--surface-2);
+  display: grid;
+  gap: 0.75rem;
+}
+.pdf-export-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.pdf-orientation-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.25rem;
+}
+.pdf-orientation-toggle button {
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+.pdf-orientation-toggle button.active {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.pdf-export-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.pdf-export-actions .button { width: 100%; justify-content: center; }
+
+.route-travel {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.route-travel span { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+.travel-summary {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+}
+.travel-summary > header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: var(--blue);
+  margin-bottom: 1rem;
+}
+.travel-summary > header p {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.travel-list { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: 0.5rem; }
+.travel-list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 12px;
+  background: var(--surface-2);
+  font-size: 0.85rem;
+}
+.travel-store { display: grid; }
+.travel-store small { color: var(--muted); font-size: 0.72rem; }
+.travel-distance { color: var(--muted); font-size: 0.8rem; }
+.travel-cost { font-weight: 700; }
+.travel-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+.travel-totals div { display: grid; gap: 0.2rem; }
+.travel-totals small { font-size: 0.72rem; color: var(--muted); }
+.travel-totals strong { font-size: 1.05rem; }
+.travel-totals .final strong { color: var(--blue); font-size: 1.2rem; }
+@media (max-width: 640px) {
+  .travel-totals { grid-template-columns: 1fr; }
+}
