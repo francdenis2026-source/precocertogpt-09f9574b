@@ -91,10 +91,12 @@ import alhoAsset from "./assets/alho-_kg_.jpg.asset.json";
 import arrozTioUrbano5kgAsset from "./assets/arroz-tio-urbano-branco-5kg.jpg.asset.json";
 import biscoitoAtrevidosAsset from "./assets/biscoito-atrevidos-sabores-90g.jpg.asset.json";
 import cebolaAsset from "./assets/cebola-_kg_.jpg.asset.json";
-import coxaoDuroAsset from "./assets/coxao-duro.jpg.asset.json";
-import feijaoBernardoAsset from "./assets/feijao-carioca-bernardo-1kg.jpg.asset.json";
 import frangoSadiaAsset from "./assets/caixa-de-frango-sadia.jpg.asset.json";
 import frangoSearaPackAsset from "./assets/caixa-de-frango-seara.jpg.asset.json";
+import escureto35gAsset from "./assets/biscoito_escureto_35g.png.asset.json";
+import esponjaBrilhusAsset from "./assets/esponja_brilhus.png.asset.json";
+import paoCestaAsset from "./assets/pao_cesta.png.asset.json";
+import nissinCarneAsset from "./assets/nissin_lamen_carne.png.asset.json";
 
 import itamaratyMorangoAsset from "./assets/biscoito_itamaraty_morango.png.asset.json";
 
@@ -120,8 +122,6 @@ const productImages: Record<string, string> = {
   "arroz-tio-urbano-5kg": arrozTioUrbano5kgAsset.url,
   "biscoito-atrevidos": biscoitoAtrevidosAsset.url,
   "cebola-kg": cebolaAsset.url,
-  "coxao-duro": coxaoDuroAsset.url,
-  "feijao-bernardo-1kg": feijaoBernardoAsset.url,
   "frango-sadia-caixa": frangoSadiaAsset.url,
   "frango-seara-caixa": frangoSearaPackAsset.url,
   "4b5508ae-5214-4bb0-9857-38eee60743bb": "/products/biscoito-itamarati-recheado.jpg",
@@ -2258,7 +2258,8 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                         <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <small>{p.brand} • {p.size}</small>
-                          <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--blue)', textDecoration: 'none' }}>
+                          <a href={`/estabelecimento/${p.establishmentSlug}`} className="establishment-link-highlight">
+                            <Store size={14} style={{ marginRight: '4px' }} />
                             {p.establishment}
                           </a>
 
