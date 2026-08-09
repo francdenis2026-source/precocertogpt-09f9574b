@@ -218,7 +218,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
   const featured = randomFeatured[featuredIndex] ?? products[0];
   return <>
     <section className="hero" style={{ height: 'auto', minHeight: '500px', paddingBottom: '40px' }}>
-      <div className="hero-photo" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=2000&auto=format&fit=crop")', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+      <div className="hero-photo" />
       <div className="hero-wash" />
       <div className="shell hero-content" style={{ paddingTop: '20px' }}>
         <div className="hero-copy">
