@@ -6,7 +6,7 @@ import {
   Plus, Receipt, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Trash2, TrendingDown, Upload, UserRound, Users, X,
 } from "lucide-react";
-import { FormEvent, ReactNode, useEffect, useMemo, useState, useRef } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useState, useRef, type ChangeEvent } from "react";
 import { useLocation } from "react-router-dom";
 import { buildCatalog, verifiedDatasetMetrics, type PlatformMetrics, type Product, type StoreRow } from "./data/catalog";
 import { fetchCatalog } from "./data/remoteCatalog";
@@ -76,6 +76,27 @@ function addAuditLog(action: string, type: "success" | "warning" | "error" = "su
 
 
 const productImages: Record<string, string> = {
+  // Pack 2 Mappings
+  "844d8729-b2a0-4a60-9c23-a074c9e0979a": "/products/rabo.jpg",
+  "294e5690-ed74-4898-a079-263f6060c2b5": "/products/biscoito-wafer-bauducco-sabores-70g.jpg",
+  "7a2666ab-25f7-4e0a-bf35-cf916fab9396": "/products/biscoito-cookies-bauducco-chocolate-60g.jpg",
+  "47444638-2e10-4f56-9723-52bad766b205": "/products/carne-bovina-em-conserva-anglo-320g.jpg",
+  "9a971a21-3377-431a-a1b8-48034499c194": "/products/carne-bovina-em-conserva-bertin-320g.jpg",
+  "b6744248-6d22-4a38-975a-7a92ec4a90fa": "/products/molho-de-tomate-tarantella-tradicional-300g.jpg",
+  "29c90c81-d06d-45e1-a64a-8867de7ab896": "/products/arroz-branco-bernardo-1kg.jpg",
+  "5d272a4b-0409-4e04-ab01-8e8c4114c484": "/products/leite-condensado-piracanjuba-semidesnatado-395g.jpg",
+  "29a5e459-5c1b-4cbf-86cf-e258de75b47d": "/products/patinho.jpg",
+  "27f126f7-dfb3-42e4-bd1b-ef0d34d80731": "/products/lava-roupas-minuano-concentrado-1,6kg.jpg",
+  "4b5508ae-5214-4bb0-9857-38eee60743bb": "/products/biscoito-itamarati-recheado.jpg",
+  "2b13198e-2499-437c-ae9f-baeabec7b783": "/products/biscoito-brandini-salt-plus-360g.jpg",
+  "639fa99b-96ea-4488-922f-f22f091f5da1": "/products/biscoito-vitarella-cream-cracker-330g.jpg",
+  "927e73ff-e6a8-4fe5-ad2a-1f331a77ec41": "/products/biscoito-galo-cream-cracker.jpg",
+  "88d74a86-11ae-44e7-9ddc-4a42c38894e2": "/products/coco-ralado-sococo-100g.jpg",
+  "ab9ed77b-3b80-4f43-ad09-7c119a566e11": "/products/salsicha-bordon-180g.jpg",
+  "d63f2de8-957c-4894-aed6-98c1934e6bf9": "/products/carne-bovina-pampeano-320g.jpg",
+  "8b3c4919-7562-421d-8a15-3339cb3d5ad3": "/products/aveia-quaker-flocos-finos-450g.jpg",
+  "e1d650e2-b0ed-47f7-81b9-9317ebfc5cc7": "/products/shampoo-clear-men-queda-control-200ml.jpg",
+
   // Mapeamento manual para o catálogo local (seed)
   "arroz-tio-joao-5kg": "/products/arroz-tio-joao-5kg.png",
   "cafe-3-coracoes-500g": "/products/cafe-3-coracoes-500g.jpg",
@@ -477,6 +498,8 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   const [isUploading, setIsUploading] = useState(false);
   const [photoViewer, setPhotoViewer] = useState<{ url: string, name: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [newProductPhoto, setNewProductPhoto] = useState<{ file: File, url: string } | null>(null);
+  const [activeAdminView, setActiveAdminView] = useState<"dashboard" | "catalog" | "images">("dashboard");
   const [itemsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -583,7 +606,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, productId: string) => {
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>, productId: string) => {
     const file = e.target.files?.[0];
     if (!file || !supabase) return;
 
@@ -687,7 +710,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
     ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
   ];
   const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><a href="/admin" className={path==="/admin"?"active":""}><LayoutDashboard/> Visão geral</a><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/catalogo" className={path==="/admin/catalogo" || path==="/admin/fotos-pendentes" ?"active":""}><PackageSearch/> Catálogo</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/ia"><Sparkles/> IA e cotas</a><a href="/admin/webhooks"><Activity/> Webhooks</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><button onClick={() => setActiveAdminView("dashboard")} className={activeAdminView==="dashboard"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><LayoutDashboard size={18}/> Visão geral</button><button onClick={() => setActiveAdminView("catalog")} className={activeAdminView==="catalog"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><PackageSearch size={18}/> Catálogo</button><button onClick={() => setActiveAdminView("images")} className={activeAdminView==="images"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><Camera size={18}/> Revisar Fotos</button><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> Voltar ao site</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{activeAdminView === "images" ? "Revisão de Fotos" : title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
 
   {showLogoutConfirm && (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
@@ -706,288 +729,204 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   )}
 
   
-  <div className="admin-kpis">
-    <article onClick={() => setActiveKpiDetail({ title: "Preços Ativos", data: rows })} style={{ cursor: 'pointer' }}><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
-    <article onClick={() => setActiveKpiDetail({ title: "Produtos Cobertos", data: initialProducts.slice(0, 10) })} style={{ cursor: 'pointer' }}><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
-    <article onClick={() => window.location.href = '/admin/fotos-pendentes'} style={{ cursor: 'pointer', border: '1px solid #f59e0b', background: '#fffbeb' }}><span>Fotos Pendentes <Camera color="#d97706"/></span><strong>{allProducts.filter(p => !p.image_url).length}</strong><small className="warning" style={{ color: '#d97706' }}>Itens sem imagem real</small></article>
-    <article onClick={() => setActiveKpiDetail({ title: "Estabelecimentos", data: initialStores })} style={{ cursor: 'pointer' }}><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
-
-  </div>
-
-  <div className="admin-lower" style={{gridTemplateColumns: "1fr 1fr", marginBottom: "1.5rem", display: "grid", gap: "1.5rem"}}>
-    <section className="admin-card">
-      <div className="admin-card-head">
-        <div><h2>Status da Conexão</h2><p>Leitura em tempo real do Supabase.</p></div>
-        <button className="button button--outline button--small" onClick={handleTestConnection} disabled={isTesting}>
-          <Activity size={14}/> {isTesting ? "Testando..." : "Testar Conexão"}
-        </button>
-
+  {activeAdminView === "dashboard" && (
+    <>
+      <div className="admin-kpis">
+        <article onClick={() => setActiveKpiDetail({ title: "Preços Ativos", data: rows })} style={{ cursor: 'pointer' }}><span>Preços ativos <Activity/></span><strong>8.932</strong><small className="positive">+12,4% nesta semana</small></article>
+        <article onClick={() => setActiveKpiDetail({ title: "Produtos Cobertos", data: initialProducts.slice(0, 10) })} style={{ cursor: 'pointer' }}><span>Produtos cobertos <PackageSearch/></span><strong>1.247</strong><small>82% da cesta base</small></article>
+        <article onClick={() => setActiveAdminView("images")} style={{ cursor: 'pointer', border: '1px solid #f59e0b', background: '#fffbeb' }}><span>Fotos Pendentes <Camera color="#d97706"/></span><strong>{allProducts.filter(p => !p.image_url).length}</strong><small className="warning" style={{ color: '#d97706' }}>Itens sem imagem real</small></article>
+        <article onClick={() => setActiveKpiDetail({ title: "Estabelecimentos", data: initialStores })} style={{ cursor: 'pointer' }}><span>Estabelecimentos <Store/></span><strong>12</strong><small className="positive">12 sincronizando</small></article>
       </div>
-      {connStatus ? (
-        <div className="connection-status-panel" style={{padding: "1rem"}}>
-          <div style={{display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem"}}>
-            <span className={`status ${connStatus.success ? "ok" : "review"}`} style={{width: 10, height: 10, borderRadius: "50%", display: "inline-block", background: connStatus.success ? "#16a34a" : "#dc2626"}}/>
-            <b>{connStatus.success ? "Conectado ao Supabase" : "Erro na Conexão"}</b>
-            {connStatus.success && <small style={{marginLeft: "auto", color: "#6b7280"}}>{connStatus.latency}ms latência</small>}
 
+      <div className="admin-lower" style={{gridTemplateColumns: "1fr 1fr", marginBottom: "1.5rem", display: "grid", gap: "1.5rem"}}>
+        <section className="admin-card">
+          <div className="admin-card-head">
+            <div><h2>Status da Conexão</h2><p>Leitura em tempo real do Supabase.</p></div>
+            <button className="button button--outline button--small" onClick={handleTestConnection} disabled={isTesting}>
+              <Activity size={14}/> {isTesting ? "Testando..." : "Testar Conexão"}
+            </button>
           </div>
-          {connStatus.success ? (
-            <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem"}}>
-              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
-                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Lojas</small>
-                <strong>{connStatus.tables.establishments}</strong>
+          {connStatus ? (
+            <div className="connection-status-panel" style={{padding: "1rem"}}>
+              <div style={{display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem"}}>
+                <span className={`status ${connStatus.success ? "ok" : "review"}`} style={{width: 10, height: 10, borderRadius: "50%", display: "inline-block", background: connStatus.success ? "#16a34a" : "#dc2626"}}/>
+                <b>{connStatus.success ? "Conectado ao Supabase" : "Erro na Conexão"}</b>
+                {connStatus.success && <small style={{marginLeft: "auto", color: "#6b7280"}}>{connStatus.latency}ms latência</small>}
               </div>
-              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
-                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Produtos</small>
-                <strong>{connStatus.tables.products}</strong>
-              </div>
-              <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
-                <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Preços</small>
-                <strong>{connStatus.tables.prices}</strong>
-              </div>
+              {connStatus.success ? (
+                <div style={{display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem"}}>
+                  <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
+                    <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Lojas</small>
+                    <strong>{connStatus.tables.establishments}</strong>
+                  </div>
+                  <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
+                    <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Produtos</small>
+                    <strong>{connStatus.tables.products}</strong>
+                  </div>
+                  <div style={{background: "#f9fafb", padding: "0.75rem", borderRadius: "0.5rem"}}>
+                    <small style={{display: "block", color: "#6b7280", fontSize: "0.7rem"}}>Preços</small>
+                    <strong>{connStatus.tables.prices}</strong>
+                  </div>
+                </div>
+              ) : (
+                <p style={{color: "#dc2626", fontSize: "0.85rem"}}>{connStatus.error}</p>
+              )}
             </div>
           ) : (
-            <p style={{color: "#dc2626", fontSize: "0.85rem"}}>{connStatus.error}</p>
+            <div style={{padding: "2rem", textAlign: "center", color: "#6b7280"}}><small>Clique em testar para validar as tabelas externas.</small></div>
           )}
-        </div>
-      ) : (
-        <div style={{padding: "2rem", textAlign: "center", color: "#6b7280"}}><small>Clique em testar para validar as tabelas externas.</small></div>
-      )}
-    </section>
+        </section>
 
-    <section className="admin-card">
-      <div className="admin-card-head">
-        <div><h2>Progresso de Importação</h2><p>Processamento de dados em tempo real.</p></div>
-      </div>
-      <div style={{padding: "1rem"}}>
-        {isImporting ? (
-          <div className="import-progress-panel">
-            <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem"}}>
-              <span>{importMsg}</span>
-              <b>{Math.round((importProgress / importTotal) * 100)}%</b>
-            </div>
-            <div style={{height: "8px", background: "#f1f5f9", borderRadius: "4px", overflow: "hidden", marginBottom: "0.5rem"}}>
-              <div style={{height: "100%", background: "#1473e6", width: `${(importProgress / importTotal) * 100}%`, transition: "width 0.3s ease"}} />
-            </div>
-            <small style={{color: "#64748b"}}>{importProgress} de {importTotal} registros processados</small>
+        <section className="admin-card">
+          <div className="admin-card-head">
+            <div><h2>Progresso de Importação</h2><p>Processamento de dados em tempo real.</p></div>
           </div>
-        ) : importLog ? (
-          <div style={{padding: "0"}}>
-            {importLog.error ? (
-              <div style={{background: "#fee2e2", padding: "1rem", borderRadius: "0.5rem", border: "1px solid #fecaca"}}>
-                <div style={{display: "flex", alignItems: "center", gap: "0.5rem", color: "#b91c1c", marginBottom: "0.5rem"}}>
-                  <AlertTriangle size={18} />
-                  <strong>Erro Crítico na Importação</strong>
+          <div style={{padding: "1rem"}}>
+            {isImporting ? (
+              <div className="import-progress-panel">
+                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.85rem"}}>
+                  <span>{importMsg}</span>
+                  <b>{Math.round((importProgress / importTotal) * 100)}%</b>
                 </div>
-                <p style={{fontSize: "0.85rem", color: "#991b1b", margin: 0}}>{importLog.error}</p>
-                <small style={{display: "block", marginTop: "0.75rem", color: "#b91c1c", fontSize: "0.75rem"}}>
-                  Verifique a conexão com o banco ou permissões de RLS.
-                </small>
+                <div style={{height: "8px", background: "#f1f5f9", borderRadius: "4px", overflow: "hidden", marginBottom: "0.5rem"}}>
+                  <div style={{height: "100%", background: "#1473e6", width: `${(importProgress / importTotal) * 100}%`, transition: "width 0.3s ease"}} />
+                </div>
+                <small style={{color: "#64748b"}}>{importProgress} de {importTotal} registros processados</small>
+              </div>
+            ) : importLog ? (
+              <div style={{padding: "0"}}>
+                {importLog.error ? (
+                  <div style={{background: "#fee2e2", padding: "1rem", borderRadius: "0.5rem", border: "1px solid #fecaca"}}>
+                    <div style={{display: "flex", alignItems: "center", gap: "0.5rem", color: "#b91c1c", marginBottom: "0.5rem"}}>
+                      <AlertTriangle size={18} />
+                      <strong>Erro Crítico na Importação</strong>
+                    </div>
+                    <p style={{fontSize: "0.85rem", color: "#991b1b", margin: 0}}>{importLog.error}</p>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
+                      <span style={{fontSize: "0.85rem"}}>Novos preços inseridos:</span>
+                      <strong style={{color: "#16a34a"}}>+{importLog.count}</strong>
+                    </div>
+                    <div style={{borderTop: "1px solid #e5e7eb", marginTop: "0.5rem", paddingTop: "0.5rem", display: "flex", justifyContent: "space-between"}}>
+                      <small style={{color: "#6b7280"}}>Execução: {(importLog.duration / 1000).toFixed(2)}s</small>
+                      <small style={{color: "#6b7280"}}>{importLog.stores} lojas | {importLog.products} produtos</small>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
-              <>
-                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-                  <span style={{fontSize: "0.85rem"}}>Novos preços inseridos:</span>
-                  <strong style={{color: "#16a34a"}}>+{importLog.count}</strong>
-                </div>
-                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-                  <span style={{fontSize: "0.85rem"}}>Duplicados ignorados:</span>
-                  <span style={{color: "#6b7280"}}>{importLog.duplicates}</span>
-                </div>
-                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "0.5rem"}}>
-                  <span style={{fontSize: "0.85rem"}}>Total processado:</span>
-                  <strong>{importLog.count + importLog.duplicates}</strong>
-                </div>
-                <div style={{borderTop: "1px solid #e5e7eb", marginTop: "0.5rem", paddingTop: "0.5rem", display: "flex", justifyContent: "space-between"}}>
-                  <small style={{color: "#6b7280"}}>Execução: {(importLog.duration / 1000).toFixed(2)}s</small>
-                  <small style={{color: "#6b7280"}}>{importLog.stores} lojas | {importLog.products} produtos</small>
-                </div>
-                <div style={{marginTop: '0.75rem', padding: '0.5rem', background: '#f0fdf4', color: '#166534', borderRadius: '0.25rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                  <Check size={14}/> Sincronização concluída com sucesso.
-                </div>
-                {importLog.errorReport && importLog.errorReport.length > 0 && (
-                  <div style={{marginTop: '1rem', border: '1px solid #fecaca', borderRadius: '0.5rem', overflow: 'hidden'}}>
-                    <div style={{background: '#fee2e2', padding: '0.5rem 1rem', fontSize: '0.8rem', borderBottom: '1px solid #fecaca', display: 'flex', justifyContent: 'space-between'}}>
-                      <b>Relatório de Inconsistências</b>
-                      <span>{importLog.errorReport.length} falhas</span>
-                    </div>
-                    <div style={{maxHeight: '150px', overflowY: 'auto', background: 'white', padding: '0.5rem'}}>
-                      {importLog.errorReport.map((err: any, idx: number) => (
-                        <div key={idx} style={{fontSize: '0.75rem', padding: '0.25rem 0', borderBottom: idx < importLog.errorReport.length - 1 ? '1px solid #f1f5f9' : 'none'}}>
-                          <span style={{color: '#dc2626'}}>[{err.entity.toUpperCase()}]</span> {err.message}
-                          <pre style={{background: '#f8fafc', padding: '0.25rem', marginTop: '0.1rem', fontSize: '0.7rem', color: '#64748b'}}>
-                            {JSON.stringify(err.data, null, 2)}
-                          </pre>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
+              <div style={{padding: "1rem", textAlign: "center", color: "#6b7280"}}><small>Aguardando início do processo de carga.</small></div>
             )}
           </div>
+        </section>
+      </div>
+    </>
+  )}
+
+  {(activeAdminView === "catalog" || activeAdminView === "images") && (
+    <section className="admin-card">
+      <div className="admin-card-head">
+        <div>
+          <h2>{activeAdminView === "images" ? "Revisão Visual de Fotos" : "Gestão de Catálogo"}</h2>
+          <p>{activeAdminView === "images" ? "Compare e atualize as imagens dos produtos cadastrados." : "Produtos e estabelecimentos registrados no sistema."}</p>
+        </div>
+        <div style={{display:"flex",gap:"0.75rem"}}>
+          <button className="button button--primary" onClick={() => setShowAddProduct(true)}><Plus/> Novo produto</button>
+          {activeAdminView === "catalog" && <button className="button button--primary" onClick={() => setShowAddStore(true)} style={{ background: '#10b981' }}><Store/> Nova Loja</button>}
+        </div>
+      </div>
+      
+      {activeAdminView === "catalog" && (
+        <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', padding: '0 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
+          <button onClick={() => setAdminActiveTab("products")} style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'products' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'products' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'products' ? '600' : '400', background: 'none' }}>
+            Produtos ({filteredProducts.length})
+          </button>
+          <button onClick={() => setAdminActiveTab("stores")} style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'stores' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'stores' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'stores' ? '600' : '400', background: 'none' }}>
+            Lojas ({filteredStores.length})
+          </button>
+        </div>
+      )}
+
+      <div className="admin-filters">
+        <label style={{ flex: 1 }}><Search/><input placeholder="Buscar por nome ou marca..." value={adminSearch} onChange={e => setAdminSearch(e.target.value)} /></label>
+        {activeAdminView === "images" && (
+          <select value={adminFilterStore} onChange={e => setAdminFilterStore(e.target.value)} style={{ padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+            <option value="all">Status da Foto</option>
+            <option value="missing">Sem Foto Real</option>
+            <option value="present">Com Foto Real</option>
+          </select>
+        )}
+      </div>
+
+      <div className={activeAdminView === "images" ? "admin-image-grid" : "admin-table"} style={activeAdminView === "images" ? { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem', padding: '1.5rem' } : {}}>
+        {activeAdminView === "images" ? (
+          filteredProducts.filter(p => adminFilterStore === 'missing' ? !p.image_url : adminFilterStore === 'present' ? !!p.image_url : true).map(p => (
+            <div key={p.id} className="admin-card" style={{ padding: '1rem', textAlign: 'center', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-2)', borderRadius: '8px', cursor: 'pointer' }} onClick={() => setEditingItem({ type: 'product', data: p })}>
+                <ProductImage product={p} size="default" />
+              </div>
+              <div>
+                <b style={{ fontSize: '0.9rem', display: 'block' }}>{p.name}</b>
+                <small style={{ color: 'var(--muted)' }}>{p.brand} • {p.size}</small>
+              </div>
+              <button className="button button--outline button--small" style={{ width: '100%' }} onClick={() => setEditingItem({ type: 'product', data: p })}>
+                <Camera size={14}/> {p.image_url ? "Trocar Foto" : "Inserir Foto"}
+              </button>
+            </div>
+          ))
+        ) : adminActiveTab === 'products' ? (
+          <>
+            <div className="admin-tr admin-th">
+              <span onClick={() => requestSort('name')}>Produto</span>
+              <span onClick={() => requestSort('brand')}>Marca / Cat.</span>
+              <span onClick={() => requestSort('establishment')}>Mercado Base</span>
+              <span onClick={() => requestSort('minPrice')}>Preço Min.</span>
+              <span style={{ textAlign: 'right' }}>Ações</span>
+            </div>
+            {paginatedProducts.map((p: any) => (
+              <div className="admin-tr" key={p.id}>
+                <span><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><div onClick={() => setPhotoViewer({ url: p.image_url || "/products/arroz-tio-joao-5kg.png", name: p.name })} style={{ cursor: 'pointer' }}><ProductImage product={p} size="compact" /></div><div><b>{p.name}</b><small style={{ display: 'block' }}>{p.barcode || 'Sem código'}</small></div></div></span>
+                <span>{p.brand}<br/><small>{p.category}</small></span>
+                <span>{p.establishment}</span>
+                <span><b>{money(p.minPrice)}</b></span>
+                <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
+                  <button className="icon-button" onClick={() => setEditingItem({ type: 'product', data: p })}><Edit size={16}/></button>
+                  <button className="icon-button" onClick={() => setConfirmDelete({ type: 'product', id: String(p.id), name: p.name })} style={{ color: '#dc2626' }}><Trash2 size={16}/></button>
+                </span>
+              </div>
+            ))}
+          </>
         ) : (
-          <div style={{padding: "1rem", textAlign: "center", color: "#6b7280"}}><small>Aguardando início do processo de carga.</small></div>
+          <>
+            <div className="admin-tr admin-th"><span>Estabelecimento</span><span>Bairro</span><span>Tipo</span><span style={{ textAlign: 'right' }}>Ações</span></div>
+            {paginatedStores.map((s: any) => (
+              <div className="admin-tr" key={s.id}>
+                <span><div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color }} /><b>{s.name}</b></div></span>
+                <span>{s.neighborhood}</span>
+                <span>{s.kind === 'market' ? 'Supermercado' : s.kind}</span>
+                <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
+                  <button className="icon-button" onClick={() => setEditingItem({ type: 'store', data: s })}><Edit size={16}/></button>
+                  <button className="icon-button" onClick={() => setConfirmDelete({ type: 'store', id: String(s.id), name: s.name })} style={{ color: '#dc2626' }}><Trash2 size={16}/></button>
+                </span>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+      <div className="admin-card-foot" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>Mostrando {activeAdminView === "images" ? filteredProducts.length : (adminActiveTab === 'products' ? paginatedProducts.length : paginatedStores.length)} registros</span>
+        {activeAdminView === "catalog" && totalPages > 1 && (
+          <div style={{ display: 'flex', gap: '0.25rem' }}>
+            <button className="button button--outline button--small" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>Anterior</button>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.5rem', fontSize: '0.85rem' }}>Página {currentPage} de {totalPages}</div>
+            <button className="button button--outline button--small" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}>Próxima</button>
+          </div>
         )}
       </div>
     </section>
-
-  </div>
-
-  <section className="admin-card">
-    <div className="admin-card-head">
-      <div>
-        <h2>{path === "/admin/fotos-pendentes" ? "Fotos Pendentes" : "Gestão de Catálogo"}</h2>
-        <p>{path === "/admin/fotos-pendentes" ? "Produtos aguardando imagem real para melhor visualização." : "Produtos e estabelecimentos registrados no sistema."}</p>
-      </div>
-      <div style={{display:"flex",gap:"0.75rem"}}>
-        <button className="button button--outline" onClick={handleImport} disabled={isImporting} title="Disparar importação para o Supabase externo">
-          <Database/> {isImporting ? "Importando..." : "Importar Dados Excel"}
-        </button>
-        <button className="button button--primary" onClick={() => setShowAddProduct(true)}><Plus/> Novo produto</button>
-        <button className="button button--primary" onClick={() => setShowAddStore(true)} style={{ background: '#10b981' }}><Store/> Nova Loja</button>
-      </div>
-    </div>
-    
-    {path !== "/admin/fotos-pendentes" && (
-      <div className="admin-tabs" style={{ display: 'flex', gap: '1rem', padding: '0 1.5rem', borderBottom: '1px solid #e2e8f0' }}>
-        <button 
-          onClick={() => setAdminActiveTab("products")}
-          style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'products' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'products' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'products' ? '600' : '400', background: 'none' }}
-        >
-          Produtos ({filteredProducts.length})
-        </button>
-        <button 
-          onClick={() => setAdminActiveTab("stores")}
-          style={{ padding: '0.75rem 1rem', borderBottom: adminActiveTab === 'stores' ? '2px solid #1473e6' : 'none', color: adminActiveTab === 'stores' ? '#1473e6' : '#64748b', fontWeight: adminActiveTab === 'stores' ? '600' : '400', background: 'none' }}
-        >
-          Lojas ({filteredStores.length})
-        </button>
-      </div>
-    )}
-
-    <div className="admin-filters">
-      <label style={{ flex: 1 }}>
-        <Search/>
-        <input 
-          placeholder={adminActiveTab === 'products' ? "Buscar por nome ou código de barras..." : "Buscar loja pelo nome..."} 
-          value={adminSearch}
-          onChange={e => setAdminSearch(e.target.value)}
-        />
-      </label>
-      {adminActiveTab === 'products' && (
-        <select 
-          value={adminFilterStore} 
-          onChange={e => setAdminFilterStore(e.target.value)}
-          style={{ padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', fontSize: '0.85rem' }}
-        >
-          <option value="all">Todos os Mercados</option>
-          {allStores.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
-        </select>
-      )}
-      <button className="button button--outline" onClick={() => { setAdminSearch(""); setAdminFilterStore("all"); }}><SlidersHorizontal/> Limpar</button>
-    </div>
-
-    <div className="admin-table">
-      {adminActiveTab === 'products' ? (
-        <>
-          <div className="admin-tr admin-th">
-            <span onClick={() => requestSort('name')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Produto {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span onClick={() => requestSort('brand')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Marca / Cat. {sortConfig?.key === 'brand' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span onClick={() => requestSort('establishment')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Mercado Base {sortConfig?.key === 'establishment' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span onClick={() => requestSort('minPrice')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Preço Min. {sortConfig?.key === 'minPrice' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span style={{ textAlign: 'right' }}>Ações</span>
-          </div>
-          {paginatedProducts.map((p: any) => (
-            <div className="admin-tr" key={p.id}>
-              <span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div 
-                    onClick={() => setPhotoViewer({ url: p.image_url || "/products/arroz-tio-joao-5kg.png", name: p.name })}
-                    style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
-                    onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
-                    onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-                  >
-                    <ProductImage product={p} size="compact" />
-                  </div>
-                  <div>
-                    <b>{p.name}</b>
-                    <small style={{ display: 'block' }}>{p.barcode || 'Sem código'}</small>
-                  </div>
-                </div>
-              </span>
-              <span>{p.brand}<br/><small>{p.category}</small></span>
-              <span>{p.establishment}</span>
-              <span><b>{money(p.minPrice)}</b></span>
-              <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
-                <button className="icon-button" onClick={() => setEditingItem({ type: 'product', data: p })} title="Editar"><Edit size={16}/></button>
-                <button className="icon-button" onClick={() => setConfirmDelete({ type: 'product', id: String(p.id), name: p.name })} style={{ color: '#dc2626' }} title="Excluir"><Trash2 size={16}/></button>
-              </span>
-            </div>
-          ))}
-        </>
-      ) : (
-        <>
-          <div className="admin-tr admin-th">
-            <span onClick={() => requestSort('name')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Estabelecimento {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span onClick={() => requestSort('neighborhood')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              Bairro {sortConfig?.key === 'neighborhood' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-            </span>
-            <span>Tipo</span>
-            <span style={{ textAlign: 'right' }}>Ações</span>
-          </div>
-          {paginatedStores.map((s: any) => (
-            <div className="admin-tr" key={s.id}>
-              <span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color }} />
-                  <b>{s.name}</b>
-                </div>
-              </span>
-              <span>{s.neighborhood}</span>
-              <span>{s.kind === 'market' ? 'Supermercado' : s.kind}</span>
-              <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.25rem' }}>
-                <button className="icon-button" onClick={() => setEditingItem({ type: 'store', data: s })} title="Editar"><Edit size={16}/></button>
-                <button className="icon-button" onClick={() => setConfirmDelete({ type: 'store', id: String(s.id), name: s.name })} style={{ color: '#dc2626' }} title="Excluir"><Trash2 size={16}/></button>
-              </span>
-            </div>
-          ))}
-        </>
-      )}
-
-    </div>
-    <div className="admin-card-foot" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span>Mostrando {adminActiveTab === 'products' ? paginatedProducts.length : paginatedStores.length} de {adminActiveTab === 'products' ? filteredProducts.length : filteredStores.length} registros</span>
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
-          <button 
-            className="button button--outline button--small" 
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-          >Anterior</button>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.5rem', fontSize: '0.85rem', color: '#64748b' }}>
-            Página {currentPage} de {totalPages}
-          </div>
-          <button 
-            className="button button--outline button--small" 
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-          >Próxima</button>
-        </div>
-      )}
-    </div>
-
-  </section>
+  )}
 
   <div className="admin-lower" style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1.5rem"}}>
     <section className="admin-card">
@@ -1109,13 +1048,18 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
 
         const { supabase } = await import("./lib/supabase");
         if (!supabase) return;
-        const { error } = await supabase.from('products').insert({
+        const { data: result, error } = await supabase.from('products').insert({
           name, brand, category, size, barcode
-        });
+        }).select('id').single();
+
         if (error) alert("Erro ao salvar: " + error.message);
         else {
+          if (newProductPhoto && result) {
+            await handleFileUpload({ target: { files: [newProductPhoto.file] } } as any, String(result.id));
+          }
           addAuditLog(`Novo produto cadastrado: ${name}`);
           setShowAddProduct(false);
+          setNewProductPhoto(null);
           loadLogs();
           window.location.reload();
         }
@@ -1125,18 +1069,38 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
           <button type="button" className="icon-button" onClick={() => setShowAddProduct(false)}><X/></button>
         </div>
         <div className="admin-modal-body" style={{ display: 'grid', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem', background: '#f8fafc', borderRadius: '0.5rem', border: '2px dashed #cbd5e1', marginBottom: '1rem' }}>
-            <Camera size={32} color="#64748b" />
-            <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', color: '#64748b' }}>Clique para subir foto</div>
-            <input type="file" accept="image/*" style={{ opacity: 0, position: 'absolute', width: '100px', cursor: 'pointer' }} onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file && !file.type.startsWith('image/')) {
-                alert("Apenas arquivos de imagem são permitidos.");
-                e.target.value = "";
-              } else if (file) {
-                alert('Foto selecionada: ' + file.name + ' (O upload real ocorre na edição do produto)');
-              }
-            }} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem', background: '#f8fafc', borderRadius: '0.5rem', border: '2px dashed #cbd5e1', marginBottom: '1rem', position: 'relative' }}>
+            {newProductPhoto ? (
+              <div style={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <img src={newProductPhoto.url} style={{ width: '120px', height: '120px', objectFit: 'contain', borderRadius: '8px' }} alt="Preview" />
+                <button type="button" className="button button--ghost button--small" style={{ color: '#dc2626', marginTop: '0.5rem' }} onClick={() => setNewProductPhoto(null)}>Remover Foto</button>
+              </div>
+            ) : (
+              <>
+                <Camera size={32} color="#64748b" />
+                <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', color: '#64748b' }}>Clique para subir foto</div>
+              </>
+            )}
+            <input 
+              type="file" 
+              accept="image/*" 
+              style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }} 
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) {
+                  alert("Apenas arquivos de imagem são permitidos.");
+                  return;
+                }
+                setIsUploading(true);
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                  setNewProductPhoto({ file, url: ev.target?.result as string });
+                  setIsUploading(false);
+                };
+                reader.readAsDataURL(file);
+              }} 
+            />
           </div>
           <label>Nome do Produto * <input name="name" required placeholder="Ex: Arroz 5kg" /></label>
           <label>Marca * <input name="brand" required placeholder="Ex: Tio João" /></label>
