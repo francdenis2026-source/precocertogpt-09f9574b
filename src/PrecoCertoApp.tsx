@@ -450,7 +450,7 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
   return <header className={headerClass}>
     <div className="shell header-inner">
       <Brand compact />
-      <span className="header-location" onClick={() => window.location.href = "/estabelecimentos"} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--muted)', transition: 'var(--transition)' }} className="hover:text-blue-600"><MapPin size={14} /> Feijó, AC</span>
+      <span onClick={() => window.location.href = "/estabelecimentos"} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--muted)', transition: 'var(--transition)' }} className="header-location hover:text-blue-600"><MapPin size={14} /> Feijó, AC</span>
       <nav className="desktop-nav" aria-label="Navegação principal">
         <a href="/buscar">Comparar preços</a><a href="/melhores-precos">Ofertas</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/planos">Planos</a>
 
