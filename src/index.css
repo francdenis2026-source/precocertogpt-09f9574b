@@ -239,15 +239,28 @@ body {
   --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Accessibility: Focus rings */
+/* Accessibility: Professional Focus rings for all interactive elements */
 :focus-visible {
   outline: 2px solid var(--blue);
-  outline-offset: 4px;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--blue-soft);
+  transition: outline-offset 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
 }
 
-.button:focus-visible {
-  outline: 2px solid var(--blue);
+.button:focus-visible, 
+.icon-button:focus-visible, 
+.theme-toggle:focus-visible,
+.brand:focus-visible,
+.desktop-nav a:focus-visible {
   outline-offset: 2px;
+}
+
+.brand:focus-visible {
+  border-radius: var(--radius);
+}
+
+.desktop-nav a:focus-visible {
+  border-radius: 8px;
 }
 
 /* Header Action Buttons */
