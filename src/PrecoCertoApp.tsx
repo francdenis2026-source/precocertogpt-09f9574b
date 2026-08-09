@@ -335,22 +335,26 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
 
   return <div className={`search-combo ${hero ? "search-combo--hero" : ""}`}>
     <form onSubmit={submit} role="search">
-      <Search aria-hidden="true" />
+      <Search size={20} className="search-combo__icon" aria-hidden="true" />
       <label className="sr-only" htmlFor={hero ? "hero-search" : "page-search"}>Buscar produto</label>
       <input 
         id={hero ? "hero-search" : "page-search"} 
+        className="search-combo__input"
         role="combobox" 
         value={localValue} 
         onChange={e => setLocalValue(e.target.value)} 
         onFocus={() => setFocused(true)} 
-        onBlur={() => setTimeout(() => setFocused(false), 120)} 
+        onBlur={() => setTimeout(() => setFocused(false), 200)} 
         placeholder="Busque arroz, café, carne, leite..." 
         autoComplete="off" 
         aria-expanded={focused} 
         aria-controls={hero ? "hero-suggestions" : "page-suggestions"} 
         aria-autocomplete="list" 
       />
-      <button className="button button--primary" type="submit">Comparar preços <ArrowRight size={18} /></button>
+      <button className="button button--primary search-combo__button" type="submit">
+        <span className="search-combo__button-text">Comparar preços</span>
+        <ArrowRight size={18} />
+      </button>
     </form>
 
     {focused && (
