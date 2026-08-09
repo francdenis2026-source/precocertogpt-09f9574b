@@ -1168,6 +1168,46 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
                 </div>
               </div>
 
+              {mode === "best_value" && (
+                <section className="travel-summary" aria-label="Resumo de deslocamento">
+                  <header>
+                    <MapPin size={16} />
+                    <div>
+                      <strong>Impacto do deslocamento</strong>
+                      <p>Estimativa a partir do centro de Feijó, {money(2)} por km rodado.</p>
+                    </div>
+                  </header>
+                  <ul className="travel-list">
+                    {Object.values(optimizationResult.storeBreakdown).map(store => (
+                      <li key={store.storeName}>
+                        <span className="travel-store">
+                          <strong>{store.storeName}</strong>
+                          <small>{store.neighborhood}</small>
+                        </span>
+                        <span className="travel-distance">{store.distanceKm} km</span>
+                        <span className="travel-cost">{money(store.estimatedTravelCost || 0)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="travel-totals">
+                    <div>
+                      <small>Produtos</small>
+                      <strong>{money(optimizationResult.total)}</strong>
+                    </div>
+                    <div>
+                      <small>Deslocamento ({Object.keys(optimizationResult.storeBreakdown).length} paradas)</small>
+                      <strong>+ {money(optimizationResult.travelCost || 0)}</strong>
+                    </div>
+                    <div className="final">
+                      <small>Custo final estimado</small>
+                      <strong>{money(optimizationResult.total + (optimizationResult.travelCost || 0))}</strong>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+
+
               <div className="result-split">
                 <div className="result-main">
                   <h3>Detalhamento da Compra</h3>
