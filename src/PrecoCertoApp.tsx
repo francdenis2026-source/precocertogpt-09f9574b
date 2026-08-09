@@ -195,7 +195,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
     <section className="hero">
       <div className="hero-photo" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=2000&auto=format&fit=crop")', backgroundSize: 'cover', backgroundPosition: 'center' }} />
       <div className="hero-wash" />
-      <div className="shell hero-content">
+      <div className="shell hero-content" style={{ paddingTop: '20px' }}>
         <div className="hero-copy">
           <span className="hero-live"><i /> Inteligência de compra em tempo real</span>
           <span className="eyebrow eyebrow--light"><MapPin size={14} /> Curadoria local • Feijó • Acre</span>
