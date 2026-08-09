@@ -125,29 +125,79 @@
 
 
 :root {
+  /* Core Colors - Modern & Premium */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --primary-dark: #1e3a8a;
+  
+  --secondary: #0f172a;
+  --secondary-light: #1e293b;
+  
+  --accent: #f59e0b;
+  --accent-light: #fffbeb;
+  
+  --success: #10b981;
+  --success-light: #ecfdf5;
+  
+  --danger: #ef4444;
+  --danger-light: #fef2f2;
+  
+  --warning: #f97316;
+  --warning-light: #fff7ed;
+
+  /* Neutral Scale */
   --bg: #f8fafc;
   --surface: #ffffff;
-  --surface-2: #f1f5f9;
-  --navy: #0f172a;
-  --blue: #2563eb;
-  --blue-hover: #1d4ed8;
-  --blue-soft: #eff6ff;
-  --gold: #f59e0b;
-  --gold-soft: #fffbeb;
-  --green: #10b981;
-  --green-soft: #ecfdf5;
-  --red: #ef4444;
-  --orange: #f97316;
-  --text: #334155;
-  --muted: #64748b;
-  --tertiary: #94a3b8;
+  --surface-hover: #f8fafc;
   --border: #e2e8f0;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --radius: 12px;
-  --radius-lg: 16px;
-  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --border-hover: #cbd5e1;
+  
+  /* Text Colors */
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --text-inverse: #ffffff;
+
+  /* Elevation & Shadows */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  /* Radius */
+  --radius-sm: 0.375rem;
+  --radius: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: all 0.1s var(--ease-in-out);
+  --transition-base: all 0.2s var(--ease-in-out);
+  --transition-slow: all 0.3s var(--ease-in-out);
+}
+
+:root {
+  --navy: var(--secondary);
+  --blue: var(--primary);
+  --blue-hover: var(--primary-hover);
+  --blue-soft: var(--primary-light);
+  --gold: var(--accent);
+  --gold-soft: var(--accent-light);
+  --green: var(--success);
+  --green-soft: var(--success-light);
+  --red: var(--danger);
+  --orange: var(--warning);
+  --text: var(--text-main);
+  --muted: var(--text-muted);
+  --tertiary: var(--text-light);
+  --shadow: var(--shadow-md);
+  --transition: var(--transition-base);
 }
 
 /* Global Animations */
