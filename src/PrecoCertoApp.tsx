@@ -263,6 +263,8 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
         src={src} 
         alt={`Embalagem de ${product.name}`} 
         loading={eager ? "eager" : "lazy"} 
+        crossOrigin="anonymous"
+        style={{ mixBlendMode: 'multiply' }}
         onError={(e) => {
           const target = e.target as HTMLImageElement;
           if (target.src !== selectedFallback) {
