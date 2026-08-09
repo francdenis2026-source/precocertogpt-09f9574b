@@ -82,7 +82,15 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
 
     const q = normalize(query);
 
-    const mapped = productRows
+    const uniqueProductRows = Array.from(
+      productRows.reduce((map, p) => {
+        const key = `${normalize(p.name || "")}|${normalize(p.brand || "")}|${normalize(p.size || "")}|${normalize(p.unit || "")}`;
+        if (!map.has(key)) map.set(key, p);
+        return map;
+      }, new Map<string, ProductRow>()).values()
+    );
+
+    const mapped = uniqueProductRows
       .map((product): Product | null => {
         const rows = priceRows.filter(price => String(price.product_id) === String(product.id));
         if (!rows.length) return null;
