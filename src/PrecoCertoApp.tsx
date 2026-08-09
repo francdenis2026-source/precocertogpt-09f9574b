@@ -3558,6 +3558,7 @@ export default function PrecoCertoApp() {
   
   function addBasket(p:Product){setCart(current=>current.some(i=>i.id===p.id)?current:[...current,p]);setToast(`${p.name} adicionado.`);}
   function removeBasket(id:number|string){setCart(current=>current.filter(i=>String(i.id)!==String(id)));setToast("Removido.");}
+  function clearBasket(){setCart([]);localStorage.removeItem("precocerto:basket");setToast("Cesta limpa.");}
   
   function saveAction(action:string,type:string,id:string){
     const key="precocerto:actions";
