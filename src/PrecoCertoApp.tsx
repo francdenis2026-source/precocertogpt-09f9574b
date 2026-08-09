@@ -1734,13 +1734,21 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
           <aside className="generic-aside">
             <span className="eyebrow">Configurações</span>
             <h2>Preferências de Alerta</h2>
+            <div className="section-heading compact" style={{ marginTop: '2rem' }}>
+              <h3>Central de Notificações</h3>
+            </div>
+            
             <div className="aside-stat">
               <span>Notificar queda de preço</span>
-              <strong style={{ fontSize: '1rem', color: 'var(--blue)' }}>Ativado</strong>
+              <div className="toggle-switch active"></div>
             </div>
             <div className="aside-stat">
               <span>Alerta de dado expirado (7 dias)</span>
-              <strong style={{ fontSize: '1rem', color: 'var(--blue)' }}>Ativado</strong>
+              <div className="toggle-switch active"></div>
+            </div>
+            <div className="aside-stat">
+              <span>Alertas via E-mail</span>
+              <div className="toggle-switch"></div>
             </div>
             <div className="aside-stat" style={{ background: 'var(--gold-soft)', border: '1px solid var(--gold)', marginTop: '1.5rem', padding: '1rem', borderRadius: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
@@ -2108,7 +2116,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 }
 
 
-function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, fetchError, syncStatus }: PageProps & { fetchError?: string | null, syncStatus?: string }) {
+function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, fetchError, syncStatus, user }: PageProps & { fetchError?: string | null, syncStatus?: string, user?: any }) {
   const [compareList, setCompareList] = useState<Product[]>([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
 
@@ -2326,7 +2334,13 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
                   return (
                     <article className="result-card" key={p.id}>
-                      <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => handleFavorite(String(p.id))}>
+                      <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => {
+                        if (!user) {
+                          alert("Apenas usuários cadastrados podem favoritar produtos.");
+                          return;
+                        }
+                        handleFavorite(String(p.id));
+                      }}>
                         <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
                       </button>
                       <div className="result-image" onClick={() => setSelectedProduct(p)} style={{ cursor: 'pointer' }}><ProductImage product={p} size="default" /></div>
@@ -2458,26 +2472,47 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                   <ProductImage product={selectedProduct} size="default" eager />
                 </div>
                 <div>
-                  <span className="category-tag">{selectedProduct.category}</span>
-                  <h2 style={{ fontSize: '1.5rem', margin: '0.5rem 0' }}>{selectedProduct.name}</h2>
-                  <p style={{ color: 'var(--muted)', marginBottom: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span className="category-tag">{selectedProduct.category}</span>
+                    {selectedProduct.previousPrice && selectedProduct.minPrice < selectedProduct.previousPrice && (
+                      <div style={{ background: 'var(--green-soft)', color: 'var(--green)', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                        -{Math.round((1 - selectedProduct.minPrice / selectedProduct.previousPrice) * 100)}% de desconto
+                      </div>
+                    )}
+                  </div>
+                  <h2 style={{ fontSize: '1.75rem', margin: '0.5rem 0', fontWeight: 800 }}>{selectedProduct.name}</h2>
+                  <p style={{ color: 'var(--muted)', marginBottom: '1rem', fontSize: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
                   
-                  <div className="visual-price" style={{ marginBottom: '1.5rem' }}>
-                    <strong>{money(selectedProduct.minPrice)}</strong>
+                  <div className="visual-price" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
+                    <strong style={{ fontSize: '2.25rem', color: 'var(--green)' }}>{money(selectedProduct.minPrice)}</strong>
                     {selectedProduct.previousPrice && selectedProduct.previousPrice > selectedProduct.minPrice && (
-                      <span className="old-price">era <s>{money(selectedProduct.previousPrice)}</s></span>
+                      <span className="old-price" style={{ color: 'var(--muted)', textDecoration: 'line-through', fontSize: '1.1rem' }}>{money(selectedProduct.previousPrice)}</span>
                     )}
                   </div>
 
-                  <div className="verified-details" style={{ background: 'none', padding: 0 }}>
-                    <div className="detail-item">
-                      <Store size={14} />
-                      <span>{selectedProduct.establishment}</span>
+                  <div className="verified-details" style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px' }}>
+                    <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Store size={16} color="var(--blue)" />
+                      <strong style={{ fontSize: '0.95rem' }}>{selectedProduct.establishment}</strong>
                     </div>
-                    <div className="detail-item">
-                      <Clock3 size={14} />
-                      <span>Atualizado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
+                    <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                      <MapPin size={16} color="var(--muted)" />
+                      <span>{selectedProduct.neighborhood}, Feijó</span>
                     </div>
+                    <div className="detail-item" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                      <Clock3 size={16} />
+                      <span>Verificado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <a 
+                      href={`/estabelecimento/${selectedProduct.establishmentSlug}`} 
+                      className="button button--primary button--full"
+                      style={{ textDecoration: 'none' }}
+                    >
+                      Ir para a loja <ArrowRight size={18} style={{ marginLeft: '8px' }} />
+                    </a>
                   </div>
                 </div>
               </div>
@@ -2505,10 +2540,17 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <button className="button button--primary" style={{ flex: 1 }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
+                <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
                   Adicionar à Cesta
                 </button>
-                <button className="button button--outline" onClick={() => { saveAction("alert", "product", String(selectedProduct.id)); setSelectedProduct(null); }}>
+                <button className="button button--outline" style={{ height: '54px' }} onClick={() => { 
+                  if (!user) {
+                    alert("Acesse sua conta para configurar alertas de preço personalizados.");
+                    return;
+                  }
+                  saveAction("alert", "product", String(selectedProduct.id)); 
+                  setSelectedProduct(null); 
+                }}>
                   <Bell size={18} /> Alertar
                 </button>
               </div>
@@ -2718,7 +2760,7 @@ export default function PrecoCertoApp() {
     }
   }
 
-  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,fetchError,syncStatus}),[products,stores,metrics,query,fetchError,syncStatus]);
+  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,fetchError,syncStatus,user}),[products,stores,metrics,query,fetchError,syncStatus,user]);
 
   const handleAdminAuth = (success: boolean) => {
     if (success) {
