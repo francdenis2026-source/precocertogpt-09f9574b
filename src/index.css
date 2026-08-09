@@ -1620,3 +1620,88 @@ iframe[src*="lovable.dev/badge"] {
   font-size: 0.8rem;
   color: var(--muted);
 }
+
+/* ---------------------------------------------------------------
+   Fase 1 — Transparência do preço: frescor, preço unitário e denúncia
+---------------------------------------------------------------- */
+.freshness-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.freshness-badge--fresh {
+  background: var(--green-soft, #dff8eb);
+  color: #08744a;
+  border-color: #a5e6c6;
+}
+
+.freshness-badge--aging {
+  background: #fff7e0;
+  color: #8a5a00;
+  border-color: #f0d578;
+}
+
+.freshness-badge--expired {
+  background: #fff1f2;
+  color: #b91c1c;
+  border-color: #fda4af;
+}
+
+.freshness-badge--pending {
+  background: var(--surface-2);
+  color: var(--muted);
+  border-color: var(--border);
+}
+
+.unit-price-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--navy);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+}
+
+textarea.admin-input {
+  padding: 10px 12px;
+  min-height: 84px;
+  resize: vertical;
+}
+
+.admin-input:focus-visible {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
+
+.admin-boot-gate {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--muted);
+}

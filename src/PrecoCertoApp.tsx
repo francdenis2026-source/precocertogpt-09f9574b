@@ -1,7 +1,7 @@
 
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
-  ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit,
+  ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit, Flag,
   Heart, Home, LayoutDashboard, LineChart, ListChecks, MapPin, Menu, Moon, PackageSearch,
   Plus, Receipt, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Sun, Trash2, TrendingDown, TrendingUp, Upload, UserRound, Users, X,
@@ -12,6 +12,10 @@ import { useLocation } from "react-router-dom";
 import { buildCatalog, verifiedDatasetMetrics, type PlatformMetrics, type Product, type StoreRow } from "./data/catalog";
 import { fetchCatalog } from "./data/remoteCatalog";
 import { supabase } from "./lib/supabase";
+import { isEnabled } from "./config/features";
+import { freshnessLabels, priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
+import { priceReportReasons, submitPriceReport } from "./data/priceReports";
+import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
 
 const initialCatalog = buildCatalog();
 const initialProducts: Product[] = initialCatalog.products;
@@ -1944,7 +1948,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
     }
   }, []);
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     if (blockedUntil && Date.now() < blockedUntil) {
       const remaining = Math.ceil((blockedUntil - Date.now()) / 1000);
@@ -1953,24 +1957,37 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
     }
 
     if (isAdminLogin) {
-      const savedPass = localStorage.getItem("precocerto:admin_password") || "feijo2026";
-      if (user === "admin" && pass === savedPass) {
-        onAdminAuth(true);
-        setAttempts(0);
-        localStorage.removeItem("precocerto:admin_blocked_until");
-        window.location.href = "/admin";
-      } else {
-        const newAttempts = attempts + 1;
-        setAttempts(newAttempts);
-        if (newAttempts >= 5) {
-          const until = Date.now() + 60000; // 1 minuto
-          setBlockedUntil(until);
-          localStorage.setItem("precocerto:admin_blocked_until", until.toString());
-          setError("Muitas tentativas falhas. Acesso bloqueado por 1 minuto.");
-          addAuditLog("Bloqueio de segurança ativado após 5 falhas no login", "error", user || "Desconhecido");
-        } else {
-          setError(`Credenciais incorretas. Tentativa ${newAttempts} de 5.`);
+      // Autenticação real no banco. Nenhuma credencial vive no frontend e o
+      // papel administrativo é confirmado pela tabela user_roles (RLS).
+      setError("");
+      const { error: authError } = await signIn(user.trim(), pass);
+
+      if (!authError) {
+        const profile = await loadSessionProfile();
+        if (profile?.isAdmin) {
+          onAdminAuth(true);
+          setAttempts(0);
+          localStorage.removeItem("precocerto:admin_blocked_until");
+          addAuditLog(`Login administrativo autorizado (${profile.roles.join(", ")})`, "success", profile.email ?? user);
+          window.location.href = "/admin";
+          return;
         }
+        await signOut();
+        setError("Sua conta não possui permissão administrativa.");
+        addAuditLog("Tentativa de acesso administrativo sem papel autorizado", "error", user || "Desconhecido");
+        return;
+      }
+
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      if (newAttempts >= 5) {
+        const until = Date.now() + 60000; // 1 minuto
+        setBlockedUntil(until);
+        localStorage.setItem("precocerto:admin_blocked_until", until.toString());
+        setError("Muitas tentativas falhas. Acesso bloqueado por 1 minuto.");
+        addAuditLog("Bloqueio de segurança ativado após 5 falhas no login", "error", user || "Desconhecido");
+      } else {
+        setError(`Credenciais incorretas. Tentativa ${newAttempts} de 5.`);
       }
     } else {
       if (onLogin) onLogin();
@@ -1985,49 +2002,26 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
       return;
     }
 
-    if (recoveryStep === 1) {
-      if (recoveryUser === "admin") {
-        setIsSendingEmail(true);
-        setError("");
-        try {
-          const { sendAdminResetEmail } = await import("./data/importer");
-          const res = await sendAdminResetEmail("admin@precocerto.com.br", "admin");
-          if (res.success) {
-            setRecoveryStep(2);
-            addAuditLog("Solicitação de redefinição de senha admin (E-mail enviado)");
-          } else {
-            setError(res.error || "Erro ao enviar e-mail.");
-          }
-        } catch (err) {
-          setError("Erro técnico ao processar envio.");
-        } finally {
-          setIsSendingEmail(false);
-        }
-      } else {
-        const newAttempts = attempts + 1;
-        setAttempts(newAttempts);
-        if (newAttempts >= 3) {
-          const until = Date.now() + 300000; // 5 min
-          setBlockedUntil(until);
-          localStorage.setItem("precocerto:admin_blocked_until", until.toString());
-          setError("Muitas tentativas de recuperação. Bloqueado por 5 minutos.");
-          addAuditLog("Bloqueio de recuperação por tentativas inválidas", "error");
-        } else {
-          setError(`Usuário não encontrado. Tentativa ${newAttempts} de 3.`);
-        }
-      }
-    } else {
-      if (newPass.length < 6) {
-        setError("A nova senha deve ter pelo menos 6 caracteres.");
-        return;
-      }
-      localStorage.setItem("precocerto:admin_password", newPass);
-      addAuditLog("Senha administrativa redefinida via fluxo de recuperação", "warning");
-      setShowForgot(false);
-      setRecoveryStep(1);
-      setError("");
-      alert("Senha administrativa alterada com sucesso!");
+    // Recuperação real: o link de redefinição é enviado pelo provedor de
+    // autenticação. A senha nunca é gravada nem trocada no navegador.
+    const email = recoveryUser.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Informe o e-mail cadastrado do administrador.");
+      return;
     }
+
+    setIsSendingEmail(true);
+    setError("");
+    const { error: resetError } = await requestPasswordReset(email);
+    setIsSendingEmail(false);
+
+    if (resetError) {
+      setError(resetError);
+      return;
+    }
+
+    addAuditLog("Solicitação de redefinição de senha administrativa enviada", "warning", email);
+    setRecoveryStep(2);
   }
 
 
@@ -2064,25 +2058,25 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
           showForgot ? (
             recoveryStep === 1 ? (
               <>
-                <label>Confirme o Usuário Administrador<input required value={recoveryUser} onChange={e=>setRecoveryUser(e.target.value)} placeholder="usuário"/></label>
+                <label>E-mail do Administrador<input required type="email" value={recoveryUser} onChange={e=>setRecoveryUser(e.target.value)} placeholder="admin@seudominio.com"/></label>
                 <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.5rem', background: '#f8fafc', padding: '0.5rem', borderRadius: '0.25rem' }}>
                   <ShieldCheck size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }}/>
-                  Um link de segurança será simulado para o email do administrador.
+                  Enviaremos um link seguro de redefinição para este e-mail.
                 </div>
               </>
             ) : (
-              <>
-                <label>Nova Senha Administrativa<input required type="password" value={newPass} onChange={e=>setNewPass(e.target.value)} placeholder="mínimo 6 caracteres"/></label>
-                <div style={{ fontSize: '0.75rem', color: '#b45309', marginTop: '0.5rem' }}>
-                  <Clock3 size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }}/>
-                  Esta sessão de redefinição expira em 10 minutos.
+              <div style={{ fontSize: '0.85rem', color: '#166534', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '0.85rem', borderRadius: '0.5rem' }}>
+                <Check size={14} style={{ verticalAlign: 'middle', marginRight: '6px' }}/>
+                Link enviado. Abra o e-mail e defina a nova senha na página segura.
+                <div style={{ marginTop: '0.5rem', color: '#b45309', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Clock3 size={12}/> O link expira por segurança.
                 </div>
-              </>
+              </div>
             )
 
           ) : (
             <>
-              <label>Usuário Administrador<input required value={user} onChange={e=>setUser(e.target.value)} placeholder="usuário"/></label>
+              <label>E-mail Administrador<input required type="email" value={user} onChange={e=>setUser(e.target.value)} placeholder="admin@seudominio.com"/></label>
               <label>Senha Secreta<input required value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="••••••••"/></label>
             </>
           )
@@ -2095,8 +2089,8 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
           </>
         )}
 
-        <button className="button button--primary button--full" type="submit" disabled={isAdminLogin ? (showForgot ? (recoveryStep === 1 ? (!recoveryUser || isSendingEmail) : !newPass) : (!user || !pass)) : (pin.length!==6||cpf.length!==11)}>
-          {isAdminLogin ? (showForgot ? (recoveryStep === 1 ? (isSendingEmail ? "Enviando..." : "Enviar E-mail de Recuperação") : "Salvar Nova Senha") : "Autenticar Acesso") : register?"Criar minha conta":"Entrar com segurança"}
+        <button className="button button--primary button--full" type="submit" disabled={isAdminLogin ? (showForgot ? (recoveryStep === 1 ? (!recoveryUser || isSendingEmail) : true) : (!user || !pass)) : (pin.length!==6||cpf.length!==11)}>
+          {isAdminLogin ? (showForgot ? (recoveryStep === 1 ? (isSendingEmail ? "Enviando..." : "Enviar link de redefinição") : "Link enviado") : "Autenticar Acesso") : register?"Criar minha conta":"Entrar com segurança"}
           <ArrowRight/>
         </button>
 
@@ -2116,6 +2110,113 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 }
 
 
+/** Selo de frescor do preço com janela configurável por categoria. */
+function FreshnessBadge({ product }: { product: Product }) {
+  const { state, label } = priceFreshness(product.capturedAt, product.category);
+  const titles: Record<FreshnessState, string> = {
+    fresh: "Preço verificado recentemente para esta categoria.",
+    aging: "A janela de confiança desta categoria já passou. Confira na loja.",
+    expired: "Preço fora da validade desta categoria. Aguardando nova coleta.",
+    pending: "Sem data de verificação registrada.",
+  };
+  return (
+    <span className={`freshness-badge freshness-badge--${state}`} title={titles[state]}>
+      <Clock3 size={10} /> {label}
+    </span>
+  );
+}
+
+/** Preço por unidade de medida (R$/kg, R$/L, R$/un). Some quando não é conversível. */
+function UnitPriceTag({ product }: { product: Product }) {
+  if (!isEnabled("unitPrice")) return null;
+  const unit = unitPrice(product.minPrice, product.size, product.unit);
+  if (!unit) return null;
+  return (
+    <span className="unit-price-tag" title="Preço por unidade de medida, calculado sobre o menor preço">
+      {money(unit.value)} / {unit.label}
+    </span>
+  );
+}
+
+/** Formulário de denúncia de preço — disponível também para visitantes. */
+function PriceReportModal({ product, onClose }: { product: Product; onClose: () => void }) {
+  const [reason, setReason] = useState(priceReportReasons[0]);
+  const [reportedPrice, setReportedPrice] = useState("");
+  const [comment, setComment] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [error, setError] = useState("");
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    setStatus("sending");
+    setError("");
+    const parsed = Number(reportedPrice.replace(",", "."));
+    const result = await submitPriceReport({
+      productId: String(product.id),
+      establishmentId: String(product.establishmentId ?? ""),
+      reportedPrice: Number.isFinite(parsed) && parsed > 0 ? parsed : null,
+      reason,
+      comment: comment.trim() || undefined,
+    });
+    if (result.ok) {
+      setStatus("done");
+    } else {
+      setStatus("error");
+      setError(result.error ?? "Não foi possível registrar agora.");
+    }
+  }
+
+  return (
+    <div className="admin-modal-overlay" onClick={onClose}>
+      <div className="admin-modal-content" style={{ maxWidth: "480px" }} onClick={e => e.stopPropagation()} role="dialog" aria-label="Informar preço incorreto">
+        <div className="admin-modal-head">
+          <h3>Informar preço incorreto</h3>
+          <button className="icon-button" onClick={onClose} aria-label="Fechar"><X /></button>
+        </div>
+        <div className="admin-modal-body">
+          {status === "done" ? (
+            <div style={{ textAlign: "center", padding: "1rem 0" }}>
+              <CheckCircle2 size={40} color="var(--green)" />
+              <h4 style={{ margin: "0.75rem 0 0.25rem" }}>Obrigado!</h4>
+              <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+                Sua informação vai para a moderação e ajuda a manter os preços de Feijó confiáveis.
+              </p>
+              <button className="button button--primary" style={{ marginTop: "1rem" }} onClick={onClose}>Fechar</button>
+            </div>
+          ) : (
+            <form onSubmit={submit} style={{ display: "grid", gap: "1rem" }}>
+              <p style={{ margin: 0, fontSize: "0.9rem", color: "var(--muted)" }}>
+                <strong>{product.name}</strong> — {product.establishment} · registrado por {money(product.minPrice)}
+              </p>
+              <label style={{ display: "grid", gap: "0.35rem", fontSize: "0.85rem", fontWeight: 600 }}>
+                Motivo
+                <select value={reason} onChange={e => setReason(e.target.value)} className="admin-input">
+                  {priceReportReasons.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </label>
+              <label style={{ display: "grid", gap: "0.35rem", fontSize: "0.85rem", fontWeight: 600 }}>
+                Preço encontrado na loja (opcional)
+                <input className="admin-input" inputMode="decimal" placeholder="Ex.: 28,90" value={reportedPrice} onChange={e => setReportedPrice(e.target.value)} />
+              </label>
+              <label style={{ display: "grid", gap: "0.35rem", fontSize: "0.85rem", fontWeight: 600 }}>
+                Observação (opcional)
+                <textarea className="admin-input" rows={3} value={comment} onChange={e => setComment(e.target.value)} />
+              </label>
+              {status === "error" && (
+                <p style={{ color: "var(--red)", fontSize: "0.85rem", margin: 0 }}>{error}</p>
+              )}
+              <button className="button button--primary" type="submit" disabled={status === "sending"}>
+                {status === "sending" ? "Enviando..." : "Enviar informação"}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, fetchError, syncStatus, user }: PageProps & { fetchError?: string | null, syncStatus?: string, user?: any }) {
   const [compareList, setCompareList] = useState<Product[]>([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
@@ -2127,12 +2228,13 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [activeBrand, setActiveBrand] = useState("all");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [updateRecency, setUpdateRecency] = useState("all"); // 'all', '7d', '24h'
-  const [sortBy, setSortBy] = useState<"price" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
+  const [sortBy, setSortBy] = useState<"price" | "unit" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
   const [chartPeriod, setChartPeriod] = useState("30d");
   const [isSearching, setIsSearching] = useState(false);
 
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [reportProduct, setReportProduct] = useState<Product | null>(null);
 
   const randomFeatured = useRandomFeatured(products);
   
@@ -2193,6 +2295,16 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
     if (sortBy === "price") {
       result.sort((a, b) => a.minPrice - b.minPrice);
+    } else if (sortBy === "unit") {
+      // Menor preço unitário: itens sem medida conversível vão para o fim.
+      result.sort((a, b) => {
+        const ua = unitPrice(a.minPrice, a.size, a.unit);
+        const ub = unitPrice(b.minPrice, b.size, b.unit);
+        if (ua && ub) return ua.base === ub.base ? ua.value - ub.value : ua.base.localeCompare(ub.base);
+        if (ua) return -1;
+        if (ub) return 1;
+        return a.minPrice - b.minPrice;
+      });
     } else if (sortBy === "date") {
       result.sort((a, b) => new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime());
     } else if (sortBy === "variation") {
@@ -2264,6 +2376,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
               <SlidersHorizontal size={16} color="var(--tertiary)" />
               <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{ border: 'none', background: 'transparent', outline: 'none', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', color: 'var(--navy)' }}>
                 <option value="price">Menor preço</option>
+                <option value="unit">Menor preço por unidade</option>
                 <option value="date">Mais recentes</option>
                 <option value="variation">Maior queda</option>
               </select>
@@ -2345,17 +2458,14 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                       </button>
                       <div className="result-image" onClick={() => setSelectedProduct(p)} style={{ cursor: 'pointer' }}><ProductImage product={p} size="default" /></div>
                       <div className="result-content">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>
                           <span className="category-tag">{p.category}</span>
-                          {isOutdated && (
-                            <span className="outdated-badge" title="Este preço pode ter mudado">
-                              <Clock3 size={10} /> Desatualizado
-                            </span>
-                          )}
+                          <FreshnessBadge product={p} />
                         </div>
                         <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                           <small>{p.brand} • {p.size}</small>
+                          <UnitPriceTag product={p} />
                           <a href={`/estabelecimento/${p.establishmentSlug}`} className="establishment-link-highlight">
                             <Store size={14} style={{ marginRight: '4px' }} />
                             {p.establishment}
@@ -2433,6 +2543,9 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                             <LineChart size={16} />
                           </button>
                           <button className="button button--outline" title="Compartilhar produto" onClick={() => handleShare(p)}><Share2 size={16} /></button>
+                          {isEnabled("priceReports") && (
+                            <button className="button button--ghost" title="Informar preço incorreto" aria-label="Informar preço incorreto" onClick={() => setReportProduct(p)}><Flag size={16} /></button>
+                          )}
                         </div>
 
                       </div>
@@ -2471,6 +2584,8 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
         </main>
       </div>
 
+
+      {reportProduct && <PriceReportModal product={reportProduct} onClose={() => setReportProduct(null)} />}
 
       {selectedProduct && (
         <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)}>
@@ -2698,10 +2813,26 @@ export default function PrecoCertoApp() {
     const saved = localStorage.getItem("precocerto:user");
     return saved ? JSON.parse(saved) : null;
   });
-  const [adminAuth, setAdminAuth] = useState(() => localStorage.getItem("precocerto:admin_authenticated") === "true");
+  // O acesso admin nunca é decidido pelo navegador: consultamos a sessão e os
+  // papéis no backend em cada carregamento.
+  const [adminAuth, setAdminAuth] = useState(false);
+  const [adminCheck, setAdminCheck] = useState<"checking" | "done">("checking");
+  const [adminProfile, setAdminProfile] = useState<SessionProfile | null>(null);
   
   const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; 
   const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
+
+  useEffect(() => {
+    let alive = true;
+    loadSessionProfile().then(profile => {
+      if (!alive) return;
+      setAdminProfile(profile);
+      setAdminAuth(Boolean(profile?.isAdmin));
+      setAdminCheck("done");
+    });
+    return () => { alive = false; };
+  }, []);
+
 
   useEffect(() => {
     let alive = true;
@@ -2778,7 +2909,7 @@ export default function PrecoCertoApp() {
   const handleAdminAuth = (success: boolean) => {
     if (success) {
       setAdminAuth(true);
-      localStorage.setItem("precocerto:admin_authenticated", "true");
+      setAdminCheck("done");
       addAuditLog("Login administrativo realizado");
     }
   };
@@ -2794,15 +2925,22 @@ export default function PrecoCertoApp() {
     setUser(null);
     setAdminAuth(false);
     localStorage.removeItem("precocerto:user");
-    localStorage.removeItem("precocerto:admin_authenticated");
+    void signOut();
     window.location.href = "/";
   };
 
   const handleAdminLogout = () => {
     setAdminAuth(false);
-    localStorage.removeItem("precocerto:admin_authenticated");
+    setAdminProfile(null);
+    void signOut();
     window.location.href = "/login";
   };
+
+  if (isAdmin && adminCheck === "checking") {
+    return <div className="admin-boot-gate" role="status" aria-live="polite">
+      <ShieldCheck size={22}/> Validando suas permissões...
+    </div>;
+  }
 
   if (isAdmin && !adminAuth) {
     window.location.href = "/admin-login";
