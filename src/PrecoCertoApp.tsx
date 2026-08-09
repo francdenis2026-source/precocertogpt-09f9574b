@@ -1844,14 +1844,23 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const allBrands = useMemo(() => ["all", ...new Set(products.map(p => p.brand))], [products]);
   const allStores = useMemo(() => ["all", ...new Set(stores.map(s => s.name))], [stores]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
+  const normalize = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
   const filtered = useMemo(() => {
     let result = products.filter(p => {
-      const q = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      const matchesQuery = !query || `${p.name} ${p.brand} ${p.category}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q);
+      const q = normalize(query);
+      const matchesQuery = !query || 
+        normalize(p.name).includes(q) || 
+        normalize(p.category).includes(q) || 
+        normalize(p.brand).includes(q) ||
+        (p.barcode && p.barcode.includes(query));
+
       const matchesCategory = activeCategory === "all" || p.category === activeCategory;
       const matchesStore = activeStore === "all" || p.establishment === activeStore;
       const matchesBrand = activeBrand === "all" || p.brand === activeBrand;
-      
       const matchesPrice = p.minPrice >= priceRange[0] && p.minPrice <= priceRange[1];
       
       const daysSinceUpdate = Math.floor((new Date().getTime() - new Date(p.capturedAt).getTime()) / (1000 * 60 * 60 * 24));
@@ -1874,7 +1883,19 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
       });
     }
     return result;
-  }, [products, query, activeCategory, activeStore, activeBrand, sortBy]);
+  }, [products, query, activeCategory, activeStore, activeBrand, sortBy, priceRange, updateRecency]);
+
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filtered.slice(start, start + itemsPerPage);
+  }, [filtered, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, activeCategory, activeStore, activeBrand, sortBy, priceRange, updateRecency]);
+
 
   const handleShare = (p?: Product) => {
     const url = new URL(window.location.origin + window.location.pathname);
