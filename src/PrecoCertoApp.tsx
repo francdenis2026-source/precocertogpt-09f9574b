@@ -2334,7 +2334,13 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
                   return (
                     <article className="result-card" key={p.id}>
-                      <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => handleFavorite(String(p.id))}>
+                      <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => {
+                        if (!user) {
+                          alert("Apenas usuários cadastrados podem favoritar produtos.");
+                          return;
+                        }
+                        handleFavorite(String(p.id));
+                      }}>
                         <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
                       </button>
                       <div className="result-image" onClick={() => setSelectedProduct(p)} style={{ cursor: 'pointer' }}><ProductImage product={p} size="default" /></div>
