@@ -2317,8 +2317,8 @@ textarea.admin-input {
 
 
 /* Tema claro/escuro global — superfícies públicas, autenticação e administração */
-.theme-toggle { display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:5px 10px 5px 6px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--text-main);font:700 .78rem var(--body-font);cursor:pointer;transition:background-color .25s ease,border-color .25s ease,color .25s ease,transform .2s ease; }
-.theme-toggle:hover { border-color:var(--blue);transform:translateY(-1px); }
+.theme-toggle { display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:5px 12px 5px 6px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--text-main);font:700 .78rem var(--body-font);cursor:pointer;transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.theme-toggle:hover { border-color:var(--blue);transform:translateY(-2px) scale(1.02); background:var(--blue-soft); box-shadow:0 4px 12px rgba(37,99,235,0.12); }
 .theme-toggle--compact { width:42px;height:42px;padding:4px;justify-content:center; }
 .theme-toggle__track { display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--surface-2);color:var(--gold); }
 [data-theme='dark'] .theme-toggle__track { background:#172554;color:#bfdbfe; }
