@@ -3351,11 +3351,11 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
       {reportProduct && <PriceReportModal product={reportProduct} onClose={() => setReportProduct(null)} />}
 
       {selectedProduct && (
-        <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)}>
-          <div className="admin-modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
+        <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)} role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div className="admin-modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()} tabIndex={-1}>
             <div className="admin-modal-head">
-              <h3>Detalhes do Produto</h3>
-              <button className="icon-button" onClick={() => setSelectedProduct(null)}><X/></button>
+              <h3 id="modal-title">Detalhes do Produto</h3>
+              <button className="icon-button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X/></button>
             </div>
             <div className="admin-modal-body">
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
