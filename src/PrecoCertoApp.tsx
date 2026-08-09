@@ -2202,14 +2202,16 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                         <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <small>{p.brand} • {p.size}</small>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', textDecoration: 'none' }}>
                             {p.establishment}
-                          </span>
+                          </a>
+
                         </div>
                         <div className="verified-details">
                           <div className="detail-item" title="Local de coleta">
                             <MapPin size={12} />
-                            <span>{p.establishment}</span>
+                            <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', textDecoration: 'none' }}>{p.establishment}</a>
+
                           </div>
                           <div className="detail-item" title="Data da última atualização">
                             <Clock3 size={12} />
