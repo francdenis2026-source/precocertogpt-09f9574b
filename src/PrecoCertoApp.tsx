@@ -79,6 +79,13 @@ function addAuditLog(action: string, type: "success" | "warning" | "error" = "su
 import ypeNeutroAsset from "./assets/ype-neutro.png.asset.json";
 import frangoSearaAsset from "./assets/frango-seara.png.asset.json";
 
+import pinhoSolFloralAsset from "./assets/pinho-sol-floral.png.asset.json";
+import alpesLavandaAsset from "./assets/alpes-lavanda.png.asset.json";
+import alpesLimaoAsset from "./assets/alpes-limao.png.asset.json";
+import alpesMacaAsset from "./assets/alpes-maca.png.asset.json";
+import minuanoMarinhaAsset from "./assets/minuano-marinha.png.asset.json";
+import ypeLimaoAsset from "./assets/ype-limao.png.asset.json";
+
 const productImages: Record<string, string> = {
   // Pack 2 Mappings
   "844d8729-b2a0-4a60-9c23-a074c9e0979a": "/products/rabo.jpg",
@@ -162,17 +169,36 @@ const productImages: Record<string, string> = {
   "159e9aa1-7848-4b39-b101-291e21f8b217": "/products/cup-noodles-nissin-costela-70g.jpg",
   "72a3291b-4f84-433c-9ba3-e445935fe0d9": "/products/seleta-de-legumes-em-conserva-ole-200g.jpg",
   "054fdaa5-99b2-45a8-909e-30981c8b7625": "/products/feijao-carioca-bernardo-1kg.jpg",
+  "pinho-sol-floral-500ml": pinhoSolFloralAsset.url,
+  "alpes-lavanda-500ml": alpesLavandaAsset.url,
+  "alpes-limao-500ml": alpesLimaoAsset.url,
+  "alpes-maca-500ml": alpesMacaAsset.url,
+  "minuano-marinha-500ml": minuanoMarinhaAsset.url,
+  "ype-limao-500ml": ypeLimaoAsset.url,
 };
 
 function ProductImage({ product, size = "default", eager = false }: { product: Product | any; size?: "compact" | "default" | "hero" | "basket"; eager?: boolean }) {
   const fallback = "/products/arroz-tio-joao-5kg.png";
   
-  const isDetergent = product.name?.toLowerCase().includes("detergente") || product.category?.toLowerCase().includes("limpeza");
-  const isBean = product.name?.toLowerCase().includes("feijao");
-  const isOil = product.name?.toLowerCase().includes("oleo");
-  const isChicken = product.name?.toLowerCase().includes("frango");
+  const lowerName = product.name?.toLowerCase() || "";
+  const isDetergent = lowerName.includes("detergente") || product.category?.toLowerCase().includes("limpeza");
+  const isBean = lowerName.includes("feijao");
+  const isOil = lowerName.includes("oleo");
+  const isChicken = lowerName.includes("frango");
   
-  const detergentFallback = ypeNeutroAsset.url;
+  // Specific fallbacks based on brand/scent
+  let detergentFallback = ypeNeutroAsset.url;
+  if (lowerName.includes("pinho sol")) detergentFallback = pinhoSolFloralAsset.url;
+  else if (lowerName.includes("alpes")) {
+    if (lowerName.includes("lavanda")) detergentFallback = alpesLavandaAsset.url;
+    else if (lowerName.includes("limão") || lowerName.includes("limao")) detergentFallback = alpesLimaoAsset.url;
+    else if (lowerName.includes("maçã") || lowerName.includes("maca")) detergentFallback = alpesMacaAsset.url;
+  }
+  else if (lowerName.includes("minuano")) detergentFallback = minuanoMarinhaAsset.url;
+  else if (lowerName.includes("ypê") || lowerName.includes("ype")) {
+    if (lowerName.includes("limão") || lowerName.includes("limao")) detergentFallback = ypeLimaoAsset.url;
+  }
+
   const beanFallback = "/products/feijao-kicaldo-1kg.jpg";
   const oilFallback = "/products/oleo-liza-900ml.jpg";
   const chickenFallback = frangoSearaAsset.url;
