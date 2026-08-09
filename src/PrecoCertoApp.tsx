@@ -901,8 +901,24 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
           ))}
         </div>
 
+        {showLogoutConfirm && (
+          <div className="admin-modal-overlay">
+            <div className="admin-modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
+              <div className="admin-modal-body">
+                <div style={{ width: '64px', height: '64px', background: '#fee2e2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                  <AlertTriangle color="#dc2626" size={32} />
+                </div>
+                <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Encerrar Sessão?</h2>
+                <p style={{ color: '#6b7280', marginBottom: '2rem' }}>Você precisará da senha administrativa para acessar estas ferramentas novamente.</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <button className="button button--outline" onClick={() => setShowLogoutConfirm(false)}>Cancelar</button>
+                  <button className="button button--primary" style={{ background: '#dc2626' }} onClick={confirmLogout}>Sim, Sair</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-  <div className="admin-lower" style={{gridTemplateColumns: "1fr 1fr", marginBottom: "1.5rem", display: "grid", gap: "1.5rem"}}>
     <section className="admin-card">
       <div className="admin-card-head">
         <div><h2>Status da Conexão</h2><p>Leitura em tempo real do Supabase.</p></div>
