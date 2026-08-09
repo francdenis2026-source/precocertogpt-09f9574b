@@ -1,10 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
-
-const SERVICE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxdWVpb2hqYWR3enhhZmRycnhrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjE5MjY3MCwiZXhwIjoyMTAxNzY4NjcwfQ.jQeq_hUrnkzyf0nLJgGuRu2O70F-6QTk5C2kEFyRX6A";
-const URL = "https://kqueiohjadwzxafdrrxk.supabase.co";
-
-const supabase = createClient(URL, SERVICE_KEY);
+import { supabase } from "../lib/supabase";
 
 /**
  * Função utilitária para disparar o seed a partir do frontend (área Admin).
@@ -34,6 +28,7 @@ export async function runPriceImport(
   const errorReport: ImportResult["errorReport"] = [];
 
   try {
+    if (!supabase) throw new Error("Supabase não configurado.");
     onProgress("Carregando dados...", 0, 100);
     
     let data;
@@ -165,6 +160,7 @@ export async function testSupabaseConnection(): Promise<{
 }> {
   const start = Date.now();
   try {
+    if (!supabase) throw new Error("Supabase não configurado.");
     const [stores, products, prices] = await Promise.all([
       supabase.from("establishments").select("*", { count: "exact", head: true }),
       supabase.from("products").select("*", { count: "exact", head: true }),
@@ -219,5 +215,4 @@ export async function sendAdminResetEmail(email: string, user: string): Promise<
     };
   }
 }
-
 

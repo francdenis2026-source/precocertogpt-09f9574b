@@ -20,6 +20,7 @@ import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, t
 import { jsPDF } from "jspdf";
 import { planBasketPdf, renderPlanToPdf } from "./lib/basketPdf";
 import { getPdfOrientation, setPdfOrientation as savePdfOrientation } from "./lib/pdfPrefs";
+import { AdminStoreCatalog } from "./components/AdminStoreCatalog";
 
 const initialCatalog = buildCatalog();
 const initialProducts: Product[] = initialCatalog.products;
@@ -1484,7 +1485,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   const [photoViewer, setPhotoViewer] = useState<{ url: string, name: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [newProductPhoto, setNewProductPhoto] = useState<{ file: File, url: string } | null>(null);
-  const [activeAdminView, setActiveAdminView] = useState<"dashboard" | "catalog" | "images">("dashboard");
+  const [activeAdminView, setActiveAdminView] = useState<"dashboard" | "catalog" | "images" | "storeCatalog">("dashboard");
   const [itemsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1695,7 +1696,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
     ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
   ];
   const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><button onClick={() => setActiveAdminView("dashboard")} className={activeAdminView==="dashboard"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><LayoutDashboard size={18}/> Visão geral</button><button onClick={() => setActiveAdminView("catalog")} className={activeAdminView==="catalog"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><PackageSearch size={18}/> Catálogo</button><button onClick={() => setActiveAdminView("images")} className={activeAdminView==="images"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><Camera size={18}/> Revisar Fotos</button><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> o que ainda falta do plano</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{activeAdminView === "images" ? "Revisão de Fotos" : title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
+  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><button onClick={() => setActiveAdminView("dashboard")} className={activeAdminView==="dashboard"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><LayoutDashboard size={18}/> Visão geral</button><button onClick={() => setActiveAdminView("storeCatalog")} className={activeAdminView==="storeCatalog"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><Store size={18}/> Catálogos por loja</button><button onClick={() => setActiveAdminView("catalog")} className={activeAdminView==="catalog"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><PackageSearch size={18}/> Produtos gerais</button><button onClick={() => setActiveAdminView("images")} className={activeAdminView==="images"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer' }}><Camera size={18}/> Revisar Fotos</button><a href="/admin/clientes"><Users/> Clientes</a><a href="/admin/precos"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""}><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics"><BarChart3/> Analytics</a><a href="/admin/auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }}><ArrowRight/> o que ainda falta do plano</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem' }}><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{activeAdminView === "images" ? "Revisão de Fotos" : activeAdminView === "storeCatalog" ? "Catálogos por estabelecimento" : title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button"><Bell/></button><span className="admin-user">FD</span></div></header>
 
   {showLogoutConfirm && (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
@@ -1712,6 +1713,10 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       </div>
     </div>
   )}
+
+  {activeAdminView === "storeCatalog" &&
+    <AdminStoreCatalog onAudit={(message, type) => { addAuditLog(message, type); loadLogs(); }}/>
+  }
 
   
   {activeAdminView === "dashboard" && (
@@ -1913,7 +1918,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
     </section>
   )}
 
-  <div className="admin-lower" style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1.5rem"}}>
+  {activeAdminView !== "storeCatalog" && <div className="admin-lower" style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1.5rem"}}>
     <section className="admin-card">
       <div className="admin-card-head"><div><h2>Saúde das integrações</h2><p>Serviços críticos e filas.</p></div></div>
       {[["Banco e Realtime","Operacional","99,99%"],["Mercado Pago","Operacional","100%"],["Fila de IA","Atenção","3 jobs"],["E-mails","Operacional","98,7%"]].map((r,i)=><div className="health-row" key={r[0]}><span className={i===2?"status warning":"status"}/><b>{r[0]}</b><em>{r[1]}</em><strong>{r[2]}</strong></div>)}
@@ -1947,7 +1952,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       </div>
     </section>
 
-  </div>
+  </div>}
   
   {/* Modais de Gestão Administrativa */}
   {activeKpiDetail && (
