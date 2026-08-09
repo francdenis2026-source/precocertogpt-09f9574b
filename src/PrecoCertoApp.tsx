@@ -1205,7 +1205,12 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
                           <span>{store.itemCount} itens</span>
                           <strong>{money(store.total)}</strong>
                         </div>
-                        <button className="button button--ghost button--small">Ver itens desta loja</button>
+                        {mode === "best_value" && (
+                          <div className="route-travel">
+                            <span><MapPin size={12} /> {store.neighborhood} · {store.distanceKm} km</span>
+                            <span>Deslocamento: <strong>{money(store.estimatedTravelCost || 0)}</strong></span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1239,7 +1244,37 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
                         {isSaving ? "Salvando..." : <><Share2 /> Salvar e Compartilhar</>}
                       </button>
                     )}
-                    <button className="button button--ghost" style={{ width: '100%' }} onClick={generatePDF}><Download /> Baixar PDF / Imprimir</button>
+                    <div className="pdf-export-box">
+                      <div className="pdf-export-head">
+                        <Printer size={15} /> <strong>Lista para impressão</strong>
+                      </div>
+                      <div className="pdf-orientation-toggle" role="group" aria-label="Orientação do PDF">
+                        <button
+                          type="button"
+                          className={pdfOrientation === "portrait" ? "active" : ""}
+                          onClick={() => setPdfOrientation("portrait")}
+                          aria-pressed={pdfOrientation === "portrait"}
+                        >
+                          Retrato
+                        </button>
+                        <button
+                          type="button"
+                          className={pdfOrientation === "landscape" ? "active" : ""}
+                          onClick={() => setPdfOrientation("landscape")}
+                          aria-pressed={pdfOrientation === "landscape"}
+                        >
+                          Paisagem
+                        </button>
+                      </div>
+                      <div className="pdf-export-actions">
+                        <button className="button button--ghost" onClick={downloadPDF}>
+                          <Download size={16} /> Baixar PDF
+                        </button>
+                        <button className="button button--ghost" onClick={sharePDF}>
+                          <Share2 size={16} /> Compartilhar
+                        </button>
+                      </div>
+                    </div>
                     <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
                   </div>
                 </aside>
