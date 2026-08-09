@@ -918,13 +918,6 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
             </div>
           </div>
         )}
-      </main>
-    </div>
-  );
-}
-
-
-  </div>
 
   <section className="admin-card">
     <div className="admin-card-head">
