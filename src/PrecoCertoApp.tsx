@@ -626,6 +626,26 @@ function PriceBadge({ product }: { product: Product }) {
   return <span className="price-badge"><TrendingDown size={13} /> {saving.toFixed(0)}% menor</span>;
 }
 
+function ProductStatusBadge({ product }: { product: Product }) {
+  const saving = product.previousPrice && product.previousPrice > product.minPrice
+    ? (product.previousPrice - product.minPrice) / product.previousPrice
+    : 0;
+  const capturedAt = Date.parse(product.capturedAt);
+  const isNew = Number.isFinite(capturedAt) && Date.now() - capturedAt < 7 * 86400000;
+  const isLowest = product.storeCount > 1 && product.minPrice <= product.avgPrice * .95;
+
+  if (saving >= .05) return <span className="product-badge product-badge--sale"><TrendingDown/> {Math.round(saving * 100)}% menor</span>;
+  if (isLowest) return <span className="product-badge product-badge--lowest"><CircleDollarSign/> Menor preço</span>;
+  if (isNew) return <span className="product-badge product-badge--new"><Sparkles/> Novo</span>;
+  return null;
+}
+
+function ProductGridSkeleton({ cards = 4 }: { cards?: number }) {
+  return <div className="visual-product-grid skeleton-grid" aria-label="Carregando produtos" aria-busy="true">
+    {Array.from({ length: cards }, (_, index) => <article className="skeleton-card" key={index} aria-hidden="true"><span className="skeleton skeleton-image"/><div><span className="skeleton skeleton-text"/><span className="skeleton skeleton-text skeleton-text--short"/><span className="skeleton skeleton-price"/><span className="skeleton skeleton-button"/></div></article>)}
+  </div>;
+}
+
 function useRandomFeatured(products: Product[]) {
   const [randomFeatured, setRandomFeatured] = useState<Product[]>([]);
 
@@ -668,7 +688,7 @@ function useRandomFeatured(products: Product[]) {
   return randomFeatured;
 }
 
-function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction }: PageProps) {
+function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction, syncStatus }: PageProps & { syncStatus?: string }) {
   const [priceMode, setPriceMode] = useState<"recent" | "lowest">("recent");
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const randomFeatured = useRandomFeatured(products);
@@ -736,7 +756,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
         </div>
         <a className="inline-link" href="/melhores-precos">Ver todas as ofertas <ArrowRight /></a>
       </div>
-      <div className="visual-product-grid">
+      {syncStatus === "syncing" && products.length === 0 ? <ProductGridSkeleton cards={8}/> : <div className="visual-product-grid stagger-in">
         {(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 8).map((p, index) => (
           <article className="visual-product-card" key={p.id}>
             <button className="floating-favorite" onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}>
@@ -744,6 +764,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
             </button>
             <a className="visual-product-image" href={`/produto/${p.slug}`}>
               <span className="position-number">0{index + 1}</span>
+              <ProductStatusBadge product={p}/>
               <ProductImage product={p} />
               {p.previousPrice && p.previousPrice > p.minPrice && (
                 <span className="price-drop-tag"><TrendingDown size={14}/> -{Math.round((1 - p.minPrice / p.previousPrice) * 100)}%</span>
@@ -781,7 +802,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
             </div>
           </article>
         ))}
-      </div>
+      </div>}
     </section>
     <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Economia pronta para você</span><h2>Cestas otimizadas</h2><p>Combinações que aproveitam o melhor preço de cada mercado de Feijó.</p></div><a className="inline-link" href="/cesta-basica">Ver todas as cestas <ArrowRight /></a></div><div className="basket-grid"><article className="basket-feature"><div className="basket-top"><span className="basket-icon"><ShoppingBasket /></span><PriceBadge product={products[0]} /></div><p>Cesta essencial da semana</p><h3>12 itens em 2 mercados</h3><div className="basket-total"><span>Valor otimizado</span><strong>{money(87.34)}</strong><small>economia estimada de {money(18.62)}</small></div><div className="store-route"><span><b style={{background: stores[0]?.color}}>CS</b> Central Super · 8 itens</span><span><b style={{background: stores[1]?.color}}>MR</b> Rebouças · 4 itens</span></div><a href="/cesta-basica" className="button button--dark">Abrir cesta otimizada <ArrowRight /></a></article><article className="basket-plan"><span className="eyebrow">Planejamento inteligente</span><h3>Quanto você quer gastar?</h3><p>Informe seu orçamento e montamos a melhor cesta possível, explicando cada escolha.</p><div className="budget-chips"><a href="/cesta-basica?orcamento=80">R$ 80</a><a href="/cesta-basica?orcamento=100">R$ 100</a><a href="/cesta-basica?orcamento=150">R$ 150</a><a href="/cesta-basica?orcamento=200">R$ 200</a></div><a href="/cesta-basica" className="inline-link">Montar minha cesta <ArrowRight /></a></article></div></section>
     <section className="section section--soft"><div className="shell"><div className="section-heading"><div><span className="eyebrow">Agora em Feijó</span><h2>Preços em tempo real</h2><p>Compare registros recentes e encontre o menor preço com transparência.</p></div><div className="segmented"><button className={priceMode === "recent" ? "active" : ""} onClick={() => setPriceMode("recent")}>Recentes</button><button className={priceMode === "lowest" ? "active" : ""} onClick={() => setPriceMode("lowest")}>Menor preço</button></div></div><div className="price-table-card"><div className="price-table-head"><span>Produto</span><span>Mercado</span><span>Preço</span><span>Atualizado</span><span>Ação</span></div>{rows.map((p, index) => <div className="price-row" key={p.id}><div className="product-cell"><ProductImage product={p} size="compact" /><span><a href={`/produto/${p.slug}`}>{p.name}</a><small>{p.brand} • {p.size}</small></span></div><div className="market-cell"><span className="market-dot" style={{background:p.storeColor}} /> <span><a href={`/estabelecimento/${p.establishmentSlug}`} style={{ color: 'inherit', fontWeight: 'bold' }}>{p.establishment}</a><small>{p.neighborhood}</small></span></div><div><strong className="green-price">{money(p.minPrice)}</strong>{index < 3 && <PriceBadge product={p} />}</div><div><span className="freshness"><Clock3 /> há {8 + index * 7} min</span></div><div className="row-actions"><button onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}><Heart /></button><button onClick={() => addBasket(p)} aria-label={`Adicionar ${p.name} à cesta`}><Plus /></button></div></div>)}<div className="table-footer"><a href="/buscar">Abrir catálogo completo <ArrowRight /></a><span><ShieldCheck /> Dados auditáveis e verificados</span></div></div></div></section>
@@ -2357,9 +2378,9 @@ function EstablishmentPage({ store, products, addBasket }: { store?: StoreRow; p
         {categories.map(([name, total]) => <button key={name} className={category === name ? "active" : ""} onClick={() => setCategory(name)}>{name}<b>{total}</b></button>)}
       </nav>
 
-      {visibleProducts.length ? <div className="store-product-grid">
+      {visibleProducts.length ? <div className="store-product-grid stagger-in">
         {visibleProducts.map(product => <article className="store-product-card" key={product.id}>
-          <a className="store-product-card__image" href={`/produto/${product.slug}`}><ProductImage product={product}/><span className="verified-chip"><ShieldCheck/> Verificado</span></a>
+          <a className="store-product-card__image" href={`/produto/${product.slug}`}><ProductStatusBadge product={product}/><ProductImage product={product}/><span className="verified-chip"><ShieldCheck/> Verificado</span></a>
           <div className="store-product-card__body"><span className="category-tag">{product.category || "Outros"} · {product.size}</span><a href={`/produto/${product.slug}`} className="store-product-card__name">{product.name}</a><p>{product.brand || "Marca não informada"}</p><div className="store-product-card__price"><span><small>Preço atual</small><strong>{money(product.minPrice)}</strong></span>{product.previousPrice && product.previousPrice > product.minPrice && <em><TrendingDown/> {Math.round((1 - product.minPrice / product.previousPrice) * 100)}% menor</em>}</div><div className="store-product-card__actions"><button className="button button--primary" onClick={() => addBasket(product)}><Plus/> Cesta</button><a className="button button--ghost" href={`/produto/${product.slug}`}>Comparar</a></div></div>
         </article>)}
       </div> : <div className="store-empty-state"><Search/><h3>Nenhum produto encontrado</h3><p>Tente outro nome ou selecione uma categoria diferente.</p><button className="button button--outline" onClick={() => { setSearch(""); setCategory("Todas"); }}>Limpar filtros</button></div>}
@@ -3788,7 +3809,7 @@ export default function PrecoCertoApp() {
 
   return <div className="app">
     <Header basketCount={cart.length} user={user} onLogout={handleLogout}/>
-    <main>{page}</main>
+    <main><div className="page-transition-enter-active" key={pathname}>{page}</div></main>
     <Footer/>
     <MobileBar basketCount={cart.length}/>
     {toast && (
