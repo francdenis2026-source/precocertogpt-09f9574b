@@ -2472,26 +2472,47 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                   <ProductImage product={selectedProduct} size="default" eager />
                 </div>
                 <div>
-                  <span className="category-tag">{selectedProduct.category}</span>
-                  <h2 style={{ fontSize: '1.5rem', margin: '0.5rem 0' }}>{selectedProduct.name}</h2>
-                  <p style={{ color: 'var(--muted)', marginBottom: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span className="category-tag">{selectedProduct.category}</span>
+                    {selectedProduct.previousPrice && selectedProduct.minPrice < selectedProduct.previousPrice && (
+                      <div style={{ background: 'var(--green-soft)', color: 'var(--green)', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                        -{Math.round((1 - selectedProduct.minPrice / selectedProduct.previousPrice) * 100)}% de desconto
+                      </div>
+                    )}
+                  </div>
+                  <h2 style={{ fontSize: '1.75rem', margin: '0.5rem 0', fontWeight: 800 }}>{selectedProduct.name}</h2>
+                  <p style={{ color: 'var(--muted)', marginBottom: '1rem', fontSize: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
                   
-                  <div className="visual-price" style={{ marginBottom: '1.5rem' }}>
-                    <strong>{money(selectedProduct.minPrice)}</strong>
+                  <div className="visual-price" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
+                    <strong style={{ fontSize: '2.25rem', color: 'var(--green)' }}>{money(selectedProduct.minPrice)}</strong>
                     {selectedProduct.previousPrice && selectedProduct.previousPrice > selectedProduct.minPrice && (
-                      <span className="old-price">era <s>{money(selectedProduct.previousPrice)}</s></span>
+                      <span className="old-price" style={{ color: 'var(--muted)', textDecoration: 'line-through', fontSize: '1.1rem' }}>{money(selectedProduct.previousPrice)}</span>
                     )}
                   </div>
 
-                  <div className="verified-details" style={{ background: 'none', padding: 0 }}>
-                    <div className="detail-item">
-                      <Store size={14} />
-                      <span>{selectedProduct.establishment}</span>
+                  <div className="verified-details" style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px' }}>
+                    <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Store size={16} color="var(--blue)" />
+                      <strong style={{ fontSize: '0.95rem' }}>{selectedProduct.establishment}</strong>
                     </div>
-                    <div className="detail-item">
-                      <Clock3 size={14} />
-                      <span>Atualizado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
+                    <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                      <MapPin size={16} color="var(--muted)" />
+                      <span>{selectedProduct.neighborhood}, Feijó</span>
                     </div>
+                    <div className="detail-item" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                      <Clock3 size={16} />
+                      <span>Verificado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <a 
+                      href={`/estabelecimento/${selectedProduct.establishmentSlug}`} 
+                      className="button button--primary button--full"
+                      style={{ textDecoration: 'none' }}
+                    >
+                      Ir para a loja <ArrowRight size={18} style={{ marginLeft: '8px' }} />
+                    </a>
                   </div>
                 </div>
               </div>
