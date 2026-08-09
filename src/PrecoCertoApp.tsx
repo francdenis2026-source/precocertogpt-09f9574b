@@ -2143,42 +2143,43 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
       <div className="search-layout">
         <aside className="search-sidebar">
-          <div className="filter-group">
-            <div className="filter-header">
-              <h3>Categorias</h3>
-            </div>
-            <div className="filter-list">
-              {categories.map(c => (
-                <button key={c} className={activeCategory === c ? "active" : ""} onClick={() => setActiveCategory(c)}>
-                  {c === "all" ? "Todas" : c}
-                </button>
-              ))}
+          <div className="sidebar-sticky">
+            <div className="filter-card">
+              <div className="filter-section">
+                <h3>Categorias</h3>
+                <div className="filter-pills">
+                  {categories.map(c => (
+                    <button key={c} className={activeCategory === c ? "active" : ""} onClick={() => setActiveCategory(c)}>
+                      {c === "all" ? "Todas" : c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="filter-section">
+                <h3>Estabelecimentos</h3>
+                <div className="filter-pills">
+                  {allStores.map(s => (
+                    <button key={s} className={activeStore === s ? "active" : ""} onClick={() => setActiveStore(s)}>
+                      {s === "all" ? "Todos" : s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="filter-section">
+                <h3>Marcas</h3>
+                <div className="filter-pills">
+                  {allBrands.slice(0, 15).map(b => (
+                    <button key={b} className={activeBrand === b ? "active" : ""} onClick={() => setActiveBrand(b)}>
+                      {b === "all" ? "Todas" : b}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-          <div className="filter-group">
-            <div className="filter-header">
-              <h3>Marcas</h3>
-            </div>
-            <div className="filter-list">
-              {allBrands.map(b => (
-                <button key={b} className={activeBrand === b ? "active" : ""} onClick={() => setActiveBrand(b)}>
-                  {b === "all" ? "Todas" : b}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="filter-group">
-            <div className="filter-header">
-              <h3>Estabelecimentos</h3>
-            </div>
-            <div className="filter-list">
-              {allStores.map(s => (
-                <button key={s} className={activeStore === s ? "active" : ""} onClick={() => setActiveStore(s)}>
-                  {s === "all" ? "Todos" : s}
-                </button>
-              ))}
-            </div>
-          </div>
+        </aside>
           <div className="filter-group">
             <div className="filter-header">
               <h3>Faixa de Preço</h3>
