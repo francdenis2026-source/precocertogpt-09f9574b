@@ -210,19 +210,24 @@ import logoAsset from "./assets/logo-clean.png.asset.json";
 
 function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
   return (
-    <a 
+    <div 
       className={`brand ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} 
-      href="/" 
+      onClick={() => window.location.href = "/"}
+      style={{ cursor: 'pointer' }}
+      role="link"
+      tabIndex={0}
       aria-label="PreçoCerto — página inicial"
+      onKeyDown={(e) => e.key === 'Enter' && (window.location.href = "/")}
     >
       <img 
         className="brand__logo-img"
         src={logoAsset.url} 
         alt="PreçoCerto" 
       />
-    </a>
+    </div>
   );
 }
+
 
 
 
