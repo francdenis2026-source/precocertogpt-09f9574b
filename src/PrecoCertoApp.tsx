@@ -1146,18 +1146,38 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
           <button type="button" className="icon-button" onClick={() => setShowAddProduct(false)}><X/></button>
         </div>
         <div className="admin-modal-body" style={{ display: 'grid', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem', background: '#f8fafc', borderRadius: '0.5rem', border: '2px dashed #cbd5e1', marginBottom: '1rem' }}>
-            <Camera size={32} color="#64748b" />
-            <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', color: '#64748b' }}>Clique para subir foto</div>
-            <input type="file" accept="image/*" style={{ opacity: 0, position: 'absolute', width: '100px', cursor: 'pointer' }} onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file && !file.type.startsWith('image/')) {
-                alert("Apenas arquivos de imagem são permitidos.");
-                e.target.value = "";
-              } else if (file) {
-                alert('Foto selecionada: ' + file.name + ' (O upload real ocorre na edição do produto)');
-              }
-            }} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem', background: '#f8fafc', borderRadius: '0.5rem', border: '2px dashed #cbd5e1', marginBottom: '1rem', position: 'relative' }}>
+            {newProductPhoto ? (
+              <div style={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <img src={newProductPhoto.url} style={{ width: '120px', height: '120px', objectFit: 'contain', borderRadius: '8px' }} alt="Preview" />
+                <button type="button" className="button button--ghost button--small" style={{ color: '#dc2626', marginTop: '0.5rem' }} onClick={() => setNewProductPhoto(null)}>Remover Foto</button>
+              </div>
+            ) : (
+              <>
+                <Camera size={32} color="#64748b" />
+                <div style={{ fontSize: '0.75rem', marginTop: '0.5rem', color: '#64748b' }}>Clique para subir foto</div>
+              </>
+            )}
+            <input 
+              type="file" 
+              accept="image/*" 
+              style={{ opacity: 0, position: 'absolute', inset: 0, cursor: 'pointer' }} 
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) {
+                  alert("Apenas arquivos de imagem são permitidos.");
+                  return;
+                }
+                setIsUploading(true);
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                  setNewProductPhoto({ file, url: ev.target?.result as string });
+                  setIsUploading(false);
+                };
+                reader.readAsDataURL(file);
+              }} 
+            />
           </div>
           <label>Nome do Produto * <input name="name" required placeholder="Ex: Arroz 5kg" /></label>
           <label>Marca * <input name="brand" required placeholder="Ex: Tio João" /></label>
