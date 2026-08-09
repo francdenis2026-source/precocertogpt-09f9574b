@@ -18,6 +18,8 @@ import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
 import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
 import { jsPDF } from "jspdf";
+import { planBasketPdf, renderPlanToPdf } from "./lib/basketPdf";
+import { getPdfOrientation, setPdfOrientation as savePdfOrientation } from "./lib/pdfPrefs";
 
 const initialCatalog = buildCatalog();
 const initialProducts: Product[] = initialCatalog.products;
