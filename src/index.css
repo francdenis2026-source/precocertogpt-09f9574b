@@ -295,12 +295,13 @@ body {
   background: var(--blue-soft);
   color: var(--blue);
   transform: translateY(-2px);
-  border-color: rgba(37, 99, 235, 0.1);
+  border-color: var(--blue);
 }
 
 .icon-button:active {
   transform: translateY(1px) scale(0.95);
-  background: var(--blue-soft);
+  background: var(--surface-3);
+  color: var(--blue-hover);
   transition-duration: 0.1s;
 }
 
@@ -345,9 +346,15 @@ body {
 }
 
 .theme-toggle:hover {
-  background: var(--surface-3);
-  border-color: var(--border-strong);
+  background: var(--blue-soft);
+  color: var(--blue);
+  border-color: var(--blue);
   transform: translateY(-1px);
+}
+
+.theme-toggle:active {
+  background: var(--surface-3);
+  transform: translateY(0.5px) scale(0.98);
 }
 
 .theme-toggle__track {
