@@ -126,14 +126,27 @@ const productImages: Record<string, string> = {
   "159e9aa1-7848-4b39-b101-291e21f8b217": "/products/cup-noodles-nissin-costela-70g.jpg",
   "72a3291b-4f84-433c-9ba3-e445935fe0d9": "/products/seleta-de-legumes-em-conserva-ole-200g.jpg",
   "054fdaa5-99b2-45a8-909e-30981c8b7625": "/products/feijao-carioca-bernardo-1kg.jpg",
+  "detergente-ype-500ml": "/products/detergente-vida-neutro-500ml.jpg",
+  "arroz-tio-joao-5kg": "/products/arroz-tio-joao-5kg.png",
 };
 
 function ProductImage({ product, size = "default", eager = false }: { product: Product | any; size?: "compact" | "default" | "hero" | "basket"; eager?: boolean }) {
-  const src = product.image_url || productImages[product.slug] || productImages[String(product.id)] || "/products/arroz-tio-joao-5kg.png";
+  const fallback = "/products/arroz-tio-joao-5kg.png";
+  
+  // Identificamos se o produto é um detergente pelo nome ou categoria para evitar o fallback de arroz
+  const isDetergent = product.name?.toLowerCase().includes("detergente") || product.category?.toLowerCase().includes("limpeza");
+  const detergentFallback = "/products/detergente-vida-neutro-500ml.jpg";
+
+  const src = product.image_url || 
+              productImages[product.slug] || 
+              productImages[String(product.id)] || 
+              (isDetergent ? detergentFallback : fallback);
+  
   return <span className={`product-photo product-photo--${size}`}><img src={src} alt={`Embalagem de ${product.name}`} loading={eager ? "eager" : "lazy"} onError={(e) => {
     const target = e.target as HTMLImageElement;
-    if (target.src !== "/products/arroz-tio-joao-5kg.png") {
-      target.src = "/products/arroz-tio-joao-5kg.png";
+    const currentFallback = isDetergent ? detergentFallback : fallback;
+    if (target.src !== currentFallback) {
+      target.src = currentFallback;
     }
   }} /><i aria-hidden="true" /></span>;
 }
