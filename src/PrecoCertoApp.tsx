@@ -1177,14 +1177,22 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, user
                         </p>
                         <input 
                           readOnly 
-                          value={shareLink} 
+                          value={shareReadOnly ? `${shareLink}?ro=1` : shareLink} 
                           style={{ width: '100%', padding: '0.5rem', fontSize: '0.75rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'white' }}
                           onClick={e => (e.target as any).select()}
                         />
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', marginTop: '0.5rem', color: 'var(--text)' }}>
+                          <input
+                            type="checkbox"
+                            checked={shareReadOnly}
+                            onChange={e => setShareReadOnly(e.target.checked)}
+                          />
+                          Link somente leitura (sem reotimizar nem alterar itens)
+                        </label>
                         <button 
                           className="button button--small" 
                           style={{ marginTop: '0.5rem', width: '100%', background: 'var(--green)', color: 'white' }}
-                          onClick={() => { navigator.clipboard.writeText(shareLink); alert("Link copiado!"); }}
+                          onClick={() => { navigator.clipboard.writeText(shareReadOnly ? `${shareLink}?ro=1` : shareLink); alert("Link copiado!"); }}
                         >
                           Copiar Link
                         </button>
