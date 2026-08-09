@@ -2602,6 +2602,172 @@ h1,h2,h3,.brand__word b,.brand__word strong,.button{font-family:var(--primary-fo
   animation: toastOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.toast-undo {
+  margin-left: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.toast-undo:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.toast-undo:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+.toast-close:hover {
+  color: white;
+}
+
+@media (max-width: 640px) {
+  .toast {
+    bottom: 84px; /* Above mobile bar */
+    left: 16px;
+    right: 16px;
+    width: auto;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    justify-content: space-between;
+  }
+  
+  .toast-undo {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* Mobile Bar Active States and Accessibility */
+.mobile-bar a {
+  position: relative;
+  transition: color 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-bar a:active {
+  transform: scale(0.92);
+}
+
+.mobile-bar a.active {
+  color: var(--blue);
+}
+
+.mobile-bar a.active svg {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 4px 8px var(--blue-glass));
+}
+
+.mobile-bar a.active::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: var(--blue);
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 2px 6px var(--blue-glass);
+  animation: slideDown 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideDown {
+  from { transform: translateX(-50%) translateY(-10px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+/* Mobile landscape adjustments */
+@media (max-width: 932px) and (orientation: landscape) {
+  .site-header { height: 56px !important; }
+  .brand__logo-img { height: 36px !important; }
+  .mobile-bar { height: 50px !important; padding-bottom: 2px !important; }
+  .mobile-bar span { font-size: 8px !important; }
+  .mobile-bar svg { width: 18px !important; height: 18px !important; }
+  
+  .visual-product-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .hero { padding-block: 70px 30px !important; }
+  
+  /* Prevent header overlap issues in landscape */
+  .page-shell { padding-top: 1rem !important; }
+}
+
+/* Landscape grid optimizations */
+@media (min-width: 641px) and (max-width: 932px) and (orientation: landscape) {
+  .professional-results-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+/* Modal Accessibility and Scroll Lock */
+body.modal-open {
+  overflow: hidden !important;
+  padding-right: var(--scrollbar-width, 0px);
+}
+
+.admin-modal-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(3, 24, 46, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.admin-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  outline: none;
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.95) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Keyboard focus for Mobile Bar */
+.mobile-bar a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: -4px;
+  border-radius: 12px;
+  background: var(--blue-soft);
+}
+
+
 /* Página dos estabelecimentos — catálogo compacto e pesquisável */
 .store-page{min-height:70vh;background:var(--bg)}
 .store-detail-hero{position:relative;overflow:hidden;background:linear-gradient(118deg,#03182e 0%,#07345d 72%,color-mix(in srgb,var(--store-color) 38%,#07345d) 100%);color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
