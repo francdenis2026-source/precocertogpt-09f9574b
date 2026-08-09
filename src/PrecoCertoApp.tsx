@@ -405,6 +405,23 @@ function getInitialTheme(): ColorTheme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+let themeTransitionFrame = 0;
+
+function commitColorTheme(theme: ColorTheme) {
+  const root = document.documentElement;
+  cancelAnimationFrame(themeTransitionFrame);
+  root.classList.add("theme-switching");
+  root.dataset.theme = theme;
+  root.style.colorScheme = theme;
+  localStorage.setItem("precocerto:theme", theme);
+
+  themeTransitionFrame = requestAnimationFrame(() => {
+    themeTransitionFrame = requestAnimationFrame(() => {
+      root.classList.remove("theme-switching");
+    });
+  });
+}
+
 function useColorTheme() {
   const [theme, setTheme] = useState<ColorTheme>(getInitialTheme);
   useEffect(() => {
@@ -413,12 +430,11 @@ function useColorTheme() {
     return () => window.removeEventListener("precocerto:theme", syncTheme);
   }, []);
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.style.colorScheme = theme;
-    localStorage.setItem("precocerto:theme", theme);
+    if (document.documentElement.dataset.theme !== theme) commitColorTheme(theme);
   }, [theme]);
   const toggleTheme = () => {
     const nextTheme: ColorTheme = theme === "light" ? "dark" : "light";
+    commitColorTheme(nextTheme);
     setTheme(nextTheme);
     window.dispatchEvent(new CustomEvent("precocerto:theme", { detail: nextTheme }));
   };

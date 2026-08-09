@@ -2669,3 +2669,11 @@ h1,h2,h3,.brand__word b,.brand__word strong,.button{font-family:var(--primary-fo
 .theme-toggle:focus-visible{outline:3px solid color-mix(in srgb,var(--green) 38%,transparent)!important;outline-offset:2px!important}
 @media(max-width:420px){.theme-toggle:not(.theme-toggle--compact) .theme-toggle__label{display:none}.theme-toggle:not(.theme-toggle--compact){padding:4px!important}}
 @media(prefers-reduced-motion:reduce){.theme-toggle,.theme-toggle__indicator,.theme-toggle__option{transition:none!important}}
+
+/* Troca de tema performática: evita centenas de animações e repaints simultâneos */
+html.theme-switching *,html.theme-switching *::before,html.theme-switching *::after{transition-property:none!important;transition-duration:0s!important;animation-play-state:paused!important}
+html.theme-switching .theme-toggle__indicator{transition-property:transform,background,box-shadow!important;transition-duration:.18s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
+body{transition:none!important}
+body,.site-header,.mobile-bar,.drawer-panel,.admin-shell,.admin-main,.auth-form-wrap,.auth-page,input,select,textarea,button{transition-property:transform,opacity!important}
+.theme-toggle{contain:layout style paint;will-change:transform}
+.theme-toggle__indicator{will-change:transform}
