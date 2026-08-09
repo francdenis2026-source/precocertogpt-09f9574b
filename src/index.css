@@ -1164,9 +1164,36 @@ body{background:radial-gradient(circle at 78% 0,#e8f2ff 0,transparent 30%),var(-
 .result-hero{background:linear-gradient(135deg,#fff,#eaf3ff);border-radius:16px}.analytics-grid article,.result-card,.basket-builder,.basket-summary,.plan-grid article,.generic-main,.generic-aside,.admin-card{border-radius:14px}.generic-hero{border-radius:18px;background:radial-gradient(circle at 82% 20%,rgba(8,116,255,.5),transparent 28%),linear-gradient(125deg,#04182b,#083c69)}
 .benefit-grid article,.basket-grid>article,.final-cta,.dashboard-preview{border-radius:18px}.section-heading h2{font-weight:750}.section-heading p{font-size:14px}
 
-@media(max-width:1180px){.hero-content{grid-template-columns:1fr 390px;gap:30px}.hero h1{font-size:58px}.visual-product-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:900px){.hero{height:670px}.hero-content{display:block}.hero-copy{padding-top:0}.hero-commerce{display:none}.visual-product-grid{grid-template-columns:repeat(2,1fr)}.result-card{grid-template-columns:30px 62px 1fr auto}.result-card .product-visual{width:62px;height:66px}}
-@media(max-width:620px){.hero{height:650px}.hero h1{font-size:45px}.featured-products{padding-top:58px}.visual-product-grid{grid-template-columns:1fr}.visual-product-image{height:220px}.result-card{grid-template-columns:24px 58px 1fr auto}.result-card .product-visual{display:block!important;width:58px;height:62px}.basket-items{grid-template-columns:1fr}.price-row .product-photo{width:48px;height:52px}.category-rail a{border-radius:8px}}
+@media (max-width: 1210px) {
+  .visual-product-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+@media (max-width: 900px) {
+  .hero { padding: 120px 0 60px !important; height: auto !important; min-height: 500px; }
+  .hero h1 { font-size: 3rem !important; }
+  .hero-content { grid-template-columns: 1fr !important; }
+  .hero-commerce { display: none; }
+  .visual-product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 1rem !important; }
+}
+
+@media (max-width: 640px) {
+  .hero h1 { font-size: 2.25rem !important; }
+  .visual-product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.5rem !important; }
+  .visual-product-card { border-radius: 12px !important; }
+  .visual-product-image { height: 160px !important; }
+  .visual-product-content { padding: 10px !important; }
+  .visual-product-name { font-size: 0.9rem !important; height: 2.6rem !important; margin-bottom: 5px !important; }
+  .visual-price strong { font-size: 1.1rem !important; }
+  .visual-product-actions .button--ghost { display: none; }
+  .visual-store { display: none !important; }
+  .mini-trend { display: none !important; }
+  .benefit-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 1.85rem !important; }
+  .visual-product-grid { grid-template-columns: 1fr !important; }
+}
 /* Professional vector brand */
 .brand__logo{display:block;width:176px;height:auto;filter:drop-shadow(0 1px 0 rgba(255,255,255,.18))}
 .brand__logo--compact{width:46px}
@@ -2667,6 +2694,31 @@ h1,h2,h3,.brand__word b,.brand__word strong,.button{font-family:var(--primary-fo
 @media (max-width: 1210px) {
   .desktop-nav--premium a { padding-inline: 12px !important; }
   .header-signup-button { display: none !important; }
+}
+
+@media (max-width: 1024px) {
+  .desktop-nav--premium a { font-size: 0.85rem; padding-inline: 8px !important; }
+  .header-location-wrapper { display: none; }
+}
+
+@media (max-width: 900px) {
+  .desktop-nav--premium { display: none !important; }
+  .header-actions { margin-right: 1rem; }
+  .header-actions .header-search-button { display: flex !important; }
+  .mobile-menu-button { display: grid !important; }
+}
+
+@media (max-width: 640px) {
+  .site-header { height: 64px !important; }
+  .header-inner { padding-inline: 1rem; }
+  .header-actions { gap: 0.5rem; }
+  .header-login-link { display: none !important; }
+  .header-logo-container .brand__logo-img { height: 48px !important; }
+  .icon-button { width: 38px; height: 38px; }
+}
+
+@media (max-width: 480px) {
+  .header-actions .header-search-button { display: none !important; }
 }
 
 @media (max-width: 1024px) {
