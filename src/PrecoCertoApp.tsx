@@ -250,13 +250,68 @@ function MobileBar({ basketCount }: { basketCount: number }) {
 
 function SearchBox({ value, setValue, products, hero = false }: { value: string; setValue: (v: string) => void; products: Product[]; hero?: boolean }) {
   const [focused, setFocused] = useState(false);
-  const suggestions = products.filter(p => !value || `${p.name} ${p.category} ${p.brand}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))).slice(0, 6);
-  function submit(event: FormEvent) { event.preventDefault(); const q = value.trim(); window.location.href = q ? `/buscar?q=${encodeURIComponent(q)}` : "/buscar"; }
+  const normalize = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  const q = normalize(value);
+  
+  const suggestions = useMemo(() => {
+    if (!value) return products.slice(0, 6);
+    return products.filter(p => 
+      normalize(p.name).includes(q) || 
+      normalize(p.category).includes(q) || 
+      normalize(p.brand).includes(q) ||
+      (p.barcode && p.barcode.includes(value))
+    ).slice(0, 6);
+  }, [value, products, q]);
+
+  function submit(event: FormEvent) { 
+    event.preventDefault(); 
+    const queryStr = value.trim(); 
+    window.location.href = queryStr ? `/buscar?q=${encodeURIComponent(queryStr)}` : "/buscar"; 
+  }
+
   return <div className={`search-combo ${hero ? "search-combo--hero" : ""}`}>
-    <form onSubmit={submit} role="search"><Search aria-hidden="true" /><label className="sr-only" htmlFor={hero ? "hero-search" : "page-search"}>Buscar produto</label><input id={hero ? "hero-search" : "page-search"} role="combobox" value={value} onChange={e => setValue(e.target.value)} onFocus={() => setFocused(true)} onBlur={() => setTimeout(() => setFocused(false), 120)} placeholder="Busque arroz, café, carne, leite..." autoComplete="off" aria-expanded={focused} aria-controls={hero ? "hero-suggestions" : "page-suggestions"} aria-autocomplete="list" /><button className="button button--primary" type="submit">Comparar preços <ArrowRight size={18} /></button></form>
-    {focused && <div className="suggestions" id={hero ? "hero-suggestions" : "page-suggestions"} role="listbox"><div className="suggestions-label">{value ? "Sugestões encontradas" : "Buscas populares em Feijó"}</div>{suggestions.map(p => <a role="option" aria-selected="false" href={`/buscar?q=${encodeURIComponent(p.name)}`} key={p.id}><span className="suggestion-icon"><PackageSearch size={18} /></span><span><strong>{p.name}</strong><small>{p.brand} • {p.size}</small></span><span className="suggestion-price"><small>a partir de</small><b>{money(p.minPrice)}</b><em>{p.establishment}</em></span></a>)}</div>}
+    <form onSubmit={submit} role="search">
+      <Search aria-hidden="true" />
+      <label className="sr-only" htmlFor={hero ? "hero-search" : "page-search"}>Buscar produto</label>
+      <input 
+        id={hero ? "hero-search" : "page-search"} 
+        role="combobox" 
+        value={value} 
+        onChange={e => setValue(e.target.value)} 
+        onFocus={() => setFocused(true)} 
+        onBlur={() => setTimeout(() => setFocused(false), 120)} 
+        placeholder="Busque arroz, café, carne, leite..." 
+        autoComplete="off" 
+        aria-expanded={focused} 
+        aria-controls={hero ? "hero-suggestions" : "page-suggestions"} 
+        aria-autocomplete="list" 
+      />
+      <button className="button button--primary" type="submit">Comparar preços <ArrowRight size={18} /></button>
+    </form>
+    {focused && (
+      <div className="suggestions" id={hero ? "hero-suggestions" : "page-suggestions"} role="listbox">
+        <div className="suggestions-label">{value ? "Sugestões encontradas" : "Buscas populares em Feijó"}</div>
+        {suggestions.length > 0 ? (
+          suggestions.map(p => (
+            <a role="option" aria-selected="false" href={`/buscar?q=${encodeURIComponent(p.name)}`} key={p.id}>
+              <span className="suggestion-icon"><PackageSearch size={18} /></span>
+              <span><strong>{p.name}</strong><small>{p.brand} • {p.size}</small></span>
+              <span className="suggestion-price"><small>a partir de</small><b>{money(p.minPrice)}</b><em>{p.establishment}</em></span>
+            </a>
+          ))
+        ) : value.length > 2 ? (
+          <div className="no-suggestions-prompt">
+             <small>Nenhuma sugestão para "{value}"</small>
+             <button onClick={() => setValue(value.normalize("NFD").replace(/[\u0300-\u036f]/g, ""))} className="text-link">
+               Tentar sem acentos?
+             </button>
+          </div>
+        ) : null}
+      </div>
+    )}
   </div>;
 }
+
 
 function PriceBadge({ product }: { product: Product }) {
   const saving = product.previousPrice ? Math.max(0, ((product.previousPrice - product.minPrice) / product.previousPrice) * 100) : 0;
