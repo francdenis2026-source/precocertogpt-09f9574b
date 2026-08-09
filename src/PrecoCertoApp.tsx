@@ -488,15 +488,17 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
   return <header className={headerClass} role="banner">
     <div className="shell header-inner">
       <div className="header-brand-zone">
-        <Brand compact />
-        <button 
-          type="button" 
-          onClick={() => window.location.href = "/estabelecimentos"} 
-          className="header-location"
-          aria-label="Ver estabelecimentos em Feijó, Acre"
-        >
-          <MapPin size={14} aria-hidden="true" /> <span>Feijó, AC</span>
-        </button>
+        <Brand compact className="header-logo-container" />
+        <div className="header-location-wrapper">
+          <button 
+            type="button" 
+            onClick={() => window.location.href = "/estabelecimentos"} 
+            className="header-location"
+            aria-label="Ver estabelecimentos em Feijó, Acre"
+          >
+            <MapPin size={14} aria-hidden="true" /> <span>Feijó, AC</span>
+          </button>
+        </div>
       </div>
       <nav className="desktop-nav desktop-nav--premium" aria-label="Navegação principal">
         {navLinks.map(link => {
