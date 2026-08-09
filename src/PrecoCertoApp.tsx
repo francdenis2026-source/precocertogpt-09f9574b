@@ -250,22 +250,45 @@ function MobileBar({ basketCount }: { basketCount: number }) {
 
 function SearchBox({ value, setValue, products, hero = false }: { value: string; setValue: (v: string) => void; products: Product[]; hero?: boolean }) {
   const [focused, setFocused] = useState(false);
+  const [localValue, setLocalValue] = useState(value);
+  const debounceTimer = useRef<any>(null);
+
+  // Debounce para evitar consultas excessivas ao digitar
+  useEffect(() => {
+    if (localValue === value) return;
+    
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setValue(localValue);
+    }, 400);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [localValue, setValue, value]);
+
+  // Sincroniza valor local se o pai mudar (ex: limpar filtros)
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
   const normalize = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-  const q = normalize(value);
+  const q = normalize(localValue);
   
   const suggestions = useMemo(() => {
-    if (!value) return products.slice(0, 6);
+    if (!localValue) return products.slice(0, 6);
     return products.filter(p => 
       normalize(p.name).includes(q) || 
       normalize(p.category).includes(q) || 
       normalize(p.brand).includes(q) ||
-      (p.barcode && p.barcode.includes(value))
+      (p.barcode && p.barcode.includes(localValue))
     ).slice(0, 6);
-  }, [value, products, q]);
+  }, [localValue, products, q]);
 
   function submit(event: FormEvent) { 
     event.preventDefault(); 
-    const queryStr = value.trim(); 
+    const queryStr = localValue.trim(); 
+    setValue(queryStr); // Aplica imediatamente no submit
     window.location.href = queryStr ? `/buscar?q=${encodeURIComponent(queryStr)}` : "/buscar"; 
   }
 
@@ -276,8 +299,8 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
       <input 
         id={hero ? "hero-search" : "page-search"} 
         role="combobox" 
-        value={value} 
-        onChange={e => setValue(e.target.value)} 
+        value={localValue} 
+        onChange={e => setLocalValue(e.target.value)} 
         onFocus={() => setFocused(true)} 
         onBlur={() => setTimeout(() => setFocused(false), 120)} 
         placeholder="Busque arroz, café, carne, leite..." 
@@ -288,6 +311,7 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
       />
       <button className="button button--primary" type="submit">Comparar preços <ArrowRight size={18} /></button>
     </form>
+
     {focused && (
       <div className="suggestions" id={hero ? "hero-suggestions" : "page-suggestions"} role="listbox">
         <div className="suggestions-label">{value ? "Sugestões encontradas" : "Buscas populares em Feijó"}</div>
@@ -1803,7 +1827,8 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 }
 
 
-function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction }: PageProps) {
+function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, fetchError, syncStatus }: PageProps & { fetchError?: string | null, syncStatus?: string }) {
+
   const pathname = useLocation().pathname;
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeStore, setActiveStore] = useState("all");
@@ -1812,9 +1837,11 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [updateRecency, setUpdateRecency] = useState("all"); // 'all', '7d', '24h'
   const [sortBy, setSortBy] = useState<"price" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
   const [chartPeriod, setChartPeriod] = useState("30d");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
   const randomFeatured = useRandomFeatured(products);
   
   useEffect(() => {
@@ -1834,11 +1861,12 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
   useEffect(() => {
     if (query || activeCategory !== "all" || activeStore !== "all" || activeBrand !== "all") {
-      setIsLoading(true);
-      const timer = setTimeout(() => setIsLoading(false), 400);
+      setIsSearching(true);
+      const timer = setTimeout(() => setIsSearching(false), 300);
       return () => clearTimeout(timer);
     }
   }, [query, activeCategory, activeStore, activeBrand]);
+
 
   const categories = useMemo(() => ["all", ...new Set(products.map(p => p.category))], [products]);
   const allBrands = useMemo(() => ["all", ...new Set(products.map(p => p.brand))], [products]);
@@ -2007,12 +2035,20 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
         </aside>
 
         <main className="search-results">
-          {isLoading ? (
+          {fetchError ? (
+            <div className="status-banner status-banner--error" style={{ margin: '0 0 2rem 0' }}>
+              <AlertTriangle size={18} />
+              <span>Erro ao atualizar dados: {fetchError}. Exibindo última versão estável.</span>
+            </div>
+          ) : null}
+
+          {isSearching ? (
             <div className="search-loading">
               <div className="spinner" />
               <p>Otimizando busca para Feijó...</p>
             </div>
           ) : paginated.length > 0 ? (
+
             <>
               <div className="results-grid">
                 {paginated.map(p => {
@@ -2211,6 +2247,9 @@ export default function PrecoCertoApp() {
   const [query,setQuery]=useState("");
   const [cart,setCart]=useState<Product[]>(() => JSON.parse(localStorage.getItem("precocerto:basket") || "[]"));
   const [toast,setToast]=useState("");
+  const [syncStatus, setSyncStatus] = useState<"online" | "syncing" | "error">("online");
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  
   const [user, setUser] = useState<{name: string} | null>(() => {
     const saved = localStorage.getItem("precocerto:user");
     return saved ? JSON.parse(saved) : null;
@@ -2222,34 +2261,41 @@ export default function PrecoCertoApp() {
 
   useEffect(() => {
     let alive = true;
-    const q = new URLSearchParams(window.location.search).get("q") ?? "";
-    if (q) setQuery(q);
+    let timer: any;
 
-    // Initial load: Fetch everything once to allow client-side filtering
-    // or fetch based on query if using remote search.
-    // Given the previous issue, we want to ensure search results are reactive.
-    const interval = setInterval(() => {
-      fetchCatalog(query).then(data => {
+    const q = new URLSearchParams(window.location.search).get("q") ?? "";
+    if (q && !query) setQuery(q);
+
+    const load = async () => {
+      if (!alive) return;
+      setSyncStatus("syncing");
+      
+      try {
+        const data = await fetchCatalog(query);
         if (!alive) return;
+        
         setProducts(data.products);
         if (data.stores.length) setStores(data.stores);
         setMetrics(data.metrics);
-      }).catch(err => console.error(err));
-    }, query ? 30000 : 300000); // 30s se pesquisando, 5m se parado
-
-    fetchCatalog(query).then(data => {
-      if (!alive) return;
-      setProducts(data.products);
-      if (data.stores.length) setStores(data.stores);
-      setMetrics(data.metrics);
-    }).catch(err => console.error(err));
-
-    return () => { 
-      alive = false; 
-      clearInterval(interval);
+        setSyncStatus("online");
+        setFetchError(null);
+      } catch (err) {
+        if (!alive) return;
+        setSyncStatus("error");
+        setFetchError(err instanceof Error ? err.message : "Falha na conexão");
+      }
+      
+      // Auto-refresh: 30s se pesquisando, 2m se inativo
+      timer = setTimeout(load, query ? 30000 : 120000);
     };
 
+    load();
+    return () => { 
+      alive = false; 
+      clearTimeout(timer);
+    };
   }, [query]);
+
 
   useEffect(() => {
     localStorage.setItem("precocerto:basket", JSON.stringify(cart));
@@ -2275,7 +2321,7 @@ export default function PrecoCertoApp() {
     }
   }
 
-  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction}),[products,stores,metrics,query]);
+  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,fetchError,syncStatus}),[products,stores,metrics,query,fetchError,syncStatus]);
 
   const handleAdminAuth = (success: boolean) => {
     if (success) {
