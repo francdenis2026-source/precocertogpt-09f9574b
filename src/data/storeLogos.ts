@@ -1,5 +1,6 @@
 const STORE_LOGO_BASE_URL =
   "https://kqueiohjadwzxafdrrxk.supabase.co/storage/v1/object/public/products/establishments";
+const STORE_LOGO_VERSION = "20260809-2";
 
 const normalizeStoreName = (name: string) => name
   .normalize("NFD")
@@ -15,6 +16,12 @@ const STORE_LOGOS = [
   { aliases: ["comercial vanderley", "comercial vandereley"], file: "comercial-vanderley.webp" },
   { aliases: ["drogarias ultra popular", "drogaria ultra popular", "ultra popular"], file: "drogaria-ultra-popular.webp" },
   { aliases: ["recanto da carne"], file: "recanto-da-carne.webp" },
+  { aliases: ["supermercado 100 feijoense", "100 feijoense", "supermercado 100"], file: "100-por-cento.webp" },
+  { aliases: ["comercial claudia", "comercial claudia feijo"], file: "comercial-claudia.webp" },
+  { aliases: ["facem comercio f m araujo", "facem comercio", "facem"], file: "facem-comercio.webp" },
+  { aliases: ["mercantil reboucas"], file: "mercantil-reboucas.webp" },
+  { aliases: ["comercial parceirao", "parceirao"], file: "parceirao.webp" },
+  { aliases: ["varejao contamigos", "contamigos"], file: "varejao-contamigos.webp" },
 ] as const;
 
 export function getStoreLogoUrl(name: string): string | undefined {
@@ -22,5 +29,5 @@ export function getStoreLogoUrl(name: string): string | undefined {
   const match = STORE_LOGOS.find(({ aliases }) =>
     aliases.some(alias => normalizedName === alias || normalizedName.includes(alias)),
   );
-  return match ? `${STORE_LOGO_BASE_URL}/${match.file}` : undefined;
+  return match ? `${STORE_LOGO_BASE_URL}/${match.file}?v=${STORE_LOGO_VERSION}` : undefined;
 }
