@@ -76,6 +76,17 @@ function addAuditLog(action: string, type: "success" | "warning" | "error" = "su
 
 
 const productImages: Record<string, string> = {
+  // Mapeamento manual para o catálogo local (seed)
+  "arroz-tio-joao-5kg": "/products/arroz-tio-joao-5kg.png",
+  "cafe-3-coracoes-500g": "/products/cafe-3-coracoes-500g.jpg",
+  "leite-italac-1l": "/products/leite-italac-1l.jpg",
+  "feijao-kicaldo-1kg": "/products/feijao-kicaldo-1kg.jpg",
+  "oleo-liza-900ml": "/products/oleo-liza-900ml.jpg",
+  "oleo-soja-liza-900ml": "/products/oleo-liza-900ml.jpg",
+  "acucar-uniao-1kg": "/products/acucar-uniao-1kg.jpg",
+  "detergente-ype-500ml": "/products/detergente-vida-neutro-500ml.jpg",
+
+  // Mapeamento por UUID para dados do Supabase (conforme auditoria)
   "c1d78817-20b9-40b2-b12d-a9bc73152d47": "/products/detergente-vida-neutro-500ml.jpg",
   "8519fc88-a26f-433d-a992-6cad775efc83": "/products/neston-3-cereais-nestle-360g.jpg",
   "0ce0efbf-2c25-4b0a-a80f-c5402bc128d1": "/products/biscoito-spantoo-80g.jpg",
@@ -126,8 +137,6 @@ const productImages: Record<string, string> = {
   "159e9aa1-7848-4b39-b101-291e21f8b217": "/products/cup-noodles-nissin-costela-70g.jpg",
   "72a3291b-4f84-433c-9ba3-e445935fe0d9": "/products/seleta-de-legumes-em-conserva-ole-200g.jpg",
   "054fdaa5-99b2-45a8-909e-30981c8b7625": "/products/feijao-carioca-bernardo-1kg.jpg",
-  "detergente-ype-500ml": "/products/detergente-vida-neutro-500ml.jpg",
-  "arroz-tio-joao-5kg": "/products/arroz-tio-joao-5kg.png",
 };
 
 function ProductImage({ product, size = "default", eager = false }: { product: Product | any; size?: "compact" | "default" | "hero" | "basket"; eager?: boolean }) {
@@ -135,18 +144,27 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   
   // Identificamos se o produto é um detergente pelo nome ou categoria para evitar o fallback de arroz
   const isDetergent = product.name?.toLowerCase().includes("detergente") || product.category?.toLowerCase().includes("limpeza");
+  const isBean = product.name?.toLowerCase().includes("feijao");
+  const isOil = product.name?.toLowerCase().includes("oleo");
+  
   const detergentFallback = "/products/detergente-vida-neutro-500ml.jpg";
+  const beanFallback = "/products/feijao-kicaldo-1kg.jpg";
+  const oilFallback = "/products/oleo-liza-900ml.jpg";
+
+  let selectedFallback = fallback;
+  if (isDetergent) selectedFallback = detergentFallback;
+  else if (isBean) selectedFallback = beanFallback;
+  else if (isOil) selectedFallback = oilFallback;
 
   const src = product.image_url || 
               productImages[product.slug] || 
               productImages[String(product.id)] || 
-              (isDetergent ? detergentFallback : fallback);
+              selectedFallback;
   
   return <span className={`product-photo product-photo--${size}`}><img src={src} alt={`Embalagem de ${product.name}`} loading={eager ? "eager" : "lazy"} onError={(e) => {
     const target = e.target as HTMLImageElement;
-    const currentFallback = isDetergent ? detergentFallback : fallback;
-    if (target.src !== currentFallback) {
-      target.src = currentFallback;
+    if (target.src !== selectedFallback) {
+      target.src = selectedFallback;
     }
   }} /><i aria-hidden="true" /></span>;
 }
