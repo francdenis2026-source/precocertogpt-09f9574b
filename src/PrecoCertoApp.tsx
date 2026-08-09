@@ -3097,6 +3097,7 @@ function PriceReportModal({ product, onClose }: { product: Product; onClose: () 
 function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, fetchError, syncStatus, user }: PageProps & { fetchError?: string | null, syncStatus?: string, user?: any }) {
   const [compareList, setCompareList] = useState<Product[]>([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
 
   const pathname = useLocation().pathname;
@@ -3106,7 +3107,6 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [updateRecency, setUpdateRecency] = useState("all"); // 'all', '7d', '24h'
   const [sortBy, setSortBy] = useState<"price" | "unit" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
-  const [chartPeriod, setChartPeriod] = useState("30d");
   const [isSearching, setIsSearching] = useState(false);
 
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -3201,6 +3201,32 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
+  const activeFilterCount = [activeCategory, activeStore, activeBrand].filter(value => value !== "all").length
+    + (updateRecency !== "all" ? 1 : 0)
+    + (priceRange[0] > 0 || priceRange[1] < 1000 ? 1 : 0);
+
+  const clearFilters = () => {
+    setQuery("");
+    setActiveCategory("all");
+    setActiveStore("all");
+    setActiveBrand("all");
+    setPriceRange([0, 1000]);
+    setUpdateRecency("all");
+    setSortBy(pathname === "/melhores-precos" ? "variation" : "price");
+  };
+
+  const toggleComparison = (product: Product) => {
+    if (compareList.some(item => item.id === product.id)) {
+      setCompareList(current => current.filter(item => item.id !== product.id));
+      return;
+    }
+    if (compareList.length >= 4) {
+      alert("Você pode comparar até 4 produtos por vez.");
+      return;
+    }
+    setCompareList(current => [...current, product]);
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [query, activeCategory, activeStore, activeBrand, sortBy, priceRange, updateRecency]);
@@ -3232,232 +3258,65 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
           </div>
         </div>
       )}
-      <section className="search-header" style={{ marginBottom: '2.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '2rem' }}>
-          <div style={{ flex: '1', minWidth: '300px' }}>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: '0.5rem' }}>
-              {pathname === "/melhores-precos" ? "Melhores Ofertas" : "Comparador de Preços"}
-            </h1>
-            <p style={{ fontSize: '1.1rem', color: 'var(--muted)', maxWidth: '600px' }}>
-              {pathname === "/melhores-precos" 
-                ? "Economize agora com os produtos que tiveram as maiores quedas de preço em Feijó." 
-                : `Encontre o menor valor entre ${stores.length} estabelecimentos locais em tempo real.`}
-            </p>
+      <section className="search-command">
+        <div className="search-command__intro">
+          <div>
+            <span className="eyebrow">Pesquisa inteligente em Feijó</span>
+            <h1>{pathname === "/melhores-precos" ? "Ofertas que realmente valem a pena" : "Compare antes de comprar"}</h1>
+            <p>{pathname === "/melhores-precos" ? "Produtos ordenados pela queda real de preço e data de verificação." : `Pesquise em ${metrics.products.toLocaleString("pt-BR")} produtos de ${stores.length} estabelecimentos locais.`}</p>
           </div>
-          
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <button className="button button--outline" onClick={() => handleShare()} style={{ height: '48px' }}>
-              <Share2 size={18} /> <span className="hide-mobile">Compartilhar</span>
-            </button>
-            <div className="sort-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'var(--surface)', padding: '0 1rem', height: '48px', borderRadius: '12px', border: '1.5px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
-              <SlidersHorizontal size={16} color="var(--tertiary)" />
-              <select className="sort-select" value={sortBy} onChange={e => setSortBy(e.target.value as any)} style={{ border: 'none', background: 'transparent', outline: 'none', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', color: 'var(--navy)' }}>
-                <option value="price">Menor preço</option>
-                <option value="unit">Menor preço por unidade</option>
-                <option value="date">Mais recentes</option>
-                <option value="variation">Maior queda</option>
-              </select>
-            </div>
-          </div>
+          <div className="search-command__trust"><ShieldCheck/><span><b>{syncStatus === "online" ? "Dados sincronizados" : "Atualização em andamento"}</b><small>Preços com origem e data de coleta</small></span></div>
         </div>
-
-        <div className="search-box-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <SearchBox value={query} setValue={setQuery} products={products} />
+        <div className="search-command__box"><SearchBox value={query} setValue={setQuery} products={products} /></div>
+        <div className="search-command__actions">
+          <button className="search-filter-trigger" onClick={() => setFiltersOpen(open => !open)} aria-expanded={filtersOpen}><SlidersHorizontal/> Filtros {activeFilterCount > 0 && <b>{activeFilterCount}</b>}</button>
+          <button onClick={() => handleShare()}><Share2/> Compartilhar busca</button>
+          <span><PackageSearch/> {filtered.length.toLocaleString("pt-BR")} resultados</span>
         </div>
       </section>
 
-      <div className="search-layout">
-        <aside className="search-sidebar">
-          <div className="sidebar-sticky">
-            <div className="filter-card">
-              <div className="filter-section">
-                <h3>Categorias</h3>
-                <div className="filter-pills">
-                  {categories.map(c => (
-                    <button key={c} className={activeCategory === c ? "active" : ""} onClick={() => setActiveCategory(c)}>
-                      {c === "all" ? "Todas" : c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="filter-section">
-                <h3>Estabelecimentos</h3>
-                <div className="filter-pills">
-                  {allStores.map(s => (
-                    <button key={s} className={activeStore === s ? "active" : ""} onClick={() => setActiveStore(s)}>
-                      {s === "all" ? "Todos" : s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="filter-section">
-                <h3>Marcas</h3>
-                <div className="filter-pills">
-                  {allBrands.slice(0, 15).map(b => (
-                    <button key={b} className={activeBrand === b ? "active" : ""} onClick={() => setActiveBrand(b)}>
-                      {b === "all" ? "Todas" : b}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className={`professional-search-layout ${filtersOpen ? "filters-open" : ""}`}>
+        <aside className="professional-filters" aria-label="Filtros da busca">
+          <header><div><SlidersHorizontal/><b>Refinar resultados</b></div>{activeFilterCount > 0 && <button onClick={clearFilters}>Limpar</button>}</header>
+          <label><span>Categoria</span><select value={activeCategory} onChange={e => setActiveCategory(e.target.value)}>{categories.map(value => <option value={value} key={value}>{value === "all" ? "Todas as categorias" : value}</option>)}</select></label>
+          <label><span>Estabelecimento</span><select value={activeStore} onChange={e => setActiveStore(e.target.value)}>{allStores.map(value => <option value={value} key={value}>{value === "all" ? "Todos os estabelecimentos" : value}</option>)}</select></label>
+          <label><span>Marca</span><select value={activeBrand} onChange={e => setActiveBrand(e.target.value)}>{allBrands.map(value => <option value={value} key={value}>{value === "all" ? "Todas as marcas" : value}</option>)}</select></label>
+          <fieldset><legend>Faixa de preço</legend><div className="professional-price-range"><label><small>Mínimo</small><input type="number" min="0" value={priceRange[0]} onChange={e => setPriceRange([Math.max(0, Number(e.target.value)), priceRange[1]])}/></label><span>—</span><label><small>Máximo</small><input type="number" min="0" value={priceRange[1]} onChange={e => setPriceRange([priceRange[0], Math.max(0, Number(e.target.value))])}/></label></div></fieldset>
+          <fieldset><legend>Atualização do preço</legend><div className="professional-radio-list">{[["all","Qualquer data"],["24h","Últimas 24 horas"],["7d","Últimos 7 dias"]].map(([value,label]) => <label key={value}><input type="radio" name="recency" checked={updateRecency === value} onChange={() => setUpdateRecency(value)}/><span>{label}</span></label>)}</div></fieldset>
+          <button className="button button--primary professional-filter-apply" onClick={() => setFiltersOpen(false)}>Ver {filtered.length} resultados</button>
         </aside>
 
-        <main className="search-results">
-          {/* O aviso de erro foi movido para o topo da página para maior visibilidade */}
+        <main className="professional-search-results">
+          <header className="professional-results-head"><div><span>Catálogo local</span><h2>{query ? `Resultados para “${query}”` : "Produtos disponíveis"}</h2><small>{filtered.length} itens encontrados • página {Math.min(currentPage, Math.max(totalPages, 1))} de {Math.max(totalPages, 1)}</small></div><label><span>Ordenar por</span><select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)}><option value="price">Menor preço</option><option value="unit">Menor preço por unidade</option><option value="date">Atualização mais recente</option><option value="variation">Maior queda de preço</option></select></label></header>
 
-          {isSearching ? (
-            <div className="search-loading">
-              <div className="spinner" />
-              <p>Otimizando busca para Feijó...</p>
-            </div>
-          ) : paginated.length > 0 ? (
-
-            <>
-              <div className="results-grid">
-                {paginated.map(p => {
-                  const daysSinceUpdate = Math.floor((new Date().getTime() - new Date(p.capturedAt).getTime()) / (1000 * 60 * 60 * 24));
-                  const isOutdated = daysSinceUpdate >= 7;
-
-                  return (
-                    <article className="result-card" key={p.id}>
-                      <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => {
-                        if (!user) {
-                          alert("Apenas usuários cadastrados podem favoritar produtos.");
-                          return;
-                        }
-                        handleFavorite(String(p.id));
-                      }}>
-                        <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
-                      </button>
-                      <div className="result-image" onClick={() => setSelectedProduct(p)} style={{ cursor: 'pointer' }}><ProductImage product={p} size="default" /></div>
-                      <div className="result-content">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>
-                          <span className="category-tag">{p.category}</span>
-                          <FreshnessBadge product={p} />
-                        </div>
-                        <h3 style={{ cursor: 'pointer' }} onClick={() => setSelectedProduct(p)}>{p.name}</h3>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                          <small>{p.brand} • {p.size}</small>
-                          <UnitPriceTag product={p} />
-                          <a href={`/estabelecimento/${p.establishmentSlug}`} className="establishment-link-highlight">
-                            <Store size={14} style={{ marginRight: '4px' }} />
-                            {p.establishment}
-                          </a>
-
-                        </div>
-                        <div className="card-metrics">
-                          <div className="metric-badge" title="Última verificação">
-                            <Clock3 size={12} />
-                            <span>{new Date(p.capturedAt).toLocaleDateString('pt-BR')}</span>
-                          </div>
-                          <div className="metric-badge" title="Origem dos dados">
-                            <ShieldCheck size={12} />
-                            <span>{p.source || "Coleta Direta"}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="history-chart-container">
-                          <div className="chart-header">
-                            <h4><LineChart size={14} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Histórico em Feijó</h4>
-                            <select className="chart-period-select" value={chartPeriod} onChange={e => setChartPeriod(e.target.value)}>
-                              <option value="7d">7 dias</option>
-                              <option value="30d">30 dias</option>
-                              <option value="90d">90 dias</option>
-                            </select>
-                          </div>
-                          <div className="mini-sparkline">
-                            <svg viewBox="0 0 100 30" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-                              <path 
-                                d={`M 0 20 Q 25 ${15 + (p.id as any % 5)} 50 ${20 - (p.id as any % 8)} T 100 ${10 + (p.id as any % 10)}`} 
-                                fill="none" 
-                                stroke="var(--blue)" 
-                                strokeWidth="2"
-                              />
-                              <circle cx="100" cy={10 + (p.id as any % 10)} r="2" fill="var(--blue)" />
-                            </svg>
-                          </div>
-                          <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
-                            Variação de {Math.round((1 - p.minPrice / p.maxPrice) * 100)}% no período.
-                          </p>
-                        </div>
-
-                        <div className="price-row" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                          <div className="price-comparison-bar">
-                            <div className="comparison-item min" title={`Encontrado em: ${p.establishment}`}>
-                              <small>Mais Barato</small>
-                              <strong>{money(p.minPrice)}</strong>
-                              <span className="location-tag">{p.establishment}</span>
-                            </div>
-                            <div className="comparison-item avg">
-                              <small>Média Local</small>
-                              <b>{money(p.avgPrice)}</b>
-                            </div>
-                            <div className="comparison-item max">
-                              <small>Mais Caro</small>
-                              <span>{money(p.maxPrice)}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="result-actions" style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button className="button button--primary" style={{ flex: 1 }} onClick={() => addBasket(p)}><Plus /> Cesta</button>
-                          <button 
-                            className={`button ${compareList.some(i => i.id === p.id) ? "button--primary" : "button--outline"}`} 
-                            title="Comparar com outros produtos" 
-                            onClick={() => {
-                              if (compareList.some(i => i.id === p.id)) {
-                                setCompareList(prev => prev.filter(i => i.id !== p.id));
-                              } else if (compareList.length < 4) {
-                                setCompareList(prev => [...prev, p]);
-                              } else {
-                                alert("Você pode comparar até 4 produtos por vez.");
-                              }
-                            }}
-                          >
-                            <LineChart size={16} />
-                          </button>
-                          <button className="button button--outline" title="Compartilhar produto" onClick={() => handleShare(p)}><Share2 size={16} /></button>
-                          {isEnabled("priceReports") && (
-                            <button className="button button--ghost" title="Informar preço incorreto" aria-label="Informar preço incorreto" onClick={() => setReportProduct(p)}><Flag size={16} /></button>
-                          )}
-                        </div>
-
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="admin-pagination" style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
-                  <button className="button button--outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Anterior</button>
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                      <button 
-                        key={page} 
-                        className={`button ${currentPage === page ? 'button--primary' : 'button--ghost'}`}
-                        style={{ minWidth: '40px', padding: '0.5rem' }}
-                        onClick={() => setCurrentPage(page)}
-                      >
-                        {page}
-                      </button>
-                    ))}
+          {isSearching ? <div className="search-loading"><div className="spinner"/><p>Analisando o catálogo local…</p></div> : paginated.length > 0 ? <>
+            <div className="professional-results-grid">
+              {paginated.map(product => {
+                const selected = compareList.some(item => item.id === product.id);
+                const saving = Math.max(0, product.avgPrice - product.minPrice);
+                const spread = product.maxPrice > 0 ? Math.round((1 - product.minPrice / product.maxPrice) * 100) : 0;
+                const history = product.price_history || [];
+                const trend = product.previousPrice ? ((product.minPrice - product.previousPrice) / product.previousPrice) * 100 : null;
+                return <article className={`professional-result-card ${selected ? "is-selected" : ""}`} key={product.id}>
+                  <div className="professional-result-card__visual" onClick={() => setSelectedProduct(product)}><ProductImage product={product} size="default"/><span className="category-tag">{product.category}</span><button className={`floating-favorite ${favorites.includes(String(product.id)) ? "active" : ""}`} aria-label={`Favoritar ${product.name}`} onClick={event => {event.stopPropagation();if (!user) return alert("Apenas usuários cadastrados podem favoritar produtos.");handleFavorite(String(product.id));}}><Heart fill={favorites.includes(String(product.id)) ? "currentColor" : "none"}/></button></div>
+                  <div className="professional-result-card__body">
+                    <div className="professional-result-card__meta"><span>{product.brand} • {product.size}</span><FreshnessBadge product={product}/></div>
+                    <h3 onClick={() => setSelectedProduct(product)}>{product.name}</h3>
+                    <a className="professional-result-store" href={`/estabelecimento/${product.establishmentSlug}`}><Store/><span><b>{product.establishment}</b><small>{product.neighborhood}</small></span><ArrowRight/></a>
+                    <div className="professional-price-main"><span><small>Menor preço encontrado</small><strong>{money(product.minPrice)}</strong></span><UnitPriceTag product={product}/></div>
+                    <div className="professional-price-analysis"><span><small>Média local</small><b>{money(product.avgPrice)}</b></span><span><small>Maior preço</small><b>{money(product.maxPrice)}</b></span><span className="saving"><small>Economia potencial</small><b>{money(saving)}</b></span></div>
+                    <div className="professional-insights">
+                      <span><TrendingDown/><b>{spread}%</b> de diferença entre lojas</span>
+                      {trend !== null && <span className={trend <= 0 ? "positive" : "negative"}>{trend <= 0 ? <TrendingDown/> : <TrendingUp/>}<b>{Math.abs(Math.round(trend))}%</b> desde o preço anterior</span>}
+                      {history.length > 1 && <button onClick={() => setSelectedProduct(product)}><LineChart/> Ver {history.length} registros históricos</button>}
+                    </div>
+                    <div className="professional-result-card__footer"><button className="button button--primary" onClick={() => addBasket(product)}><Plus/> Adicionar à cesta</button><button className={`professional-compare-button ${selected ? "selected" : ""}`} onClick={() => toggleComparison(product)}>{selected ? <CheckCircle2/> : <LineChart/>}{selected ? "Selecionado" : "Comparar"}</button>{isEnabled("priceReports") && <button className="professional-report-button" aria-label="Informar preço incorreto" onClick={() => setReportProduct(product)}><Flag/></button>}</div>
                   </div>
-                  <button className="button button--outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Próximo</button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="no-results">
-              <PackageSearch size={48} />
-              <h2>Nenhum produto encontrado</h2>
-              <p>Não encontramos "{query}". Tente variações como "{normalize(query)}" ou outros termos.</p>
-              <button className="button button--outline" onClick={() => { setQuery(""); setActiveCategory("all"); setActiveStore("all"); setActiveBrand("all"); }}>Limpar tudo</button>
+                </article>;
+              })}
             </div>
-          )}
+            {totalPages > 1 && <nav className="professional-pagination" aria-label="Paginação"><button onClick={() => setCurrentPage(page => Math.max(1,page - 1))} disabled={currentPage === 1}><ArrowLeft/> Anterior</button><span>Página <b>{currentPage}</b> de {totalPages}</span><button onClick={() => setCurrentPage(page => Math.min(totalPages,page + 1))} disabled={currentPage === totalPages}>Próxima <ArrowRight/></button></nav>}
+          </> : <div className="no-results"><PackageSearch/><h2>Nenhum produto encontrado</h2><p>Revise o termo pesquisado ou remova alguns filtros.</p><button className="button button--outline" onClick={clearFilters}>Limpar busca e filtros</button></div>}
         </main>
       </div>
 
@@ -3524,24 +3383,17 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
               <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
                 <h4>Histórico de Variação</h4>
-                <div style={{ height: '120px', width: '100%', marginTop: '1rem', position: 'relative' }}>
-                   <svg viewBox="0 0 500 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-                    <path 
-                      d="M 0 80 Q 125 40 250 60 T 500 20" 
-                      fill="none" 
-                      stroke="var(--blue)" 
-                      strokeWidth="3"
-                    />
-                    <circle cx="0" cy="80" r="4" fill="var(--blue)" />
-                    <circle cx="250" cy="60" r="4" fill="var(--blue)" />
-                    <circle cx="500" cy="20" r="4" fill="var(--blue)" />
-                  </svg>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
-                    <span>Há 30 dias</span>
-                    <span>Há 15 dias</span>
-                    <span>Hoje</span>
+                {selectedProduct.price_history && selectedProduct.price_history.length > 1 ? (
+                  <div className="real-price-history">
+                    {selectedProduct.price_history.slice(-8).map((record, index, records) => {
+                      const previous = records[index - 1];
+                      const variation = previous ? ((record.value - previous.value) / previous.value) * 100 : 0;
+                      return <div key={`${record.date}-${index}`}><span><Clock3/><small>{new Date(record.date).toLocaleDateString("pt-BR")}</small></span><strong>{money(record.value)}</strong>{index > 0 && <em className={variation <= 0 ? "down" : "up"}>{variation <= 0 ? <TrendingDown/> : <TrendingUp/>}{Math.abs(variation).toFixed(1)}%</em>}</div>;
+                    })}
                   </div>
-                </div>
+                ) : (
+                  <div className="history-unavailable"><LineChart/><span><b>Histórico ainda insuficiente</b><small>Exibiremos a evolução assim que houver pelo menos duas coletas verificadas.</small></span></div>
+                )}
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
@@ -3587,8 +3439,8 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
           <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>
             {compareList.length} {compareList.length === 1 ? 'produto selecionado' : 'produtos selecionados'}
           </div>
-          <button className="button button--primary" onClick={() => setShowCompareModal(true)}>
-            Comparar agora <LineChart size={18} />
+          <button className="button button--primary" disabled={compareList.length < 2} onClick={() => setShowCompareModal(true)}>
+            {compareList.length < 2 ? "Selecione mais 1" : "Comparar agora"} <LineChart size={18} />
           </button>
         </div>
       )}
