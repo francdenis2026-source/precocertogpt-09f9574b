@@ -2228,15 +2228,27 @@ export default function PrecoCertoApp() {
     // Initial load: Fetch everything once to allow client-side filtering
     // or fetch based on query if using remote search.
     // Given the previous issue, we want to ensure search results are reactive.
+    const interval = setInterval(() => {
+      fetchCatalog(query).then(data => {
+        if (!alive) return;
+        setProducts(data.products);
+        if (data.stores.length) setStores(data.stores);
+        setMetrics(data.metrics);
+      }).catch(err => console.error(err));
+    }, query ? 30000 : 300000); // 30s se pesquisando, 5m se parado
+
     fetchCatalog(query).then(data => {
       if (!alive) return;
-      // We only update if we got data or if we're doing a search that might return empty
       setProducts(data.products);
       if (data.stores.length) setStores(data.stores);
       setMetrics(data.metrics);
     }).catch(err => console.error(err));
 
-    return () => { alive = false; };
+    return () => { 
+      alive = false; 
+      clearInterval(interval);
+    };
+
   }, [query]);
 
   useEffect(() => {
