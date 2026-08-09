@@ -16,7 +16,7 @@ import { isEnabled } from "./config/features";
 import { freshnessLabels, priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
-import { optimizeBasket, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
+import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
 
 const initialCatalog = buildCatalog();
 const initialProducts: Product[] = initialCatalog.products;
