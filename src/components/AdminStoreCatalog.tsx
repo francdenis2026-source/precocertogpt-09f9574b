@@ -1,6 +1,7 @@
 import { Camera, CheckCircle2, Loader2, PackagePlus, Search, Store, Upload, X } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { getStoreLogoUrl } from "../data/storeLogos";
 
 type StoreRecord = { id: string; name: string; neighborhood: string | null; brand_color: string | null };
 type ProductRecord = {
@@ -209,9 +210,14 @@ export function AdminStoreCatalog({ onAudit }: { onAudit: (message: string, type
     {notice && <div className="store-catalog-message success"><CheckCircle2/> {notice}<button onClick={() => setNotice("")}><X/></button></div>}
 
     <section className="store-summary-grid">
-      {summaries.map(store => <button key={store.id} className={store.id === selectedStoreId ? "active" : ""} onClick={() => setSelectedStoreId(store.id)}>
-        <i style={{ background: store.brand_color ?? "#1473e6" }}><Store/></i><span><b>{store.name}</b><small>{store.neighborhood || "Bairro não informado"}</small></span><strong>{store.products}</strong><em>produtos</em>
-      </button>)}
+      {summaries.map(store => {
+        const logoUrl = getStoreLogoUrl(store.name);
+        return <button key={store.id} className={store.id === selectedStoreId ? "active" : ""} onClick={() => setSelectedStoreId(store.id)}>
+          <i className={logoUrl ? "has-image" : ""} style={{ background: store.brand_color ?? "#1473e6" }}>
+            {logoUrl ? <img src={logoUrl} alt={`Logomarca ${store.name}`} loading="lazy" /> : <Store/>}
+          </i><span><b>{store.name}</b><small>{store.neighborhood || "Bairro não informado"}</small></span><strong>{store.products}</strong><em>produtos</em>
+        </button>;
+      })}
     </section>
 
     <section className="store-catalog-workspace">
