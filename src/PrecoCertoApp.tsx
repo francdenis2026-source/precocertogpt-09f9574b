@@ -2178,6 +2178,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                 </div>
               </div>
             </div>
+          </div>
         </aside>
 
         <main className="search-results">
