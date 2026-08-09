@@ -523,9 +523,12 @@ body {
   color: var(--blue); 
   background: var(--blue-soft);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--blue-glass);
 }
 .desktop-nav a:active {
-  transform: translateY(1px) scale(0.98);
+  transform: translateY(0.5px) scale(0.98);
+  background: var(--surface-3);
+  color: var(--blue-hover);
 }
 .desktop-nav a.active {
   color: var(--blue);
