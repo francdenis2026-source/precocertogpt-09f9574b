@@ -2529,11 +2529,19 @@ export default function PrecoCertoApp() {
         const data = await fetchCatalog(query);
         if (!alive) return;
         
-        setProducts(data.products);
-        if (data.stores.length) setStores(data.stores);
+        if (data.products && data.products.length > 0) {
+          setProducts(data.products);
+          setFetchError(null);
+        } else if (data.error) {
+          setFetchError(data.error);
+        }
+        
+        if (data.stores && data.stores.length > 0) {
+          setStores(data.stores);
+        }
+        
         setMetrics(data.metrics);
         setSyncStatus("online");
-        setFetchError(null);
       } catch (err) {
         if (!alive) return;
         setSyncStatus("error");

@@ -176,9 +176,9 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
     }));
 
     const metrics: PlatformMetrics = {
-      products: Math.max(verifiedDatasetMetrics.products, productRows.length),
-      prices: Math.max(verifiedDatasetMetrics.prices, priceRows.length),
-      stores: Math.max(verifiedDatasetMetrics.stores, storeRows.length),
+      products: productRows.length || verifiedDatasetMetrics.products,
+      prices: priceRows.length || verifiedDatasetMetrics.prices,
+      stores: storeRows.length || verifiedDatasetMetrics.stores,
     };
 
     return {
