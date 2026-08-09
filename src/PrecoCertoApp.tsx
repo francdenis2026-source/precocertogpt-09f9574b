@@ -86,6 +86,12 @@ import alpesMacaAsset from "./assets/alpes-maca.png.asset.json";
 import minuanoMarinhaAsset from "./assets/minuano-marinha.png.asset.json";
 import ypeLimaoAsset from "./assets/ype-limao.png.asset.json";
 
+import itamaratyMorangoAsset from "./assets/biscoito_itamaraty_morango.png.asset.json";
+import escureto35gAsset from "./assets/biscoito_escureto_35g.png.asset.json";
+import esponjaBrilhusAsset from "./assets/esponja_brilhus.png.asset.json";
+import paoCestaAsset from "./assets/pao_cesta.png.asset.json";
+import nissinCarneAsset from "./assets/nissin_lamen_carne.png.asset.json";
+
 const productImages: Record<string, string> = {
   // Pack 2 Mappings
   "844d8729-b2a0-4a60-9c23-a074c9e0979a": "/products/rabo.jpg",
@@ -98,6 +104,11 @@ const productImages: Record<string, string> = {
   "5d272a4b-0409-4e04-ab01-8e8c4114c484": "/products/leite-condensado-piracanjuba-semidesnatado-395g.jpg",
   "29a5e459-5c1b-4cbf-86cf-e258de75b47d": "/products/patinho.jpg",
   "27f126f7-dfb3-42e4-bd1b-ef0d34d80731": "/products/lava-roupas-minuano-concentrado-1,6kg.jpg",
+  "itamaraty-morango": itamaratyMorangoAsset.url,
+  "escureto-35g": escureto35gAsset.url,
+  "esponja-brilhus": esponjaBrilhusAsset.url,
+  "pao-cesta": paoCestaAsset.url,
+  "nissin-carne": nissinCarneAsset.url,
   "4b5508ae-5214-4bb0-9857-38eee60743bb": "/products/biscoito-itamarati-recheado.jpg",
   "2b13198e-2499-437c-ae9f-baeabec7b783": "/products/biscoito-brandini-salt-plus-360g.jpg",
   "639fa99b-96ea-4488-922f-f22f091f5da1": "/products/biscoito-vitarella-cream-cracker-330g.jpg",
