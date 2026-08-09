@@ -441,6 +441,7 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
 
   return <header className={headerClass}>
     <div className="shell header-inner">
+      <Brand compact />
       <span className="header-location" onClick={() => window.location.href = "/estabelecimentos"} style={{ cursor: 'pointer' }}><MapPin size={14} /> Feijó, AC</span>
       <nav className="desktop-nav" aria-label="Navegação principal">
         <a href="/buscar">Comparar preços</a><a href="/melhores-precos">Ofertas</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/planos">Planos</a>
@@ -595,15 +596,15 @@ function useRandomFeatured(products: Product[]) {
           selected.push(p);
           usedStores.add(p.establishmentId);
         }
-        if (selected.length >= 6) break;
+        if (selected.length >= 8) break;
       }
       
-      if (selected.length < 6) {
+      if (selected.length < 8) {
         for (const p of attractive) {
           if (!selected.find(s => s.id === p.id)) {
             selected.push(p);
           }
-          if (selected.length >= 6) break;
+          if (selected.length >= 8) break;
         }
       }
 
@@ -631,10 +632,10 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
       <div className="hero-wash" />
       <div className="shell hero-content">
         <div className="hero-copy">
-          <span className="hero-live"><i /> Inteligência de compra em tempo real</span>
-          <span className="eyebrow eyebrow--light"><MapPin size={14} /> Curadoria local • Feijó • Acre</span>
-          <h1>Compre melhor.<br/><span>Gaste menos.</span></h1>
-          <p>Uma leitura precisa do comércio local para você encontrar a melhor combinação de preço, loja e conveniência.</p>
+          <span className="hero-live"><i /> Preços locais atualizados</span>
+          <span className="eyebrow eyebrow--light"><MapPin size={14} /> Feijó • Acre</span>
+          <h1>Compare preços.<br/><span>Compre melhor.</span></h1>
+          <p>Encontre o menor preço nos comércios de Feijó e monte uma cesta mais econômica em poucos minutos.</p>
           <div className="hero-actions">
             <SearchBox value={query} setValue={setQuery} products={products} hero />
             <a href="/buscar" className="button button--white">Explorar ofertas <ArrowRight size={18} /></a>
@@ -681,13 +682,13 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
       <div className="section-heading">
         <div>
           <span className="eyebrow">Destaques de hoje em Feijó</span>
-          <h2>Ofertas em Destaque</h2>
-          <p>Produtos com preços atrativos, atualizados automaticamente a cada 60 minutos para promover todos os estabelecimentos locais.</p>
+          <h2>Ofertas em destaque</h2>
+          <p>Preços verificados e oportunidades reais nos estabelecimentos locais.</p>
         </div>
         <a className="inline-link" href="/melhores-precos">Ver todas as ofertas <ArrowRight /></a>
       </div>
       <div className="visual-product-grid">
-        {(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 6).map((p, index) => (
+        {(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 8).map((p, index) => (
           <article className="visual-product-card" key={p.id}>
             <button className="floating-favorite" onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}>
               <Heart />
