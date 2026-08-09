@@ -133,14 +133,20 @@ const productImages: Record<string, string> = {
 function ProductImage({ product, size = "default", eager = false }: { product: Product | any; size?: "compact" | "default" | "hero" | "basket"; eager?: boolean }) {
   const fallback = "/products/arroz-tio-joao-5kg.png";
   
-  // Lógica defensiva para evitar misturar imagens se o mapeamento estiver incorreto
-  // Se o nome contém detergente mas o slug/id aponta para arroz, preferimos o fallback ou URL do banco
-  const src = product.image_url || productImages[product.slug] || productImages[String(product.id)] || fallback;
+  // Identificamos se o produto é um detergente pelo nome ou categoria para evitar o fallback de arroz
+  const isDetergent = product.name?.toLowerCase().includes("detergente") || product.category?.toLowerCase().includes("limpeza");
+  const detergentFallback = "/products/detergente-vida-neutro-500ml.jpg";
+
+  const src = product.image_url || 
+              productImages[product.slug] || 
+              productImages[String(product.id)] || 
+              (isDetergent ? detergentFallback : fallback);
   
   return <span className={`product-photo product-photo--${size}`}><img src={src} alt={`Embalagem de ${product.name}`} loading={eager ? "eager" : "lazy"} onError={(e) => {
     const target = e.target as HTMLImageElement;
-    if (target.src !== fallback) {
-      target.src = fallback;
+    const currentFallback = isDetergent ? detergentFallback : fallback;
+    if (target.src !== currentFallback) {
+      target.src = currentFallback;
     }
   }} /><i aria-hidden="true" /></span>;
 }
