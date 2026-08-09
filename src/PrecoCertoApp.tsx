@@ -815,6 +815,26 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     return optimizeBasket(products, basketItems, mode, budget);
   }, [products, basketItems, mode, budget]);
 
+  // Mantém a lista sincronizada com os produtos enviados à cesta em outras páginas.
+  useEffect(() => {
+    setBasketItems(prev => {
+      const missing = initialCart
+        .filter(p => !prev.some(i => i.productName === p.name))
+        .map(p => ({
+          productName: p.name,
+          category: p.category,
+          quantity: 1,
+          unit: (p.unit as any) || "un",
+          isEssential: true,
+        }));
+      return missing.length ? [...prev, ...missing] : prev;
+    });
+  }, [initialCart]);
+
+  /** Produto do catálogo correspondente ao item da lista (para foto, preço e loja). */
+  const findProduct = (name: string) =>
+    initialCart.find(p => p.name === name) || products.find(p => p.name === name);
+
   const toggleItem = (p: Product) => {
     setBasketItems(prev => {
       const exists = prev.find(i => i.productName === p.name);
@@ -827,6 +847,20 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
         isEssential: true
       }];
     });
+  };
+
+  const removeItem = (name: string) => {
+    setBasketItems(prev => prev.filter(i => i.productName !== name));
+    const inCart = initialCart.find(p => p.name === name);
+    if (inCart) removeBasket(inCart.id);
+  };
+
+  const clearAll = () => {
+    if (!basketItems.length) return;
+    if (!window.confirm("Limpar todos os itens da cesta?")) return;
+    setBasketItems([]);
+    clearBasket();
+    setStep(2);
   };
 
   const updateQuantity = (name: string, delta: number) => {
