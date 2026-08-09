@@ -61,7 +61,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
       supabase.from("products").select("id, name, brand, category, size, unit, barcode, image_url"),
       supabase
         .from("prices")
-        .select("product_id, establishment_id, value, previous_value, captured_at, source"),
+        .select("product_id, establishment_id, value, previous_value, captured_at"),
     ]);
 
     const failure = establishments.error ?? products.error ?? prices.error;
@@ -141,7 +141,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
           capturedAt: best.captured_at ?? new Date().toISOString(),
           previousPrice: Number.isFinite(previous) ? round(previous) : undefined,
           image_url: product.image_url || undefined,
-          source: best.source ?? "Coleta Manual",
+          source: "Coleta Manual",
           updated_at: best.captured_at || undefined,
           price_history: rows
             .map(r => ({ date: r.captured_at || new Date().toISOString(), value: toNumber(r.value) }))
