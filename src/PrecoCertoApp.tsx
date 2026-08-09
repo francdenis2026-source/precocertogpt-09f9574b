@@ -2540,10 +2540,17 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <button className="button button--primary" style={{ flex: 1 }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
+                <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
                   Adicionar à Cesta
                 </button>
-                <button className="button button--outline" onClick={() => { saveAction("alert", "product", String(selectedProduct.id)); setSelectedProduct(null); }}>
+                <button className="button button--outline" style={{ height: '54px' }} onClick={() => { 
+                  if (!user) {
+                    alert("Acesse sua conta para configurar alertas de preço personalizados.");
+                    return;
+                  }
+                  saveAction("alert", "product", String(selectedProduct.id)); 
+                  setSelectedProduct(null); 
+                }}>
                   <Bell size={18} /> Alertar
                 </button>
               </div>
