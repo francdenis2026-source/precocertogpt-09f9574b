@@ -69,7 +69,7 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   }} /><i aria-hidden="true" /></span>;
 }
 
-import logoAsset from "./assets/logo-ref.png.asset.json";
+import logoAsset from "./assets/logo-clean.png.asset.json";
 
 function Brand({ compact = false, inverse = false }: { compact?: boolean; inverse?: boolean }) {
   return (
@@ -86,6 +86,7 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
     </a>
   );
 }
+
 
 
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
