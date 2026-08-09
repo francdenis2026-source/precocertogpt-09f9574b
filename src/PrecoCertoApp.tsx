@@ -3599,9 +3599,39 @@ export default function PrecoCertoApp() {
   }, [toast]);
 
   
-  function addBasket(p:Product){setCart(current=>current.some(i=>i.id===p.id)?current:[...current,p]);setToast(`${p.name} adicionado.`);}
-  function removeBasket(id:number|string){setCart(current=>current.filter(i=>String(i.id)!==String(id)));setToast("Removido.");}
-  function clearBasket(){setCart([]);localStorage.removeItem("precocerto:basket");setToast("Cesta limpa.");}
+  const [undoAction, setUndoAction] = useState<(() => void) | null>(null);
+
+  function addBasket(p: Product) {
+    setCart(current => {
+      if (current.some(i => i.id === p.id)) return current;
+      return [...current, p];
+    });
+    setToast(`${p.name} adicionado à cesta.`);
+    setUndoAction(null);
+  }
+
+  function removeBasket(id: number | string) {
+    const itemToRemove = cart.find(i => String(i.id) === String(id));
+    if (!itemToRemove) return;
+
+    setCart(current => current.filter(i => String(i.id) !== String(id)));
+    setToast(`${itemToRemove.name} removido.`);
+    setUndoAction(() => () => {
+      setCart(current => [...current, itemToRemove]);
+      setToast("Ação desfeita.");
+    });
+  }
+
+  function clearBasket() {
+    const previousCart = [...cart];
+    setCart([]);
+    localStorage.removeItem("precocerto:basket");
+    setToast("Cesta limpa.");
+    setUndoAction(() => () => {
+      setCart(previousCart);
+      setToast("Ação desfeita.");
+    });
+  }
   
   function saveAction(action:string,type:string,id:string){
     const key="precocerto:actions";
@@ -3677,9 +3707,36 @@ export default function PrecoCertoApp() {
     <Footer/>
     <MobileBar basketCount={cart.length}/>
     {toast && (
-      <div className={`toast ${toastExit ? "toast--exit" : ""}`} role="alert" aria-live="polite">
-        <CheckCircle2 />
-        <span>{toast}</span>
+      <div 
+        className={`toast ${toastExit ? "toast--exit" : ""}`}
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div className="toast-content">
+          <CheckCircle2 size={20} color="var(--green)" />
+          <span>{toast}</span>
+          {undoAction && (
+            <button 
+              className="toast-undo"
+              onClick={() => {
+                undoAction();
+                setToast("");
+                setUndoAction(null);
+              }}
+              aria-label="Desfazer ação anterior"
+            >
+              Desfazer
+            </button>
+          )}
+        </div>
+        <button 
+          className="toast-close" 
+          onClick={() => setToast("")}
+          aria-label="Fechar notificação"
+        >
+          <X size={16} />
+        </button>
       </div>
     )}
 
