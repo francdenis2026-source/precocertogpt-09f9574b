@@ -34,6 +34,7 @@ export interface BasketResult {
     itemCount: number;
     storeName: string;
     neighborhood?: string;
+    distanceKm?: number;
     estimatedTravelCost?: number;
   }>;
 }
@@ -171,15 +172,29 @@ export function optimizeBasket(
   const storeBreakdown: BasketResult['storeBreakdown'] = {};
   selectedItems.forEach(item => {
     if (!storeBreakdown[item.establishment]) {
-      storeBreakdown[item.establishment] = { total: 0, itemCount: 0, storeName: item.establishment };
+      const distanceKm = distanceFromOrigin(item.neighborhood, userLocation);
+      storeBreakdown[item.establishment] = {
+        total: 0,
+        itemCount: 0,
+        storeName: item.establishment,
+        neighborhood: item.neighborhood,
+        distanceKm,
+        estimatedTravelCost: Math.round(distanceKm * COST_PER_KM * 100) / 100,
+      };
     }
     storeBreakdown[item.establishment].total += item.subtotal;
     storeBreakdown[item.establishment].itemCount += 1;
   });
 
+  // Custo total de deslocamento: uma parada por estabelecimento visitado.
+  const travelCost = Math.round(
+    Object.values(storeBreakdown).reduce((sum, s) => sum + (s.estimatedTravelCost || 0), 0) * 100,
+  ) / 100;
+
   return {
     total,
     savings,
+    travelCost,
     items: selectedItems,
     storeBreakdown
   };
