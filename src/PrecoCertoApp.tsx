@@ -4,8 +4,9 @@ import {
   ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit,
   Heart, Home, LayoutDashboard, LineChart, ListChecks, MapPin, Menu, PackageSearch,
   Plus, Receipt, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
-  SlidersHorizontal, Sparkles, Store, Trash2, TrendingDown, Upload, UserRound, Users, X,
+  SlidersHorizontal, Sparkles, Store, Trash2, TrendingDown, TrendingUp, Upload, UserRound, Users, X,
 } from "lucide-react";
+
 import { FormEvent, ReactNode, useEffect, useMemo, useState, useRef, type ChangeEvent } from "react";
 import { useLocation } from "react-router-dom";
 import { buildCatalog, verifiedDatasetMetrics, type PlatformMetrics, type Product, type StoreRow } from "./data/catalog";
