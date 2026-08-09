@@ -251,7 +251,7 @@ function MobileBar({ basketCount }: { basketCount: number }) {
 function SearchBox({ value, setValue, products, hero = false }: { value: string; setValue: (v: string) => void; products: Product[]; hero?: boolean }) {
   const [focused, setFocused] = useState(false);
   const [localValue, setLocalValue] = useState(value);
-  const debounceTimer = useRef<any>();
+  const debounceTimer = useRef<any>(null);
 
   // Debounce para evitar consultas excessivas ao digitar
   useEffect(() => {
