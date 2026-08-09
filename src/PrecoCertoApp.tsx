@@ -463,7 +463,8 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
         p.name.toLowerCase().includes(adminSearch.toLowerCase()) || 
         p.barcode?.includes(adminSearch);
       const storeMatch = adminFilterStore === "all" || p.establishment === adminFilterStore;
-      return searchMatch && storeMatch;
+      const photoMatch = path !== "/admin/fotos-pendentes" || !p.image_url;
+      return searchMatch && storeMatch && photoMatch;
     });
   }, [sortedProducts, adminSearch, adminFilterStore]);
 
