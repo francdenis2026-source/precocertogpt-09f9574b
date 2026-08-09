@@ -1,6 +1,11 @@
 import { Product } from "../data/catalog";
 import { unitPrice, MeasureBase } from "./pricing";
 
+export interface LatLng {
+  lat: number;
+  lng: number;
+}
+
 export type OptimizationMode = 'cheapest_single' | 'cheapest_multi' | 'best_value' | 'within_budget';
 
 export interface BasketItemConfig {
@@ -15,6 +20,7 @@ export interface BasketItemConfig {
 export interface BasketResult {
   total: number;
   savings: number;
+  travelCost?: number;
   items: Array<{
     product: Product;
     quantity: number;
@@ -27,6 +33,8 @@ export interface BasketResult {
     total: number;
     itemCount: number;
     storeName: string;
+    neighborhood?: string;
+    estimatedTravelCost?: number;
   }>;
 }
 
@@ -38,7 +46,8 @@ export function optimizeBasket(
   catalog: Product[],
   items: BasketItemConfig[],
   mode: OptimizationMode,
-  budget?: number
+  budget?: number,
+  userLocation?: LatLng
 ): BasketResult {
   // 1. Mapear itens da cesta para produtos do catálogo
   const mappedItems = items.map(config => {
@@ -95,8 +104,46 @@ export function optimizeBasket(
         isOptimizationMatch: storeMatch?.establishment === primaryStore
       };
     }).filter(i => i.product);
+  } else if (mode === 'best_value') {
+    // Modo: Melhor Custo-Benefício (Considerando Deslocamento)
+    // Custo estimado: R$ 2.00 por km (mock)
+    const COST_PER_KM = 2.0;
+
+    // Localização padrão de Feijó (Centro) se não fornecida
+    const origin = userLocation || { lat: -8.1633, lng: -70.3533 };
+
+    // Mapeamento de coordenadas mock para estabelecimentos em Feijó
+    const getStoreCoords = (neighborhood: string): LatLng => {
+      if (neighborhood.includes("Centro")) return { lat: -8.164, lng: -70.354 };
+      if (neighborhood.includes("Segundo")) return { lat: -8.168, lng: -70.358 };
+      return { lat: -8.160, lng: -70.350 };
+    };
+
+    const calculateDistance = (a: LatLng, b: LatLng) => {
+      // Haversine simplificada
+      return Math.sqrt(Math.pow(a.lat - b.lat, 2) + Math.pow(a.lng - b.lng, 2)) * 111; // ~111km por grau
+    };
+
+    selectedItems = mappedItems.map(({ config, matches }) => {
+      const best = matches.sort((a, b) => {
+        const distA = calculateDistance(origin, getStoreCoords(a.neighborhood));
+        const distB = calculateDistance(origin, getStoreCoords(b.neighborhood));
+        const scoreA = a.minPrice + (distA * COST_PER_KM);
+        const scoreB = b.minPrice + (distB * COST_PER_KM);
+        return scoreA - scoreB;
+      })[0];
+
+      return {
+        product: best,
+        quantity: config.quantity,
+        subtotal: (best?.minPrice || 0) * config.quantity,
+        establishment: best?.establishment || '—',
+        neighborhood: best?.neighborhood || '—',
+        isOptimizationMatch: true
+      };
+    }).filter(i => i.product);
   } else {
-    // Fallback para os outros modos (simplificado para o MVP)
+    // Fallback/Within Budget
     selectedItems = mappedItems.map(({ config, matches }) => {
       const bestProduct = matches.sort((a, b) => a.minPrice - b.minPrice)[0];
       return {
