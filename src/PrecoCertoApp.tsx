@@ -76,6 +76,27 @@ function addAuditLog(action: string, type: "success" | "warning" | "error" = "su
 
 
 const productImages: Record<string, string> = {
+  // Pack 2 Mappings
+  "844d8729-b2a0-4a60-9c23-a074c9e0979a": "/products/rabo.jpg",
+  "294e5690-ed74-4898-a079-263f6060c2b5": "/products/biscoito-wafer-bauducco-sabores-70g.jpg",
+  "7a2666ab-25f7-4e0a-bf35-cf916fab9396": "/products/biscoito-cookies-bauducco-chocolate-60g.jpg",
+  "47444638-2e10-4f56-9723-52bad766b205": "/products/carne-bovina-em-conserva-anglo-320g.jpg",
+  "9a971a21-3377-431a-a1b8-48034499c194": "/products/carne-bovina-em-conserva-bertin-320g.jpg",
+  "b6744248-6d22-4a38-975a-7a92ec4a90fa": "/products/molho-de-tomate-tarantella-tradicional-300g.jpg",
+  "29c90c81-d06d-45e1-a64a-8867de7ab896": "/products/arroz-branco-bernardo-1kg.jpg",
+  "5d272a4b-0409-4e04-ab01-8e8c4114c484": "/products/leite-condensado-piracanjuba-semidesnatado-395g.jpg",
+  "29a5e459-5c1b-4cbf-86cf-e258de75b47d": "/products/patinho.jpg",
+  "27f126f7-dfb3-42e4-bd1b-ef0d34d80731": "/products/lava-roupas-minuano-concentrado-1,6kg.jpg",
+  "4b5508ae-5214-4bb0-9857-38eee60743bb": "/products/biscoito-itamarati-recheado.jpg",
+  "2b13198e-2499-437c-ae9f-baeabec7b783": "/products/biscoito-brandini-salt-plus-360g.jpg",
+  "639fa99b-96ea-4488-922f-f22f091f5da1": "/products/biscoito-vitarella-cream-cracker-330g.jpg",
+  "927e73ff-e6a8-4fe5-ad2a-1f331a77ec41": "/products/biscoito-galo-cream-cracker.jpg",
+  "88d74a86-11ae-44e7-9ddc-4a42c38894e2": "/products/coco-ralado-sococo-100g.jpg",
+  "ab9ed77b-3b80-4f43-ad09-7c119a566e11": "/products/salsicha-bordon-180g.jpg",
+  "d63f2de8-957c-4894-aed6-98c1934e6bf9": "/products/carne-bovina-pampeano-320g.jpg",
+  "8b3c4919-7562-421d-8a15-3339cb3d5ad3": "/products/aveia-quaker-flocos-finos-450g.jpg",
+  "e1d650e2-b0ed-47f7-81b9-9317ebfc5cc7": "/products/shampoo-clear-men-queda-control-200ml.jpg",
+
   // Mapeamento manual para o catálogo local (seed)
   "arroz-tio-joao-5kg": "/products/arroz-tio-joao-5kg.png",
   "cafe-3-coracoes-500g": "/products/cafe-3-coracoes-500g.jpg",
