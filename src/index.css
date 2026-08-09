@@ -95,23 +95,24 @@ body {
 .visual-product-image {
   display: flex;
   position: relative;
-  height: 220px;
+  height: 240px; /* Increased from 220px */
   background: linear-gradient(to bottom, var(--surface), var(--surface-2));
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1rem; /* Reduced padding to make image larger */
   overflow: hidden;
 }
 
 .visual-product-image img {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 95%; /* Increased from 100% with padding */
+  max-height: 95%;
   object-fit: contain;
   transition: var(--transition-slow);
+  transform: scale(1.1); /* Subtle scale up for better visibility */
 }
 
 .visual-product-card:hover .visual-product-image img {
-  transform: scale(1.08);
+  transform: scale(1.18);
 }
 
 .visual-product-content {
@@ -1273,6 +1274,29 @@ iframe[src*="lovable.dev/badge"] {
   gap: 2rem;
 }
 
+.result-image {
+  height: 260px; /* Consistent height for product images in results */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.result-image img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.result-card:hover .result-image img {
+  transform: scale(1.1);
+}
+
 .result-card {
   height: 100%;
   display: flex;
@@ -1283,6 +1307,7 @@ iframe[src*="lovable.dev/badge"] {
   padding: 1.25rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: var(--shadow-sm);
+  cursor: default;
 }
 
 .result-card:hover {
