@@ -116,7 +116,7 @@ function Brand({ compact = false, inverse = false }: { compact?: boolean; invers
 
 function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
-  return <header className="site-header" style={{ position: 'absolute', background: 'transparent', border: 'none', backdropFilter: 'none' }}>
+  return <header className="site-header">
     <div className="shell header-inner">
       {/* Logo removida do header a pedido do usuário */}
       <span className="header-location"><MapPin size={14} /> Feijó, AC</span>
@@ -243,22 +243,22 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
     <section className="benefits-section">
       <div className="shell">
         <div className="benefits-grid">
-          <div className="benefit-card">
+          <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <div className="benefit-icon"><CircleDollarSign size={24} /></div>
             <h3>Economia Real</h3>
             <p>Compare preços entre mercados e economize até 30% na sua lista mensal.</p>
           </div>
-          <div className="benefit-card">
+          <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <div className="benefit-icon"><Clock3 size={24} /></div>
             <h3>Dados Atualizados</h3>
             <p>Nossa equipe verifica os preços diariamente nos principais comércios de Feijó.</p>
           </div>
-          <div className="benefit-card">
+          <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <div className="benefit-icon"><LayoutDashboard size={24} /></div>
             <h3>Cestas Inteligentes</h3>
             <p>Monte sua lista e descubra em qual loja ela sai mais barata automaticamente.</p>
           </div>
-          <div className="benefit-card">
+          <div className="benefit-card animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <div className="benefit-icon"><ShieldCheck size={24} /></div>
             <h3>Transparência Total</h3>
             <p>Veja o histórico de preços e saiba se a oferta é realmente vantajosa.</p>
