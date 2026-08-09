@@ -2813,7 +2813,11 @@ export default function PrecoCertoApp() {
     const saved = localStorage.getItem("precocerto:user");
     return saved ? JSON.parse(saved) : null;
   });
-  const [adminAuth, setAdminAuth] = useState(() => localStorage.getItem("precocerto:admin_authenticated") === "true");
+  // O acesso admin nunca é decidido pelo navegador: consultamos a sessão e os
+  // papéis no backend em cada carregamento.
+  const [adminAuth, setAdminAuth] = useState(false);
+  const [adminCheck, setAdminCheck] = useState<"checking" | "done">("checking");
+  const [adminProfile, setAdminProfile] = useState<SessionProfile | null>(null);
   
   const isAdmin = pathname.startsWith("/admin") && pathname !== "/admin-login"; 
   const isAuth = ["/login","/cadastro","/registrar","/admin-login"].includes(pathname);
