@@ -1337,10 +1337,11 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       </div>
     </div>
   )}
-</main></div>;
-
-
+      </main>
+    </div>
+  );
 }
+
 
 function GenericPage({ path, products, stores, metrics, addBasket, saveAction, user }: PageProps & { path:string, user?: any }) {
   const randomFeatured = useRandomFeatured(products);
