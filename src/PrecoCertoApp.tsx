@@ -784,11 +784,13 @@ function useRandomFeatured(products: Product[]) {
 
 function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction, syncStatus }: PageProps & { syncStatus?: string }) {
   const [priceMode, setPriceMode] = useState<"recent" | "lowest">("recent");
-  const [featuredIndex, setFeaturedIndex] = useState(0);
   const randomFeatured = useRandomFeatured(products);
 
   const rows = [...products].sort((a,b) => priceMode === "lowest" ? a.minPrice - b.minPrice : Date.parse(b.capturedAt) - Date.parse(a.capturedAt)).slice(0, 6);
-  const featured = randomFeatured[featuredIndex] ?? products[0];
+  const opportunityProducts = [...products]
+    .sort((a, b) => ((b.previousPrice ?? b.maxPrice) - b.minPrice) - ((a.previousPrice ?? a.maxPrice) - a.minPrice))
+    .slice(0, 3);
+  const potentialSaving = opportunityProducts.reduce((total, product) => total + Math.max(0, (product.previousPrice ?? product.maxPrice) - product.minPrice), 0);
   return <>
     <section className="hero">
       <div className="hero-photo" />
@@ -805,10 +807,21 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
           </div>
           <div className="hero-trust"><span><CheckCircle2 /> Preços verificados</span><span><Clock3 /> Atualização contínua</span><span><ShieldCheck /> Dados protegidos</span></div>
         </div>
-        <aside className="hero-radar hero-commerce" aria-label="Comparação interativa em destaque">
-          <div className="radar-head"><span><Activity /> Comparação inteligente</span><em>ao vivo</em></div>
-          {featured && <><div className="commerce-product"><ProductImage product={featured} size="hero" eager /><div className="commerce-copy"><span>{featured.category} • {featured.size}</span><h2>{featured.name}</h2><small><ShieldCheck /> preço verificado há 8 min</small></div></div><div className="commerce-prices"><div><small>Melhor preço</small><strong>{money(featured.minPrice)}</strong><span>em {featured.establishment}</span></div><div className="commerce-chart"><svg viewBox="0 0 250 72" role="img" aria-label="Tendência de preço em queda"><defs><linearGradient id="priceArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#54d69a" stopOpacity=".42"/><stop offset="1" stopColor="#54d69a" stopOpacity="0"/></linearGradient></defs><path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55 L246 70 L4 70 Z" fill="url(#priceArea)"/><path d="M4 14 C28 18 35 30 58 27 S92 18 112 35 S146 50 168 41 S202 28 246 55" fill="none" stroke="#65dfa8" strokeWidth="3" strokeLinecap="round"/><circle cx="246" cy="55" r="5" fill="#65dfa8" stroke="#08243a" strokeWidth="3"/></svg><span><TrendingDown /> caiu {money(Math.max(0,(featured.previousPrice ?? featured.maxPrice)-featured.minPrice))}</span></div></div><div className="commerce-actions"><button className="button button--gold" onClick={()=>addBasket(featured)}><Plus /> Adicionar à cesta</button><a href={`/produto/${featured.slug}`}>Ver comparação <ArrowRight /></a></div></>}
-          <div className="commerce-thumbs">{(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 4).map((product, index) => <button className={featuredIndex === index ? "active" : ""} onClick={() => setFeaturedIndex(index)} aria-pressed={featuredIndex === index} aria-label={`Destacar ${product.name}`} key={product.id}><ProductImage product={product} size="compact" /><span>{product.brand}<small>{money(product.minPrice)}</small></span></button>)}</div>
+        <aside className="hero-insight" aria-label="Resumo das melhores oportunidades em Feijó">
+          <header className="hero-insight__head"><span><Activity /> Radar de economia</span><em><i /> atualizado</em></header>
+          <div className="hero-insight__summary">
+            <span><small>Economia potencial</small><strong>{money(potentialSaving)}</strong><em>nas melhores oportunidades</em></span>
+            <div><TrendingDown /><b>Compare antes de comprar</b><small>Dados de {count(metrics.stores)} estabelecimentos locais</small></div>
+          </div>
+          <div className="hero-insight__list">
+            <p><span>Oportunidades agora</span><a href="/melhores-precos">Ver todas <ArrowRight /></a></p>
+            {opportunityProducts.map((product, index) => <a className="hero-insight__item" href={`/produto/${product.slug}`} key={product.id}>
+              <span className="hero-insight__rank">0{index + 1}</span><ProductImage product={product} size="compact" />
+              <span className="hero-insight__product"><b>{product.name}</b><small>{product.establishment}</small></span>
+              <span className="hero-insight__price"><b>{money(product.minPrice)}</b><small>melhor preço</small></span>
+            </a>)}
+          </div>
+          <footer className="hero-insight__footer"><ShieldCheck /><span><b>Preços verificados</b><small>Informação clara para decidir com segurança.</small></span><a href="/buscar" aria-label="Abrir comparação de preços"><ArrowRight /></a></footer>
         </aside>
       </div>
     </section>
