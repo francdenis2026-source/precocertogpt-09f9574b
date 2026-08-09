@@ -518,10 +518,10 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
       const fileName = `${productId}-${Math.random()}.${fileExt}`;
       const filePath = `products/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file);
+      const { error: uploadError } = await supabase.storage.from('products').upload(filePath, file);
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath);
+      const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(filePath);
 
       const { error: updateError } = await supabase.from('products').update({ image_url: publicUrl }).eq('id', productId);
       if (updateError) throw updateError;
