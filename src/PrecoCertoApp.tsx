@@ -2201,7 +2201,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                           <span className="category-tag">{p.category}</span>
                           {isOutdated && (
                             <span className="outdated-badge" title="Este preço pode ter mudado">
-                              <Clock3 size={10} /> {daysSinceUpdate} dias sem verificar
+                              <Clock3 size={10} /> Desatualizado
                             </span>
                           )}
                         </div>
