@@ -606,7 +606,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, productId: string) => {
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>, productId: string) => {
     const file = e.target.files?.[0];
     if (!file || !supabase) return;
 
