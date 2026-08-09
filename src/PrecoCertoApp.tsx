@@ -969,7 +969,9 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
           </section>
         </div>
 
+        {showLogoutConfirm && (
           <div className="admin-modal-overlay">
+
             <div className="admin-modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
               <div className="admin-modal-body">
                 <div style={{ width: '64px', height: '64px', background: '#fee2e2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
