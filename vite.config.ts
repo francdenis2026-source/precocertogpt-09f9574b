@@ -5,7 +5,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    host: "::",
+    host: true,
     port: 8080,
   },
   test: {
