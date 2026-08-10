@@ -1412,9 +1412,34 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                     boxShadow: 'var(--shadow-sm)'
                   }}>
                     <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Itens na Cesta ({basketItems.length})
-                      </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Itens na Cesta ({basketItems.length})
+                        </span>
+                        {basketItems.length > 0 && (
+                          <button 
+                            onClick={clearAll}
+                            style={{ 
+                              background: 'none', 
+                              border: 'none', 
+                              padding: '4px',
+                              color: 'var(--red)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              borderRadius: '4px',
+                              transition: 'all 0.2s'
+                            }}
+                            className="hover-opacity"
+                            title="Limpar cesta"
+                          >
+                            <Trash2 size={12} /> Limpar
+                          </button>
+                        )}
+                      </div>
                       <div style={{ maxHeight: '160px', overflowY: 'auto', paddingRight: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         {basketItems.map((item, idx) => {
                           const prod = findProduct(item.productName);
