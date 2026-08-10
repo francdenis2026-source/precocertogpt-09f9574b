@@ -3364,13 +3364,13 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   };
 
   useEffect(() => {
-    if (selectedProduct || reportProduct) {
+    if (reportProduct) {
       document.body.classList.add('modal-open');
     } else {
       document.body.classList.remove('modal-open');
     }
     return () => document.body.classList.remove('modal-open');
-  }, [selectedProduct, reportProduct]);
+  }, [reportProduct]);
 
   return (
     <div className="shell page-shell">
