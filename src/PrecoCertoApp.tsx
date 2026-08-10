@@ -506,7 +506,7 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
     { label: "Planos", href: "/planos" }
   ];
 
-  return <header className={headerClass} role="banner">
+  return <header className={headerClass} style={headerStyle} role="banner">
     <div className="shell header-inner">
       <div className="header-brand-zone">
         <Brand compact className="header-logo-container" />
