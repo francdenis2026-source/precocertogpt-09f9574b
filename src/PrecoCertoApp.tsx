@@ -1134,42 +1134,45 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
         try {
           const { data, error } = await activeSupabase
             .from('smart_baskets')
-            .select('*')
+            .select('*, items:smart_basket_items(*)')
             .eq('id', snapshotId)
             .single();
           
-          if (error) throw error;
+          if (error) {
+            console.error("Erro Supabase ao carregar snapshot:", error);
+            // PGRST116: JSON object requested, but no rows returned (RLS filtered or not found)
+            if (error.code === 'PGRST116' || error.message.includes("RLS")) {
+               window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Esta cesta é privada, expirou ou o link foi revogado.", type: "error" } }));
+            }
+            return;
+          }
           if (!data) return;
 
-          // Verifica se foi revogado manualmente ou se expirou (5 min)
+          // Validação de expiração (5 min) para o parâmetro snapshot
           const createdAt = new Date(data.created_at).getTime();
           const now = new Date().getTime();
           const isExpired = (now - createdAt) > (5 * 60 * 1000);
-          const isRevoked = data.status === 'revoked';
           
-          if (isRevoked) {
-            window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Este link de compartilhamento foi revogado pelo proprietário.", type: "error" } }));
-            return;
-          }
-
           if (isExpired) {
             window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Este link de compartilhamento expirou (5 min).", type: "warning" } }));
             return;
           }
 
-          const items = data.items.map((i: any) => ({
-            productName: i.product_name,
-            category: i.category,
-            quantity: i.quantity,
-            unit: i.unit,
-            isEssential: i.is_essential
-          }));
-
-          setBasketItems(items);
+          if (data.items) {
+            const mappedItems = data.items.map((i: any) => ({
+              productName: i.product_name,
+              category: i.category,
+              quantity: i.quantity,
+              unit: i.unit,
+              isEssential: i.is_essential
+            }));
+            setBasketItems(mappedItems);
+          }
+          
           setMode(data.optimization_mode);
           setBudget(data.budget);
           setStep(3);
-          window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cesta compartilhada carregada com sucesso!", type: "success" } }));
+          window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cesta compartilhada carregada!", type: "success" } }));
         } catch (err) {
           console.error("Erro ao carregar snapshot:", err);
           window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Não foi possível carregar a cesta compartilhada.", type: "error" } }));
