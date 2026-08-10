@@ -3,9 +3,10 @@ import {
   Activity, AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
   ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit, Flag,
   Heart, Home, LayoutDashboard, LineChart, ListChecks, MapPin, Menu, Moon, PackageSearch,
-  Plus, Printer, Receipt, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
+  Plus, Printer, Receipt, Save, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Sun, Trash2, TrendingDown, TrendingUp, Upload, UserRound, Users, X,
 } from "lucide-react";
+
 
 import { FormEvent, ReactNode, useEffect, useMemo, useState, useRef, type ChangeEvent, type CSSProperties } from "react";
 import { useLocation } from "react-router-dom";
@@ -1638,16 +1639,37 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                         }, 0))}
                       </strong>
                     </div>
-                    <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <button 
-                        className="button button--outline button--small button--full"
+                        className="button button--outline button--small"
+                        style={{ flex: 1 }}
                         onClick={downloadPDF}
                         disabled={basketItems.length === 0}
                         title="Exportar PDF do resumo"
                       >
-                        <Download size={14} /> PDF Resumo
+                        <Download size={14} /> PDF
+                      </button>
+                      <button 
+                        className={`button ${user ? 'button--primary' : 'button--outline'} button--small`}
+                        style={{ flex: 1.5 }}
+                        onClick={() => {
+                          if (!user) {
+                            localStorage.setItem("pc:pending_save_basket", "true");
+                            window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+                            return;
+                          }
+                          handleSaveBasket();
+                        }}
+                        disabled={basketItems.length === 0 || isSaving}
+                      >
+                        {isSaving ? 'Salvando...' : (
+                          <>
+                            <Save size={14} /> Salvar Lista
+                          </>
+                        )}
                       </button>
                     </div>
+
                   </div>
                 )}
                 <button 
@@ -3203,8 +3225,12 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     phone: (user as any)?.phone || "",
     whatsapp: (user as any)?.whatsapp || "",
     referencePoint: (user as any)?.referencePoint || "",
-    cpf: (user as any)?.cpf || ""
+    cpf: (user as any)?.cpf || "",
+    avatarUrl: (user as any)?.avatarUrl || ""
   });
+  const [avatarChangeCount, setAvatarChangeCount] = useState((user as any)?.avatarChangeCount || 0);
+  const [lastAvatarReset, setLastAvatarReset] = useState((user as any)?.lastAvatarReset || new Date().getFullYear());
+
   const favProducts = useMemo(() => products.filter(p => favorites.includes(String(p.id))), [products, favorites]);
   const recentActions = useMemo(() => {
     try {
@@ -3232,10 +3258,14 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
         phone: (user as any)?.phone || "",
         whatsapp: (user as any)?.whatsapp || "",
         referencePoint: (user as any)?.referencePoint || "",
-        cpf: (user as any)?.cpf || ""
+        cpf: (user as any)?.cpf || "",
+        avatarUrl: (user as any)?.avatarUrl || ""
       });
+      setAvatarChangeCount((user as any)?.avatarChangeCount || 0);
+      setLastAvatarReset((user as any)?.lastAvatarReset || new Date().getFullYear());
     }
   }, [user]);
+
 
 
 
@@ -3280,6 +3310,25 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
       if (profileData.phone && !/^\d{10,11}$/.test(profileData.phone.replace(/\D/g, ""))) errors.push("Telefone inválido (use DDD + número).");
       if (profileData.whatsapp && !/^\d{10,11}$/.test(profileData.whatsapp.replace(/\D/g, ""))) errors.push("WhatsApp inválido (use DDD + número).");
 
+      const currentYear = new Date().getFullYear();
+      let newAvatarCount = avatarChangeCount;
+      let newResetYear = lastAvatarReset;
+
+      // Reset count if year changed
+      if (currentYear > lastAvatarReset) {
+        newAvatarCount = 0;
+        newResetYear = currentYear;
+      }
+
+      const isAvatarChanging = profileData.avatarUrl !== (user as any)?.avatarUrl;
+      if (isAvatarChanging) {
+        if (newAvatarCount >= 2) {
+          errors.push("Você já atingiu o limite de 2 trocas de foto por ano.");
+        } else {
+          newAvatarCount += 1;
+        }
+      }
+
       if (errors.length > 0) {
         if (typeof (window as any).setGlobalToast === 'function') {
           (window as any).setGlobalToast(errors[0], "error");
@@ -3287,7 +3336,13 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
         return;
       }
 
-      const updatedUser = { ...user, ...profileData };
+      const updatedUser = { 
+        ...user, 
+        ...profileData, 
+        avatarChangeCount: newAvatarCount, 
+        lastAvatarReset: newResetYear 
+      };
+      
       if (setUser) setUser(updatedUser);
       localStorage.setItem("precocerto:user", JSON.stringify(updatedUser));
       setIsEditingProfile(false);
@@ -3296,21 +3351,75 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
       }
     };
 
+
     return (
       <div className="shell page-shell generic-page">
         {isProfileView && (
           <section className="generic-hero">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <div style={{ width: '80px', height: '80px', background: 'var(--blue-soft)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)' }}>
-                <UserRound size={40} />
+              <div style={{ position: 'relative' }}>
+                <div style={{ 
+                  width: '100px', 
+                  height: '100px', 
+                  background: 'var(--blue-soft)', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  color: 'var(--blue)',
+                  overflow: 'hidden',
+                  border: '4px solid white',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                }}>
+                  {(user as any)?.avatarUrl ? (
+                    <img src={(user as any).avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <UserRound size={48} />
+                  )}
+                </div>
+                <button 
+                  onClick={() => setIsEditingProfile(true)}
+                  style={{
+                    position: 'absolute',
+                    bottom: '0',
+                    right: '0',
+                    background: 'var(--blue)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                  }}
+                  title="Alterar foto"
+                >
+                  <Camera size={16} />
+                </button>
               </div>
               <div style={{ flex: 1, minWidth: '240px' }}>
                 <span className="eyebrow">Minha Conta</span>
-                <h1>{(user as any)?.name || "Usuário PreçoCerto"}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <h1>{(user as any)?.name || "Usuário PreçoCerto"}</h1>
+                  <span style={{ 
+                    fontSize: '0.7rem', 
+                    background: 'var(--surface-3)', 
+                    padding: '2px 8px', 
+                    borderRadius: '12px', 
+                    color: 'var(--muted)',
+                    fontWeight: 600
+                  }}>
+                    {avatarChangeCount >= 2 ? "Limite de fotos atingido" : `${2 - avatarChangeCount} trocas restantes este ano`}
+                  </span>
+                </div>
                 <p>Gerencie seus alertas, favoritos e preferências de economia em Feijó.</p>
               </div>
               <button className="button button--primary" onClick={() => setIsEditingProfile(true)}>Editar Meus Dados</button>
             </div>
+
           </section>
         )}
 
@@ -3322,6 +3431,49 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
                 <button className="icon-button" onClick={() => setIsEditingProfile(false)}><X /></button>
               </div>
               <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem' }}>
+                <div className="form-group">
+                  <label>Foto de Perfil (URL)</label>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input 
+                      className="admin-input" 
+                      placeholder="https://..." 
+                      value={profileData.avatarUrl} 
+                      onChange={e => setProfileData({...profileData, avatarUrl: e.target.value})} 
+                      disabled={avatarChangeCount >= 2 && profileData.avatarUrl === (user as any)?.avatarUrl}
+                    />
+                    {(user as any)?.avatarUrl && (
+                      <button 
+                        type="button" 
+                        className="button button--ghost button--small" 
+                        onClick={() => setProfileData({...profileData, avatarUrl: ""})}
+                        style={{ color: 'var(--red)' }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                  <div style={{ marginTop: '0.5rem', background: 'var(--surface-3)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--blue)', fontSize: '0.8rem', fontWeight: 600 }}>
+                      <AlertTriangle size={14} />
+                      <span>Política de Avatar PreçoCerto</span>
+                    </div>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
+                      Por segurança, permitimos apenas <b>2 trocas de foto por ano</b>. 
+                      {avatarChangeCount >= 2 ? (
+                        <span style={{ color: 'var(--red)', display: 'block', marginTop: '0.25rem' }}>Limite atingido para o ano de {lastAvatarReset}.</span>
+                      ) : (
+                        <span style={{ color: 'var(--green)', display: 'block', marginTop: '0.25rem' }}>Você ainda possui {2 - avatarChangeCount} troca(s) disponível(eis).</span>
+                      )}
+                    </p>
+                    <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'center' }}>
+                      <svg width="40" height="20" viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 2L10 18H30L20 2Z" stroke={avatarChangeCount >= 2 ? "var(--red)" : "var(--blue)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <circle cx="20" cy="11" r="2" fill={avatarChangeCount >= 2 ? "var(--red)" : "var(--blue)"}/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="form-group">
                   <label>Nome Completo</label>
                   <input className="admin-input" value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} required />
@@ -4600,6 +4752,13 @@ export default function PrecoCertoApp() {
     try { setFavorites(JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]")); }
     catch { setFavorites([]); }
     setToast("Bem-vindo ao PreçoCerto!");
+    
+    // Verifica se havia um salvamento de cesta pendente
+    if (localStorage.getItem("pc:pending_save_basket") === "true") {
+      localStorage.removeItem("pc:pending_save_basket");
+      // O redirect cuidará de levar o usuário de volta para /cesta onde ele poderá clicar em Salvar
+    }
+
   };
 
 
