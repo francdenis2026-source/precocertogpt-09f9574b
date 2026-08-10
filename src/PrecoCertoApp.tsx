@@ -3235,15 +3235,6 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     const isFavoritesView = path === "/favoritos";
     const isProfileView = path === "/perfil";
     
-    const [isEditingProfile, setIsEditingProfile] = useState(false);
-    const [profileData, setProfileData] = useState({
-      name: (user as any)?.name || "",
-      address: (user as any)?.address || "",
-      phone: (user as any)?.phone || "",
-      whatsapp: (user as any)?.whatsapp || "",
-      referencePoint: (user as any)?.referencePoint || "",
-      cpf: (user as any)?.cpf || ""
-    });
 
     useEffect(() => {
       if (user) {
