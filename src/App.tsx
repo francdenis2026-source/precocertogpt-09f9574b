@@ -16,6 +16,8 @@ import { FooterCompactUx } from "./components/FooterCompactUx";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
+import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
+import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
 import { MerchantDashboard } from "./components/MerchantDashboard";
 import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
 import { MerchantBusinessSetupShortcut } from "./components/MerchantBusinessSetupShortcut";
@@ -50,7 +52,9 @@ export default function App() {
       <MarketplacePositioningSection />
       <MerchantBusinessSetupShortcut />
       <MerchantDemoSwitcher />
+      <EstablishmentsNavBridge />
       <Routes>
+        <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
         <Route path="/loja/:merchantId" element={<MerchantOnlineStoreRoute />} />
         <Route path="/painel-lojista" element={<MerchantDashboard />} />
