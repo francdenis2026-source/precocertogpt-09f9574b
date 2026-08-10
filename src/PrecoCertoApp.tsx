@@ -4109,7 +4109,7 @@ export default function PrecoCertoApp() {
   else if(pathname==="/acougues"||pathname==="/categoria/acougue") page=<ButchersPage {...props}/>;
   else if(pathname==="/planos" && isEnabled("consumerPlans")) page=<PlansPage/>;
   else if(pathname==="/alertas"||pathname==="/perfil") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user}/>;
-  else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
+  else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user} syncStatus={syncStatus}/>;
   else if(pathname.startsWith("/cesta/snapshot/")) page=<SnapshotPage {...props}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
