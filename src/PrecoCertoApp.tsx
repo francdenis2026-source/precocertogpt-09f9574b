@@ -524,7 +524,7 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
       <div className="header-actions">
         <ThemeToggle compact />
         <a className="icon-button header-action-button header-search-button" href="/buscar" aria-label="Pesquisar produtos" title="Buscar produtos"><Search size={20} aria-hidden="true" /></a>
-        <a className="icon-button header-action-button basket-button favorites-button" href={user ? "/favoritos" : "/login"} aria-label={user ? `${favoritesCount} produtos favoritos` : "Entre para salvar favoritos"} title={user ? "Abrir favoritos" : "Entre para salvar favoritos"}><Heart size={20} fill={favoritesCount > 0 ? "currentColor" : "none"} aria-hidden="true" />{favoritesCount > 0 && <span aria-hidden="true">{favoritesCount}</span>}</a>
+        <a className="icon-button header-action-button basket-button favorites-button" href="/favoritos" aria-label={user ? `${favoritesCount} produtos favoritos` : "Entre para salvar favoritos"} title={user ? "Abrir favoritos" : "Entre para salvar favoritos"} onClick={(e) => { if (!user) { e.preventDefault(); window.location.href = `/login?redirect=${encodeURIComponent('/favoritos')}`; } }}><Heart size={20} fill={favoritesCount > 0 ? "currentColor" : "none"} aria-hidden="true" />{favoritesCount > 0 && <span aria-hidden="true">{favoritesCount}</span>}</a>
         <a className="icon-button header-action-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`} title="Abrir cesta"><ShoppingBasket size={20} aria-hidden="true" />{basketCount > 0 && <span key={basketCount} aria-hidden="true">{basketCount}</span>}</a>
 
         {user ? (
