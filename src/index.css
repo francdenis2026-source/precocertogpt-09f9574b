@@ -1430,7 +1430,7 @@ h1,h2,h3,.brand__word b,.brand__word strong{font-family:"Manrope Variable",Manro
 :root{--bg:#f3f6fb;--surface-2:#eaf0f7;--navy:#061c31;--blue:#086bf2;--blue-hover:#0059d5;--blue-soft:#e7f1ff;--gold:#ffc942;--gold-soft:#fff6d7;--green:#079460;--border:#d8e1ea;--shadow:0 24px 70px rgba(6,28,49,.12)}
 body{background:radial-gradient(circle at 78% 0,#e8f2ff 0,transparent 30%),var(--bg)}
 .section-heading>div{padding-left:0}.section-heading>div:before{display:none}
-.eyebrow{color:#086bf2;font-weight:900}.button{border-radius:10px;min-height:48px}.button--primary{background:linear-gradient(135deg,#0874ff,#0759d6);box-shadow:0 12px 28px rgba(8,107,242,.25)}
+.eyebrow{color:#086bf2;font-weight:900}.button{border-radius:10px;min-height:48px;transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);}.button:active:not(:disabled) { transform: translateY(0.5px) scale(0.97) !important; }.button--primary{background:linear-gradient(135deg,#0874ff,#0759d6);box-shadow:0 12px 28px rgba(8,107,242,.25)}
 .brand__mark{border-radius:10px;background:linear-gradient(145deg,#0874ff,#043c91);box-shadow:0 7px 18px rgba(8,91,200,.28)}.brand__mark:before{border-color:transparent #0867e7 transparent transparent}.brand__mark i,.brand__mark i:after{border-color:#ffd35d;background:#ffd35d}
 .site-header{background:rgba(255,255,255,.91);box-shadow:0 8px 32px rgba(6,28,49,.05)}
 .desktop-nav a:after{height:3px;border-radius:4px;background:#086bf2}.market-pulse{background:linear-gradient(90deg,#061c31,#0a355a)}
