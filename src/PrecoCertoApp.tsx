@@ -3159,7 +3159,7 @@ function ButchersPage({ products, stores, addBasket }: PageProps) {
   </main>;
 }
 
-function GenericPage({ path, products, stores, metrics, addBasket, favorites, toggleFavorite, user }: PageProps & { path:string, user?: any }) {
+function GenericPage({ path, products, stores, metrics, addBasket, favorites, toggleFavorite, user, setUser }: PageProps & { path:string, user?: any, setUser?: (u: any) => void }) {
   const randomFeatured = useRandomFeatured(products);
   const isStore = path.startsWith("/estabelecimento/") || path.startsWith("/loja/");
   const isProduct = path.startsWith("/produto") || path.includes("/produto/");
