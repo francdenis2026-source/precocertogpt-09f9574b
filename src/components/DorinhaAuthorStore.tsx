@@ -254,7 +254,6 @@ export function DorinhaAuthorStore() {
           <div className={`db-real-cover-shell ${loadedCovers.has(book.id)?"is-loaded":""}`} data-real-cover="1">
             <span className="db-cover-placeholder" aria-hidden="true">Preparando a capa…</span>
             {src?<img className="db-real-cover-image" src={src} sizes="(max-width: 640px) 68vw, (max-width: 1050px) 34vw, 238px" width={480} height={720} loading="lazy" fetchPriority="low" decoding="async" onLoad={()=>setLoadedCovers(current=>{if(current.has(book.id))return current;const next=new Set(current);next.add(book.id);return next})} alt={`Capa do livro ${book.name}, de Dorinha Barroso`} style={['uma-viagem-ao-mundo-da-imaginacao', 'mente-perversa', 'uma-historia-de-superacao', 'o-despertar-para-o-mundo-literario'].includes(book.slug) ? { objectFit: 'cover' } : {}}/>:null}
-            <span className="db-real-cover-badge">CAPA OFICIAL</span>
           </div>
           <div style={s.bookBody}>
             <div style={s.bookTop}><span style={s.bookType}>LIVRO</span>{book.available&&<span style={s.available}>Disponível para consulta</span>}</div>
