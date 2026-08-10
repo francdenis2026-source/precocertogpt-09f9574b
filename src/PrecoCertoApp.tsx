@@ -3612,10 +3612,6 @@ export default function PrecoCertoApp() {
     let alive = true;
     let timer: any;
 
-    const params = new URLSearchParams(window.location.search);
-    const initialQuery = params.get("q") ?? "";
-    if (initialQuery) setQuery(initialQuery);
-
     const load = async () => {
       if (!alive) return;
       setSyncStatus("syncing");
@@ -3634,14 +3630,17 @@ export default function PrecoCertoApp() {
         setMetrics(data.metrics);
         setSyncStatus("online");
 
-        // Deep link: abrir modal se houver "product_id" na URL
+        // Deep link e Query inicial (processados após o carregamento do catálogo)
+        const params = new URLSearchParams(window.location.search);
+        
+        const initialQuery = params.get("q");
+        if (initialQuery) setQuery(initialQuery);
+
         const productId = params.get("product_id");
         if (productId) {
-          // Busca no catálogo completo retornado, não apenas no filtrado pela query
           const found = data.products.find(p => String(p.id) === String(productId));
           if (found) {
             setSelectedProduct(found);
-            // Limpa o parâmetro da URL sem recarregar
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.delete("product_id");
             window.history.replaceState({}, "", newUrl.toString());
