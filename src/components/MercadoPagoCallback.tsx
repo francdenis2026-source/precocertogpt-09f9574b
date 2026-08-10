@@ -5,6 +5,7 @@ import { supabase } from "../lib/roles";
 export function MercadoPagoCallback() {
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Concluindo conexão com Mercado Pago…");
+  const [correlationId, setCorrelationId] = useState<string | null>(null);
 
   const runCallback = useCallback(async () => {
     setState("loading");
@@ -27,14 +28,18 @@ export function MercadoPagoCallback() {
       return;
     }
 
+    const requestId = Math.random().toString(36).substring(2, 15);
+    setCorrelationId(requestId);
+
     try {
       const { data, error } = await supabase.functions.invoke("mercadopago-oauth", {
-        body: { action: "callback", merchantId, code, state: oauthState },
+        body: { action: "callback", merchantId, code, state: oauthState, requestId },
       });
 
       if (error || data?.error) {
         setState("error");
         setMessage(data?.error || error?.message || "Não foi possível concluir a conexão.");
+        console.error(`[MP-OAUTH-ERROR] ID: ${requestId}`, error || data?.error);
         return;
       }
 
@@ -45,6 +50,7 @@ export function MercadoPagoCallback() {
     } catch (err: any) {
       setState("error");
       setMessage(err.message || "Erro inesperado ao processar a resposta.");
+      console.error(`[MP-OAUTH-CRASH] ID: ${requestId}`, err);
     }
   }, []);
 
@@ -57,7 +63,10 @@ export function MercadoPagoCallback() {
       {state === "error" && (
         <div style={s.banner}>
           <AlertTriangle size={20} />
-          <span>Erro técnico detectado na comunicação com o servidor.</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span>Erro técnico detectado na comunicação com o servidor.</span>
+            {correlationId && <small style={{ opacity: 0.8, fontSize: '0.75rem' }}>ID de suporte: {correlationId}</small>}
+          </div>
         </div>
       )}
 

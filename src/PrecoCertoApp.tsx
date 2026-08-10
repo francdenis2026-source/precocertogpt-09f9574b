@@ -3830,6 +3830,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
               ))}
             </div>
             <UserBasketHistory user={user} products={products} />
+            <PaymentHistory user={user} />
           </section>
 
           <aside className="generic-aside">
