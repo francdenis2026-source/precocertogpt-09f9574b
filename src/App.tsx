@@ -1,4 +1,5 @@
 import "./performance/disableClientImageProcessing";
+import "./performance/tolerantDomMutations";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import PrecoCertoApp from "./PrecoCertoApp";
 import { MaxPriceStoreLabels } from "./components/MaxPriceStoreLabels";

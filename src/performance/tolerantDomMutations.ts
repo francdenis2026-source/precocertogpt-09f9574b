@@ -33,3 +33,5 @@ if (!guardedWindow[GLOBAL_KEY]) {
     return originalInsertBefore.call(this, node, reference) as T;
   };
 }
+
+export {};
