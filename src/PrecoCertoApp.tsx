@@ -1741,12 +1741,23 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                           onClick={async () => {
                             if (!user) return;
                             try {
-                              const snapshot = await getBasketSnapshot(user.id, mode, budget, basketItems);
+                              // O ID da cesta ativa pode ser recuperado se já foi salvo, 
+                              // ou criamos um snapshot rápido para compartilhamento.
+                              // Para o MVP, assumimos que handleSaveBasket já gerou um ID ou usamos um ID temporário.
+                              const basketId = localStorage.getItem("pc:last_saved_basket_id");
+                              if (!basketId) {
+                                window.dispatchEvent(new CustomEvent('pc:set-toast', { 
+                                  detail: { message: "Salve a lista primeiro para gerar o link.", type: "warning" } 
+                                }));
+                                return;
+                              }
                               const expiry = new Date(Date.now() + 5 * 60 * 1000).toLocaleTimeString();
-                              const text = `Minha Cesta Inteligente (Expira às ${expiry}):\nTotal: ${money(optimizationResult?.total || 0)}\n\nVeja a lista e salve no seu perfil: ${window.location.origin}/cesta?snapshot=${snapshot.id}`;
+                              const text = `Minha Cesta Inteligente (Expira às ${expiry}):\nTotal: ${money(optimizationResult?.total || 0)}\n\nVeja a lista e salve no seu perfil: ${window.location.origin}/cesta?snapshot=${basketId}`;
                               window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                             } catch (err) {
-                              window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Erro ao gerar link de compartilhamento.", type: "error" } }));
+                              window.dispatchEvent(new CustomEvent('pc:set-toast', { 
+                                detail: { message: "Erro ao gerar link de compartilhamento.", type: "error" } 
+                              }));
                             }
                           }}
                         >
