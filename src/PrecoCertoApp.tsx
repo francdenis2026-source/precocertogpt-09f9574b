@@ -3203,8 +3203,12 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     phone: (user as any)?.phone || "",
     whatsapp: (user as any)?.whatsapp || "",
     referencePoint: (user as any)?.referencePoint || "",
-    cpf: (user as any)?.cpf || ""
+    cpf: (user as any)?.cpf || "",
+    avatarUrl: (user as any)?.avatarUrl || ""
   });
+  const [avatarChangeCount, setAvatarChangeCount] = useState((user as any)?.avatarChangeCount || 0);
+  const [lastAvatarReset, setLastAvatarReset] = useState((user as any)?.lastAvatarReset || new Date().getFullYear());
+
   const favProducts = useMemo(() => products.filter(p => favorites.includes(String(p.id))), [products, favorites]);
   const recentActions = useMemo(() => {
     try {
@@ -3232,10 +3236,14 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
         phone: (user as any)?.phone || "",
         whatsapp: (user as any)?.whatsapp || "",
         referencePoint: (user as any)?.referencePoint || "",
-        cpf: (user as any)?.cpf || ""
+        cpf: (user as any)?.cpf || "",
+        avatarUrl: (user as any)?.avatarUrl || ""
       });
+      setAvatarChangeCount((user as any)?.avatarChangeCount || 0);
+      setLastAvatarReset((user as any)?.lastAvatarReset || new Date().getFullYear());
     }
   }, [user]);
+
 
 
 
