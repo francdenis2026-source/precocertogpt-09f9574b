@@ -3776,7 +3776,6 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
                 </div>
               </div>
             )
-
           ) : (
             <>
               <label>E-mail Administrador<input required type="email" value={user} onChange={e=>setUser(e.target.value)} placeholder="francdenisbr@gmail.com"/></label>
@@ -3785,9 +3784,9 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
           )
         ) : (
           <>
-            {register&&<label>Nome completo<input required minLength={3} placeholder="Seu nome e sobrenome"/></label>}
+            {register&&<label>Nome completo<input name="name" required minLength={3} placeholder="Seu nome e sobrenome"/></label>}
             <label>CPF<input required value={cpf} onChange={e=>setCpf(e.target.value.replace(/\D/g,"").slice(0,11))} inputMode="numeric" placeholder="000.000.000-00"/><small>Usamos seu CPF somente para identificar sua conta.</small></label>
-            {register&&<label>Celular<input inputMode="tel" placeholder="(68) 99999-9999"/></label>}
+            {register&&<label>Celular<input name="phone" inputMode="tel" placeholder="(68) 99999-9999"/></label>}
             <label>PIN de 6 dígitos<input required value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,6))} inputMode="numeric" type="password" maxLength={6} placeholder="••••••"/><small>Evite sequências como 123456.</small></label>
           </>
         )}
@@ -3797,7 +3796,6 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
           <ArrowRight/>
         </button>
 
-        
         {isAdminLogin && !showForgot && <button type="button" onClick={() => setShowForgot(true)} className="center-link" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', marginTop: '1rem' }}>Esqueci minha senha admin</button>}
         {isAdminLogin && showForgot && <button type="button" onClick={() => { setShowForgot(false); setRecoveryStep(1); setError(""); }} className="center-link" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', marginTop: '1rem' }}>Voltar ao login admin</button>}
         
