@@ -3288,6 +3288,25 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
       if (profileData.phone && !/^\d{10,11}$/.test(profileData.phone.replace(/\D/g, ""))) errors.push("Telefone inválido (use DDD + número).");
       if (profileData.whatsapp && !/^\d{10,11}$/.test(profileData.whatsapp.replace(/\D/g, ""))) errors.push("WhatsApp inválido (use DDD + número).");
 
+      const currentYear = new Date().getFullYear();
+      let newAvatarCount = avatarChangeCount;
+      let newResetYear = lastAvatarReset;
+
+      // Reset count if year changed
+      if (currentYear > lastAvatarReset) {
+        newAvatarCount = 0;
+        newResetYear = currentYear;
+      }
+
+      const isAvatarChanging = profileData.avatarUrl !== (user as any)?.avatarUrl;
+      if (isAvatarChanging) {
+        if (newAvatarCount >= 2) {
+          errors.push("Você já atingiu o limite de 2 trocas de foto por ano.");
+        } else {
+          newAvatarCount += 1;
+        }
+      }
+
       if (errors.length > 0) {
         if (typeof (window as any).setGlobalToast === 'function') {
           (window as any).setGlobalToast(errors[0], "error");
@@ -3295,7 +3314,13 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
         return;
       }
 
-      const updatedUser = { ...user, ...profileData };
+      const updatedUser = { 
+        ...user, 
+        ...profileData, 
+        avatarChangeCount: newAvatarCount, 
+        lastAvatarReset: newResetYear 
+      };
+      
       if (setUser) setUser(updatedUser);
       localStorage.setItem("precocerto:user", JSON.stringify(updatedUser));
       setIsEditingProfile(false);
@@ -3303,6 +3328,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
         (window as any).setGlobalToast("Perfil atualizado com sucesso!", "success");
       }
     };
+
 
     return (
       <div className="shell page-shell generic-page">
