@@ -1057,6 +1057,39 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     }));
   });
 
+  // Efeito para carregar cesta do banco de dados quando o usuário loga
+  useEffect(() => {
+    async function loadUserBasket() {
+      if (!user || !supabase) return;
+      try {
+        const { data: baskets, error } = await supabase
+          .from('smart_baskets')
+          .select('*, items:smart_basket_items(*)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) throw error;
+        if (baskets && baskets.length > 0) {
+          const latest = baskets[0];
+          const mappedItems = latest.items.map((i: any) => ({
+            productName: i.product_name,
+            category: i.category,
+            quantity: i.quantity,
+            unit: i.unit,
+            isEssential: i.is_essential
+          }));
+          setBasketItems(mappedItems);
+          setMode(latest.optimization_mode);
+          setBudget(latest.budget);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar cesta do banco:", err);
+      }
+    }
+    loadUserBasket();
+  }, [user]);
+
   // Persiste itens da cesta no localStorage conforme mudam
   useEffect(() => {
     localStorage.setItem("precocerto:active_basket_items", JSON.stringify(basketItems));
@@ -1132,6 +1165,26 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
       i.productName === name ? { ...i, quantity: Math.max(0.5, i.quantity + delta) } : i
     ));
   };
+
+  useEffect(() => {
+    async function persistToCloud() {
+      if (!user || !supabase || basketItems.length === 0) return;
+      try {
+        await saveBasket(
+          user.id,
+          "Cesta Ativa (Auto)",
+          mode,
+          budget,
+          basketItems,
+          optimizationResult || { total: 0, savings: 0, items: [], storeBreakdown: {} }
+        );
+      } catch (err) {
+        console.error("Erro no autosave:", err);
+      }
+    }
+    const timer = setTimeout(persistToCloud, 3000); // Debounce de 3s para evitar spam no banco
+    return () => clearTimeout(timer);
+  }, [basketItems, mode, budget, user, optimizationResult]);
 
   const handleSaveBasket = async () => {
     if (!user) {
@@ -1379,9 +1432,34 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                     boxShadow: 'var(--shadow-sm)'
                   }}>
                     <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Itens na Cesta ({basketItems.length})
-                      </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Itens na Cesta ({basketItems.length})
+                        </span>
+                        {basketItems.length > 0 && (
+                          <button 
+                            onClick={clearAll}
+                            style={{ 
+                              background: 'none', 
+                              border: 'none', 
+                              padding: '4px',
+                              color: 'var(--red)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              borderRadius: '4px',
+                              transition: 'all 0.2s'
+                            }}
+                            className="hover-opacity"
+                            title="Limpar cesta"
+                          >
+                            <Trash2 size={12} /> Limpar
+                          </button>
+                        )}
+                      </div>
                       <div style={{ maxHeight: '160px', overflowY: 'auto', paddingRight: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         {basketItems.map((item, idx) => {
                           const prod = findProduct(item.productName);
@@ -3812,7 +3890,12 @@ export default function PrecoCertoApp() {
     };
   }, [selectedProduct]);
 
+  // Validação de autenticação para adicionar itens
   function addBasket(p: Product) {
+    if (!user) {
+      setToast("Você precisa estar logado para gerenciar sua cesta.");
+      return;
+    }
     setCart(current => {
       if (current.some(i => i.id === p.id)) return current;
       return [...current, p];
