@@ -3637,13 +3637,14 @@ export default function PrecoCertoApp() {
         // Deep link: abrir modal se houver "product_id" na URL
         const productId = params.get("product_id");
         if (productId) {
+          // Busca no catálogo completo retornado, não apenas no filtrado pela query
           const found = data.products.find(p => String(p.id) === String(productId));
           if (found) {
             setSelectedProduct(found);
-            // Limpa o parâmetro da URL sem recarregar para evitar reabrir ao navegar
+            // Limpa o parâmetro da URL sem recarregar
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.delete("product_id");
-            window.history.replaceState({}, "", newUrl);
+            window.history.replaceState({}, "", newUrl.toString());
           }
         }
       } catch (err) {
