@@ -1161,9 +1161,13 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
   };
 
   const updateQuantity = (name: string, delta: number) => {
-    setBasketItems(prev => prev.map(i => 
-      i.productName === name ? { ...i, quantity: Math.max(0.5, i.quantity + delta) } : i
-    ));
+    setBasketItems(prev => prev.map(i => {
+      if (i.productName === name) {
+        const newQty = Math.max(0.5, i.quantity + delta);
+        return { ...i, quantity: newQty };
+      }
+      return i;
+    }));
   };
 
   useEffect(() => {
@@ -1180,9 +1184,13 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
         );
       } catch (err) {
         console.error("Erro no autosave:", err);
+        // Exibe toast de erro mas mantém os itens na interface (já estão no state/localStorage)
+        if (typeof (window as any).setGlobalToast === 'function') {
+           (window as any).setGlobalToast("Ops! Erro ao sincronizar cesta com a nuvem. Seus itens continuam salvos localmente.", "error");
+        }
       }
     }
-    const timer = setTimeout(persistToCloud, 3000); // Debounce de 3s para evitar spam no banco
+    const timer = setTimeout(persistToCloud, 3000); // Debounce de 3s
     return () => clearTimeout(timer);
   }, [basketItems, mode, budget, user, optimizationResult]);
 
@@ -4026,6 +4034,11 @@ export default function PrecoCertoApp() {
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
   else page=<GenericPage {...props} metrics={metrics} path={pathname} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
+
+  // Expondo o toast globalmente para o useEffect da BasketPage poder disparar erros de rede
+  useEffect(() => {
+    (window as any).setGlobalToast = (msg: string, type?: string) => setToast(msg);
+  }, []);
 
   return <div className="app">
     <Header basketCount={cart.length} favoritesCount={favorites.length} user={user} onLogout={handleLogout}/>
