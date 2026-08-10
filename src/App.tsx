@@ -13,6 +13,7 @@ import { HomeMobilePolish } from "./components/HomeMobilePolish";
 import { HomeSearchPortalPolish } from "./components/HomeSearchPortalPolish";
 import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { FooterCompactUx } from "./components/FooterCompactUx";
+import { GlobalMobileCompactUx } from "./components/GlobalMobileCompactUx";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
@@ -59,6 +60,7 @@ export default function App() {
       <HomeSearchPortalPolish />
       <HomeSearchKeyboardUx />
       <FooterCompactUx />
+      <GlobalMobileCompactUx />
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
       <MarketplacePositioningSection />

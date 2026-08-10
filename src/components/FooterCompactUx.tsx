@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
 
 const STYLE_ID = "pc-footer-compact-ux";
 
@@ -69,6 +68,7 @@ function installStyles() {
 
     body.pc-footer-compact .site-footer .footer-bottom {
       min-height: 0 !important;
+      margin-top: 8px !important;
       padding-top: 8px !important;
       padding-bottom: 2px !important;
       font-size: .68rem !important;
@@ -96,8 +96,8 @@ function installStyles() {
       }
 
       body.pc-footer-compact .site-footer .footer-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px 16px !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px 10px !important;
         padding-bottom: 8px !important;
       }
 
@@ -144,6 +144,7 @@ function installStyles() {
       }
 
       body.pc-footer-compact .site-footer .footer-bottom {
+        margin-top: 5px !important;
         padding-top: 6px !important;
         padding-bottom: 0 !important;
         font-size: .62rem !important;
@@ -154,12 +155,10 @@ function installStyles() {
 }
 
 export function FooterCompactUx() {
-  const { pathname } = useLocation();
   useEffect(() => {
     installStyles();
-    if (pathname === "/") document.body.classList.add("pc-footer-compact");
-    else document.body.classList.remove("pc-footer-compact");
+    document.body.classList.add("pc-footer-compact");
     return () => document.body.classList.remove("pc-footer-compact");
-  }, [pathname]);
+  }, []);
   return null;
 }
