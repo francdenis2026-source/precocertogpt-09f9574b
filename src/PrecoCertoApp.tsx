@@ -3630,7 +3630,7 @@ export default function PrecoCertoApp() {
         setMetrics(data.metrics);
         setSyncStatus("online");
 
-        // Deep link e Query inicial (processados após o carregamento do catálogo)
+        // Processamento de parâmetros da URL (Query e Deep Link)
         const params = new URLSearchParams(window.location.search);
         
         const initialQuery = params.get("q");
@@ -3640,7 +3640,11 @@ export default function PrecoCertoApp() {
         if (productId) {
           const found = data.products.find(p => String(p.id) === String(productId));
           if (found) {
-            setSelectedProduct(found);
+            // Pequeno atraso para garantir que o modal não seja fechado por outros efeitos colaterais de carregamento
+            setTimeout(() => {
+              if (alive) setSelectedProduct(found);
+            }, 500);
+            
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.delete("product_id");
             window.history.replaceState({}, "", newUrl.toString());
