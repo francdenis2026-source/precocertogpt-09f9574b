@@ -4439,7 +4439,7 @@ export default function PrecoCertoApp() {
     <Header basketCount={cart.length} favoritesCount={favorites.length} user={user} onLogout={handleLogout}/>
     <main><div className="page-transition-enter-active" key={pathname}>{page}</div></main>
     <Footer/>
-    <MobileBar basketCount={cart.length}/>
+    <MobileBar basketCount={cart.length} favoritesCount={favorites.length}/>
     {toast && (
       <div 
         className={`toast ${toastExit ? "toast--exit" : ""}`}
