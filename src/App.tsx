@@ -13,6 +13,7 @@ import { HomeSearchPortalPolish } from "./components/HomeSearchPortalPolish";
 import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { FooterCompactUx } from "./components/FooterCompactUx";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
+import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { CollaboratePage, ContactPage, MerchantSignupPage, PharmaciesPage } from "./components/PublicFooterServicePages";
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
       <HomeSearchKeyboardUx />
       <FooterCompactUx />
       <RadarShowcaseUx />
+      <PreferredProductPngUpgrade />
       <Routes>
         <Route path="/lojista" element={<MerchantSignupPage />} />
         <Route path="/colaborar" element={<CollaboratePage />} />
