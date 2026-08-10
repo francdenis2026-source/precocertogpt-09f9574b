@@ -1,28 +1,152 @@
-import { useEffect, useState } from "react";
-import { CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { CheckCircle2, Loader2, XCircle, RotateCcw, AlertTriangle } from "lucide-react";
 import { supabase } from "../lib/roles";
 
 export function MercadoPagoCallback() {
-  const [state, setState] = useState<"loading"|"success"|"error">("loading");
+  const [state, setState] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Concluindo conexão com Mercado Pago…");
 
-  useEffect(() => {
-    void (async () => {
-      if (!supabase) { setState("error"); setMessage("Supabase indisponível."); return; }
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-      const oauthState = params.get("state");
-      const merchantId = sessionStorage.getItem("pc_mp_merchant_id");
-      if (!code || !oauthState || !merchantId) { setState("error"); setMessage("Dados da autorização incompletos. Inicie a conexão novamente no painel da loja."); return; }
-      const { data, error } = await supabase.functions.invoke("mercadopago-oauth", { body: { action:"callback", merchantId, code, state:oauthState } });
-      if (error || data?.error) { setState("error"); setMessage(data?.error || error?.message || "Não foi possível concluir a conexão."); return; }
+  const runCallback = useCallback(async () => {
+    setState("loading");
+    setMessage("Concluindo conexão com Mercado Pago…");
+
+    if (!supabase) {
+      setState("error");
+      setMessage("Supabase indisponível.");
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const oauthState = params.get("state");
+    const merchantId = sessionStorage.getItem("pc_mp_merchant_id");
+
+    if (!code || !oauthState || !merchantId) {
+      setState("error");
+      setMessage("Dados da autorização incompletos. Inicie a conexão novamente no painel da loja.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke("mercadopago-oauth", {
+        body: { action: "callback", merchantId, code, state: oauthState },
+      });
+
+      if (error || data?.error) {
+        setState("error");
+        setMessage(data?.error || error?.message || "Não foi possível concluir a conexão.");
+        return;
+      }
+
       sessionStorage.removeItem("pc_mp_merchant_id");
       setState("success");
       setMessage("Conta Mercado Pago conectada com sucesso.");
       setTimeout(() => window.location.replace("/painel-lojista"), 1200);
-    })();
+    } catch (err: any) {
+      setState("error");
+      setMessage(err.message || "Erro inesperado ao processar a resposta.");
+    }
   }, []);
 
-  return <main style={s.page}>{state==="loading"?<Loader2 size={42}/>:state==="success"?<CheckCircle2 size={48} color="#2f7d4d"/>:<XCircle size={48} color="#a63b3b"/>}<h1>{state==="success"?"Conexão concluída":state==="error"?"Falha na conexão":"Conectando…"}</h1><p>{message}</p>{state==="error"&&<a href="/painel-lojista" style={s.button}>Voltar ao painel</a>}</main>;
+  useEffect(() => {
+    runCallback();
+  }, [runCallback]);
+
+  return (
+    <main style={s.page}>
+      {state === "error" && (
+        <div style={s.banner}>
+          <AlertTriangle size={20} />
+          <span>Erro técnico detectado na comunicação com o servidor.</span>
+        </div>
+      )}
+
+      {state === "loading" ? (
+        <Loader2 size={42} className="animate-spin" />
+      ) : state === "success" ? (
+        <CheckCircle2 size={48} color="#2f7d4d" />
+      ) : (
+        <XCircle size={48} color="#a63b3b" />
+      )}
+
+      <h1>
+        {state === "success"
+          ? "Conexão concluída"
+          : state === "error"
+          ? "Falha na conexão"
+          : "Conectando…"}
+      </h1>
+
+      <p style={{ maxWidth: 400 }}>{message}</p>
+
+      {state === "error" && (
+        <div style={s.actions}>
+          <button onClick={runCallback} style={s.retryButton}>
+            <RotateCcw size={18} />
+            Tentar novamente
+          </button>
+          <a href="/painel-lojista" style={s.backButton}>
+            Voltar ao painel
+          </a>
+        </div>
+      )}
+    </main>
+  );
 }
-const s: Record<string, React.CSSProperties> = { page:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10,textAlign:"center",fontFamily:"Inter,system-ui,sans-serif",padding:24}, button:{background:"#183d2b",color:"white",padding:"10px 14px",borderRadius:10,textDecoration:"none"} };
+
+const s: Record<string, React.CSSProperties> = {
+  page: {
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    textAlign: "center",
+    fontFamily: "Inter,system-ui,sans-serif",
+    padding: 24,
+    background: "#fcfcfd",
+  },
+  banner: {
+    background: "#fee2e2",
+    color: "#991b1b",
+    padding: "12px 24px",
+    borderRadius: 8,
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    fontSize: "0.95rem",
+    fontWeight: 500,
+    marginBottom: 24,
+    border: "1px solid #fecaca",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+  },
+  actions: {
+    display: "flex",
+    gap: 12,
+    marginTop: 8,
+  },
+  retryButton: {
+    background: "#183d2b",
+    color: "white",
+    padding: "10px 20px",
+    borderRadius: 10,
+    border: "none",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    fontWeight: 500,
+    transition: "transform 0.1s",
+  },
+  backButton: {
+    background: "transparent",
+    color: "#4b5563",
+    padding: "10px 20px",
+    borderRadius: 10,
+    textDecoration: "none",
+    border: "1px solid #e5e7eb",
+    fontWeight: 500,
+  },
+};
+
