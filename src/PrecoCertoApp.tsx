@@ -3193,24 +3193,56 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
   }, []);
   const alertProducts = useMemo(() => products.filter(p => alerts.some((a: any) => String(a.id) === String(p.id))), [products, alerts]);
 
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
+
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: (user as any)?.name || "",
+    address: (user as any)?.address || "",
+    phone: (user as any)?.phone || "",
+    whatsapp: (user as any)?.whatsapp || "",
+    referencePoint: (user as any)?.referencePoint || "",
+    cpf: (user as any)?.cpf || ""
+  });
+  const favProducts = useMemo(() => products.filter(p => favorites.includes(String(p.id))), [products, favorites]);
+  const recentActions = useMemo(() => {
+    try {
+      return (JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]") as any[]).slice(0, 5);
+    } catch {
+      return [];
+    }
+  }, [favorites]);
+
+
+  useEffect(() => {
+    if (path === "/perfil" || path === "/favoritos") {
+      const timer = setTimeout(() => {
+        setIsDataLoading(false);
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [path]);
+
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: (user as any)?.name || "",
+        address: (user as any)?.address || "",
+        phone: (user as any)?.phone || "",
+        whatsapp: (user as any)?.whatsapp || "",
+        referencePoint: (user as any)?.referencePoint || "",
+        cpf: (user as any)?.cpf || ""
+      });
+    }
+  }, [user]);
+
+
+
   if (path === "/perfil" || path === "/favoritos") {
     if (!user) return <div className="shell page-shell generic-page"><section className="favorites-login-gate"><Heart/><span className="eyebrow">Favoritos protegidos</span><h1>Entre para salvar seus produtos</h1><p>Seus favoritos ficam disponíveis somente na sua área de cliente.</p><a className="button button--primary" href={`/login?redirect=${encodeURIComponent(path)}`}>Entrar na minha conta <ArrowRight/></a></section></div>;
     
     // Tratamento de carregamento e erro para dados que dependem da renderização
-    const [isDataLoading, setIsDataLoading] = useState(true);
-    const [dataError, setDataError] = useState<string | null>(null);
-
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        try {
-          setIsDataLoading(false);
-        } catch (err) {
-          setDataError("Falha ao carregar suas preferências. Tente recarregar a página.");
-          setIsDataLoading(false);
-        }
-      }, 400); // Simulamos um pequeno delay para feedback visual
-      return () => clearTimeout(timer);
-    }, []);
 
     if (isDataLoading) {
       return (
@@ -3233,32 +3265,11 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
       );
     }
 
-    const favProducts = useMemo(() => products.filter(p => favorites.includes(String(p.id))), [products, favorites]);
+    
     const isFavoritesView = path === "/favoritos";
     const isProfileView = path === "/perfil";
     
-    const [isEditingProfile, setIsEditingProfile] = useState(false);
-    const [profileData, setProfileData] = useState({
-      name: (user as any)?.name || "",
-      address: (user as any)?.address || "",
-      phone: (user as any)?.phone || "",
-      whatsapp: (user as any)?.whatsapp || "",
-      referencePoint: (user as any)?.referencePoint || "",
-      cpf: (user as any)?.cpf || ""
-    });
 
-    useEffect(() => {
-      if (user) {
-        setProfileData({
-          name: (user as any)?.name || "",
-          address: (user as any)?.address || "",
-          phone: (user as any)?.phone || "",
-          whatsapp: (user as any)?.whatsapp || "",
-          referencePoint: (user as any)?.referencePoint || "",
-          cpf: (user as any)?.cpf || ""
-        });
-      }
-    }, [user]);
 
     const handleUpdateProfile = (e: React.FormEvent) => {
       e.preventDefault();
@@ -3442,13 +3453,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
               <h2>Histórico de Ações Recentes</h2>
             </div>
             <div className="price-table-card">
-              {useMemo(() => {
-                try {
-                  return (JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]") as any[]).slice(0, 5);
-                } catch {
-                  return [];
-                }
-              }, [favorites]).map((a: any, i: number) => (
+              {recentActions.map((a: any, i: number) => (
                 <div key={i} className="price-row" style={{ padding: '0.75rem 1rem' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                      {a.action === 'favorite' ? <Heart size={14} color="var(--red)"/> : <Bell size={14} color="var(--blue)"/>}
