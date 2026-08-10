@@ -1417,9 +1417,9 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                           </div>
                           <div className="item-controls">
                             <div className="item-qty">
-                              <button onClick={() => updateQuantity(item.productName, -0.5)} aria-label={`Diminuir ${item.productName}`}>-</button>
+                              <button onClick={() => updateQuantity(item.productName, -1)} aria-label={`Diminuir ${item.productName}`} disabled={item.quantity <= 1}>-</button>
                               <span>{item.quantity}</span>
-                              <button onClick={() => updateQuantity(item.productName, 0.5)} aria-label={`Aumentar ${item.productName}`}>+</button>
+                              <button onClick={() => updateQuantity(item.productName, 1)} aria-label={`Aumentar ${item.productName}`}>+</button>
                             </div>
                             <button className="item-remove" onClick={() => removeItem(item.productName)} aria-label={`Remover ${item.productName}`}>
                               <Trash2 size={14} />
@@ -1474,9 +1474,23 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                           const price = (prod?.minPrice || 0) * item.quantity;
                           return (
                             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
-                              <span style={{ color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
-                                {item.quantity}x {item.productName}
-                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                                <div style={{ display: 'flex', background: 'var(--surface-3)', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                                  <button 
+                                    onClick={() => updateQuantity(item.productName, -1)} 
+                                    style={{ padding: '0 6px', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}
+                                    disabled={item.quantity <= 1}
+                                  >-</button>
+                                  <span style={{ padding: '0 4px', fontSize: '0.75rem', fontWeight: 700, minWidth: '1.2rem', textAlign: 'center' }}>{item.quantity}</span>
+                                  <button 
+                                    onClick={() => updateQuantity(item.productName, 1)} 
+                                    style={{ padding: '0 6px', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}
+                                  >+</button>
+                                </div>
+                                <span style={{ color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100px' }}>
+                                  {item.productName}
+                                </span>
+                              </div>
                               <span style={{ fontWeight: 600, color: 'var(--muted)', flexShrink: 0 }}>
                                 {money(price)}
                               </span>
