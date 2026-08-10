@@ -3890,7 +3890,12 @@ export default function PrecoCertoApp() {
     };
   }, [selectedProduct]);
 
+  // Validação de autenticação para adicionar itens
   function addBasket(p: Product) {
+    if (!user) {
+      setToast("Você precisa estar logado para gerenciar sua cesta.");
+      return;
+    }
     setCart(current => {
       if (current.some(i => i.id === p.id)) return current;
       return [...current, p];
