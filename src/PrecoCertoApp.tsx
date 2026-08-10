@@ -3248,18 +3248,6 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     const isProfileView = path === "/perfil";
     
 
-    useEffect(() => {
-      if (user) {
-        setProfileData({
-          name: (user as any)?.name || "",
-          address: (user as any)?.address || "",
-          phone: (user as any)?.phone || "",
-          whatsapp: (user as any)?.whatsapp || "",
-          referencePoint: (user as any)?.referencePoint || "",
-          cpf: (user as any)?.cpf || ""
-        });
-      }
-    }, [user]);
 
     const handleUpdateProfile = (e: React.FormEvent) => {
       e.preventDefault();
