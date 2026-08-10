@@ -1352,8 +1352,28 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                     })
                   )}
                 </div>
+                {basketItems.length > 0 && (
+                  <div className="builder-sidebar-footer" style={{ 
+                    padding: '1.25rem', 
+                    background: 'var(--surface-2)', 
+                    borderRadius: '12px',
+                    marginBottom: '1rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                    border: '1px solid var(--border)'
+                  }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 600 }}>Total Estimado</span>
+                    <strong style={{ fontSize: '1.25rem', color: 'var(--blue)', letterSpacing: '-0.02em' }}>
+                      {money(basketItems.reduce((sum, item) => {
+                        const prod = findProduct(item.productName);
+                        return sum + ((prod?.minPrice || 0) * item.quantity);
+                      }, 0))}
+                    </strong>
+                  </div>
+                )}
                 <button 
-                  className="button button--primary button--full" 
+                  className="button button--primary button--full"
                   disabled={basketItems.length === 0}
                   onClick={() => setStep(3)}
                 >
