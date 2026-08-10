@@ -391,7 +391,7 @@ function Brand({ compact = false, inverse = false, className = "" }: { compact?:
     >
       <img 
         className="brand__logo-img"
-        src={compact ? "/logo-preco-certo-simbolo.svg" : inverse ? "/logo-preco-certo-inversa.svg" : "/logo-preco-certo.svg"}
+        src={compact ? "/logo-preco-certo.svg" : inverse ? "/logo-preco-certo-inversa.svg" : "/logo-preco-certo.svg"}
         alt="PreçoCerto" 
       />
     </div>
