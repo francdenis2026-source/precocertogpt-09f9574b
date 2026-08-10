@@ -281,6 +281,12 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
   useEffect(() => {
     if (!src) return;
     
+    // Skip processing on mobile or modest devices for performance
+    if (window.innerWidth < 768 || (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4)) {
+      setProcessedSrc(src);
+      return;
+    }
+
     // Skip local assets that are already "clean" enough or if it's already a blob
     if (src.startsWith('data:') || src.startsWith('blob:')) {
       setProcessedSrc(src);
@@ -296,6 +302,8 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
         await new Promise((resolve, reject) => {
           img.onload = resolve;
           img.onerror = reject;
+          // Set a timeout for loading
+          setTimeout(() => reject(new Error("Timeout loading image")), 5000);
         });
 
         const canvas = document.createElement('canvas');
@@ -309,8 +317,6 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
 
-        // Simple flood-fill / corner color detection for background removal
-        // We look at the 4 corners to guess the background color
         const corners = [
           [0, 0], [canvas.width - 1, 0], 
           [0, canvas.height - 1], [canvas.width - 1, canvas.height - 1]
@@ -319,12 +325,11 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
           return [data[idx], data[idx + 1], data[idx + 2]];
         });
 
-        // Average corner color
         const bgR = corners.reduce((sum, c) => sum + c[0], 0) / 4;
         const bgG = corners.reduce((sum, c) => sum + c[1], 0) / 4;
         const bgB = corners.reduce((sum, c) => sum + c[2], 0) / 4;
 
-        const threshold = 45; // Sensitivity
+        const threshold = 45; 
 
         for (let i = 0; i < data.length; i += 4) {
           const r = data[i];
@@ -338,11 +343,8 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
           );
 
           if (diff < threshold) {
-            // Check if it's likely a background pixel (near the edges or matches corner color)
-            // To preserve center details even if they match background color
             data[i + 3] = 0; 
           } else if (diff < threshold + 20) {
-            // Soft edges
             data[i + 3] = ((diff - threshold) / 20) * 255;
           }
         }
@@ -350,7 +352,7 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
         ctx.putImageData(imageData, 0, 0);
         return canvas.toDataURL('image/png');
       } catch (err) {
-        console.warn("Background removal failed:", err);
+        console.warn("Background removal skipped/failed:", err);
         return imageSrc;
       }
     };
