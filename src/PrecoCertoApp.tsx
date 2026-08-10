@@ -1140,14 +1140,15 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
           
           if (error) {
             console.error("Erro Supabase ao carregar snapshot:", error);
+            // PGRST116: JSON object requested, but no rows returned (RLS filtered or not found)
             if (error.code === 'PGRST116' || error.message.includes("RLS")) {
-               window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Link de cesta inválido ou sem permissão.", type: "error" } }));
+               window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Esta cesta é privada, expirou ou o link foi revogado.", type: "error" } }));
             }
             return;
           }
           if (!data) return;
 
-          // Verifica se foi revogado manualmente ou se expirou (5 min)
+          // Validação de expiração (5 min) para o parâmetro snapshot
           const createdAt = new Date(data.created_at).getTime();
           const now = new Date().getTime();
           const isExpired = (now - createdAt) > (5 * 60 * 1000);
