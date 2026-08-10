@@ -137,7 +137,9 @@ export function subscribeMerchantOrders(merchantId: string, onChange: () => void
     .subscribe();
 
   return () => {
-    void supabase.removeChannel(channel);
+    if (supabase) {
+      void supabase.removeChannel(channel);
+    }
   };
 }
 
