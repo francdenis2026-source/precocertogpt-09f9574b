@@ -17,6 +17,7 @@ import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgr
 import { MerchantDashboard } from "./components/MerchantDashboard";
 import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
 import { MerchantBusinessSetupShortcut } from "./components/MerchantBusinessSetupShortcut";
+import { MerchantCatalogStudio } from "./components/MerchantCatalogStudio";
 import { MerchantManagementCenter } from "./components/MerchantManagementCenter";
 import { MerchantOnboardingPage } from "./components/MerchantOnboardingPage";
 import { PlatformAdminDashboard } from "./components/PlatformAdminDashboard";
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
         <Route path="/painel-lojista" element={<MerchantDashboard />} />
         <Route path="/painel-lojista/gestao" element={<MerchantManagementCenter />} />
+        <Route path="/painel-lojista/catalogo" element={<MerchantCatalogStudio />} />
         <Route path="/painel-lojista/configurar-negocio" element={<MerchantBusinessSetup />} />
         <Route path="/meus-pedidos" element={<CustomerOrders />} />
         <Route path="/integracoes/mercadopago/callback" element={<MercadoPagoCallback />} />
