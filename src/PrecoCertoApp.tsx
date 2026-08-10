@@ -3159,7 +3159,7 @@ function ButchersPage({ products, stores, addBasket }: PageProps) {
   </main>;
 }
 
-function GenericPage({ path, products, stores, metrics, addBasket, favorites, toggleFavorite, user }: PageProps & { path:string, user?: any }) {
+function GenericPage({ path, products, stores, metrics, addBasket, favorites, toggleFavorite, user, setUser }: PageProps & { path:string, user?: any, setUser?: (u: any) => void }) {
   const randomFeatured = useRandomFeatured(products);
   const isStore = path.startsWith("/estabelecimento/") || path.startsWith("/loja/");
   const isProduct = path.startsWith("/produto") || path.includes("/produto/");
@@ -3228,76 +3228,192 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     }
 
     const favProducts = products.filter(p => favorites.includes(String(p.id)));
+    const isFavoritesView = path === "/favoritos";
+    const isProfileView = path === "/perfil";
     
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [profileData, setProfileData] = useState({
+      name: (user as any)?.name || "",
+      address: (user as any)?.address || "",
+      phone: (user as any)?.phone || "",
+      whatsapp: (user as any)?.whatsapp || "",
+      referencePoint: (user as any)?.referencePoint || "",
+      cpf: (user as any)?.cpf || ""
+    });
+
+    useEffect(() => {
+      if (user) {
+        setProfileData({
+          name: (user as any)?.name || "",
+          address: (user as any)?.address || "",
+          phone: (user as any)?.phone || "",
+          whatsapp: (user as any)?.whatsapp || "",
+          referencePoint: (user as any)?.referencePoint || "",
+          cpf: (user as any)?.cpf || ""
+        });
+      }
+    }, [user]);
+
+    const handleUpdateProfile = (e: React.FormEvent) => {
+      e.preventDefault();
+      const updatedUser = { ...user, ...profileData };
+      if (setUser) setUser(updatedUser);
+      localStorage.setItem("precocerto:user", JSON.stringify(updatedUser));
+      setIsEditingProfile(false);
+      if (typeof (window as any).setGlobalToast === 'function') {
+        (window as any).setGlobalToast("Perfil atualizado com sucesso!", "success");
+      }
+    };
+
     return (
       <div className="shell page-shell generic-page">
-        <section className="generic-hero">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <div style={{ width: '80px', height: '80px', background: 'var(--blue-soft)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)' }}>
-              <UserRound size={40} />
+        {isProfileView && (
+          <section className="generic-hero">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+              <div style={{ width: '80px', height: '80px', background: 'var(--blue-soft)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)' }}>
+                <UserRound size={40} />
+              </div>
+              <div style={{ flex: 1, minWidth: '240px' }}>
+                <span className="eyebrow">Minha Conta</span>
+                <h1>{(user as any)?.name || "Usuário PreçoCerto"}</h1>
+                <p>Gerencie seus alertas, favoritos e preferências de economia em Feijó.</p>
+              </div>
+              <button className="button button--primary" onClick={() => setIsEditingProfile(true)}>Editar Meus Dados</button>
             </div>
-            <div>
-              <span className="eyebrow">Minha Conta</span>
-              <h1>{user?.name || "Usuário PreçoCerto"}</h1>
-              <p>Gerencie seus alertas, favoritos e preferências de economia em Feijó.</p>
+          </section>
+        )}
+
+        {isEditingProfile && (
+          <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="modal-content" style={{ maxWidth: '500px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+              <div className="modal-header">
+                <h2>Editar Perfil</h2>
+                <button className="icon-button" onClick={() => setIsEditingProfile(false)}><X /></button>
+              </div>
+              <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem' }}>
+                <div className="form-group">
+                  <label>Nome Completo</label>
+                  <input className="admin-input" value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label>Endereço</label>
+                  <input className="admin-input" value={profileData.address} onChange={e => setProfileData({...profileData, address: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>Telefone</label>
+                  <input className="admin-input" value={profileData.phone} onChange={e => setProfileData({...profileData, phone: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>WhatsApp</label>
+                  <input className="admin-input" value={profileData.whatsapp} onChange={e => setProfileData({...profileData, whatsapp: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>Ponto de Referência</label>
+                  <input className="admin-input" value={profileData.referencePoint} onChange={e => setProfileData({...profileData, referencePoint: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>CPF (Bloqueado para edição)</label>
+                  <input className="admin-input" value={profileData.cpf} readOnly style={{ background: 'var(--surface-3)', opacity: 0.7, cursor: 'not-allowed' }} />
+                  <small style={{ color: 'var(--muted)' }}>Para alterar o CPF, entre em contato com o suporte.</small>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <button type="submit" className="button button--primary" style={{ flex: 1 }}>Salvar Alterações</button>
+                  <button type="button" className="button button--ghost" onClick={() => setIsEditingProfile(false)}>Cancelar</button>
+                </div>
+              </form>
             </div>
           </div>
-        </section>
+        )}
 
         <div className="generic-grid">
           <section className="generic-main">
             <div className="section-heading compact">
-              <h2>Ofertas Favoritas ({favProducts.length})</h2>
-              <p>Produtos que você marcou com o coração para acesso rápido.</p>
+              <h2>{isFavoritesView ? "Ofertas Favoritas" : "Meu Perfil"} ({favProducts.length})</h2>
+              <p>{isFavoritesView ? "Produtos que você marcou com o coração para acesso rápido." : "Gerencie seus dados e preferências."}</p>
             </div>
             
-            {favProducts.length > 0 ? (
-              <div className="visual-product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-                {favProducts.map(p => (
-                  <article className="visual-product-card" key={p.id}>
-                    <div 
-                      className="visual-product-image" 
-                      onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
-                      style={{ height: '120px', cursor: 'pointer' }}
-                    >
-                      <ProductImage product={p} size="compact" />
-                    </div>
-                    <div className="visual-product-content" style={{ padding: '1rem' }}>
+            {isFavoritesView && (
+              favProducts.length > 0 ? (
+                <div className="visual-product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+                  {favProducts.map(p => (
+                    <article className="visual-product-card" key={p.id}>
                       <div 
-                        className="visual-product-name" 
+                        className="visual-product-image" 
                         onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
-                        style={{ fontSize: '0.9rem', height: '2.5rem', cursor: 'pointer' }}
+                        style={{ height: '120px', cursor: 'pointer' }}
                       >
-                        {p.name}
+                        <ProductImage product={p} size="compact" />
                       </div>
-                      <div className="visual-price">
-                        <strong>{money(p.minPrice)}</strong>
+                      <div className="visual-product-content" style={{ padding: '1rem' }}>
+                        <div 
+                          className="visual-product-name" 
+                          onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
+                          style={{ fontSize: '0.9rem', height: '2.5rem', cursor: 'pointer' }}
+                        >
+                          {p.name}
+                        </div>
+                        <div className="visual-price">
+                          <strong>{money(p.minPrice)}</strong>
+                        </div>
+                        <div className="visual-product-actions">
+                          <button className="button button--primary button--small" onClick={() => addBasket(p)}><Plus size={14}/> Cesta</button>
+                          <button className="button button--ghost button--small" onClick={() => {
+                            toggleFavorite(String(p.id));
+                          }}><Trash2 size={14}/></button>
+                        </div>
                       </div>
-                      <div className="visual-product-actions">
-                        <button className="button button--primary button--small" onClick={() => addBasket(p)}><Plus size={14}/> Cesta</button>
-                        <button className="button button--ghost button--small" onClick={() => {
-                          toggleFavorite(String(p.id));
-                        }}><Trash2 size={14}/></button>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--surface-2)', borderRadius: '12px', border: '2px dashed var(--surface-3)' }}>
-                <div style={{ position: 'relative', display: 'inline-block', marginBottom: '1.5rem' }}>
-                  <Heart size={48} style={{ opacity: 0.1 }} />
-                  <Search size={20} style={{ position: 'absolute', bottom: -5, right: -5, color: 'var(--blue)' }} />
+                    </article>
+                  ))}
                 </div>
-                <h3>Sua lista está vazia</h3>
-                <p style={{ maxWidth: '300px', margin: '0 auto 1.5rem', color: 'var(--muted)' }}>
-                  Você ainda não favoritou nenhum produto. Adicione itens para acompanhar preços rapidamente.
-                </p>
-                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                  <a href="/buscar" className="button button--primary">
-                    <Search size={16} /> Explorar Ofertas
-                  </a>
-                  <a href="/" className="button button--ghost">Ver Início</a>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--surface-2)', borderRadius: '12px', border: '2px dashed var(--surface-3)' }}>
+                  <div style={{ position: 'relative', display: 'inline-block', marginBottom: '1.5rem' }}>
+                    <Heart size={48} style={{ opacity: 0.1 }} />
+                    <Search size={20} style={{ position: 'absolute', bottom: -5, right: -5, color: 'var(--blue)' }} />
+                  </div>
+                  <h3>Sua lista está vazia</h3>
+                  <p style={{ maxWidth: '300px', margin: '0 auto 1.5rem', color: 'var(--muted)' }}>
+                    Você ainda não favoritou nenhum produto. Adicione itens para acompanhar preços rapidamente.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                    <a href="/buscar" className="button button--primary">
+                      <Search size={16} /> Explorar Ofertas
+                    </a>
+                    <a href="/" className="button button--ghost">Ver Início</a>
+                  </div>
+                </div>
+              )
+            )}
+
+            {isProfileView && (
+              <div className="price-table-card" style={{ padding: '1.5rem', display: 'grid', gap: '1.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                  <div>
+                    <span className="eyebrow" style={{ fontSize: '0.7rem' }}>Nome Completo</span>
+                    <p style={{ margin: '0.25rem 0 0', fontWeight: 600 }}>{profileData.name || "Não informado"}</p>
+                  </div>
+                  <div>
+                    <span className="eyebrow" style={{ fontSize: '0.7rem' }}>CPF</span>
+                    <p style={{ margin: '0.25rem 0 0', fontWeight: 600 }}>{profileData.cpf || "Não informado"}</p>
+                  </div>
+                  <div>
+                    <span className="eyebrow" style={{ fontSize: '0.7rem' }}>Telefone</span>
+                    <p style={{ margin: '0.25rem 0 0', fontWeight: 600 }}>{profileData.phone || "Não informado"}</p>
+                  </div>
+                  <div>
+                    <span className="eyebrow" style={{ fontSize: '0.7rem' }}>WhatsApp</span>
+                    <p style={{ margin: '0.25rem 0 0', fontWeight: 600 }}>{profileData.whatsapp || "Não informado"}</p>
+                  </div>
+                </div>
+                <div>
+                  <span className="eyebrow" style={{ fontSize: '0.7rem' }}>Endereço e Referência</span>
+                  <p style={{ margin: '0.25rem 0 0', fontWeight: 600 }}>
+                    {profileData.address || "Endereço não informado"}
+                    {profileData.referencePoint && <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 400 }}>{profileData.referencePoint}</span>}
+                  </p>
+                </div>
+                <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--surface-3)' }}>
+                  <button className="button button--ghost button--small" onClick={() => setIsEditingProfile(true)}>Atualizar Meus Dados</button>
                 </div>
               </div>
             )}
@@ -3563,7 +3679,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
 
 }
 
-function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (success: boolean) => void; onLogin?: () => void }) {
+function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (success: boolean) => void; onLogin?: (userData?: any) => void }) {
   const register = path === "/cadastro" || path === "/registrar";
   const isAdminLogin = path === "/admin-login";
   const [pin, setPin] = useState("");
@@ -3629,7 +3745,19 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
         setError(`Credenciais incorretas. Tentativa ${newAttempts} de 5.`);
       }
     } else {
-      if (onLogin) onLogin();
+      const form = e.currentTarget as HTMLFormElement;
+      const formData = new FormData(form);
+      const name = formData.get("name") as string;
+      const phone = formData.get("phone") as string;
+      const userData = {
+        name: name || (register ? "Novo Usuário" : "Usuário PreçoCerto"),
+        cpf: cpf,
+        phone: phone || "",
+        address: "",
+        whatsapp: phone || "",
+        referencePoint: ""
+      };
+      if (onLogin) onLogin(userData);
       window.location.href = "/";
     }
   }
@@ -3712,7 +3840,6 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
                 </div>
               </div>
             )
-
           ) : (
             <>
               <label>E-mail Administrador<input required type="email" value={user} onChange={e=>setUser(e.target.value)} placeholder="francdenisbr@gmail.com"/></label>
@@ -3721,9 +3848,9 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
           )
         ) : (
           <>
-            {register&&<label>Nome completo<input required minLength={3} placeholder="Seu nome e sobrenome"/></label>}
+            {register&&<label>Nome completo<input name="name" required minLength={3} placeholder="Seu nome e sobrenome"/></label>}
             <label>CPF<input required value={cpf} onChange={e=>setCpf(e.target.value.replace(/\D/g,"").slice(0,11))} inputMode="numeric" placeholder="000.000.000-00"/><small>Usamos seu CPF somente para identificar sua conta.</small></label>
-            {register&&<label>Celular<input inputMode="tel" placeholder="(68) 99999-9999"/></label>}
+            {register&&<label>Celular<input name="phone" inputMode="tel" placeholder="(68) 99999-9999"/></label>}
             <label>PIN de 6 dígitos<input required value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,6))} inputMode="numeric" type="password" maxLength={6} placeholder="••••••"/><small>Evite sequências como 123456.</small></label>
           </>
         )}
@@ -3733,7 +3860,6 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
           <ArrowRight/>
         </button>
 
-        
         {isAdminLogin && !showForgot && <button type="button" onClick={() => setShowForgot(true)} className="center-link" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', marginTop: '1rem' }}>Esqueci minha senha admin</button>}
         {isAdminLogin && showForgot && <button type="button" onClick={() => { setShowForgot(false); setRecoveryStep(1); setError(""); }} className="center-link" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', marginTop: '1rem' }}>Voltar ao login admin</button>}
         
@@ -4421,7 +4547,7 @@ export default function PrecoCertoApp() {
     });
   }
 
-  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites]);
+  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user,setUser: setUserAndUpdateStorage}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites]);
 
   const handleAdminAuth = (success: boolean) => {
     if (success) {
@@ -4431,13 +4557,18 @@ export default function PrecoCertoApp() {
     }
   };
 
-  const handleUserLogin = () => {
-    const newUser = { name: "Usuário PreçoCerto" };
+  const handleUserLogin = (userData?: any) => {
+    const newUser = userData || { name: "Usuário PreçoCerto" };
     setUser(newUser);
     localStorage.setItem("precocerto:user", JSON.stringify(newUser));
     try { setFavorites(JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]")); }
     catch { setFavorites([]); }
     setToast("Bem-vindo ao PreçoCerto!");
+  };
+
+  const setUserAndUpdateStorage = (newUser: any) => {
+    setUser(newUser);
+    localStorage.setItem("precocerto:user", JSON.stringify(newUser));
   };
 
   const handleLogout = () => {
@@ -4472,7 +4603,7 @@ export default function PrecoCertoApp() {
   else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
   else if(pathname==="/acougues"||pathname==="/categoria/acougue") page=<ButchersPage {...props}/>;
   else if(pathname==="/planos" && isEnabled("consumerPlans")) page=<PlansPage/>;
-  else if(pathname==="/alertas"||pathname==="/perfil") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user}/>;
+  else if(pathname==="/alertas"||pathname==="/perfil"||pathname==="/favoritos") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user} setUser={setUserAndUpdateStorage}/>;
   else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user} syncStatus={syncStatus}/>;
   else if(pathname.startsWith("/cesta/snapshot/")) page=<SnapshotPage {...props}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
