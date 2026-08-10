@@ -3196,7 +3196,16 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: (user as any)?.name || "",
+    address: (user as any)?.address || "",
+    phone: (user as any)?.phone || "",
+    whatsapp: (user as any)?.whatsapp || "",
+    referencePoint: (user as any)?.referencePoint || "",
+    cpf: (user as any)?.cpf || ""
+  });
+
     if (path === "/perfil" || path === "/favoritos") {
       const timer = setTimeout(() => {
         setIsDataLoading(false);
