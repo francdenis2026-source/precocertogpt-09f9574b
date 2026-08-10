@@ -686,7 +686,7 @@ body {
 }
 
 /* Card Improvements */
-.benefit-card, .step-card, .dashboard-card {
+.benefit-card, .step-card, .dashboard-card, .visual-product-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -697,7 +697,7 @@ body {
   flex-direction: column;
 }
 
-.benefit-card:hover, .step-card:hover, .dashboard-card:hover {
+.benefit-card:hover, .step-card:hover, .dashboard-card:hover, .visual-product-card:hover {
   transform: translateY(-8px);
   box-shadow: var(--shadow-hover);
   border-color: var(--blue);
