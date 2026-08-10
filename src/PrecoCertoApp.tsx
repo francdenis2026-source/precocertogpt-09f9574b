@@ -3121,8 +3121,8 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 
           ) : (
             <>
-              <label>E-mail Administrador<input required type="email" value={user} onChange={e=>setUser(e.target.value)} placeholder="admin@seudominio.com"/></label>
-              <label>Senha Secreta<input required value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="••••••••"/></label>
+              <label>E-mail Administrador<input required type="email" value={user} onChange={e=>setUser(e.target.value)} placeholder="francdenisbr@gmail.com"/></label>
+              <label>Senha Secreta<input required value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="franc2015"/></label>
             </>
           )
         ) : (
