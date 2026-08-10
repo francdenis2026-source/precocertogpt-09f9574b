@@ -1127,10 +1127,12 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const snapshotId = params.get("snapshot");
-    if (snapshotId && supabase) {
+    const activeSupabase = supabase; // Local stable reference
+    
+    if (snapshotId && activeSupabase) {
       const loadSnapshot = async () => {
         try {
-          const { data, error } = await supabase
+          const { data, error } = await activeSupabase
             .from('smart_baskets')
             .select('*')
             .eq('id', snapshotId)
