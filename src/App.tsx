@@ -8,6 +8,7 @@ import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { HeaderStickyUx } from "./components/HeaderStickyUx";
 import { HomepageProfessionalRewrite } from "./components/HomepageProfessionalRewrite";
 import { HomeSearchFocusUx } from "./components/HomeSearchFocusUx";
+import { DarkThemeConsistency } from "./components/DarkThemeConsistency";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
       <HeaderStickyUx />
       <HomepageProfessionalRewrite />
       <HomeSearchFocusUx />
+      <DarkThemeConsistency />
       <Routes>
         <Route path="*" element={<PrecoCertoApp />} />
       </Routes>
