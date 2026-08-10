@@ -18,6 +18,7 @@ import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgr
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
 import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
 import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
+import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
 import { BasketSessionFlow } from "./components/BasketSessionFlow";
 import { MerchantDashboard } from "./components/MerchantDashboard";
 import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
@@ -57,6 +58,8 @@ export default function App() {
       <BasketSessionFlow />
       <Routes>
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
+        <Route path="/autora/dorinha-barroso" element={<DorinhaAuthorStore />} />
+        <Route path="/dorinha-barroso" element={<DorinhaAuthorStore />} />
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
         <Route path="/loja/:merchantId" element={<MerchantOnlineStoreRoute />} />
         <Route path="/painel-lojista" element={<MerchantDashboard />} />
