@@ -1166,6 +1166,26 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     ));
   };
 
+  useEffect(() => {
+    async function persistToCloud() {
+      if (!user || !supabase || basketItems.length === 0) return;
+      try {
+        await saveBasket(
+          user.id,
+          "Cesta Ativa (Auto)",
+          mode,
+          budget,
+          basketItems,
+          optimizationResult || { total: 0, savings: 0, items: [], storeBreakdown: {} }
+        );
+      } catch (err) {
+        console.error("Erro no autosave:", err);
+      }
+    }
+    const timer = setTimeout(persistToCloud, 3000); // Debounce de 3s para evitar spam no banco
+    return () => clearTimeout(timer);
+  }, [basketItems, mode, budget, user, optimizationResult]);
+
   const handleSaveBasket = async () => {
     if (!user) {
       alert("Você precisa estar logado para salvar e compartilhar cestas.");
