@@ -4,6 +4,7 @@ import PrecoCertoApp from "./PrecoCertoApp";
 import { MaxPriceStoreLabels } from "./components/MaxPriceStoreLabels";
 import { SearchUxClarity } from "./components/SearchUxClarity";
 import { ProductInteractionUx } from "./components/ProductInteractionUx";
+import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       <MaxPriceStoreLabels />
       <SearchUxClarity />
       <ProductInteractionUx />
+      <PublicCatalogUxFixes />
       <Routes>
         <Route path="*" element={<PrecoCertoApp />} />
       </Routes>
