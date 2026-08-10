@@ -10,6 +10,7 @@ export type BusinessType =
   | "pet_shop"
   | "cosmetics"
   | "services"
+  | "books_author"
   | "other";
 
 export type BusinessCapability =
@@ -146,6 +147,15 @@ export const businessProfiles: Record<BusinessType, BusinessProfile> = {
     recommendedStations: ["Atendimento"],
     examples: ["Serviços agendados", "Orçamentos", "Atendimentos"],
     operationalStages: ["Solicitado", "Confirmado", "Em atendimento", "Concluído"],
+  },
+  books_author: {
+    type: "books_author", label: "Livraria / Autora", shortLabel: "Livros",
+    description: "Catálogo de obras com estoque de exemplares, venda direta, retirada ou entrega, presença editorial e gestão financeira.",
+    catalogLabel: "Obras e exemplares", orderLabel: "Pedidos de leitores",
+    capabilities: [...common, "inventory", "scheduled_orders"],
+    recommendedStations: ["Atendimento ao leitor", "Separação", "Autógrafos", "Expedição"],
+    examples: ["Livros físicos", "E-books", "Edições autografadas", "Encomendas"],
+    operationalStages: ["Novo pedido", "Confirmado", "Separando exemplar", "Aguardando retirada", "Enviado", "Entregue"],
   },
   other: {
     type: "other", label: "Outro comércio local", shortLabel: "Outro",
