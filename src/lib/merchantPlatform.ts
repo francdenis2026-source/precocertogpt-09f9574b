@@ -210,5 +210,8 @@ export async function getMercadoPagoConnectUrl(merchantId: string) {
   const { data, error } = await supabase.functions.invoke("mercadopago-oauth", {
     body: { action: "authorize", merchantId },
   });
+  if (data?.url && typeof window !== "undefined") {
+    sessionStorage.setItem("pc_mp_merchant_id", merchantId);
+  }
   return { url: data?.url ?? null, error: error?.message ?? null };
 }
