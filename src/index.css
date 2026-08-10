@@ -2082,11 +2082,21 @@ iframe[src*="lovable.dev/badge"] {
 
 .chart-period-select {
   font-size: 0.7rem;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: white;
   cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  appearance: none;
+}
+.chart-period-select:hover {
+  border-color: var(--border-strong);
+}
+.chart-period-select:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-glass);
 }
 
 .share-row {
@@ -2116,10 +2126,20 @@ iframe[src*="lovable.dev/badge"] {
 
 .sort-select {
   font-size: 0.75rem;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: white;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  appearance: none;
+}
+.sort-select:hover {
+  border-color: var(--border-strong);
+}
+.sort-select:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-glass);
 }
 
 .mini-sparkline {
