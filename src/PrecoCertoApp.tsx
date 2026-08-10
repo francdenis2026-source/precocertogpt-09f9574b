@@ -1163,7 +1163,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
   const updateQuantity = (name: string, delta: number) => {
     setBasketItems(prev => prev.map(i => {
       if (i.productName === name) {
-        const newQty = Math.max(0.5, i.quantity + delta);
+        const newQty = Math.max(1, i.quantity + delta);
         return { ...i, quantity: newQty };
       }
       return i;
