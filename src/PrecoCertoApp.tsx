@@ -867,7 +867,17 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
             <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => toggleFavorite(String(p.id))} aria-pressed={favorites.includes(String(p.id))} aria-label={favorites.includes(String(p.id)) ? `Remover ${p.name} dos favoritos` : `Favoritar ${p.name}`}>
               <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
             </button>
-            <a className="visual-product-image" href={`/produto/${p.slug}`}>
+            <div 
+              className="visual-product-image" 
+              onClick={(e) => {
+                e.preventDefault();
+                // O estado setSelectedProduct está disponível no componente pai SearchPage e na SearchResultCard
+                // Para a Home, precisamos garantir que o estado exista ou usar a rota.
+                // Como o usuário relatou que o modal NÃO abre, vamos unificar o comportamento.
+                window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }));
+              }}
+              style={{ cursor: 'pointer' }}
+            >
               <span className="position-number">0{index + 1}</span>
               <ProductStatusBadge product={p}/>
               <ProductImage product={p} />
@@ -875,11 +885,17 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
                 <span className="price-drop-tag"><TrendingDown size={14}/> -{Math.round((1 - p.minPrice / p.previousPrice) * 100)}%</span>
               )}
               <span className="verified-chip"><ShieldCheck /> Verificado</span>
-            </a>
+            </div>
 
             <div className="visual-product-content">
               <span className="category-tag">{p.category} • {p.size}</span>
-              <a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a>
+              <div 
+                className="visual-product-name" 
+                onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
+                style={{ cursor: 'pointer' }}
+              >
+                {p.name}
+              </div>
               <div className="visual-store">
                 <span className="market-dot" style={{ background: p.storeColor }} />
                 <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -3728,6 +3744,14 @@ export default function PrecoCertoApp() {
   
   const [undoAction, setUndoAction] = useState<(() => void) | null>(null);
 
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => setSelectedProduct(e.detail);
+    window.addEventListener('pc:open-product-details', handler);
+    return () => window.removeEventListener('pc:open-product-details', handler);
+  }, []);
+
   function addBasket(p: Product) {
     setCart(current => {
       if (current.some(i => i.id === p.id)) return current;
@@ -3896,6 +3920,64 @@ export default function PrecoCertoApp() {
         >
           <X size={16} />
         </button>
+      </div>
+    )}
+
+    {selectedProduct && (
+      <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)} role="dialog" aria-modal="true" aria-labelledby="modal-title" style={{ zIndex: 9999 }}>
+        <div className="admin-modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()} tabIndex={-1}>
+          <div className="admin-modal-head">
+            <h3 id="modal-title">Detalhes do Produto</h3>
+            <button className="icon-button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X/></button>
+          </div>
+          <div className="admin-modal-body">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+              <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ProductImage product={selectedProduct} size="default" eager />
+              </div>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <span className="category-tag">{selectedProduct.category}</span>
+                  {selectedProduct.previousPrice && selectedProduct.minPrice < selectedProduct.previousPrice && (
+                    <div style={{ background: 'var(--green-soft)', color: 'var(--green)', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                      -{Math.round((1 - selectedProduct.minPrice / selectedProduct.previousPrice) * 100)}% de desconto
+                    </div>
+                  )}
+                </div>
+                <h2 style={{ fontSize: '1.75rem', margin: '0.5rem 0', fontWeight: 800 }}>{selectedProduct.name}</h2>
+                <p style={{ color: 'var(--muted)', marginBottom: '1rem', fontSize: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
+                
+                <div className="visual-price" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
+                  <strong style={{ fontSize: '2.25rem', color: 'var(--green)' }}>{money(selectedProduct.minPrice)}</strong>
+                  {selectedProduct.previousPrice && selectedProduct.previousPrice > selectedProduct.minPrice && (
+                    <span className="old-price" style={{ color: 'var(--muted)', textDecoration: 'line-through', fontSize: '1.1rem' }}>{money(selectedProduct.previousPrice)}</span>
+                  )}
+                </div>
+
+                <div className="verified-details" style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px' }}>
+                  <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Store size={16} color="var(--blue)" />
+                    <strong style={{ fontSize: '0.95rem' }}>{selectedProduct.establishment}</strong>
+                  </div>
+                  <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                    <MapPin size={16} color="var(--muted)" />
+                    <span>{selectedProduct.neighborhood}, Feijó</span>
+                  </div>
+                  <div className="detail-item" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                    <Clock3 size={16} />
+                    <span>Verificado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+              <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
+                Adicionar à Cesta
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     )}
 
