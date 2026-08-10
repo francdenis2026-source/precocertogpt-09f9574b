@@ -3453,3 +3453,9 @@ body,.site-header,.mobile-bar,.drawer-panel,.admin-shell,.admin-main,.auth-form-
 /* Estado inequívoco de favorito e comparação responsável de preços */
 .floating-favorite.active{width:auto!important;min-width:34px!important;padding:0 10px!important;display:flex!important;gap:5px!important;border-radius:999px!important;color:#b51232!important;background:#fff0f3!important}.floating-favorite.active svg{fill:currentColor!important;filter:drop-shadow(0 2px 3px rgba(181,18,50,.25))}.favorite-saved-label{display:inline!important;color:inherit;font-size:9px!important;font-weight:900;letter-spacing:.2px}.freshness-badge{font-size:10px!important;font-weight:650!important;letter-spacing:0!important;text-transform:none!important;opacity:.82}.single-price-note{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px;border:1px dashed var(--border-strong);border-radius:8px;color:var(--muted);background:var(--surface-2)}.single-price-note>svg{width:16px;flex:0 0 auto;color:var(--blue)}.single-price-note span,.single-price-note b,.single-price-note small{display:block}.single-price-note b{color:var(--text-main);font-size:10px}.single-price-note small{margin-top:1px;font-size:9px;line-height:1.35}
 [data-theme='dark'] .floating-favorite.active{color:#ff8ba1!important;background:#3d1721!important;border-color:#a94156!important;box-shadow:0 0 0 3px rgba(255,91,121,.16),0 8px 20px rgba(0,0,0,.35)!important}
+@media (max-width: 620px) {
+  .pc-pix-modal { border-radius: 18px !important; }
+  .pc-pix-form { padding: 18px !important; }
+  .pc-pix-two, .pc-pix-summary { grid-template-columns: 1fr !important; }
+  .pc-pix-summary > div:last-child { text-align: left !important; }
+}
