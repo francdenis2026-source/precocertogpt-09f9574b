@@ -3612,7 +3612,8 @@ export default function PrecoCertoApp() {
     let alive = true;
     let timer: any;
 
-    const initialQuery = new URLSearchParams(window.location.search).get("q") ?? "";
+    const params = new URLSearchParams(window.location.search);
+    const initialQuery = params.get("q") ?? "";
     if (initialQuery) setQuery(initialQuery);
 
     const load = async () => {
@@ -3620,8 +3621,6 @@ export default function PrecoCertoApp() {
       setSyncStatus("syncing");
       
       try {
-        // A busca é filtrada pela própria interface. Manter o catálogo completo
-        // evita que cada nova letra pesquise sobre um resultado já reduzido.
         const data = await fetchCatalog();
         if (!alive) return;
         
@@ -3634,6 +3633,19 @@ export default function PrecoCertoApp() {
         
         setMetrics(data.metrics);
         setSyncStatus("online");
+
+        // Deep link: abrir modal se houver "product_id" na URL
+        const productId = params.get("product_id");
+        if (productId) {
+          const found = data.products.find(p => String(p.id) === String(productId));
+          if (found) {
+            setSelectedProduct(found);
+            // Limpa o parâmetro da URL sem recarregar para evitar reabrir ao navegar
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete("product_id");
+            window.history.replaceState({}, "", newUrl);
+          }
+        }
       } catch (err) {
         if (!alive) return;
         setSyncStatus("error");
@@ -3673,10 +3685,15 @@ export default function PrecoCertoApp() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
-    const handler = (e: any) => setSelectedProduct(e.detail);
+    const handler = (e: any) => {
+      if (e.detail) {
+        // Garante que o estado seja resetado antes de aplicar o novo para evitar bugs de transição
+        setSelectedProduct(null);
+        setTimeout(() => setSelectedProduct(e.detail), 0);
+      }
+    };
     window.addEventListener('pc:open-product-details', handler);
     
-    // Controle de overflow do body quando o modal está aberto
     if (selectedProduct) {
       document.body.classList.add('modal-open');
     } else {
@@ -3865,7 +3882,21 @@ export default function PrecoCertoApp() {
         <div className="admin-modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()} tabIndex={-1}>
           <div className="admin-modal-head">
             <h3 id="modal-title">Detalhes do Produto</h3>
-            <button className="icon-button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X/></button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button 
+                className="icon-button" 
+                title="Compartilhar este produto"
+                onClick={() => {
+                  const url = new URL(window.location.origin + window.location.pathname);
+                  url.searchParams.set("product_id", String(selectedProduct.id));
+                  navigator.clipboard.writeText(url.toString());
+                  setToast("Link do produto copiado!");
+                }}
+              >
+                <Share2 size={18} />
+              </button>
+              <button className="icon-button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X/></button>
+            </div>
           </div>
           <div className="admin-modal-body">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
