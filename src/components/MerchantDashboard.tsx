@@ -140,7 +140,7 @@ export function MerchantDashboard() {
   }
 
   useEffect(() => {
-    let cleanup = () => undefined;
+    let cleanup: (() => void) | undefined;
     void (async () => {
       setLoading(true);
       const member = await loadMerchantMembership();
@@ -154,9 +154,13 @@ export function MerchantDashboard() {
       ]);
       setOrders(orderRows);
       setSummary(summaryRow);
-      cleanup = subscribeMerchantOrders(member.merchant_id, () => void refresh());
+      cleanup = subscribeMerchantOrders(member.merchant_id, () => {
+        refresh();
+      });
     })();
-    return () => cleanup();
+    return () => {
+      if (cleanup) cleanup();
+    };
   }, [merchantId]);
 
   const grouped = useMemo(() => ({
