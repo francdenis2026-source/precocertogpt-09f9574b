@@ -3241,7 +3241,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
       );
     }
 
-    const favProducts = useMemo(() => products.filter(p => favorites.includes(String(p.id))), [products, favorites]);
+    
     const isFavoritesView = path === "/favoritos";
     const isProfileView = path === "/perfil";
     
