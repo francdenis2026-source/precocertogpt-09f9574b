@@ -14,7 +14,7 @@ import {
   Truck,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
-import imagimacaoAsset from "@/assets/uma-viagem-ao-mundo-da-imaginacao.png.asset.json";
+import imagimacaoAsset from "../assets/uma-viagem-ao-mundo-da-imaginacao.png.asset.json";
 
 type ExternalStore = { label: string; url: string };
 type Book = {
