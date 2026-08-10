@@ -21,6 +21,7 @@ import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
 import { PublicEstablishmentCatalog } from "./components/PublicEstablishmentCatalog";
 import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
 import { DorinhaCommerceEnhancer } from "./components/DorinhaCommerceEnhancer";
+import { DorinhaBookCoverPolish } from "./components/DorinhaBookCoverPolish";
 import { PremiumMarketplaceSpotlight } from "./components/PremiumMarketplaceSpotlight";
 import { LocalCultureSpotlight } from "./components/LocalCultureSpotlight";
 import { FremixProductionsPage } from "./components/FremixProductionsPage";
@@ -71,6 +72,7 @@ export default function App() {
       <BasketSessionFlow />
       <AuthorMerchantDashboardWelcome />
       <DorinhaCommerceEnhancer />
+      <DorinhaBookCoverPolish />
       <Routes>
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/estabelecimento/:identifier" element={<PublicEstablishmentCatalog />} />
