@@ -24,6 +24,7 @@ import { DorinhaCommerceEnhancer } from "./components/DorinhaCommerceEnhancer";
 import { PremiumMarketplaceSpotlight } from "./components/PremiumMarketplaceSpotlight";
 import { LocalCultureSpotlight } from "./components/LocalCultureSpotlight";
 import { FremixProductionsPage } from "./components/FremixProductionsPage";
+import { FremixDirectoryBridge } from "./components/FremixDirectoryBridge";
 import { BasketSessionFlow } from "./components/BasketSessionFlow";
 import { AuthorMerchantDashboardWelcome } from "./components/AuthorMerchantDashboardWelcome";
 import { AuthorCatalogEditor } from "./components/AuthorCatalogEditor";
@@ -64,6 +65,7 @@ export default function App() {
       <MerchantBusinessSetupShortcut />
       <MerchantDemoSwitcher />
       <EstablishmentsNavBridge />
+      <FremixDirectoryBridge />
       <BasketSessionFlow />
       <AuthorMerchantDashboardWelcome />
       <DorinhaCommerceEnhancer />
