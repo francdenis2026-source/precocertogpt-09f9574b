@@ -3693,7 +3693,18 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
         setError(`Credenciais incorretas. Tentativa ${newAttempts} de 5.`);
       }
     } else {
-      if (onLogin) onLogin();
+      const formData = new FormData(e.currentTarget);
+      const name = formData.get("name") as string;
+      const phone = formData.get("phone") as string;
+      const userData = {
+        name: name || (register ? "Novo Usuário" : "Usuário PreçoCerto"),
+        cpf: cpf,
+        phone: phone || "",
+        address: "",
+        whatsapp: phone || "",
+        referencePoint: ""
+      };
+      if (onLogin) onLogin(userData);
       window.location.href = "/";
     }
   }
