@@ -16,9 +16,12 @@ import { FooterCompactUx } from "./components/FooterCompactUx";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
+import { PremiumMarketplaceSpotlight } from "./components/PremiumMarketplaceSpotlight";
 import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
 import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
 import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
+import { DorinhaCommerceEnhancer } from "./components/DorinhaCommerceEnhancer";
+import { AuthorCatalogEditor } from "./components/AuthorCatalogEditor";
 import { BasketSessionFlow } from "./components/BasketSessionFlow";
 import { AuthorMerchantDashboardWelcome } from "./components/AuthorMerchantDashboardWelcome";
 import { MerchantDashboard } from "./components/MerchantDashboard";
@@ -53,11 +56,13 @@ export default function App() {
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
       <MarketplacePositioningSection />
+      <PremiumMarketplaceSpotlight />
       <MerchantBusinessSetupShortcut />
       <MerchantDemoSwitcher />
       <EstablishmentsNavBridge />
       <BasketSessionFlow />
       <AuthorMerchantDashboardWelcome />
+      <DorinhaCommerceEnhancer />
       <Routes>
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/autora/dorinha-barroso" element={<DorinhaAuthorStore />} />
@@ -65,6 +70,7 @@ export default function App() {
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
         <Route path="/loja/:merchantId" element={<MerchantOnlineStoreRoute />} />
         <Route path="/painel-lojista" element={<MerchantDashboard />} />
+        <Route path="/painel-lojista/autora" element={<AuthorCatalogEditor />} />
         <Route path="/painel-lojista/gestao" element={<MerchantManagementCenter />} />
         <Route path="/painel-lojista/catalogo" element={<MerchantCatalogStudio />} />
         <Route path="/painel-lojista/configurar-negocio" element={<MerchantBusinessSetup />} />
