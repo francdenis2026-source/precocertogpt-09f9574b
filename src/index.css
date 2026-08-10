@@ -111,21 +111,7 @@ body {
 }
 
 .visual-product-card {
-  position: relative;
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  overflow: hidden;
-  transition: var(--transition-bounce);
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-soft);
-}
-
-.visual-product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--blue);
+  /* Combined styles in Card Improvements section */
 }
 
 
