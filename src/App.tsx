@@ -22,6 +22,8 @@ import { PublicEstablishmentCatalog } from "./components/PublicEstablishmentCata
 import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
 import { DorinhaCommerceEnhancer } from "./components/DorinhaCommerceEnhancer";
 import { PremiumMarketplaceSpotlight } from "./components/PremiumMarketplaceSpotlight";
+import { LocalCultureSpotlight } from "./components/LocalCultureSpotlight";
+import { FremixProductionsPage } from "./components/FremixProductionsPage";
 import { BasketSessionFlow } from "./components/BasketSessionFlow";
 import { AuthorMerchantDashboardWelcome } from "./components/AuthorMerchantDashboardWelcome";
 import { AuthorCatalogEditor } from "./components/AuthorCatalogEditor";
@@ -58,6 +60,7 @@ export default function App() {
       <PreferredProductPngUpgrade />
       <MarketplacePositioningSection />
       <PremiumMarketplaceSpotlight />
+      <LocalCultureSpotlight />
       <MerchantBusinessSetupShortcut />
       <MerchantDemoSwitcher />
       <EstablishmentsNavBridge />
@@ -67,6 +70,8 @@ export default function App() {
       <Routes>
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/estabelecimento/:identifier" element={<PublicEstablishmentCatalog />} />
+        <Route path="/cultura/fremix-producoes" element={<FremixProductionsPage />} />
+        <Route path="/fremix-producoes" element={<FremixProductionsPage />} />
         <Route path="/autora/dorinha-barroso" element={<DorinhaAuthorStore />} />
         <Route path="/dorinha-barroso" element={<DorinhaAuthorStore />} />
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
