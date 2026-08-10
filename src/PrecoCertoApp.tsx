@@ -790,7 +790,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
     .slice(0, 3);
   const potentialSaving = opportunityProducts.reduce((total, product) => total + Math.max(0, (product.previousPrice ?? product.maxPrice) - product.minPrice), 0);
   return <>
-    <section className="hero">
+    <section className="hero" style={{ marginTop: '1.5rem' }}>
       <div className="hero-photo" />
       <div className="hero-wash" />
       <div className="shell hero-content">
