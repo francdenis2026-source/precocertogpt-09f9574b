@@ -3906,6 +3906,16 @@ export default function PrecoCertoApp() {
               <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
                 Adicionar à Cesta
               </button>
+              <button className="button button--outline" style={{ height: '54px' }} onClick={() => { 
+                if (!user) {
+                  setToast("Acesse sua conta para configurar alertas de preço.");
+                  return;
+                }
+                saveAction("alert", "product", String(selectedProduct.id)); 
+                setSelectedProduct(null); 
+              }}>
+                <Bell size={18} /> Alertar
+              </button>
             </div>
           </div>
         </div>
