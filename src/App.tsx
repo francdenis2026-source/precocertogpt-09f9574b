@@ -6,6 +6,7 @@ import { SearchUxClarity } from "./components/SearchUxClarity";
 import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { HeaderStickyUx } from "./components/HeaderStickyUx";
+import { HomepageProfessionalRewrite } from "./components/HomepageProfessionalRewrite";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
       <ProductInteractionUx />
       <PublicCatalogUxFixes />
       <HeaderStickyUx />
+      <HomepageProfessionalRewrite />
       <Routes>
         <Route path="*" element={<PrecoCertoApp />} />
       </Routes>
