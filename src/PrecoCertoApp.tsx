@@ -1142,7 +1142,8 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
           const isExpired = (now - createdAt) > (5 * 60 * 1000);
           
           if (isExpired) {
-            setToast("Este link de compartilhamento expirou (5 min).", "warning");
+            // setToast não está disponível aqui ainda, usamos dispatchEvent
+            window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Este link de compartilhamento expirou (5 min).", type: "warning" } }));
             return;
           }
 
@@ -1158,7 +1159,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
           setMode(data.optimization_mode);
           setBudget(data.budget);
           setStep(3);
-          setToast("Cesta compartilhada carregada com sucesso!");
+          window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cesta compartilhada carregada com sucesso!", type: "success" } }));
         }
       };
       loadSnapshot();
@@ -1745,7 +1746,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                               const text = `Minha Cesta Inteligente (Expira às ${expiry}):\nTotal: ${money(optimizationResult?.total || 0)}\n\nVeja a lista e salve no seu perfil: ${window.location.origin}/cesta?snapshot=${snapshot.id}`;
                               window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                             } catch (err) {
-                              setToast("Erro ao gerar link de compartilhamento.");
+                              window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Erro ao gerar link de compartilhamento.", type: "error" } }));
                             }
                           }}
                         >
@@ -4840,6 +4841,13 @@ export default function PrecoCertoApp() {
   };
 
   const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user,setUser: setUserAndUpdateStorage}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites]);
+
+  // Toast global listener
+  useEffect(() => {
+    const handler = (e: any) => setToast(e.detail.message, e.detail.type || "success");
+    window.addEventListener('pc:set-toast', handler);
+    return () => window.removeEventListener('pc:set-toast', handler);
+  }, []);
 
   const handleAdminAuth = (success: boolean) => {
     if (success) {
