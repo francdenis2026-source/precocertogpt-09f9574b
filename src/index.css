@@ -1663,13 +1663,22 @@ iframe[src*="lovable.dev/badge"] {
 .admin-modal-body { padding: 1.5rem; max-height: 80vh; overflow-y: auto; }
 .admin-modal-body label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem; font-weight: 500; color: #64748b; margin-bottom: 1rem; }
 .admin-modal-body input { 
-  padding: 0.65rem; 
-  border: 1px solid #e2e8f0; 
-  border-radius: 0.5rem; 
-  font-size: 0.95rem; 
-  color: #1e293b;
+  width: 100%;
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1rem;
+  color: var(--navy);
+  appearance: none;
 }
-.admin-modal-body input:focus { outline: none; border-color: #3b82f6; }
+.admin-modal-body input:focus { 
+  outline: none; 
+  border-color: var(--blue);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px var(--blue-glass);
+}
 
 
 /* Aprimoramentos do Comparador de Preços */
