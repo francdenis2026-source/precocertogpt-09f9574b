@@ -3309,16 +3309,69 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
         {isProfileView && (
           <section className="generic-hero">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <div style={{ width: '80px', height: '80px', background: 'var(--blue-soft)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)' }}>
-                <UserRound size={40} />
+              <div style={{ position: 'relative' }}>
+                <div style={{ 
+                  width: '100px', 
+                  height: '100px', 
+                  background: 'var(--blue-soft)', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  color: 'var(--blue)',
+                  overflow: 'hidden',
+                  border: '4px solid white',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                }}>
+                  {(user as any)?.avatarUrl ? (
+                    <img src={(user as any).avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <UserRound size={48} />
+                  )}
+                </div>
+                <button 
+                  onClick={() => setIsEditingProfile(true)}
+                  style={{
+                    position: 'absolute',
+                    bottom: '0',
+                    right: '0',
+                    background: 'var(--blue)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                  }}
+                  title="Alterar foto"
+                >
+                  <Camera size={16} />
+                </button>
               </div>
               <div style={{ flex: 1, minWidth: '240px' }}>
                 <span className="eyebrow">Minha Conta</span>
-                <h1>{(user as any)?.name || "Usuário PreçoCerto"}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <h1>{(user as any)?.name || "Usuário PreçoCerto"}</h1>
+                  <span style={{ 
+                    fontSize: '0.7rem', 
+                    background: 'var(--surface-3)', 
+                    padding: '2px 8px', 
+                    borderRadius: '12px', 
+                    color: 'var(--muted)',
+                    fontWeight: 600
+                  }}>
+                    {avatarChangeCount >= 2 ? "Limite de fotos atingido" : `${2 - avatarChangeCount} trocas restantes este ano`}
+                  </span>
+                </div>
                 <p>Gerencie seus alertas, favoritos e preferências de economia em Feijó.</p>
               </div>
               <button className="button button--primary" onClick={() => setIsEditingProfile(true)}>Editar Meus Dados</button>
             </div>
+
           </section>
         )}
 
