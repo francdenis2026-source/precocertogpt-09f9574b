@@ -1060,7 +1060,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
   // Efeito para carregar cesta do banco de dados quando o usuário loga
   useEffect(() => {
     async function loadUserBasket() {
-      if (!user) return;
+      if (!user || !supabase) return;
       try {
         const { data: baskets, error } = await supabase
           .from('smart_baskets')
