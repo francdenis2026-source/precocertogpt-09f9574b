@@ -3189,6 +3189,44 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
 
   if (path === "/perfil" || path === "/favoritos") {
     if (!user) return <div className="shell page-shell generic-page"><section className="favorites-login-gate"><Heart/><span className="eyebrow">Favoritos protegidos</span><h1>Entre para salvar seus produtos</h1><p>Seus favoritos ficam disponíveis somente na sua área de cliente.</p><a className="button button--primary" href={`/login?redirect=${encodeURIComponent(path)}`}>Entrar na minha conta <ArrowRight/></a></section></div>;
+    
+    // Tratamento de carregamento e erro para dados que dependem da renderização
+    const [isDataLoading, setIsDataLoading] = useState(true);
+    const [dataError, setDataError] = useState<string | null>(null);
+
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        try {
+          setIsDataLoading(false);
+        } catch (err) {
+          setDataError("Falha ao carregar suas preferências. Tente recarregar a página.");
+          setIsDataLoading(false);
+        }
+      }, 400); // Simulamos um pequeno delay para feedback visual
+      return () => clearTimeout(timer);
+    }, []);
+
+    if (isDataLoading) {
+      return (
+        <div className="shell page-shell generic-page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div className="loading-spinner" style={{ width: '40px', height: '40px', border: '3px solid var(--surface-3)', borderTopColor: 'var(--blue)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          <p style={{ marginTop: '1rem', color: 'var(--muted)' }}>Carregando seu painel...</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      );
+    }
+
+    if (dataError) {
+      return (
+        <div className="shell page-shell generic-page" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+          <div style={{ color: 'var(--red)', marginBottom: '1.5rem' }}><PackageSearch size={48} /></div>
+          <h1>Ops! Algo deu errado</h1>
+          <p>{dataError}</p>
+          <button className="button button--primary" style={{ marginTop: '1.5rem' }} onClick={() => window.location.reload()}>Tentar novamente</button>
+        </div>
+      );
+    }
+
     const favProducts = products.filter(p => favorites.includes(String(p.id)));
     
     return (
@@ -3246,10 +3284,21 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
                 ))}
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--surface-2)', borderRadius: '12px' }}>
-                <Heart size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                <p>Nenhuma oferta favoritada ainda.</p>
-                <a href="/buscar" className="button button--outline" style={{ marginTop: '1rem' }}>Ver catálogo</a>
+              <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--surface-2)', borderRadius: '12px', border: '2px dashed var(--surface-3)' }}>
+                <div style={{ position: 'relative', display: 'inline-block', marginBottom: '1.5rem' }}>
+                  <Heart size={48} style={{ opacity: 0.1 }} />
+                  <Search size={20} style={{ position: 'absolute', bottom: -5, right: -5, color: 'var(--blue)' }} />
+                </div>
+                <h3>Sua lista está vazia</h3>
+                <p style={{ maxWidth: '300px', margin: '0 auto 1.5rem', color: 'var(--muted)' }}>
+                  Você ainda não favoritou nenhum produto. Adicione itens para acompanhar preços rapidamente.
+                </p>
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                  <a href="/buscar" className="button button--primary">
+                    <Search size={16} /> Explorar Ofertas
+                  </a>
+                  <a href="/" className="button button--ghost">Ver Início</a>
+                </div>
               </div>
             )}
 
