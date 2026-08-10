@@ -2263,8 +2263,42 @@ function SnapshotPage({ products }: PageProps) {
   useEffect(() => {
     async function load() {
       if (!snapshotId) return;
+      const activeSupabase = (window as any).supabase;
+      if (!activeSupabase) return;
+
       try {
-        const data = await getBasketSnapshot(snapshotId);
+        const { data, error } = await activeSupabase
+          .from('smart_baskets')
+          .select(`
+            *,
+            items:smart_basket_items(*),
+            snapshots:basket_snapshots(*)
+          `)
+          .eq('id', snapshotId)
+          .single();
+        
+        if (error) throw error;
+        if (!data) throw new Error("Cesta não encontrada.");
+
+        // Regra de Negócio: Snapshots só podem ser vistos completos por usuários logados
+        // se o usuário não for o dono e estiver tentando ver detalhes sensíveis (estabelecimentos).
+        const currentSession = await activeSupabase.auth.getSession();
+        const currentUser = currentSession.data.session?.user;
+
+        if (!currentUser && data.status !== 'public') {
+          // Se não estiver logado, oculta os estabelecimentos (segurança)
+          // O usuário ainda pode ver os itens, mas não onde comprar sem logar.
+          data.snapshots = data.snapshots.map((s: any) => ({
+            ...s,
+            establishment_name: "Faça login para ver",
+            establishment_id: null
+          }));
+        }
+
+        if (data.status === 'revoked') {
+          throw new Error("Este link de compartilhamento foi revogado.");
+        }
+
         setSnapshot(data);
       } catch (e: any) {
         setError(e.message);
