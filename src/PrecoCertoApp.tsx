@@ -3231,27 +3231,6 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [profileData, setProfileData] = useState({
-      name: user?.name || "",
-      address: user?.address || "",
-      phone: user?.phone || "",
-      whatsapp: user?.whatsapp || "",
-      referencePoint: user?.referencePoint || "",
-      cpf: user?.cpf || ""
-    });
-
-    const handleUpdateProfile = (e: React.FormEvent) => {
-      e.preventDefault();
-      const updatedUser = { ...user, ...profileData };
-      setUser(updatedUser);
-      localStorage.setItem("precocerto:user", JSON.stringify(updatedUser));
-      setIsEditingProfile(false);
-      if (typeof (window as any).setGlobalToast === 'function') {
-        (window as any).setGlobalToast("Perfil atualizado com sucesso!", "success");
-      }
-    };
-
-    const [isEditingProfile, setIsEditingProfile] = useState(false);
-    const [profileData, setProfileData] = useState({
       name: (user as any)?.name || "",
       address: (user as any)?.address || "",
       phone: (user as any)?.phone || "",
@@ -3263,7 +3242,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     const handleUpdateProfile = (e: React.FormEvent) => {
       e.preventDefault();
       const updatedUser = { ...user, ...profileData };
-      setUser(updatedUser as any);
+      (props as any).setUser(updatedUser);
       localStorage.setItem("precocerto:user", JSON.stringify(updatedUser));
       setIsEditingProfile(false);
       if (typeof (window as any).setGlobalToast === 'function') {
