@@ -16,10 +16,12 @@ import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MerchantDashboard } from "./components/MerchantDashboard";
 import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
+import { MerchantOnboardingPage } from "./components/MerchantOnboardingPage";
 import { PlatformAdminDashboard } from "./components/PlatformAdminDashboard";
+import { AdminMerchantManagement } from "./components/AdminMerchantManagement";
 import { CustomerOrders } from "./components/CustomerOrders";
 import { MercadoPagoCallback } from "./components/MercadoPagoCallback";
-import { CollaboratePage, ContactPage, MerchantSignupPage, PharmaciesPage } from "./components/PublicFooterServicePages";
+import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/PublicFooterServicePages";
 
 export default function App() {
   return (
@@ -37,12 +39,13 @@ export default function App() {
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
       <Routes>
-        <Route path="/lojista" element={<MerchantSignupPage />} />
+        <Route path="/lojista" element={<MerchantOnboardingPage />} />
         <Route path="/painel-lojista" element={<MerchantDashboard />} />
         <Route path="/painel-lojista/configurar-negocio" element={<MerchantBusinessSetup />} />
         <Route path="/meus-pedidos" element={<CustomerOrders />} />
         <Route path="/integracoes/mercadopago/callback" element={<MercadoPagoCallback />} />
         <Route path="/admin/plataforma" element={<PlatformAdminDashboard />} />
+        <Route path="/admin/comercios" element={<AdminMerchantManagement />} />
         <Route path="/colaborar" element={<CollaboratePage />} />
         <Route path="/fale-conosco" element={<ContactPage />} />
         <Route path="/farmacias" element={<PharmaciesPage />} />
