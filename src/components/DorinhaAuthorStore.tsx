@@ -52,17 +52,17 @@ type Profile = {
   books: Book[];
 };
 
-const coverThemes: Record<string, { bg: string; accent: string; eyebrow: string }> = {
-  "mente-perversa": { bg: "linear-gradient(145deg,#170d23,#4c1d3f 62%,#c75b7e)", accent: "#f3c4d3", eyebrow: "ROMANCE · FICÇÃO" },
-  "uma-historia-de-superacao": { bg: "linear-gradient(145deg,#1d2d44,#355070 60%,#e09f3e)", accent: "#ffe2ae", eyebrow: "TRAJETÓRIA · SUPERAÇÃO" },
-  "uma-viagem-ao-mundo-da-imaginacao": { bg: "linear-gradient(145deg,#12372a,#436850 58%,#adbc9f)", accent: "#e9f5df", eyebrow: "FÁBULAS · IMAGINAÇÃO" },
-  "despertar-para-o-mundo-literario": { bg: "linear-gradient(145deg,#231942,#5e548e 58%,#be95c4)", accent: "#f2ddf4", eyebrow: "LEITURA · LITERATURA" },
-};
-
 const heroPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='760' height='520' viewBox='0 0 760 520'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.07' stroke-width='2'%3E%3Cpath d='M70 430h520M110 430V145h58v285M177 430V100h44v330M231 430V178h62v252M304 430V126h50v304M365 430V190h72v240M447 430V82h48v348M508 430V150h68v280'/%3E%3Cpath d='M600 110c42 28 63 75 55 126-8 52-41 91-91 116M624 84c61 39 91 102 79 171-12 68-56 120-123 151'/%3E%3C/g%3E%3C/svg%3E")`;
 
 function cleanPhone(value?: string | null) {
   return (value || "").replace(/\D/g, "");
+}
+
+function responsiveCoverSrcSet(url:string){
+  const marker="/storage/v1/object/public/";
+  if(!url.includes(marker))return undefined;
+  const renderUrl=url.replace(marker,"/storage/v1/render/image/public/");
+  return [320,480,640].map(width=>`${renderUrl}${renderUrl.includes("?")?"&":"?"}width=${width}&quality=82 ${width}w`).join(", ");
 }
 
 function whatsappUrl(phone: string, book?: string) {
@@ -76,6 +76,7 @@ export function DorinhaAuthorStore() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [loadedCovers,setLoadedCovers]=useState<Set<string>>(()=>new Set());
 
   useEffect(() => {
     document.title = "Dorinha Barroso · Livros | PreçoCerto Marketplace Local";
@@ -195,7 +196,7 @@ export function DorinhaAuthorStore() {
         <div className="db-hero-art" aria-label="Coleção de livros de Dorinha Barroso">
           <div className="db-cover-stage">
             <div className="db-stage-glow"/>
-            {profile.books.slice(0,4).map(book=>book.image_url?<img key={book.id} className="db-hero-cover" src={book.image_url} alt={`Capa de ${book.name}`}/>:null)}
+            {profile.books.slice(0,4).map((book,index)=>book.image_url?<img key={book.id} className="db-hero-cover" src={book.image_url} srcSet={responsiveCoverSrcSet(book.image_url)} sizes="(max-width: 640px) 120px, (max-width: 1050px) 135px, 150px" width={300} height={456} loading={index===0?"eager":"lazy"} fetchPriority={index===0?"high":"low"} decoding="async" alt={`Capa de ${book.name}`}/>:null)}
             <div className="db-stage-note"><b>COLEÇÃO DA AUTORA</b>{profile.books.length} obras disponíveis para leitores de todo o Brasil.</div>
           </div>
         </div>
@@ -208,13 +209,11 @@ export function DorinhaAuthorStore() {
         <div style={s.catalogCount} className="db-catalog-count"><strong>{profile.books.length}</strong><span>títulos no catálogo</span></div>
       </div>
       <div className="db-book-grid">
-        {profile.books.map((book,index)=>{const theme=coverThemes[book.slug]||coverThemes["despertar-para-o-mundo-literario"];return <article key={book.id} className="db-book" style={s.bookCard}>
-          <div style={{...s.cover,background:theme.bg}}>
-            <span style={{...s.coverEyebrow,color:theme.accent}}>{theme.eyebrow}</span>
-            <div style={s.coverRule}/>
-            <strong style={s.coverTitle}>{book.name}</strong>
-            <span style={s.coverAuthor}>DORINHA BARROSO</span>
-            <span style={s.coverIndex}>0{index+1}</span>
+        {profile.books.map(book=><article key={book.id} className="db-book" style={s.bookCard}>
+          <div className={`db-real-cover-shell ${loadedCovers.has(book.id)?"is-loaded":""}`} data-real-cover="1">
+            <span className="db-cover-placeholder" aria-hidden="true">Preparando a capa…</span>
+            {book.image_url?<img className="db-real-cover-image" src={book.image_url} srcSet={responsiveCoverSrcSet(book.image_url)} sizes="(max-width: 640px) 68vw, (max-width: 1050px) 34vw, 238px" width={480} height={720} loading="lazy" fetchPriority="low" decoding="async" onLoad={()=>setLoadedCovers(current=>{if(current.has(book.id))return current;const next=new Set(current);next.add(book.id);return next})} alt={`Capa do livro ${book.name}, de Dorinha Barroso`}/>:null}
+            <span className="db-real-cover-badge">CAPA OFICIAL</span>
           </div>
           <div style={s.bookBody}>
             <div style={s.bookTop}><span style={s.bookType}>LIVRO</span>{book.available&&<span style={s.available}>Disponível para consulta</span>}</div>
@@ -227,7 +226,7 @@ export function DorinhaAuthorStore() {
               {book.external_url&&<a href={book.external_url} target="_blank" rel="noreferrer" style={s.externalBtn} title="Ver na Amazon"><ExternalLink size={16}/></a>}
             </div>
           </div>
-        </article>})}
+        </article>)}
       </div>
     </section>
 
@@ -241,7 +240,7 @@ export function DorinhaAuthorStore() {
           <div style={s.aboutFacts} className="db-about-facts"><span><b>Feijó</b><small>raízes acreanas</small></span><span><b>Educação</b><small>professora e pedagoga</small></span><span><b>Literatura</b><small>obras publicadas</small></span></div>
         </article>
         <figure className="db-author-portrait-card">
-          <img src="/dorinha-author-portrait-v2.webp" alt="Dorinha Barroso segurando dois de seus livros"/>
+          <img src="/dorinha-author-portrait-v2.webp" width={1024} height={1536} loading="lazy" decoding="async" sizes="(max-width: 640px) calc(100vw - 36px), (max-width: 1050px) calc(100vw - 48px), 360px" alt="Dorinha Barroso segurando dois de seus livros"/>
           <figcaption><strong>Dorinha Barroso</strong><span>ESCRITORA · EDUCADORA · ACREANA</span></figcaption>
         </figure>
       </div>
