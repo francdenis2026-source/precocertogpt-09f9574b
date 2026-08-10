@@ -3627,7 +3627,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
 
 }
 
-function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (success: boolean) => void; onLogin?: () => void }) {
+function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (success: boolean) => void; onLogin?: (userData?: any) => void }) {
   const register = path === "/cadastro" || path === "/registrar";
   const isAdminLogin = path === "/admin-login";
   const [pin, setPin] = useState("");
