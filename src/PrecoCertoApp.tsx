@@ -1028,15 +1028,26 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     savePdfOrientation(o, pdfUserKey);
   };
   
-  
   const [basketItems, setBasketItems] = useState<BasketItemConfig[]>(() => {
+    // 1. Tentar reabrir um snapshot específico (link compartilhado ou salvo)
     const reopened = localStorage.getItem("precocerto:basket_reopen");
     if (reopened) {
       const data = JSON.parse(reopened);
       localStorage.removeItem("precocerto:basket_reopen");
-      // Pequeno timeout para garantir que os estados de modo/budget sincronizem se necessário
       return data.items;
     }
+
+    // 2. Tentar recuperar a sessão de trabalho anterior salva localmente
+    const savedSession = localStorage.getItem("precocerto:active_basket_items");
+    if (savedSession) {
+      try {
+        return JSON.parse(savedSession);
+      } catch (e) {
+        console.error("Falha ao carregar cesta salva", e);
+      }
+    }
+
+    // 3. Fallback para itens do carrinho global (initialCart)
     return initialCart.map(p => ({
       productName: p.name,
       category: p.category,
@@ -1045,6 +1056,11 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
       isEssential: true
     }));
   });
+
+  // Persiste itens da cesta no localStorage conforme mudam
+  useEffect(() => {
+    localStorage.setItem("precocerto:active_basket_items", JSON.stringify(basketItems));
+  }, [basketItems]);
 
   useEffect(() => {
     const reopened = localStorage.getItem("precocerto:basket_reopen_meta");
@@ -1107,6 +1123,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     if (!window.confirm("Limpar todos os itens da cesta?")) return;
     setBasketItems([]);
     clearBasket();
+    localStorage.removeItem("precocerto:active_basket_items");
     setStep(2);
   };
 
@@ -1356,20 +1373,48 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                   <div className="builder-sidebar-footer" style={{ 
                     padding: '1.25rem', 
                     background: 'var(--surface-2)', 
-                    borderRadius: '12px',
+                    borderRadius: '16px',
                     marginBottom: '1rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'baseline',
-                    border: '1px solid var(--border)'
+                    border: '1px solid var(--border)',
+                    boxShadow: 'var(--shadow-sm)'
                   }}>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 600 }}>Total Estimado</span>
-                    <strong style={{ fontSize: '1.25rem', color: 'var(--blue)', letterSpacing: '-0.02em' }}>
-                      {money(basketItems.reduce((sum, item) => {
-                        const prod = findProduct(item.productName);
-                        return sum + ((prod?.minPrice || 0) * item.quantity);
-                      }, 0))}
-                    </strong>
+                    <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Itens na Cesta ({basketItems.length})
+                      </span>
+                      <div style={{ maxHeight: '160px', overflowY: 'auto', paddingRight: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {basketItems.map((item, idx) => {
+                          const prod = findProduct(item.productName);
+                          const price = (prod?.minPrice || 0) * item.quantity;
+                          return (
+                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
+                              <span style={{ color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
+                                {item.quantity}x {item.productName}
+                              </span>
+                              <span style={{ fontWeight: 600, color: 'var(--muted)', flexShrink: 0 }}>
+                                {money(price)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div style={{ 
+                      paddingTop: '0.75rem',
+                      borderTop: '1px solid var(--border)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 600 }}>Total Estimado</span>
+                      <strong style={{ fontSize: '1.25rem', color: 'var(--blue)', letterSpacing: '-0.02em', fontWeight: 800 }}>
+                        {money(basketItems.reduce((sum, item) => {
+                          const prod = findProduct(item.productName);
+                          return sum + ((prod?.minPrice || 0) * item.quantity);
+                        }, 0))}
+                      </strong>
+                    </div>
                   </div>
                 )}
                 <button 
