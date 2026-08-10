@@ -379,20 +379,31 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
 }
 
 function Brand({ compact = false, inverse = false, className = "" }: { compact?: boolean; inverse?: boolean; className?: string }) {
+  const [settings] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("precocerto:settings") || "{}");
+    } catch { return {}; }
+  });
+
+  const logoUrl = settings.logoUrl || (compact ? "/logo-preco-certo.svg" : inverse ? "/logo-preco-certo-inversa.svg" : "/logo-preco-certo.svg");
+  const siteUrl = settings.siteUrl || "/";
+  const logoHeight = settings.logoHeight || 68;
+
   return (
     <div 
       className={`brand ${className} ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} 
-      onClick={() => window.location.href = "/"}
+      onClick={() => window.location.href = siteUrl}
       style={{ cursor: 'pointer' }}
       role="link"
       tabIndex={0}
       aria-label="PreçoCerto — página inicial"
-      onKeyDown={(e) => e.key === 'Enter' && (window.location.href = "/")}
+      onKeyDown={(e) => e.key === 'Enter' && (window.location.href = siteUrl)}
     >
       <img 
         className="brand__logo-img"
-        src={compact ? "/logo-preco-certo.svg" : inverse ? "/logo-preco-certo-inversa.svg" : "/logo-preco-certo.svg"}
-        alt="PreçoCerto" 
+        src={logoUrl}
+        alt="PreçoCerto"
+        style={{ height: `${logoHeight}px` }}
       />
     </div>
   );
@@ -460,12 +471,16 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [settings] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("precocerto:settings") || "{}");
+    } catch { return {}; }
+  });
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     
-    // Listen for history changes if needed, but for simple SPA this works:
     const handleLocationChange = () => setCurrentPath(window.location.pathname);
     window.addEventListener("popstate", handleLocationChange);
 
@@ -476,6 +491,10 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
   }, []);
 
   const isHome = currentPath === "/";
+  const headerStyle = {
+    backgroundColor: settings.headerBg || undefined,
+    color: settings.headerText || undefined
+  };
   const headerClass = `site-header ${isHome ? "site-header--absolute" : ""} ${scrolled ? "site-header--scrolled" : ""}`;
 
   const navLinks = [
