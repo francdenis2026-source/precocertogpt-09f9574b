@@ -1174,35 +1174,6 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
           window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cesta compartilhada carregada!", type: "success" } }));
         } catch (err) {
           console.error("Erro ao carregar snapshot:", err);
-        }
-      };
-      loadSnapshot();
-    }
-  }, [supabase]);
-            window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Este link de compartilhamento foi revogado pelo proprietário.", type: "error" } }));
-            return;
-          }
-
-          if (isExpired) {
-            window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Este link de compartilhamento expirou (5 min).", type: "warning" } }));
-            return;
-          }
-
-          const items = data.items.map((i: any) => ({
-            productName: i.product_name,
-            category: i.category,
-            quantity: i.quantity,
-            unit: i.unit,
-            isEssential: i.is_essential
-          }));
-
-          setBasketItems(items);
-          setMode(data.optimization_mode);
-          setBudget(data.budget);
-          setStep(3);
-          window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cesta compartilhada carregada com sucesso!", type: "success" } }));
-        } catch (err) {
-          console.error("Erro ao carregar snapshot:", err);
           window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Não foi possível carregar a cesta compartilhada.", type: "error" } }));
         }
       };
