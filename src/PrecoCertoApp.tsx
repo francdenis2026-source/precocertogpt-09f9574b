@@ -605,10 +605,10 @@ function MobileBar({ basketCount }: { basketCount: number }) {
       <Sparkles aria-hidden="true" />
       <span>Cesta IA</span>
     </a>
-    <a href="/cesta" className={`mobile-basket ${isActive("/cesta") ? "active" : ""}`} aria-current={isActive("/cesta") ? "page" : undefined}>
-      <ShoppingBasket aria-hidden="true" />
-      {basketCount > 0 && <b aria-hidden="true">{basketCount}</b>}
-      <span>Minha Cesta</span>
+    <a href="/favoritos" className={`mobile-basket ${isActive("/favoritos") ? "active" : ""}`} aria-current={isActive("/favoritos") ? "page" : undefined}>
+      <Heart aria-hidden="true" fill={favoritesCount > 0 ? "currentColor" : "none"} />
+      {favoritesCount > 0 && <b aria-hidden="true">{favoritesCount}</b>}
+      <span>Favoritos</span>
     </a>
     <a href="/perfil" className={isActive("/perfil") ? "active" : ""} aria-current={isActive("/perfil") ? "page" : undefined}>
       <UserRound aria-hidden="true" />
