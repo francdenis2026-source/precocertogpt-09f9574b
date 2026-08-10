@@ -6,67 +6,77 @@ function injectStyles() {
   const style = document.createElement("style");
   style.id = "pc-home-search-focus-ux";
   style.textContent = `
+    body.pc-home-search-focus .hero,
+    body.pc-home-search-focus .hero-content,
+    body.pc-home-search-focus .hero-copy,
+    body.pc-home-search-focus .hero-actions,
+    body.pc-home-search-focus .hero-actions .search-combo {
+      overflow: visible !important;
+    }
+
     body.pc-home-search-focus .hero-actions {
       position: relative !important;
-      z-index: 120 !important;
+      z-index: 9000 !important;
     }
 
     body.pc-home-search-focus .hero-actions .search-combo {
       position: relative !important;
-      z-index: 130 !important;
+      z-index: 9100 !important;
     }
 
     body.pc-home-search-focus .hero-actions .search-results-dynamic {
       position: absolute !important;
-      top: calc(100% + 14px) !important;
+      top: calc(100% + 12px) !important;
       left: 0 !important;
       right: auto !important;
-      width: min(760px, calc(100vw - 32px)) !important;
-      max-height: min(520px, calc(100vh - 180px)) !important;
+      width: min(780px, calc(100vw - 32px)) !important;
+      max-height: min(520px, calc(100vh - 170px)) !important;
       overflow-y: auto !important;
       overscroll-behavior: contain !important;
-      z-index: 5000 !important;
+      z-index: 99999 !important;
       margin: 0 !important;
       padding: 0 !important;
-      background: rgba(255,255,255,.985) !important;
+      background: #ffffff !important;
       color: #0f172a !important;
-      border: 1px solid rgba(148,163,184,.28) !important;
-      border-radius: 20px !important;
-      box-shadow: 0 28px 80px rgba(2,6,23,.30), 0 6px 24px rgba(2,6,23,.14) !important;
-      backdrop-filter: blur(18px) saturate(135%);
-      isolation: isolate;
+      border: 1px solid #dbe3ee !important;
+      border-radius: 18px !important;
+      box-shadow: 0 26px 70px rgba(15, 23, 42, .28), 0 8px 22px rgba(15, 23, 42, .12) !important;
+      backdrop-filter: none !important;
+      isolation: isolate !important;
     }
 
-    [data-theme='dark'] body.pc-home-search-focus .hero-actions .search-results-dynamic,
-    body.pc-home-search-focus[data-theme='dark'] .hero-actions .search-results-dynamic {
-      background: rgba(15,23,42,.985) !important;
+    body.pc-home-search-focus[data-theme='dark'] .hero-actions .search-results-dynamic,
+    [data-theme='dark'] body.pc-home-search-focus .hero-actions .search-results-dynamic {
+      background: #111827 !important;
       color: #f8fafc !important;
-      border-color: rgba(148,163,184,.22) !important;
+      border-color: #334155 !important;
     }
 
     body.pc-home-search-focus .hero-actions .search-results-dynamic .suggestions-label {
       position: sticky !important;
       top: 0 !important;
-      z-index: 2 !important;
-      padding: 14px 18px !important;
+      z-index: 3 !important;
+      padding: 13px 16px !important;
       background: inherit !important;
-      border-bottom: 1px solid rgba(148,163,184,.18) !important;
+      border-bottom: 1px solid rgba(148,163,184,.22) !important;
       font-size: .72rem !important;
       font-weight: 800 !important;
-      letter-spacing: .08em !important;
+      letter-spacing: .07em !important;
+      text-transform: uppercase !important;
     }
 
     body.pc-home-search-focus .hero-actions .search-result-item {
-      min-height: 78px !important;
-      padding: 12px 16px !important;
+      min-height: 76px !important;
+      padding: 11px 15px !important;
       display: grid !important;
-      grid-template-columns: 58px minmax(0,1fr) auto !important;
-      gap: 14px !important;
+      grid-template-columns: 56px minmax(0,1fr) auto !important;
+      gap: 13px !important;
       align-items: center !important;
       background: transparent !important;
-      border-bottom: 1px solid rgba(148,163,184,.14) !important;
+      border-bottom: 1px solid rgba(148,163,184,.16) !important;
       text-decoration: none !important;
-      transition: background .18s ease, transform .18s ease !important;
+      color: inherit !important;
+      transition: background-color .16s ease !important;
     }
 
     body.pc-home-search-focus .hero-actions .search-result-item:last-child {
@@ -75,52 +85,44 @@ function injectStyles() {
 
     body.pc-home-search-focus .hero-actions .search-result-item:hover,
     body.pc-home-search-focus .hero-actions .search-result-item:focus-visible {
-      background: rgba(37,99,235,.075) !important;
+      background: #f3f7ff !important;
       transform: none !important;
+    }
+
+    [data-theme='dark'] body.pc-home-search-focus .hero-actions .search-result-item:hover,
+    [data-theme='dark'] body.pc-home-search-focus .hero-actions .search-result-item:focus-visible {
+      background: #1e293b !important;
     }
 
     body.pc-home-search-focus .hero-actions .search-result-item .product-photo,
     body.pc-home-search-focus .hero-actions .search-result-item img {
-      max-width: 54px !important;
-      max-height: 54px !important;
+      width: 52px !important;
+      height: 52px !important;
+      max-width: 52px !important;
+      max-height: 52px !important;
       object-fit: contain !important;
     }
 
     body.pc-home-search-focus .hero-actions .search-result-item strong {
       display: block !important;
-      font-size: .94rem !important;
-      line-height: 1.25 !important;
-      color: var(--text-main) !important;
-      margin-bottom: 4px !important;
+      font-size: .95rem !important;
+      line-height: 1.28 !important;
+      color: #0f172a !important;
+      margin-bottom: 3px !important;
+    }
+
+    [data-theme='dark'] body.pc-home-search-focus .hero-actions .search-result-item strong {
+      color: #f8fafc !important;
     }
 
     body.pc-home-search-focus .hero-actions .search-result-item small {
-      color: var(--muted) !important;
+      color: #64748b !important;
       line-height: 1.25 !important;
     }
 
     body.pc-home-search-focus .hero-actions .search-result-item b {
-      font-size: 1rem !important;
-    }
-
-    body.pc-home-search-focus::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: 95;
-      background: rgba(2,6,23,.26);
-      backdrop-filter: blur(2px);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .18s ease;
-    }
-
-    body.pc-home-search-focus.pc-search-active::before {
-      opacity: 1;
-    }
-
-    body.pc-home-search-focus.pc-search-active .hero-actions {
-      z-index: 5200 !important;
+      font-size: .98rem !important;
+      white-space: nowrap !important;
     }
 
     @media (max-width: 820px) {
@@ -129,17 +131,21 @@ function injectStyles() {
         left: 50% !important;
         right: auto !important;
         transform: translateX(-50%) !important;
-        max-height: min(62vh, 520px) !important;
-        border-radius: 18px !important;
+        max-height: min(60vh, 500px) !important;
+        border-radius: 16px !important;
       }
       body.pc-home-search-focus .hero-actions .search-result-item {
-        grid-template-columns: 52px minmax(0,1fr) auto !important;
-        min-height: 72px !important;
-        gap: 10px !important;
-        padding: 10px 12px !important;
+        grid-template-columns: 48px minmax(0,1fr) auto !important;
+        min-height: 68px !important;
+        gap: 9px !important;
+        padding: 9px 11px !important;
       }
-      body.pc-home-search-focus .hero-actions .search-result-item > div:last-child {
-        max-width: 98px;
+      body.pc-home-search-focus .hero-actions .search-result-item .product-photo,
+      body.pc-home-search-focus .hero-actions .search-result-item img {
+        width: 46px !important;
+        height: 46px !important;
+        max-width: 46px !important;
+        max-height: 46px !important;
       }
     }
   `;
@@ -153,7 +159,7 @@ function focusSearch(input: HTMLInputElement) {
   if (!combo) return;
 
   const rect = combo.getBoundingClientRect();
-  const desiredTop = headerHeight + 18;
+  const desiredTop = headerHeight + 16;
   const delta = rect.top - desiredTop;
 
   if (Math.abs(delta) > 8) {
@@ -174,41 +180,18 @@ export function HomeSearchFocusUx() {
     const onInput = (event: Event) => {
       const input = event.target;
       if (!(input instanceof HTMLInputElement) || input.id !== "hero-search") return;
-
-      const hasText = input.value.trim().length > 0;
-      document.body.classList.toggle("pc-search-active", hasText);
-      if (!hasText) return;
+      if (!input.value.trim()) return;
 
       if (focusTimer) window.clearTimeout(focusTimer);
-      focusTimer = window.setTimeout(() => focusSearch(input), 80);
-    };
-
-    const onFocus = (event: FocusEvent) => {
-      const input = event.target;
-      if (!(input instanceof HTMLInputElement) || input.id !== "hero-search") return;
-      if (input.value.trim()) document.body.classList.add("pc-search-active");
-    };
-
-    const onBlur = (event: FocusEvent) => {
-      const input = event.target;
-      if (!(input instanceof HTMLInputElement) || input.id !== "hero-search") return;
-      window.setTimeout(() => {
-        const active = document.activeElement;
-        const combo = input.closest(".search-combo");
-        if (!combo?.contains(active)) document.body.classList.remove("pc-search-active");
-      }, 220);
+      focusTimer = window.setTimeout(() => focusSearch(input), 70);
     };
 
     document.addEventListener("input", onInput, true);
-    document.addEventListener("focusin", onFocus, true);
-    document.addEventListener("focusout", onBlur, true);
 
     return () => {
       if (focusTimer) window.clearTimeout(focusTimer);
       document.body.classList.remove("pc-home-search-focus", "pc-search-active");
       document.removeEventListener("input", onInput, true);
-      document.removeEventListener("focusin", onFocus, true);
-      document.removeEventListener("focusout", onBlur, true);
     };
   }, [pathname]);
 
