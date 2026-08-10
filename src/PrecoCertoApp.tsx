@@ -3693,7 +3693,8 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
         setError(`Credenciais incorretas. Tentativa ${newAttempts} de 5.`);
       }
     } else {
-      const formData = new FormData(e.currentTarget);
+      const form = e.currentTarget as HTMLFormElement;
+      const formData = new FormData(form);
       const name = formData.get("name") as string;
       const phone = formData.get("phone") as string;
       const userData = {
