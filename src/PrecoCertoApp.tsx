@@ -1933,6 +1933,7 @@ function UserBasketHistory({ user, products }: { user: any; products: Product[] 
 
   const handleDelete = async (id: string, name: string) => {
     if (!window.confirm(`Tem certeza que deseja excluir a lista "${name}"? Esta ação não pode ser desfeita.`)) return;
+    if (!supabase) return;
     try {
       const { error } = await supabase.from('smart_baskets').delete().eq('id', id);
       if (error) throw error;
@@ -1946,7 +1947,7 @@ function UserBasketHistory({ user, products }: { user: any; products: Product[] 
   };
 
   const handleRename = async (id: string) => {
-    if (!newName.trim()) return;
+    if (!newName.trim() || !supabase) return;
     try {
       const { error } = await supabase.from('smart_baskets').update({ name: newName }).eq('id', id);
       if (error) throw error;
