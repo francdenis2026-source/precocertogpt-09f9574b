@@ -110,9 +110,6 @@ body {
   border: 1px solid rgba(255,255,255,0.2);
 }
 
-.visual-product-card {
-  /* Combined styles in Card Improvements section */
-}
 
 
 .visual-product-image {
@@ -673,6 +670,9 @@ body {
 
 /* Card Improvements */
 .benefit-card, .step-card, .dashboard-card, .visual-product-card {
+  position: relative;
+  overflow: hidden;
+
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
