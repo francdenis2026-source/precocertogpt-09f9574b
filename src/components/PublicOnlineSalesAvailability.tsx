@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CheckCircle2, Clock3, LockKeyhole, ShoppingCart, Store } from "lucide-react";
+import { CheckCircle2, Clock3, LockKeyhole } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
@@ -61,18 +61,31 @@ function unavailableButton(button: HTMLButtonElement, label = "Venda online em b
   });
 }
 
-function availableButton(button: HTMLButtonElement) {
+function availableButton(button: HTMLButtonElement, merchantId: string) {
   button.disabled = false;
   button.removeAttribute("aria-disabled");
-  button.setAttribute("title", "Adicionar este produto à cesta");
+  button.setAttribute("title", "Comprar na loja online deste estabelecimento");
   button.dataset.pcOnlineSalesState = "available";
-  button.innerHTML = `<span aria-hidden="true">＋</span> Comprar`;
+  button.dataset.pcMerchantId = merchantId;
+  button.innerHTML = `<span aria-hidden="true">🛒</span> Comprar online`;
   button.style.removeProperty("opacity");
   button.style.removeProperty("cursor");
   button.style.removeProperty("background");
   button.style.removeProperty("color");
   button.style.removeProperty("border");
   button.style.removeProperty("box-shadow");
+  if (!button.dataset.pcOnlineSalesBound) {
+    button.dataset.pcOnlineSalesBound = "true";
+    button.addEventListener("click", event => {
+      const current = event.currentTarget as HTMLButtonElement;
+      const id = current.dataset.pcMerchantId;
+      if (!id) return;
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      window.location.href = `/loja/${encodeURIComponent(id)}`;
+    }, true);
+  }
 }
 
 function StoreUnavailableBanner({ storeName, message }: { storeName: string; message: string }) {
@@ -115,6 +128,7 @@ export function PublicOnlineSalesAvailability() {
     rows.forEach(row => {
       map.set(normalizeKey(row.establishment_id), row);
       map.set(normalizeKey(row.establishment_slug), row);
+      map.set(normalizeKey(row.merchant_id), row);
     });
     return map;
   }, [rows]);
@@ -130,7 +144,7 @@ export function PublicOnlineSalesAvailability() {
 
   useEffect(() => {
     function patchStorePage() {
-      const match = location.pathname.match(/^\/(?:estabelecimento|loja)\/([^/]+)/);
+      const match = location.pathname.match(/^\/estabelecimento\/([^/]+)/);
       if (!match) return;
       const storeKey = decodeURIComponent(match[1]);
       const availability = byStore.get(normalizeKey(storeKey));
@@ -164,7 +178,7 @@ export function PublicOnlineSalesAvailability() {
         const primary = card.querySelector<HTMLButtonElement>(".store-product-card__actions .button--primary");
         if (!productLink || !primary) return;
         const productKey = decodeURIComponent(productLink.pathname.split("/produto/")[1]?.split("/")[0] || "");
-        if (isProductLive(availability, productKey)) availableButton(primary);
+        if (isProductLive(availability, productKey) && availability) availableButton(primary, availability.merchant_id);
         else unavailableButton(primary);
       });
     }
@@ -199,7 +213,7 @@ export function PublicOnlineSalesAvailability() {
       button.style.justifyContent = "center";
       button.style.gap = "8px";
 
-      if (!live) {
+      if (!live || !availability) {
         button.disabled = true;
         button.innerHTML = "◷ Venda online ainda indisponível";
         Object.assign(button.style, { border:"1px solid #d9e0dc", background:"#f1f4f2", color:"#657168", cursor:"not-allowed" });
@@ -210,24 +224,15 @@ export function PublicOnlineSalesAvailability() {
         return;
       }
 
-      button.innerHTML = "🛒 Comprar agora";
+      button.innerHTML = "🛒 Comprar online";
       Object.assign(button.style, { border:"1px solid #173a29", background:"#183d2b", color:"white", cursor:"pointer", boxShadow:"0 10px 24px rgba(24,61,43,.16)" });
-      button.addEventListener("click", async () => {
-        if (!supabase) return;
-        const { data } = await supabase.auth.getSession();
-        if (!data.session) {
-          const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
-          window.location.href = `/login?returnTo=${returnTo}`;
-          return;
-        }
-        const current = JSON.parse(localStorage.getItem("precocerto:basket") || "[]") as ModalProduct[];
-        if (!current.some(item => String(item.id) === String(modalProduct.id) && String(item.establishmentId) === String(modalProduct.establishmentId))) {
-          current.push(modalProduct);
-          localStorage.setItem("precocerto:basket", JSON.stringify(current));
-        }
-        window.location.href = "/cesta";
+      button.addEventListener("click", () => {
+        window.location.href = `/loja/${encodeURIComponent(availability.merchant_id)}`;
       });
-      host.appendChild(button);
+      const hint = document.createElement("p");
+      hint.textContent = `Venda online disponível por ${availability.establishment_name}. O preço e o estoque serão validados novamente antes do pagamento.`;
+      Object.assign(hint.style, { margin:"8px 2px 0", fontSize:"12px", lineHeight:"1.5", color:"#4e6658" });
+      host.append(button, hint);
     }
 
     const patch = () => { patchStorePage(); patchModal(); };
