@@ -35,3 +35,5 @@ if (!guardedWindow[GLOBAL_KEY] && typeof CanvasRenderingContext2D !== "undefined
     return originalGetImageData.apply(this, args);
   };
 }
+
+export {};
