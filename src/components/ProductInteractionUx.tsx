@@ -49,9 +49,7 @@ function injectStyles() {
       border-radius: 0 0 16px 16px;
       box-shadow: 0 18px 50px rgba(15, 23, 42, .18);
     }
-    .search-results-dynamic .search-result-item {
-      cursor: pointer;
-    }
+    .search-results-dynamic .search-result-item { cursor: pointer; }
     .professional-search-results .professional-results-grid {
       max-height: min(720px, calc(100vh - 190px));
       overflow-y: auto;
@@ -67,37 +65,27 @@ function injectStyles() {
       border-radius: 999px;
     }
     @media (max-width: 760px) {
-      .search-results-dynamic {
-        max-height: min(58vh, 420px);
-      }
-      .professional-search-results .professional-results-grid {
-        max-height: 64vh;
-      }
+      .search-results-dynamic { max-height: min(58vh, 420px); }
+      .professional-search-results .professional-results-grid { max-height: 64vh; }
     }
   `;
   document.head.appendChild(style);
 }
 
-/**
- * Unifica a interação dos produtos: selecionar um produto abre o modal global
- * de detalhes; navegação para páginas de produto deixa de acontecer por engano.
- * Também limita listas extensas a painéis com rolagem interna, evitando alongar
- * excessivamente a Home e o comparador.
- */
 export function ProductInteractionUx() {
   useEffect(() => {
     let active = true;
+    let clickHandler: ((event: MouseEvent) => void) | undefined;
     injectStyles();
 
     void fetchCatalog().then(catalog => {
       if (!active) return;
       const lookup = buildLookup(catalog.products);
 
-      const clickHandler = (event: MouseEvent) => {
+      clickHandler = (event: MouseEvent) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
 
-        // Ações explícitas continuam com seu comportamento próprio.
         if (target.closest("button, .professional-compare-button, .professional-result-store, a[href^='/estabelecimento/'], .visual-product-actions .button--primary")) return;
 
         const isProductIntent = Boolean(
@@ -114,13 +102,13 @@ export function ProductInteractionUx() {
       };
 
       document.addEventListener("click", clickHandler, true);
-      return () => document.removeEventListener("click", clickHandler, true);
     }).catch(error => {
       console.warn("Falha ao ativar interação inteligente dos produtos.", error);
     });
 
     return () => {
       active = false;
+      if (clickHandler) document.removeEventListener("click", clickHandler, true);
     };
   }, []);
 
