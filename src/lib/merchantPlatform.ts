@@ -17,7 +17,7 @@ const emptyPlatform:PlatformSummary={gmvToday:0,platformRevenueToday:0,subscript
 export async function loadMerchantMembership(){
   if(!supabase)return null;
   const {data:session}=await supabase.auth.getSession(); const userId=session.session?.user?.id; if(!userId)return null;
-  const {data,error}=await supabase.from("merchant_members").select("merchant_id, role, merchants(id,name,status,plan_code,delivery_enabled,pickup_enabled,min_order,opening_hours)").eq("user_id",userId).eq("active",true).limit(1).maybeSingle();
+  const {data,error}=await supabase.from("merchant_members").select("merchant_id, role, merchants(id,name,status,plan_code,delivery_enabled,pickup_enabled,min_order,opening_hours,business_type,business_capabilities,service_settings)").eq("user_id",userId).eq("active",true).limit(1).maybeSingle();
   return error?null:data;
 }
 export async function loadMerchantOrders(merchantId:string,limit=80):Promise<MerchantOrder[]>{
