@@ -2,8 +2,8 @@
 import {
   Activity, AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
   ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit, Flag,
-  Heart, Home, LayoutDashboard, LineChart, ListChecks, MapPin, Menu, Moon, PackageSearch,
-  Plus, Printer, Receipt, Save, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
+  Heart, Home, LayoutDashboard, LineChart, ListChecks, Loader2, MapPin, Menu, Moon, PackageSearch,
+  Plus, Printer, Receipt, RotateCcw, Save, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Sun, Trash2, TrendingDown, TrendingUp, Upload, UserRound, Users, X,
 } from "lucide-react";
 
@@ -5215,7 +5215,7 @@ function PaymentHistory({ user }: { user: SessionProfile | null }) {
       const { data } = await supabase
         .from("merchant_orders")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", (user as any).id)
         .order("created_at", { ascending: false });
       if (data) setPayments(data);
       setLoading(false);
