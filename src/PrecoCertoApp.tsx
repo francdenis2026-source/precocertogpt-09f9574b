@@ -3328,8 +3328,8 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
         <div className="generic-grid">
           <section className="generic-main">
             <div className="section-heading compact">
-              <h2>Ofertas Favoritas ({favProducts.length})</h2>
-              <p>Produtos que você marcou com o coração para acesso rápido.</p>
+              <h2>{isFavoritesView ? "Ofertas Favoritas" : "Meu Perfil"} ({favProducts.length})</h2>
+              <p>{isFavoritesView ? "Produtos que você marcou com o coração para acesso rápido." : "Gerencie seus dados e preferências."}</p>
             </div>
             
             {favProducts.length > 0 ? (
