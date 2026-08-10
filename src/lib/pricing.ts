@@ -97,7 +97,7 @@ export const windowFor = (category?: string | null): FreshnessWindow =>
 
 export const freshnessLabels: Record<FreshnessState, string> = {
   fresh: "Atualizado",
-  aging: "Pode estar desatualizado",
+  aging: "Atualização anterior",
   expired: "Expirado",
   pending: "Aguardando confirmação",
 };

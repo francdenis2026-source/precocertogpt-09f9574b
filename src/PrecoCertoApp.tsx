@@ -13,7 +13,7 @@ import { buildCatalog, verifiedDatasetMetrics, type PlatformMetrics, type Produc
 import { fetchCatalog } from "./data/remoteCatalog";
 import { supabase } from "./lib/supabase";
 import { isEnabled } from "./config/features";
-import { freshnessLabels, priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
+import { priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
 import { normalizeSearchText, searchProducts, suggestProducts } from "./lib/productSearch";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
@@ -865,7 +865,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
         {(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 8).map((p, index) => (
           <article className="visual-product-card" key={p.id}>
             <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => toggleFavorite(String(p.id))} aria-pressed={favorites.includes(String(p.id))} aria-label={favorites.includes(String(p.id)) ? `Remover ${p.name} dos favoritos` : `Favoritar ${p.name}`}>
-              <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
+              <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />{favorites.includes(String(p.id)) && <span className="favorite-saved-label">Salvo</span>}
             </button>
             <div 
               className="visual-product-image" 
@@ -3127,7 +3127,11 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 
 /** Selo de frescor do preço com janela configurável por categoria. */
 function FreshnessBadge({ product }: { product: Product }) {
-  const { state, label } = priceFreshness(product.capturedAt, product.category);
+  const { state } = priceFreshness(product.capturedAt, product.category);
+  const captured = new Date(product.updated_at || product.capturedAt);
+  const label = Number.isFinite(captured.getTime())
+    ? `Atualizado em ${captured.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" })}`
+    : "Sem data de atualização";
   const titles: Record<FreshnessState, string> = {
     fresh: "Preço verificado recentemente para esta categoria.",
     aging: "A janela de confiança desta categoria já passou. Confira na loja.",
@@ -3420,18 +3424,20 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                 const selected = compareList.some(item => item.id === product.id);
                 const saving = Math.max(0, product.avgPrice - product.minPrice);
                 const spread = product.maxPrice > 0 ? Math.round((1 - product.minPrice / product.maxPrice) * 100) : 0;
+                const comparedStores = new Set((product.offers || []).map(offer => String(offer.establishmentId))).size || product.storeCount;
+                const hasLocalComparison = comparedStores > 1 && product.maxPrice > product.minPrice;
                 const history = product.price_history || [];
                 const trend = product.previousPrice ? ((product.minPrice - product.previousPrice) / product.previousPrice) * 100 : null;
                 return <article className={`professional-result-card ${selected ? "is-selected" : ""}`} key={product.id}>
-                  <div className="professional-result-card__visual" onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: product }))}><ProductImage product={product} size="default"/><span className="category-tag">{product.category}</span><button className={`floating-favorite ${favorites.includes(String(product.id)) ? "active" : ""}`} aria-pressed={favorites.includes(String(product.id))} aria-label={favorites.includes(String(product.id)) ? `Remover ${product.name} dos favoritos` : `Favoritar ${product.name}`} onClick={event => {event.stopPropagation();toggleFavorite(String(product.id));}}><Heart fill={favorites.includes(String(product.id)) ? "currentColor" : "none"}/></button></div>
+                  <div className="professional-result-card__visual" onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: product }))}><ProductImage product={product} size="default"/><span className="category-tag">{product.category}</span><button className={`floating-favorite ${favorites.includes(String(product.id)) ? "active" : ""}`} aria-pressed={favorites.includes(String(product.id))} aria-label={favorites.includes(String(product.id)) ? `Remover ${product.name} dos favoritos` : `Favoritar ${product.name}`} onClick={event => {event.stopPropagation();toggleFavorite(String(product.id));}}><Heart fill={favorites.includes(String(product.id)) ? "currentColor" : "none"}/>{favorites.includes(String(product.id)) && <span className="favorite-saved-label">Salvo</span>}</button></div>
                   <div className="professional-result-card__body">
                     <div className="professional-result-card__meta"><span>{product.brand} • {product.size}</span><FreshnessBadge product={product}/></div>
                     <h3 onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: product }))}>{product.name}</h3>
                     <a className="professional-result-store" href={`/estabelecimento/${product.establishmentSlug}`}><Store/><span><b>{product.establishment}</b><small>{product.neighborhood}</small></span><ArrowRight/></a>
                     <div className="professional-price-main"><span><small>Menor preço encontrado</small><strong>{money(product.minPrice)}</strong></span><UnitPriceTag product={product}/></div>
-                    <div className="professional-price-analysis"><span><small>Média local</small><b>{money(product.avgPrice)}</b></span><span><small>Maior preço</small><b>{money(product.maxPrice)}</b></span><span className="saving"><small>Economia potencial</small><b>{money(saving)}</b></span></div>
+                    {hasLocalComparison ? <div className="professional-price-analysis"><span><small>Média local</small><b>{money(product.avgPrice)}</b></span><span><small>Maior preço</small><b>{money(product.maxPrice)}</b></span><span className="saving"><small>Economia potencial</small><b>{money(saving)}</b></span></div> : <div className="single-price-note"><Store/><span><b>1 preço disponível</b><small>A média e o maior preço aparecerão quando houver outra loja para comparar.</small></span></div>}
                     <div className="professional-insights">
-                      <span><TrendingDown/><b>{spread}%</b> de diferença entre lojas</span>
+                      {hasLocalComparison && <span><TrendingDown/><b>{spread}%</b> de diferença entre lojas</span>}
                       {trend !== null && <span className={trend <= 0 ? "positive" : "negative"}>{trend <= 0 ? <TrendingDown/> : <TrendingUp/>}<b>{Math.abs(Math.round(trend))}%</b> desde o preço anterior</span>}
                       {history.length > 1 && <button onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: product }))}><LineChart/> Ver {history.length} registros históricos</button>}
                     </div>

@@ -48,6 +48,12 @@ const DATABASE_PAGE_SIZE = 1000;
 export const normalize = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
+// A unidade pode variar entre cadastros ("un", "pacote", "unidade") sem que
+// o produto seja diferente. Barcode é a identidade mais segura quando existe.
+const productIdentity = (product: ProductRow) => product.barcode
+  ? `barcode:${normalize(product.barcode)}`
+  : [product.name, product.brand, product.size].map(value => normalize(value || "")).join("|");
+
 /**
  * O PostgREST limita o número de linhas devolvidas por requisição. Lemos em
  * páginas para que produtos e preços acima desse limite também apareçam.
@@ -106,7 +112,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
     const productPriceMap = new Map<string, PriceRow[]>();
     
     productRows.forEach(product => {
-      const key = `${normalize(product.name || "")}|${normalize(product.brand || "")}|${normalize(product.size || "")}|${normalize(product.unit || "")}`;
+      const key = productIdentity(product);
       const rows = priceRows.filter(price => String(price.product_id) === String(product.id));
       
       if (!productPriceMap.has(key)) {
@@ -118,7 +124,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
     // Mapeia os produtos usando a primeira ocorrência de cada produto normalizado e seus preços agregados
     const uniqueProductRows = Array.from(
       productRows.reduce((map, p) => {
-        const key = `${normalize(p.name || "")}|${normalize(p.brand || "")}|${normalize(p.size || "")}|${normalize(p.unit || "")}`;
+        const key = productIdentity(p);
         if (!map.has(key)) map.set(key, p);
         return map;
       }, new Map<string, ProductRow>()).values()
@@ -126,7 +132,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
 
     const mapped = uniqueProductRows
       .map((product): Product | null => {
-        const key = `${normalize(product.name || "")}|${normalize(product.brand || "")}|${normalize(product.size || "")}|${normalize(product.unit || "")}`;
+        const key = productIdentity(product);
         const rows = productPriceMap.get(key) || [];
         
         if (!rows.length) return null;
