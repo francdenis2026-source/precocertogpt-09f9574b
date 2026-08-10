@@ -54,6 +54,8 @@ ALTER TABLE public.smart_baskets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.smart_basket_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.basket_snapshots ENABLE ROW LEVEL SECURITY;
 
+-- RLS Policies
+DROP POLICY IF EXISTS "Users can manage their own baskets" ON public.smart_baskets;
 CREATE POLICY "Users can manage their own baskets"
 ON public.smart_baskets
 FOR ALL
@@ -61,12 +63,14 @@ TO authenticated
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Public can view shared baskets" ON public.smart_baskets;
 CREATE POLICY "Public can view shared baskets"
 ON public.smart_baskets
 FOR SELECT
 TO anon, authenticated
 USING (true);
 
+DROP POLICY IF EXISTS "Users can manage items of their own baskets" ON public.smart_basket_items;
 CREATE POLICY "Users can manage items of their own baskets"
 ON public.smart_basket_items
 FOR ALL
@@ -80,12 +84,14 @@ WITH CHECK (EXISTS (
     WHERE id = basket_id AND user_id = auth.uid()
 ));
 
+DROP POLICY IF EXISTS "Public can view items of shared baskets" ON public.smart_basket_items;
 CREATE POLICY "Public can view items of shared baskets"
 ON public.smart_basket_items
 FOR SELECT
 TO anon, authenticated
 USING (true);
 
+DROP POLICY IF EXISTS "Users can manage snapshots of their own baskets" ON public.basket_snapshots;
 CREATE POLICY "Users can manage snapshots of their own baskets"
 ON public.basket_snapshots
 FOR ALL
@@ -99,12 +105,14 @@ WITH CHECK (EXISTS (
     WHERE id = basket_id AND user_id = auth.uid()
 ));
 
+DROP POLICY IF EXISTS "Public can view snapshots of shared baskets" ON public.basket_snapshots;
 CREATE POLICY "Public can view snapshots of shared baskets"
 ON public.basket_snapshots
 FOR SELECT
 TO anon, authenticated
 USING (true);
 
+-- Explicit Grants for Anonymous Access (Required for shared links)
 GRANT SELECT ON public.smart_baskets TO anon;
 GRANT SELECT ON public.smart_basket_items TO anon;
 GRANT SELECT ON public.basket_snapshots TO anon;
