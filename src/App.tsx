@@ -15,6 +15,7 @@ import { FooterCompactUx } from "./components/FooterCompactUx";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MerchantDashboard } from "./components/MerchantDashboard";
+import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
 import { PlatformAdminDashboard } from "./components/PlatformAdminDashboard";
 import { CustomerOrders } from "./components/CustomerOrders";
 import { MercadoPagoCallback } from "./components/MercadoPagoCallback";
@@ -38,6 +39,7 @@ export default function App() {
       <Routes>
         <Route path="/lojista" element={<MerchantSignupPage />} />
         <Route path="/painel-lojista" element={<MerchantDashboard />} />
+        <Route path="/painel-lojista/configurar-negocio" element={<MerchantBusinessSetup />} />
         <Route path="/meus-pedidos" element={<CustomerOrders />} />
         <Route path="/integracoes/mercadopago/callback" element={<MercadoPagoCallback />} />
         <Route path="/admin/plataforma" element={<PlatformAdminDashboard />} />
