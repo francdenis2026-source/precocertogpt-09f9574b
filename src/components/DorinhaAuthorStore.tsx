@@ -17,6 +17,7 @@ import { supabase } from "../lib/supabase";
 import imagimacaoAsset from "../assets/uma-viagem-ao-mundo-da-imaginacao.png.asset.json";
 import mentePerversaAsset from "../assets/mente-perversa.png.asset.json";
 import superacaoAsset from "../assets/uma-historia-de-superacao.png.asset.json";
+import despertarAsset from "../assets/o-despertar-para-o-mundo-literario.png.asset.json";
 
 type ExternalStore = { label: string; url: string };
 type Book = {
@@ -205,6 +206,7 @@ export function DorinhaAuthorStore() {
               if (book.slug === 'uma-viagem-ao-mundo-da-imaginacao') src = imagimacaoAsset.url;
               if (book.slug === 'mente-perversa') src = mentePerversaAsset.url;
               if (book.slug === 'uma-historia-de-superacao') src = superacaoAsset.url;
+              if (book.slug === 'o-despertar-para-o-mundo-literario') src = despertarAsset.url;
               
               return src ? (
                 <img 
@@ -212,7 +214,7 @@ export function DorinhaAuthorStore() {
                   className="db-hero-cover" 
                   src={src} 
                   alt={`Capa de ${book.name}`}
-                  style={['uma-viagem-ao-mundo-da-imaginacao', 'mente-perversa', 'uma-historia-de-superacao'].includes(book.slug) ? { objectFit: 'cover' } : {}}
+                  style={['uma-viagem-ao-mundo-da-imaginacao', 'mente-perversa', 'uma-historia-de-superacao', 'o-despertar-para-o-mundo-literario'].includes(book.slug) ? { objectFit: 'cover' } : {}}
                 />
               ) : null;
             })}
@@ -233,11 +235,12 @@ export function DorinhaAuthorStore() {
           if (book.slug === 'uma-viagem-ao-mundo-da-imaginacao') src = imagimacaoAsset.url;
           if (book.slug === 'mente-perversa') src = mentePerversaAsset.url;
           if (book.slug === 'uma-historia-de-superacao') src = superacaoAsset.url;
+          if (book.slug === 'o-despertar-para-o-mundo-literario') src = despertarAsset.url;
           
           return <article key={book.id} className="db-book" style={s.bookCard}>
           <div className={`db-real-cover-shell ${loadedCovers.has(book.id)?"is-loaded":""}`} data-real-cover="1">
             <span className="db-cover-placeholder" aria-hidden="true">Preparando a capa…</span>
-            {src?<img className="db-real-cover-image" src={src} sizes="(max-width: 640px) 68vw, (max-width: 1050px) 34vw, 238px" width={480} height={720} loading="lazy" fetchPriority="low" decoding="async" onLoad={()=>setLoadedCovers(current=>{if(current.has(book.id))return current;const next=new Set(current);next.add(book.id);return next})} alt={`Capa do livro ${book.name}, de Dorinha Barroso`} style={['uma-viagem-ao-mundo-da-imaginacao', 'mente-perversa', 'uma-historia-de-superacao'].includes(book.slug) ? { objectFit: 'cover' } : {}}/>:null}
+            {src?<img className="db-real-cover-image" src={src} sizes="(max-width: 640px) 68vw, (max-width: 1050px) 34vw, 238px" width={480} height={720} loading="lazy" fetchPriority="low" decoding="async" onLoad={()=>setLoadedCovers(current=>{if(current.has(book.id))return current;const next=new Set(current);next.add(book.id);return next})} alt={`Capa do livro ${book.name}, de Dorinha Barroso`} style={['uma-viagem-ao-mundo-da-imaginacao', 'mente-perversa', 'uma-historia-de-superacao', 'o-despertar-para-o-mundo-literario'].includes(book.slug) ? { objectFit: 'cover' } : {}}/>:null}
             <span className="db-real-cover-badge">CAPA OFICIAL</span>
           </div>
           <div style={s.bookBody}>
