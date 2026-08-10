@@ -198,7 +198,20 @@ export function DorinhaAuthorStore() {
         <div className="db-hero-art" aria-label="Coleção de livros de Dorinha Barroso">
           <div className="db-cover-stage">
             <div className="db-stage-glow"/>
-            {profile.books.slice(0,4).map((book,index)=>book.image_url?<img key={book.id} className="db-hero-cover" src={book.image_url} srcSet={responsiveCoverSrcSet(book.image_url)} sizes="(max-width: 640px) 120px, (max-width: 1050px) 135px, 150px" width={300} height={456} loading={index===0?"eager":"lazy"} fetchPriority={index===0?"high":"low"} decoding="async" alt={`Capa de ${book.name}`}/>:null)}
+            {profile.books.slice(0,4).map((book,index)=>{
+              let src = book.image_url;
+              if (book.slug === 'uma-viagem-ao-mundo-da-imaginacao') src = imagimacaoAsset.url;
+              
+              return src ? (
+                <img 
+                  key={book.id} 
+                  className="db-hero-cover" 
+                  src={src} 
+                  alt={`Capa de ${book.name}`}
+                  style={book.slug === 'uma-viagem-ao-mundo-da-imaginacao' ? { objectFit: 'cover' } : {}}
+                />
+              ) : null;
+            })}
             <div className="db-stage-note"><b>COLEÇÃO DA AUTORA</b>{profile.books.length} obras disponíveis para leitores de todo o Brasil.</div>
           </div>
         </div>
