@@ -3997,7 +3997,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
         </aside>
 
         <main className="professional-search-results">
-          <header className="professional-results-head"><div><span>Catálogo local</span><h2>{query ? `Resultados para “${query}”` : "Produtos disponíveis"}</h2><small>{filtered.length} itens encontrados • página {Math.min(currentPage, Math.max(totalPages, 1))} de {Math.max(totalPages, 1)}</small></div><label><span>Ordenar por</span><select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)}><option value="price">Menor preço</option><option value="unit">Menor preço por unidade</option><option value="date">Atualização mais recente</option><option value="variation">Maior queda de preço</option></select></label></header>
+          <header className="professional-results-head"><div><span>Catálogo local</span><h2>{query ? `Resultados para “${query}”` : "Produtos disponíveis"}</h2><small>{filtered.length} itens encontrados • página {Math.min(currentPage, Math.max(totalPages, 1))} de {Math.max(totalPages, 1)}</small></div><label><span>Ordenar por</span><select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)}><option value="price">Menor preço</option><option value="avg_price">Preço médio</option><option value="max_price">Maior preço</option><option value="unit">Menor preço por unidade</option><option value="date">Atualização mais recente</option><option value="variation">Maior queda de preço</option></select></label></header>
 
           {isSearching ? <div className="search-loading"><div className="spinner"/><p>Analisando o catálogo local…</p></div> : paginated.length > 0 ? <>
             <div className="professional-results-grid">
