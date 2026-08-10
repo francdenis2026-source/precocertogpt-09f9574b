@@ -1135,6 +1135,22 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     setBasketItems(prev => {
       const exists = prev.find(i => i.productName === p.name);
       if (exists) return prev.filter(i => i.productName !== p.name);
+
+      // Validação de orçamento para novos itens
+      if (mode === 'within_budget') {
+        const currentTotal = prev.reduce((sum, i) => {
+          const prod = findProduct(i.productName);
+          return sum + ((prod?.minPrice || 0) * i.quantity);
+        }, 0) + p.minPrice;
+
+        if (currentTotal > budget) {
+          window.dispatchEvent(new CustomEvent('pc:budget-exceeded', { 
+            detail: { total: currentTotal, budget, itemName: p.name } 
+          }));
+          return prev;
+        }
+      }
+
       return [...prev, {
         productName: p.name,
         category: p.category,
@@ -1180,7 +1196,25 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
       
       const newQty = Math.max(1, item.quantity + delta);
       
-      // Simulação de validação de estoque (limite de 20 unidades por item como exemplo)
+      // Validação de orçamento (se o modo for within_budget)
+      if (mode === 'within_budget') {
+        const currentTotal = basketItems.reduce((sum, i) => {
+          const p = findProduct(i.productName);
+          return sum + ((p?.minPrice || 0) * (i.productName === name ? newQty : i.quantity));
+        }, 0);
+
+        if (currentTotal > budget) {
+          window.dispatchEvent(new CustomEvent('pc:budget-exceeded', { 
+            detail: { 
+              total: currentTotal, 
+              budget,
+              itemName: name
+            } 
+          }));
+          return prev;
+        }
+      }
+      
       const STOCK_LIMIT = 20;
       if (newQty > STOCK_LIMIT) {
         if (typeof (window as any).setGlobalToast === 'function') {
@@ -1313,8 +1347,58 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     setStep(3); // Vai direto para o resultado
   };
 
+  const [showBudgetAlert, setShowBudgetAlert] = useState<{ total: number, budget: number, item: string } | null>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => setShowBudgetAlert(e.detail);
+    window.addEventListener('pc:budget-exceeded', handler);
+    return () => window.removeEventListener('pc:budget-exceeded', handler);
+  }, []);
+
   return (
     <div className="shell page-shell basket-page">
+      {showBudgetAlert && (
+        <div className="modal-overlay" style={{ zIndex: 2000 }}>
+          <div className="modal-content animate-slide-up" style={{ maxWidth: '400px', textAlign: 'center', padding: '2rem' }}>
+            <div style={{ marginBottom: '1.5rem', color: 'var(--red)', display: 'flex', justifyContent: 'center' }}>
+              <div style={{ background: 'var(--red-soft)', padding: '1rem', borderRadius: '50%' }}>
+                <AlertTriangle size={48} />
+              </div>
+            </div>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--foreground)' }}>Limite de Orçamento!</h2>
+            <p style={{ color: 'var(--muted)', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+              Ao adicionar <strong>{showBudgetAlert.item}</strong>, o total da cesta chegaria a <strong>{money(showBudgetAlert.total)}</strong>, 
+              ultrapassando seu limite de <strong>{money(showBudgetAlert.budget)}</strong>.
+            </p>
+            <div style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                <span>Seu Limite:</span>
+                <span style={{ fontWeight: 700 }}>{money(showBudgetAlert.budget)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--red)' }}>
+                <span>Tentativa:</span>
+                <span style={{ fontWeight: 700 }}>{money(showBudgetAlert.total)}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <button className="button button--primary" onClick={() => { setStep(1); setShowBudgetAlert(null); }}>
+                Aumentar Orçamento
+              </button>
+              <button className="button button--ghost" onClick={() => setShowBudgetAlert(null)}>
+                Manter Lista Atual
+              </button>
+            </div>
+            <div style={{ marginTop: '1.5rem' }}>
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--red)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 17L12 22L22 17" stroke="var(--red)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 12L12 17L22 12" stroke="var(--red)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="page-title">
         <div>
           <span className="eyebrow">Planejador de Compras Inteligente</span>
@@ -1773,6 +1857,37 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                         </button>
                       </div>
                     </div>
+                    <button 
+                      className="button button--outline" 
+                      style={{ width: '100%', borderColor: 'var(--blue)', color: 'var(--blue)' }} 
+                      disabled={isSaving}
+                      onClick={async () => {
+                        if (!user) {
+                          alert("Acesse sua conta para salvar cestas permanentemente no seu painel.");
+                          return;
+                        }
+                        try {
+                          setIsSaving(true);
+                          const now = new Date();
+                          const timestamp = `${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+                          await saveBasket(
+                            user.id,
+                            `Cesta Planejada - ${timestamp}`,
+                            mode,
+                            budget,
+                            basketItems,
+                            optimizationResult
+                          );
+                          alert(`Cesta salva com sucesso no seu histórico!\nData: ${timestamp}`);
+                        } catch (err: any) {
+                          alert("Erro ao salvar: " + err.message);
+                        } finally {
+                          setIsSaving(false);
+                        }
+                      }}
+                    >
+                      <Database size={16} /> Salvar no Painel (Histórico)
+                    </button>
                     <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
                     <button type="button" className="link-danger" style={{ width: '100%', justifyContent: 'center', marginTop: '.5rem' }} onClick={clearAll}><Trash2 size={14} /> Limpar cesta</button>
                   </div>
