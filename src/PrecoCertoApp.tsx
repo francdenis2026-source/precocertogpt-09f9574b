@@ -3191,10 +3191,10 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     if (!user) return <div className="shell page-shell generic-page"><section className="favorites-login-gate"><Heart/><span className="eyebrow">Favoritos protegidos</span><h1>Entre para salvar seus produtos</h1><p>Seus favoritos ficam disponíveis somente na sua área de cliente.</p><a className="button button--primary" href={`/login?redirect=${encodeURIComponent(path)}`}>Entrar na minha conta <ArrowRight/></a></section></div>;
     
     // Tratamento de carregamento e erro para dados que dependem da renderização
-    const [isDataLoading, setIsDataLoading] = React.useState(true);
-    const [dataError, setDataError] = React.useState<string | null>(null);
+    const [isDataLoading, setIsDataLoading] = useState(true);
+    const [dataError, setDataError] = useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
       const timer = setTimeout(() => {
         try {
           setIsDataLoading(false);
