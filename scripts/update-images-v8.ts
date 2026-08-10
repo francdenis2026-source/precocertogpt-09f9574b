@@ -10,20 +10,20 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const ASSETS_DIR = 'src/assets';
 
 const mappings = [
-  { pattern: /doce.*leite.*itambe/i, asset: 'doce-de-leite-itambe.png.asset.json' },
-  { pattern: /extrato.*tomate.*elefante/i, asset: 'extrato-tomate-elefante.png.asset.json' },
-  { pattern: /farinha.*mandioca.*agrovila/i, asset: 'farinha-mandioca-agrovila.png.asset.json' },
-  { pattern: /farinha.*mandioca.*cooper/i, asset: 'farinha-mandioca-cooper.png.asset.json' },
-  { pattern: /farinha.*milho.*sinha/i, asset: 'farinha-milho-sinha.png.asset.json' },
-  { pattern: /farinha.*trigo.*dona.*benta/i, asset: 'farinha-trigo-dona-benta.png.asset.json' },
-  { pattern: /farinha.*trigo.*finna/i, asset: 'farinha-trigo-finna.png.asset.json' },
-  { pattern: /farinha.*lactea.*nestle/i, asset: 'farinha-lactea-nestle.png.asset.json' },
-  { pattern: /feijao.*tio.*alemao/i, asset: 'feijao-tio-alemao.png.asset.json' },
-  { pattern: /feijao.*preto.*kumbuca/i, asset: 'feijao-preto-kumbuca.png.asset.json' }
+  { pattern: /detergente.*limpol/i, asset: 'detergente-limpol.png.asset.json' },
+  { pattern: /detergente.*ype/i, asset: 'detergente-ype.png.asset.json' },
+  { pattern: /farinha.*lactea.*nestle/i, asset: 'farinha-lactea-nestle-v2.png.asset.json' },
+  { pattern: /feijao.*carioca.*bernardo/i, asset: 'feijao-carioca-bernardo.png.asset.json' },
+  { pattern: /feijao.*praia|feijao.*kumbuca.*praia/i, asset: 'feijao-praia-kumbuca.png.asset.json' },
+  { pattern: /feijao.*preto.*bernardo/i, asset: 'feijao-preto-bernardo.png.asset.json' },
+  { pattern: /feijao.*rajado/i, asset: 'feijao-rajado-kumbuca.png.asset.json' },
+  { pattern: /file.*bovino/i, asset: 'file-bovino.png.asset.json' },
+  { pattern: /file.*frango.*copacol|sassami/i, asset: 'file-frango-copacol.png.asset.json' },
+  { pattern: /file.*frango.*lar|peito.*frango.*lar/i, asset: 'file-frango-lar.png.asset.json' }
 ];
 
 async function updateBatch8() {
-  console.log('--- Iniciando Lote 8 de imagens (Mercearia) ---');
+  console.log('--- Iniciando Lote 8 de imagens (Limpeza, Mercearia e Carnes) ---');
   const { data: products } = await supabase.from('products').select('id, name');
   if (!products) return;
 
