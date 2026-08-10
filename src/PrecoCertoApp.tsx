@@ -1161,9 +1161,13 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
   };
 
   const updateQuantity = (name: string, delta: number) => {
-    setBasketItems(prev => prev.map(i => 
-      i.productName === name ? { ...i, quantity: Math.max(0.5, i.quantity + delta) } : i
-    ));
+    setBasketItems(prev => prev.map(i => {
+      if (i.productName === name) {
+        const newQty = Math.max(1, i.quantity + delta);
+        return { ...i, quantity: newQty };
+      }
+      return i;
+    }));
   };
 
   useEffect(() => {
@@ -1180,9 +1184,13 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
         );
       } catch (err) {
         console.error("Erro no autosave:", err);
+        // Exibe toast de erro mas mantém os itens na interface (já estão no state/localStorage)
+        if (typeof (window as any).setGlobalToast === 'function') {
+           (window as any).setGlobalToast("Ops! Erro ao sincronizar cesta com a nuvem. Seus itens continuam salvos localmente.", "error");
+        }
       }
     }
-    const timer = setTimeout(persistToCloud, 3000); // Debounce de 3s para evitar spam no banco
+    const timer = setTimeout(persistToCloud, 3000); // Debounce de 3s
     return () => clearTimeout(timer);
   }, [basketItems, mode, budget, user, optimizationResult]);
 
@@ -1409,9 +1417,9 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                           </div>
                           <div className="item-controls">
                             <div className="item-qty">
-                              <button onClick={() => updateQuantity(item.productName, -0.5)} aria-label={`Diminuir ${item.productName}`}>-</button>
+                              <button onClick={() => updateQuantity(item.productName, -1)} aria-label={`Diminuir ${item.productName}`} disabled={item.quantity <= 1}>-</button>
                               <span>{item.quantity}</span>
-                              <button onClick={() => updateQuantity(item.productName, 0.5)} aria-label={`Aumentar ${item.productName}`}>+</button>
+                              <button onClick={() => updateQuantity(item.productName, 1)} aria-label={`Aumentar ${item.productName}`}>+</button>
                             </div>
                             <button className="item-remove" onClick={() => removeItem(item.productName)} aria-label={`Remover ${item.productName}`}>
                               <Trash2 size={14} />
@@ -1466,9 +1474,23 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                           const price = (prod?.minPrice || 0) * item.quantity;
                           return (
                             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
-                              <span style={{ color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
-                                {item.quantity}x {item.productName}
-                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                                <div style={{ display: 'flex', background: 'var(--surface-3)', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                                  <button 
+                                    onClick={() => updateQuantity(item.productName, -1)} 
+                                    style={{ padding: '0 6px', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}
+                                    disabled={item.quantity <= 1}
+                                  >-</button>
+                                  <span style={{ padding: '0 4px', fontSize: '0.75rem', fontWeight: 700, minWidth: '1.2rem', textAlign: 'center' }}>{item.quantity}</span>
+                                  <button 
+                                    onClick={() => updateQuantity(item.productName, 1)} 
+                                    style={{ padding: '0 6px', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}
+                                  >+</button>
+                                </div>
+                                <span style={{ color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100px' }}>
+                                  {item.productName}
+                                </span>
+                              </div>
                               <span style={{ fontWeight: 600, color: 'var(--muted)', flexShrink: 0 }}>
                                 {money(price)}
                               </span>
@@ -4026,6 +4048,11 @@ export default function PrecoCertoApp() {
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
   else page=<GenericPage {...props} metrics={metrics} path={pathname} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
+
+  // Expondo o toast globalmente para o useEffect da BasketPage poder disparar erros de rede
+  useEffect(() => {
+    (window as any).setGlobalToast = (msg: string, type?: string) => setToast(msg);
+  }, []);
 
   return <div className="app">
     <Header basketCount={cart.length} favoritesCount={favorites.length} user={user} onLogout={handleLogout}/>
