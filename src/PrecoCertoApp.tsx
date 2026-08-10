@@ -3204,6 +3204,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     whatsapp: (user as any)?.whatsapp || "",
     referencePoint: (user as any)?.referencePoint || "",
     cpf: (user as any)?.cpf || ""
+  });
   const favProducts = useMemo(() => products.filter(p => favorites.includes(String(p.id))), [products, favorites]);
 
   useEffect(() => {
