@@ -1759,7 +1759,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   const [photoViewer, setPhotoViewer] = useState<{ url: string, name: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [newProductPhoto, setNewProductPhoto] = useState<{ file: File, url: string } | null>(null);
-  const [activeAdminView, setActiveAdminView] = useState<"dashboard" | "catalog" | "images" | "storeCatalog">("dashboard");
+  const [activeAdminView, setActiveAdminView] = useState<"dashboard" | "catalog" | "images" | "storeCatalog" | "users">("dashboard");
   const [itemsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
