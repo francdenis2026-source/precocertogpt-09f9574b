@@ -119,16 +119,16 @@ export function DorinhaAuthorStore() {
       .db-hero-title{font-size:clamp(2.85rem,5vw,4.45rem);line-height:.9;letter-spacing:-.06em;margin:11px 0 14px;max-width:680px;text-shadow:0 15px 44px rgba(0,0,0,.25)}
       .db-hero-title em{font-style:normal;color:#e7c78d}
       .db-hero-art{position:relative;min-height:350px;display:grid;place-items:center;isolation:isolate}
-      .db-cover-stage{position:relative;width:min(100%,550px);height:335px}
-      .db-hero-cover{position:absolute;display:block;width:150px;height:228px;object-fit:contain;border-radius:3px 9px 9px 3px;filter:drop-shadow(0 22px 22px rgba(18,6,22,.52));transform-origin:50% 100%;transition:transform .35s ease,filter .35s ease}
-      .db-hero-cover:nth-child(1){left:5%;bottom:24px;transform:rotate(-13deg) translateY(15px);z-index:1}
-      .db-hero-cover:nth-child(2){left:29%;bottom:49px;transform:rotate(-4deg);z-index:3}
-      .db-hero-cover:nth-child(3){right:24%;bottom:44px;transform:rotate(5deg);z-index:4}
-      .db-hero-cover:nth-child(4){right:0;bottom:19px;transform:rotate(13deg) translateY(18px);z-index:2}
-      .db-cover-stage:hover .db-hero-cover:nth-child(1){transform:rotate(-15deg) translate(-6px,5px)}
-      .db-cover-stage:hover .db-hero-cover:nth-child(2){transform:rotate(-5deg) translateY(-10px)}
-      .db-cover-stage:hover .db-hero-cover:nth-child(3){transform:rotate(6deg) translateY(-12px)}
-      .db-cover-stage:hover .db-hero-cover:nth-child(4){transform:rotate(15deg) translate(6px,7px)}
+      .db-cover-stage{position:relative;width:min(100%,550px);height:335px;perspective:1000px}
+      .db-hero-cover{position:absolute;display:block;width:150px;height:228px;object-fit:contain;border-radius:3px 9px 9px 3px;filter:drop-shadow(0 22px 22px rgba(18,6,22,.52));transform-origin:50% 100%;transition:transform .45s cubic-bezier(0.34, 1.56, 0.64, 1),filter .45s ease}
+      .db-hero-cover:nth-child(1){left:5%;bottom:24px;transform:rotateY(-25deg) rotateX(5deg) rotateZ(-13deg) translateY(15px);z-index:1}
+      .db-hero-cover:nth-child(2){left:29%;bottom:49px;transform:rotateY(-15deg) rotateX(5deg) rotateZ(-4deg);z-index:3}
+      .db-hero-cover:nth-child(3){right:24%;bottom:44px;transform:rotateY(15deg) rotateX(5deg) rotateZ(5deg);z-index:4}
+      .db-hero-cover:nth-child(4){right:0;bottom:19px;transform:rotateY(25deg) rotateX(5deg) rotateZ(13deg) translateY(18px);z-index:2}
+      .db-cover-stage:hover .db-hero-cover:nth-child(1){transform:rotateY(-30deg) rotateZ(-15deg) translate(-10px,5px) scale(1.05)}
+      .db-cover-stage:hover .db-hero-cover:nth-child(2){transform:rotateY(-18deg) rotateZ(-5deg) translateY(-15px) scale(1.08)}
+      .db-cover-stage:hover .db-hero-cover:nth-child(3){transform:rotateY(18deg) rotateZ(6deg) translateY(-18px) scale(1.08)}
+      .db-cover-stage:hover .db-hero-cover:nth-child(4){transform:rotateY(30deg) rotateZ(15deg) translate(10px,7px) scale(1.05)}
       .db-stage-glow{position:absolute;left:8%;right:5%;bottom:2%;height:35%;border-radius:50%;background:radial-gradient(ellipse,rgba(238,202,128,.42),transparent 69%);filter:blur(22px);z-index:-1}
       .db-stage-note{position:absolute;right:2%;top:10px;max-width:178px;padding:11px 13px;border:1px solid rgba(255,255,255,.25);border-radius:14px;background:rgba(36,17,42,.68);backdrop-filter:blur(16px);color:#f2e8ef;font-size:10px;line-height:1.45;box-shadow:0 14px 36px rgba(0,0,0,.24)}
       .db-stage-note b{display:block;color:#f0d398;font-size:11px;margin-bottom:3px}
@@ -146,7 +146,11 @@ export function DorinhaAuthorStore() {
       #contato .db-contact-grid h2{font-size:clamp(1.75rem,3.2vw,2.45rem);max-width:620px}
       .db-external-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
       .db-action:hover{transform:translateY(-2px)}
-      .db-book:hover{transform:translateY(-5px);box-shadow:0 22px 60px rgba(29,18,44,.12)}
+      .db-book:hover{transform:translateY(-8px);box-shadow:0 30px 60px rgba(29,18,44,0.18);border-color:rgba(180,120,200,0.3)}
+      .db-book:hover .db-cover-title{transform: scale(1.02); text-shadow: 0 4px 12px rgba(0,0,0,0.3)}
+      .db-book .db-cover{transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)}
+      .db-book:hover .db-cover{transform: scale(1.02)}
+
       @media(max-width:1050px){.db-hero-grid{grid-template-columns:minmax(0,1fr) minmax(330px,.82fr);gap:18px}.db-cover-stage{transform:scale(.85)}.db-book-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.db-about-grid,.db-contact-grid{grid-template-columns:1fr}.db-author-portrait-card{min-height:470px}.db-external-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
       @media(max-width:790px){.db-hero-grid{grid-template-columns:1fr}.db-hero-art{min-height:320px;margin-top:-24px}.db-cover-stage{height:330px;transform:scale(.78)}.db-stage-note{display:none}.db-hero-copy{text-align:center;padding-left:0}.db-hero-copy:before{display:none}.db-hero-copy .db-hero-actions,.db-hero-copy [data-hero-badges],.db-hero-copy [data-hero-foot]{justify-content:center}}
       @media(max-width:640px){.db-book-grid,.db-external-grid{grid-template-columns:1fr}.db-hero-title{font-size:clamp(2.55rem,14vw,3.65rem)}.db-top-label,.db-icon-label{display:none}.db-hero-actions{display:grid!important}.db-hero-actions>*{width:100%;justify-content:center}.db-section{padding-left:18px!important;padding-right:18px!important}.db-contact-actions{display:grid!important}.db-contact-actions>*{width:100%;justify-content:center}.db-hero-art{min-height:245px;margin-top:-36px}.db-cover-stage{height:275px;transform:scale(.62)}.db-about-facts{grid-template-columns:1fr!important}.db-author-portrait-card{min-height:390px}.db-section-head{align-items:flex-start!important}.db-catalog-count{display:none!important}}
@@ -198,7 +202,9 @@ export function DorinhaAuthorStore() {
       </div>
       <div className="db-book-grid">
         {profile.books.map((book,index)=>{const theme=coverThemes[book.slug]||coverThemes["despertar-para-o-mundo-literario"];return <article key={book.id} className="db-book" style={s.bookCard}>
-          <div style={{...s.cover,background:theme.bg}}>
+          <div style={{...s.cover,background:theme.bg, position: 'relative', overflow: 'hidden'}}>
+            <div style={{...s.coverGlow, position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%)', pointerEvents: 'none'}} />
+            <div style={{...s.coverTexture, position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`, pointerEvents: 'none'}} />
             <span style={{...s.coverEyebrow,color:theme.accent}}>{theme.eyebrow}</span>
             <div style={s.coverRule}/>
             <strong style={s.coverTitle}>{book.name}</strong>
