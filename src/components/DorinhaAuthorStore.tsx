@@ -96,9 +96,14 @@ export function DorinhaAuthorStore() {
   }, [profile]);
 
   async function sharePage() {
-    const data = { title: "Dorinha Barroso · Livros", text: "Conheça os livros de Dorinha Barroso e compre diretamente com a autora pelo PreçoCerto.", url: window.location.href };
+    const shareUrl = window.location.origin + window.location.pathname;
+    const data = { 
+      title: "Dorinha Barroso · Livros", 
+      text: "Conheça os livros de Dorinha Barroso e compre diretamente com a autora pelo PreçoCerto.", 
+      url: shareUrl 
+    };
     if (navigator.share) { try { await navigator.share(data); return; } catch { /* cancelado */ } }
-    await navigator.clipboard?.writeText(window.location.href);
+    await navigator.clipboard?.writeText(shareUrl);
     setCopied(true); setTimeout(() => setCopied(false), 1800);
   }
 

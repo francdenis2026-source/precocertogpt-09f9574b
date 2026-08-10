@@ -5204,3 +5204,78 @@ export default function PrecoCertoApp() {
 
   </div>;
 }
+
+function PaymentHistory({ user }: { user: SessionProfile | null }) {
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user || !supabase) { setLoading(false); return; }
+    void (async () => {
+      const { data } = await supabase
+        .from("merchant_orders")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (data) setPayments(data);
+      setLoading(false);
+    })();
+  }, [user]);
+
+  if (!user) return null;
+
+  return (
+    <div style={{ marginTop: '3rem' }}>
+      <div className="section-heading compact">
+        <h2>Histórico de Pagamentos</h2>
+        <p>Acompanhe suas transações e assinaturas do Marketplace.</p>
+      </div>
+      
+      <div className="price-table-card">
+        {loading ? (
+          <div style={{ padding: '2rem', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>
+        ) : payments.length > 0 ? (
+          payments.map(p => (
+            <div key={p.id} className="price-row" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ 
+                  width: 40, height: 40, borderRadius: 8, background: 'var(--surface-3)', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)' 
+                }}>
+                  <CircleDollarSign size={20} />
+                </div>
+                <div>
+                  <strong style={{ display: 'block' }}>{money(p.amount || 0)}</strong>
+                  <small style={{ color: 'var(--muted)' }}>{new Date(p.created_at).toLocaleDateString()}</small>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <span style={{ 
+                  fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px', 
+                  background: p.status === 'paid' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+                  color: p.status === 'paid' ? '#15803d' : '#b91c1c',
+                  fontWeight: 600
+                }}>
+                  {p.status === 'paid' ? 'Concluído' : 'Pendente'}
+                </span>
+                {p.status !== 'paid' && (
+                  <button className="button button--ghost button--small" style={{ gap: 4 }}>
+                    <RotateCcw size={14} /> Re-tentar
+                  </button>
+                )}
+                {p.status === 'paid' && (
+                  <button className="button button--ghost button--small" title="Baixar comprovante">
+                    <Download size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--muted)' }}>Nenhum pagamento registrado.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+}
