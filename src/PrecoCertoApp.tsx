@@ -867,7 +867,14 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
             <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => toggleFavorite(String(p.id))} aria-pressed={favorites.includes(String(p.id))} aria-label={favorites.includes(String(p.id)) ? `Remover ${p.name} dos favoritos` : `Favoritar ${p.name}`}>
               <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
             </button>
-            <a className="visual-product-image" href={`/produto/${p.slug}`}>
+            <div 
+              className="visual-product-image" 
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedProduct(p);
+              }}
+              style={{ cursor: 'pointer' }}
+            >
               <span className="position-number">0{index + 1}</span>
               <ProductStatusBadge product={p}/>
               <ProductImage product={p} />
@@ -875,11 +882,17 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
                 <span className="price-drop-tag"><TrendingDown size={14}/> -{Math.round((1 - p.minPrice / p.previousPrice) * 100)}%</span>
               )}
               <span className="verified-chip"><ShieldCheck /> Verificado</span>
-            </a>
+            </div>
 
             <div className="visual-product-content">
               <span className="category-tag">{p.category} • {p.size}</span>
-              <a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a>
+              <div 
+                className="visual-product-name" 
+                onClick={() => setSelectedProduct(p)}
+                style={{ cursor: 'pointer' }}
+              >
+                {p.name}
+              </div>
               <div className="visual-store">
                 <span className="market-dot" style={{ background: p.storeColor }} />
                 <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -2627,11 +2640,21 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
               <div className="visual-product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                 {favProducts.map(p => (
                   <article className="visual-product-card" key={p.id}>
-                    <a className="visual-product-image" href={`/produto/${p.slug}`} style={{ height: '120px' }}>
+                    <div 
+                      className="visual-product-image" 
+                      onClick={() => setSelectedProduct(p)}
+                      style={{ height: '120px', cursor: 'pointer' }}
+                    >
                       <ProductImage product={p} size="compact" />
-                    </a>
+                    </div>
                     <div className="visual-product-content" style={{ padding: '1rem' }}>
-                      <a className="visual-product-name" href={`/produto/${p.slug}`} style={{ fontSize: '0.9rem', height: '2.5rem' }}>{p.name}</a>
+                      <div 
+                        className="visual-product-name" 
+                        onClick={() => setSelectedProduct(p)}
+                        style={{ fontSize: '0.9rem', height: '2.5rem', cursor: 'pointer' }}
+                      >
+                        {p.name}
+                      </div>
                       <div className="visual-price">
                         <strong>{money(p.minPrice)}</strong>
                       </div>
