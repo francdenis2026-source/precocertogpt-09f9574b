@@ -379,31 +379,20 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
 }
 
 function Brand({ compact = false, inverse = false, className = "" }: { compact?: boolean; inverse?: boolean; className?: string }) {
-  const [settings] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("precocerto:settings") || "{}");
-    } catch { return {}; }
-  });
-
-  const logoUrl = settings.logoUrl || (compact ? "/logo-preco-certo.svg" : inverse ? "/logo-preco-certo-inversa.svg" : "/logo-preco-certo.svg");
-  const siteUrl = settings.siteUrl || "/";
-  const logoHeight = settings.logoHeight || 68;
-
   return (
     <div 
       className={`brand ${className} ${inverse ? "brand--inverse" : ""} ${compact ? "brand--compact" : ""}`} 
-      onClick={() => window.location.href = siteUrl}
+      onClick={() => window.location.href = "/"}
       style={{ cursor: 'pointer' }}
       role="link"
       tabIndex={0}
       aria-label="PreçoCerto — página inicial"
-      onKeyDown={(e) => e.key === 'Enter' && (window.location.href = siteUrl)}
+      onKeyDown={(e) => e.key === 'Enter' && (window.location.href = "/")}
     >
       <img 
         className="brand__logo-img"
-        src={logoUrl}
-        alt="PreçoCerto"
-        style={{ height: `${logoHeight}px` }}
+        src={inverse ? "/logo-preco-certo-inversa.svg" : "/logo-preco-certo.svg"}
+        alt="PreçoCerto" 
       />
     </div>
   );
@@ -471,16 +460,12 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
-  const [settings] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("precocerto:settings") || "{}");
-    } catch { return {}; }
-  });
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     
+    // Listen for history changes if needed, but for simple SPA this works:
     const handleLocationChange = () => setCurrentPath(window.location.pathname);
     window.addEventListener("popstate", handleLocationChange);
 
@@ -491,10 +476,6 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
   }, []);
 
   const isHome = currentPath === "/";
-  const headerStyle = {
-    backgroundColor: settings.headerBg || undefined,
-    color: settings.headerText || undefined
-  };
   const headerClass = `site-header ${isHome ? "site-header--absolute" : ""} ${scrolled ? "site-header--scrolled" : ""}`;
 
   const navLinks = [
@@ -506,7 +487,7 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
     { label: "Planos", href: "/planos" }
   ];
 
-  return <header className={headerClass} style={headerStyle} role="banner">
+  return <header className={headerClass} role="banner">
     <div className="shell header-inner">
       <div className="header-brand-zone">
         <Brand compact className="header-logo-container" />
@@ -1746,7 +1727,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
   const [photoViewer, setPhotoViewer] = useState<{ url: string, name: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [newProductPhoto, setNewProductPhoto] = useState<{ file: File, url: string } | null>(null);
-  const [activeAdminView, setActiveAdminView] = useState<"dashboard" | "catalog" | "images" | "storeCatalog" | "settings">("dashboard");
+  const [activeAdminView, setActiveAdminView] = useState<"dashboard" | "catalog" | "images" | "storeCatalog">("dashboard");
   const [itemsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1957,7 +1938,7 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
     ["Feijão Kicaldo 1 kg","Super Feijoense","R$ 7,49","Verificado"],
   ];
   const title = adminRouteNames[path] ?? (path.startsWith("/admin/cobertura/") ? "Detalhe da cobertura" : "Operação administrativa");
-  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><button onClick={() => setActiveAdminView("dashboard")} className={activeAdminView==="dashboard"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer', borderRadius: '8px' }} aria-label="Visão geral do painel"><LayoutDashboard size={18}/> Visão geral</button><button onClick={() => setActiveAdminView("storeCatalog")} className={activeAdminView==="storeCatalog"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer', borderRadius: '8px' }} aria-label="Catálogos por estabelecimento"><Store size={18}/> Catálogos por loja</button><button onClick={() => setActiveAdminView("catalog")} className={activeAdminView==="catalog"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer', borderRadius: '8px' }} aria-label="Gestão de produtos gerais"><PackageSearch size={18}/> Produtos gerais</button><button onClick={() => setActiveAdminView("images")} className={activeAdminView==="images"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer', borderRadius: '8px' }} aria-label="Revisar fotos pendentes"><Camera size={18}/> Revisar Fotos</button><a href="/admin/clientes" aria-label="Gestão de clientes"><Users/> Clientes</a><a href="/admin/precos" aria-label="Gestão de preços"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""} aria-label="Histórico de importações"><Database/> Importações</a><span>Configurações</span><button onClick={() => setActiveAdminView("settings")} className={activeAdminView==="settings"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer', borderRadius: '8px' }} aria-label="Configurações do aplicativo"><Settings size={18}/> Ajustes Gerais</button><span>Inteligência</span><a href="/admin/analytics" aria-label="Analytics e métricas"><BarChart3/> Analytics</a><a href="/admin/auditoria" aria-label="Logs de auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }} aria-label="Voltar para o site principal"><ArrowRight/> o que ainda falta do plano</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem', borderRadius: '8px' }} aria-label="Deslogar do painel administrativo"><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{activeAdminView === "images" ? "Revisão de Fotos" : activeAdminView === "storeCatalog" ? "Catálogos por estabelecimento" : activeAdminView === "settings" ? "Configurações Gerais" : title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button" aria-label="Notificações"><Bell/></button><span className="admin-user">FD</span></div></header>
+  return <div className="admin-shell"><aside className="admin-sidebar"><Brand inverse/><nav><span>Operação</span><button onClick={() => setActiveAdminView("dashboard")} className={activeAdminView==="dashboard"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer', borderRadius: '8px' }} aria-label="Visão geral do painel"><LayoutDashboard size={18}/> Visão geral</button><button onClick={() => setActiveAdminView("storeCatalog")} className={activeAdminView==="storeCatalog"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer', borderRadius: '8px' }} aria-label="Catálogos por estabelecimento"><Store size={18}/> Catálogos por loja</button><button onClick={() => setActiveAdminView("catalog")} className={activeAdminView==="catalog"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer', borderRadius: '8px' }} aria-label="Gestão de produtos gerais"><PackageSearch size={18}/> Produtos gerais</button><button onClick={() => setActiveAdminView("images")} className={activeAdminView==="images"?"active":""} style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'inherit', cursor: 'pointer', borderRadius: '8px' }} aria-label="Revisar fotos pendentes"><Camera size={18}/> Revisar Fotos</button><a href="/admin/clientes" aria-label="Gestão de clientes"><Users/> Clientes</a><a href="/admin/precos" aria-label="Gestão de preços"><CircleDollarSign/> Preços</a><a href="/admin/importacoes" className={path==="/admin/importacoes"?"active":""} aria-label="Histórico de importações"><Database/> Importações</a><span>Inteligência</span><a href="/admin/analytics" aria-label="Analytics e métricas"><BarChart3/> Analytics</a><a href="/admin/auditoria" aria-label="Logs de auditoria"><ShieldCheck/> Auditoria</a></nav><a className="admin-back" href="/" style={{ marginBottom: '1rem' }} aria-label="Voltar para o site principal"><ArrowRight/> o que ainda falta do plano</a><button className="button button--ghost button--small" onClick={handleLogoutRequest} style={{ color: '#fca5a5', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-start', paddingLeft: '1rem', borderRadius: '8px' }} aria-label="Deslogar do painel administrativo"><X size={16}/> Deslogar Admin</button></aside><main className="admin-main"><header><div><small>Admin / Operação</small><h1>{activeAdminView === "images" ? "Revisão de Fotos" : activeAdminView === "storeCatalog" ? "Catálogos por estabelecimento" : title}</h1></div><div>{importMsg && <span className="admin-import-badge" style={{fontSize:"0.75rem",background:"#fef3c7",color:"#92400e",padding:"0.25rem 0.75rem",borderRadius:"1rem",marginRight:"1rem"}}>{importMsg}</span>}<button className="icon-button" aria-label="Notificações"><Bell/></button><span className="admin-user">FD</span></div></header>
 
   {showLogoutConfirm && (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
@@ -2074,59 +2055,6 @@ function AdminPage({ path, onLogout, products: allProducts, stores: allStores }:
         </section>
       </div>
     </>
-  )}
-
-  {activeAdminView === "settings" && (
-    <section className="admin-card">
-      <div className="admin-card-head">
-        <div>
-          <h2>Configurações do Aplicativo</h2>
-          <p>Personalize a identidade visual e links globais sem mexer no código.</p>
-        </div>
-      </div>
-      <form 
-        style={{ padding: '1.5rem', display: 'grid', gap: '1.5rem', maxWidth: '600px' }}
-        onSubmit={(e) => {
-          e.preventDefault();
-          const fd = new FormData(e.currentTarget);
-          const data = {
-            logoUrl: fd.get("logoUrl"),
-            siteUrl: fd.get("siteUrl"),
-            headerBg: fd.get("headerBg"),
-            headerText: fd.get("headerText"),
-            logoHeight: Number(fd.get("logoHeight"))
-          };
-          localStorage.setItem("precocerto:settings", JSON.stringify(data));
-          addAuditLog("Configurações do aplicativo atualizadas");
-          alert("Configurações salvas com sucesso! Recarregue para aplicar totalmente.");
-          window.location.reload();
-        }}
-      >
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
-          <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>URL da Logomarca (SVG ou PNG)</label>
-          <input className="admin-input" name="logoUrl" defaultValue={JSON.parse(localStorage.getItem("precocerto:settings") || "{}").logoUrl || "/logo-preco-certo.svg"} placeholder="https://..." />
-        </div>
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
-          <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Altura da Logo (px)</label>
-          <input className="admin-input" type="number" name="logoHeight" defaultValue={JSON.parse(localStorage.getItem("precocerto:settings") || "{}").logoHeight || 68} />
-        </div>
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
-          <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>URL do Link do Site</label>
-          <input className="admin-input" name="siteUrl" defaultValue={JSON.parse(localStorage.getItem("precocerto:settings") || "{}").siteUrl || "/"} placeholder="/" />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div style={{ display: 'grid', gap: '0.5rem' }}>
-            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Cor de Fundo do Header</label>
-            <input className="admin-input" type="color" name="headerBg" defaultValue={JSON.parse(localStorage.getItem("precocerto:settings") || "{}").headerBg || "#ffffff"} style={{ height: '40px' }} />
-          </div>
-          <div style={{ display: 'grid', gap: '0.5rem' }}>
-            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Cor do Texto do Header</label>
-            <input className="admin-input" type="color" name="headerText" defaultValue={JSON.parse(localStorage.getItem("precocerto:settings") || "{}").headerText || "#0f172a"} style={{ height: '40px' }} />
-          </div>
-        </div>
-        <button type="submit" className="button button--primary" style={{ marginTop: '1rem' }}>Salvar Configurações</button>
-      </form>
-    </section>
   )}
 
   {(activeAdminView === "catalog" || activeAdminView === "images") && (
