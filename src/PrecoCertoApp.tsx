@@ -4485,7 +4485,7 @@ export default function PrecoCertoApp() {
     });
   }
 
-  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites]);
+  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user,setUser: setUserAndUpdateStorage}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites]);
 
   const handleAdminAuth = (success: boolean) => {
     if (success) {
