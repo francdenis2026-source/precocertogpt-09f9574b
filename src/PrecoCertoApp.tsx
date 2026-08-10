@@ -3267,19 +3267,21 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
 
     return (
       <div className="shell page-shell generic-page">
-        <section className="generic-hero">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-            <div style={{ width: '80px', height: '80px', background: 'var(--blue-soft)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)' }}>
-              <UserRound size={40} />
+        {isProfileView && (
+          <section className="generic-hero">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+              <div style={{ width: '80px', height: '80px', background: 'var(--blue-soft)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)' }}>
+                <UserRound size={40} />
+              </div>
+              <div style={{ flex: 1, minWidth: '240px' }}>
+                <span className="eyebrow">Minha Conta</span>
+                <h1>{(user as any)?.name || "Usuário PreçoCerto"}</h1>
+                <p>Gerencie seus alertas, favoritos e preferências de economia em Feijó.</p>
+              </div>
+              <button className="button button--primary" onClick={() => setIsEditingProfile(true)}>Editar Meus Dados</button>
             </div>
-            <div style={{ flex: 1, minWidth: '240px' }}>
-              <span className="eyebrow">Minha Conta</span>
-              <h1>{(user as any)?.name || "Usuário PreçoCerto"}</h1>
-              <p>Gerencie seus alertas, favoritos e preferências de economia em Feijó.</p>
-            </div>
-            <button className="button button--primary" onClick={() => setIsEditingProfile(true)}>Editar Meus Dados</button>
-          </div>
-        </section>
+          </section>
+        )}
 
         {isEditingProfile && (
           <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
