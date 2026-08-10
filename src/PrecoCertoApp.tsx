@@ -3206,6 +3206,14 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     cpf: (user as any)?.cpf || ""
   });
   const favProducts = useMemo(() => products.filter(p => favorites.includes(String(p.id))), [products, favorites]);
+  const recentActions = useMemo(() => {
+    try {
+      return (JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]") as any[]).slice(0, 5);
+    } catch {
+      return [];
+    }
+  }, [favorites]);
+
 
   useEffect(() => {
     if (path === "/perfil" || path === "/favoritos") {
