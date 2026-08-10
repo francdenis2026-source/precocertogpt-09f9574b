@@ -2208,11 +2208,43 @@ function UserBasketHistory({ user, products }: { user: any; products: Product[] 
                       </button>
                     </div>
                   )}
-                  <small style={{ color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Clock3 size={12} /> {new Date(basket.created_at).toLocaleString('pt-BR')}
-                  </small>
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <Clock3 size={12}/> {new Date(basket.created_at).toLocaleDateString("pt-BR")}
+                    </span>
+                    {basket.status === 'revoked' ? (
+                      <span style={{ color: 'var(--red)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <AlertTriangle size={12}/> Link Revogado
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--green)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Check size={12}/> Link Ativo
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button 
+                    className="button button--ghost button--small" 
+                    title="Copiar Link" 
+                    onClick={() => {
+                      const url = `${window.location.origin}/cesta?snapshot=${basket.id}`;
+                      navigator.clipboard.writeText(url);
+                      if (typeof (window as any).setGlobalToast === 'function') (window as any).setGlobalToast("Link copiado!", "success");
+                    }}
+                  >
+                    <Share2 size={16} />
+                  </button>
+                  {basket.status !== 'revoked' && (
+                    <button 
+                      className="button button--ghost button--small" 
+                      style={{ color: 'var(--orange)' }} 
+                      title="Revogar Link" 
+                      onClick={() => handleRevoke(basket.id)}
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
                   <button className="button button--ghost button--small" title="Baixar PDF" onClick={() => handleExportPDF(basket)}>
                     <Download size={16} />
                   </button>
