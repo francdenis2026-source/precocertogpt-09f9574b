@@ -245,7 +245,7 @@ export function DorinhaAuthorStore() {
               {book.external_url&&<a href={book.external_url} target="_blank" rel="noreferrer" style={s.externalBtn} title="Ver na Amazon"><ExternalLink size={16}/></a>}
             </div>
           </div>
-        </article>)}
+        </article>})}
       </div>
     </section>
 
