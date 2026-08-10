@@ -467,18 +467,18 @@ body {
   background: rgba(255, 255, 255, 0.8); 
   backdrop-filter: blur(16px) saturate(180%);
   border-bottom: 1px solid rgba(226, 232, 240, 0.8); 
-  height: 100px; 
-  display: flex; 
+  height: 80px; 
+  display: flex;
   align-items: center; 
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
 }
 @media (min-width: 1024px) {
-  .site-header { height: 100px; }
+  .site-header { height: 80px; }
 }
 
 .site-header--scrolled {
-  height: 90px; /* Slightly taller scrolled header to accommodate larger logo */
+  height: 70px; /* Slightly taller scrolled header to accommodate larger logo */
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 4px 30px -10px rgba(0, 0, 0, 0.1), 0 0 20px rgba(37, 99, 235, 0.05);
   border-bottom-color: var(--border);
