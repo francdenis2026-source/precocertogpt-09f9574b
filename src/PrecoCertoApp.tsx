@@ -3867,6 +3867,12 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
       // A relevância da pesquisa vem primeiro; o menor preço desempata.
     } else if (sortBy === "price") {
       result.sort((a, b) => a.minPrice - b.minPrice);
+    } else if (sortBy === "avg_price") {
+      result.sort((a, b) => a.avgPrice - b.avgPrice);
+    } else if (sortBy === "max_price") {
+      result.sort((a, b) => b.maxPrice - a.maxPrice); // Maior preço costuma ser do maior para o menor para ver piores cenários? Ou menor? Usuário pediu "escolher produtos pelo menor, médio ou maior preço", geralmente "por maior" implica descendente. Vamos manter ascendente para consistência com "menor", ou descendente para o "maior".
+      // Se ele quer escolher pelo maior, talvez queira ver os mais caros ou os que tem maior teto.
+      // Vou fazer: menor (asc), médio (asc), maior (desc).
     } else if (sortBy === "unit") {
       // Menor preço unitário: itens sem medida conversível vão para o fim.
       result.sort((a, b) => {
