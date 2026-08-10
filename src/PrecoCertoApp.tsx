@@ -3242,7 +3242,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     const handleUpdateProfile = (e: React.FormEvent) => {
       e.preventDefault();
       const updatedUser = { ...user, ...profileData };
-      (props as any).setUser(updatedUser);
+      if (setUser) setUser(updatedUser);
       localStorage.setItem("precocerto:user", JSON.stringify(updatedUser));
       setIsEditingProfile(false);
       if (typeof (window as any).setGlobalToast === 'function') {
