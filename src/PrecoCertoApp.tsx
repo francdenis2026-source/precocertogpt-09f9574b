@@ -4752,6 +4752,13 @@ export default function PrecoCertoApp() {
     try { setFavorites(JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]")); }
     catch { setFavorites([]); }
     setToast("Bem-vindo ao PreçoCerto!");
+    
+    // Verifica se havia um salvamento de cesta pendente
+    if (localStorage.getItem("pc:pending_save_basket") === "true") {
+      localStorage.removeItem("pc:pending_save_basket");
+      // O redirect cuidará de levar o usuário de volta para /cesta onde ele poderá clicar em Salvar
+    }
+
   };
 
 
