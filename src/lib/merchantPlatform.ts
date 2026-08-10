@@ -1,219 +1,59 @@
 import { supabase } from "./roles";
 
-export type OrderStatus =
-  | "pending_payment"
-  | "paid"
-  | "accepted"
-  | "preparing"
-  | "ready"
-  | "out_for_delivery"
-  | "delivered"
-  | "cancelled";
-
+export type OrderStatus = "pending_payment" | "paid" | "accepted" | "preparing" | "ready" | "out_for_delivery" | "delivered" | "cancelled";
 export type PaymentStatus = "pending" | "approved" | "rejected" | "refunded" | "cancelled";
+export type MerchantOrderItem = { id:string; order_id:string; product_id:string|null; merchant_product_id?:string|null; product_name:string; quantity:number; unit_price:number; total_price:number; image_url:string|null };
+export type MerchantOrder = { id:string; order_number:string; merchant_id:string; customer_id:string|null; customer_name:string; customer_phone:string|null; customer_email:string|null; delivery_address:Record<string,string>|null; delivery_type:"delivery"|"pickup"; status:OrderStatus; payment_status:PaymentStatus; payment_provider:string|null; subtotal:number; delivery_fee:number; discount:number; platform_fee:number; total:number; notes:string|null; created_at:string; updated_at:string; items?:MerchantOrderItem[] };
+export type MerchantSummary = { merchantId:string; merchantName:string; todayGross:number; todayOrders:number; pendingOrders:number; preparingOrders:number; deliveryOrders:number; averageTicket:number; lowStock:number };
+export type PlatformSummary = { gmvToday:number; platformRevenueToday:number; subscriptionRevenueMonth:number; commissionRevenueToday:number; activeMerchants:number; ordersToday:number; cancelledToday:number; averageTicket:number };
+export type MerchantProduct = { id:string; merchant_id:string; product_id:string|null; product_slug:string|null; product_name:string; image_url:string|null; price:number; promotional_price:number|null; stock_quantity:number; low_stock_threshold:number; active:boolean; available:boolean; max_per_order:number|null; updated_at:string };
+export type DeliveryZone = { id:string; merchant_id:string; name:string; neighborhood:string|null; fee:number; free_above:number|null; minimum_order:number; estimated_min_minutes:number; estimated_max_minutes:number; active:boolean };
+export type MerchantMember = { id:string; merchant_id:string; user_id:string; role:"owner"|"manager"|"orders"|"stock"|"finance"; active:boolean; created_at:string };
+export type MerchantPaymentStatus = { provider:string; provider_user_id:string|null; status:string; connected_at:string|null; last_sync_at:string|null };
 
-export type MerchantOrder = {
-  id: string;
-  order_number: string;
-  merchant_id: string;
-  customer_id: string | null;
-  customer_name: string;
-  customer_phone: string | null;
-  customer_email: string | null;
-  delivery_address: Record<string, string> | null;
-  delivery_type: "delivery" | "pickup";
-  status: OrderStatus;
-  payment_status: PaymentStatus;
-  payment_provider: string | null;
-  subtotal: number;
-  delivery_fee: number;
-  discount: number;
-  platform_fee: number;
-  total: number;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-  items?: MerchantOrderItem[];
-};
+const money=(v:unknown)=>Number(v??0);
+const emptyPlatform:PlatformSummary={gmvToday:0,platformRevenueToday:0,subscriptionRevenueMonth:0,commissionRevenueToday:0,activeMerchants:0,ordersToday:0,cancelledToday:0,averageTicket:0};
 
-export type MerchantOrderItem = {
-  id: string;
-  order_id: string;
-  product_id: string | null;
-  product_name: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-  image_url: string | null;
-};
+export async function loadMerchantMembership(){
+  if(!supabase)return null;
+  const {data:session}=await supabase.auth.getSession(); const userId=session.session?.user?.id; if(!userId)return null;
+  const {data,error}=await supabase.from("merchant_members").select("merchant_id, role, merchants(id,name,status,plan_code,delivery_enabled,pickup_enabled,min_order,opening_hours)").eq("user_id",userId).eq("active",true).limit(1).maybeSingle();
+  return error?null:data;
+}
+export async function loadMerchantOrders(merchantId:string,limit=80):Promise<MerchantOrder[]>{
+  if(!supabase)return[]; const {data,error}=await supabase.from("orders").select("*, order_items(*)").eq("merchant_id",merchantId).order("created_at",{ascending:false}).limit(limit); if(error||!data)return[];
+  return data.map((r:any)=>({...r,subtotal:money(r.subtotal),delivery_fee:money(r.delivery_fee),discount:money(r.discount),platform_fee:money(r.platform_fee),total:money(r.total),items:(r.order_items??[]).map((i:any)=>({...i,quantity:money(i.quantity),unit_price:money(i.unit_price),total_price:money(i.total_price)}))})) as MerchantOrder[];
+}
+export async function updateOrderStatus(orderId:string,status:OrderStatus){ if(!supabase)return{error:"Supabase indisponível"}; const {error}=await supabase.from("orders").update({status,updated_at:new Date().toISOString()}).eq("id",orderId); return{error:error?.message??null}; }
+export function subscribeMerchantOrders(merchantId:string,onChange:()=>void){ if(!supabase)return()=>undefined; const channel=supabase.channel(`merchant-orders-${merchantId}`).on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:`merchant_id=eq.${merchantId}`},onChange).subscribe(); return()=>{void supabase?.removeChannel(channel)}; }
+export async function loadMerchantSummary(merchantId:string,merchantName="Meu estabelecimento"):Promise<MerchantSummary>{ const orders=await loadMerchantOrders(merchantId,200),today=new Date().toISOString().slice(0,10),todayOrders=orders.filter(o=>o.created_at.slice(0,10)===today),completed=todayOrders.filter(o=>!["cancelled","pending_payment"].includes(o.status)),todayGross=completed.reduce((s,o)=>s+o.total,0); let lowStock=0;if(supabase){const {count}=await supabase.from("merchant_products").select("id",{count:"exact",head:true}).eq("merchant_id",merchantId).eq("active",true).lte("stock_quantity",5);lowStock=count??0} return{merchantId,merchantName,todayGross,todayOrders:todayOrders.length,pendingOrders:orders.filter(o=>["paid","accepted"].includes(o.status)).length,preparingOrders:orders.filter(o=>o.status==="preparing").length,deliveryOrders:orders.filter(o=>o.status==="out_for_delivery").length,averageTicket:completed.length?todayGross/completed.length:0,lowStock}; }
 
-export type MerchantSummary = {
-  merchantId: string;
-  merchantName: string;
-  todayGross: number;
-  todayOrders: number;
-  pendingOrders: number;
-  preparingOrders: number;
-  deliveryOrders: number;
-  averageTicket: number;
-  lowStock: number;
-};
-
-export type PlatformSummary = {
-  gmvToday: number;
-  platformRevenueToday: number;
-  subscriptionRevenueMonth: number;
-  commissionRevenueToday: number;
-  activeMerchants: number;
-  ordersToday: number;
-  cancelledToday: number;
-  averageTicket: number;
-};
-
-const money = (value: unknown) => Number(value ?? 0);
-
-export async function loadMerchantMembership() {
-  if (!supabase) return null;
-  const { data: session } = await supabase.auth.getSession();
-  const userId = session.session?.user?.id;
-  if (!userId) return null;
-
-  const { data, error } = await supabase
-    .from("merchant_members")
-    .select("merchant_id, role, merchants(id,name,status,plan_code)")
-    .eq("user_id", userId)
-    .eq("active", true)
-    .limit(1)
-    .maybeSingle();
-
-  if (error) return null;
-  return data;
+export async function loadPlatformSummary():Promise<PlatformSummary>{
+  if(!supabase)return emptyPlatform;
+  const {data,error}=await supabase.rpc("get_platform_dashboard_summary"); if(error||!data)return emptyPlatform;
+  const r:any=data; return{gmvToday:money(r.gmvToday),platformRevenueToday:money(r.platformRevenueToday),subscriptionRevenueMonth:money(r.subscriptionRevenueMonth),commissionRevenueToday:money(r.commissionRevenueToday),activeMerchants:Number(r.activeMerchants??0),ordersToday:Number(r.ordersToday??0),cancelledToday:Number(r.cancelledToday??0),averageTicket:money(r.averageTicket)};
 }
 
-export async function loadMerchantOrders(merchantId: string, limit = 80): Promise<MerchantOrder[]> {
-  if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("orders")
-    .select("*, order_items(*)")
-    .eq("merchant_id", merchantId)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+export async function loadMerchantProducts(merchantId:string):Promise<MerchantProduct[]>{ if(!supabase)return[];const {data}=await supabase.from("merchant_products").select("*").eq("merchant_id",merchantId).order("product_name");return(data??[]).map((r:any)=>({...r,price:money(r.price),promotional_price:r.promotional_price==null?null:money(r.promotional_price),stock_quantity:money(r.stock_quantity),low_stock_threshold:money(r.low_stock_threshold),max_per_order:r.max_per_order==null?null:money(r.max_per_order)})) as MerchantProduct[]; }
+export async function saveMerchantProduct(product:Partial<MerchantProduct>&{merchant_id:string;product_name:string}){ if(!supabase)return{error:"Supabase indisponível"};const row={...product,updated_at:new Date().toISOString()};const q=product.id?supabase.from("merchant_products").update(row).eq("id",product.id):supabase.from("merchant_products").insert(row);const {error}=await q;return{error:error?.message??null}; }
+export async function removeMerchantProduct(id:string){if(!supabase)return{error:"Supabase indisponível"};const {error}=await supabase.from("merchant_products").delete().eq("id",id);return{error:error?.message??null};}
 
-  if (error || !data) return [];
-  return data.map((row: any) => ({
-    ...row,
-    subtotal: money(row.subtotal),
-    delivery_fee: money(row.delivery_fee),
-    discount: money(row.discount),
-    platform_fee: money(row.platform_fee),
-    total: money(row.total),
-    items: (row.order_items ?? []).map((item: any) => ({
-      ...item,
-      quantity: money(item.quantity),
-      unit_price: money(item.unit_price),
-      total_price: money(item.total_price),
-    })),
-  })) as MerchantOrder[];
+export async function loadDeliveryZones(merchantId:string):Promise<DeliveryZone[]>{if(!supabase)return[];const {data}=await supabase.from("delivery_zones").select("*").eq("merchant_id",merchantId).order("name");return(data??[]).map((r:any)=>({...r,fee:money(r.fee),free_above:r.free_above==null?null:money(r.free_above),minimum_order:money(r.minimum_order)})) as DeliveryZone[];}
+export async function saveDeliveryZone(zone:Partial<DeliveryZone>&{merchant_id:string;name:string}){if(!supabase)return{error:"Supabase indisponível"};const q=zone.id?supabase.from("delivery_zones").update(zone).eq("id",zone.id):supabase.from("delivery_zones").insert(zone);const {error}=await q;return{error:error?.message??null};}
+export async function removeDeliveryZone(id:string){if(!supabase)return{error:"Supabase indisponível"};const {error}=await supabase.from("delivery_zones").delete().eq("id",id);return{error:error?.message??null};}
+
+export async function loadMerchantMembers(merchantId:string):Promise<MerchantMember[]>{if(!supabase)return[];const {data}=await supabase.from("merchant_members").select("*").eq("merchant_id",merchantId).order("created_at");return(data??[]) as MerchantMember[];}
+export async function updateMerchantMember(id:string,values:Partial<Pick<MerchantMember,"role"|"active">>){if(!supabase)return{error:"Supabase indisponível"};const {error}=await supabase.from("merchant_members").update(values).eq("id",id);return{error:error?.message??null};}
+
+export async function loadMerchantPaymentStatus(merchantId:string):Promise<MerchantPaymentStatus|null>{if(!supabase)return null;const {data,error}=await supabase.rpc("get_merchant_payment_connection_status",{_merchant_id:merchantId,_provider:"mercadopago"});if(error)return null;const row=Array.isArray(data)?data[0]:data;return row??null;}
+export async function getMercadoPagoConnectUrl(merchantId:string){if(!supabase)return{url:null,error:"Supabase indisponível"};const {data,error}=await supabase.functions.invoke("mercadopago-oauth",{body:{action:"authorize",merchantId}});if(data?.url&&typeof window!=="undefined")sessionStorage.setItem("pc_mp_merchant_id",merchantId);return{url:data?.url??null,error:error?.message??data?.error??null};}
+export async function startMercadoPagoCheckout(orderId:string){if(!supabase)return{url:null,error:"Supabase indisponível"};const {data,error}=await supabase.functions.invoke("mercadopago-checkout",{body:{orderId}});return{url:data?.checkoutUrl??null,error:error?.message??data?.error??null,preferenceId:data?.preferenceId??null};}
+
+export async function createMarketplaceOrder(input:{merchantId:string;deliveryType:"delivery"|"pickup";deliveryZoneId?:string|null;deliveryAddress?:Record<string,string>|null;customerName:string;customerPhone?:string;customerEmail?:string;items:Array<{merchant_product_id:string;quantity:number}>;notes?:string}){
+  if(!supabase)return{data:null,error:"Supabase indisponível"};
+  const {data,error}=await supabase.rpc("create_marketplace_order",{_merchant_id:input.merchantId,_delivery_type:input.deliveryType,_delivery_zone_id:input.deliveryZoneId??null,_delivery_address:input.deliveryAddress??null,_customer_name:input.customerName,_customer_phone:input.customerPhone??"",_customer_email:input.customerEmail??"",_items:input.items,_notes:input.notes??null});
+  return{data,error:error?.message??null};
 }
 
-export async function updateOrderStatus(orderId: string, status: OrderStatus) {
-  if (!supabase) return { error: "Supabase indisponível" };
-  const { error } = await supabase
-    .from("orders")
-    .update({ status, updated_at: new Date().toISOString() })
-    .eq("id", orderId);
-  return { error: error?.message ?? null };
-}
-
-export function subscribeMerchantOrders(merchantId: string, onChange: () => void) {
-  if (!supabase) return () => undefined;
-  const channel = supabase
-    .channel(`merchant-orders-${merchantId}`)
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "orders", filter: `merchant_id=eq.${merchantId}` },
-      onChange,
-    )
-    .subscribe();
-
-  return () => {
-    if (supabase) {
-      void supabase.removeChannel(channel);
-    }
-  };
-}
-
-export async function loadMerchantSummary(merchantId: string, merchantName = "Meu estabelecimento"): Promise<MerchantSummary> {
-  const orders = await loadMerchantOrders(merchantId, 200);
-  const today = new Date().toISOString().slice(0, 10);
-  const todayOrders = orders.filter(order => order.created_at.slice(0, 10) === today);
-  const completed = todayOrders.filter(order => !["cancelled", "pending_payment"].includes(order.status));
-  const todayGross = completed.reduce((sum, order) => sum + order.total, 0);
-
-  let lowStock = 0;
-  if (supabase) {
-    const { count } = await supabase
-      .from("merchant_products")
-      .select("id", { count: "exact", head: true })
-      .eq("merchant_id", merchantId)
-      .eq("active", true)
-      .lte("stock_quantity", 5);
-    lowStock = count ?? 0;
-  }
-
-  return {
-    merchantId,
-    merchantName,
-    todayGross,
-    todayOrders: todayOrders.length,
-    pendingOrders: orders.filter(order => ["paid", "accepted"].includes(order.status)).length,
-    preparingOrders: orders.filter(order => order.status === "preparing").length,
-    deliveryOrders: orders.filter(order => order.status === "out_for_delivery").length,
-    averageTicket: completed.length ? todayGross / completed.length : 0,
-    lowStock,
-  };
-}
-
-export async function loadPlatformSummary(): Promise<PlatformSummary> {
-  if (!supabase) {
-    return { gmvToday: 0, platformRevenueToday: 0, subscriptionRevenueMonth: 0, commissionRevenueToday: 0, activeMerchants: 0, ordersToday: 0, cancelledToday: 0, averageTicket: 0 };
-  }
-
-  const today = new Date();
-  const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
-
-  const [{ data: orders }, { count: activeMerchants }, { data: subscriptions }] = await Promise.all([
-    supabase.from("orders").select("total, platform_fee, status").gte("created_at", dayStart),
-    supabase.from("merchants").select("id", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("merchant_subscriptions").select("amount,status,paid_at").eq("status", "paid").gte("paid_at", monthStart),
-  ]);
-
-  const rows = orders ?? [];
-  const valid = rows.filter((order: any) => order.status !== "cancelled");
-  const gmvToday = valid.reduce((sum: number, order: any) => sum + money(order.total), 0);
-  const commissionRevenueToday = valid.reduce((sum: number, order: any) => sum + money(order.platform_fee), 0);
-  const subscriptionRevenueMonth = (subscriptions ?? []).reduce((sum: number, row: any) => sum + money(row.amount), 0);
-
-  return {
-    gmvToday,
-    platformRevenueToday: commissionRevenueToday,
-    subscriptionRevenueMonth,
-    commissionRevenueToday,
-    activeMerchants: activeMerchants ?? 0,
-    ordersToday: rows.length,
-    cancelledToday: rows.filter((order: any) => order.status === "cancelled").length,
-    averageTicket: valid.length ? gmvToday / valid.length : 0,
-  };
-}
-
-export async function getMercadoPagoConnectUrl(merchantId: string) {
-  if (!supabase) return { url: null, error: "Supabase indisponível" };
-  const { data, error } = await supabase.functions.invoke("mercadopago-oauth", {
-    body: { action: "authorize", merchantId },
-  });
-  if (data?.url && typeof window !== "undefined") {
-    sessionStorage.setItem("pc_mp_merchant_id", merchantId);
-  }
-  return { url: data?.url ?? null, error: error?.message ?? null };
-}
+export async function loadCustomerOrders():Promise<MerchantOrder[]>{if(!supabase)return[];const {data,error}=await supabase.from("orders").select("*,order_items(*)").order("created_at",{ascending:false}).limit(100);if(error||!data)return[];return data.map((r:any)=>({...r,subtotal:money(r.subtotal),delivery_fee:money(r.delivery_fee),discount:money(r.discount),platform_fee:money(r.platform_fee),total:money(r.total),items:(r.order_items??[]).map((i:any)=>({...i,quantity:money(i.quantity),unit_price:money(i.unit_price),total_price:money(i.total_price)}))})) as MerchantOrder[];}
+export async function loadOrderEvents(orderId:string){if(!supabase)return[];const {data}=await supabase.from("order_events").select("*").eq("order_id",orderId).order("created_at",{ascending:true});return data??[];}
