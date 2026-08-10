@@ -951,6 +951,17 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
               </div>
               <div className="visual-product-actions">
                 <button className="button button--primary" onClick={() => addBasket(p)}><Plus /> Cesta</button>
+                <button 
+                  className="icon-button" 
+                  title="Compartilhar produto"
+                  onClick={() => {
+                    const text = `Veja este produto no PreçoCerto Feijó: ${p.name} por ${money(p.minPrice)} em ${p.establishment}. Link: ${window.location.origin}/produto/${p.slug}`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                  }}
+                  style={{ color: 'var(--muted)', padding: '6px' }}
+                >
+                  <Share2 size={16} />
+                </button>
                 <a href={`/produto/${p.slug}`} className="button button--ghost button--small">Comparar</a>
               </div>
             </div>
@@ -1111,6 +1122,48 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     if (basketItems.length === 0) return null;
     return optimizeBasket(products, basketItems, mode, budget);
   }, [products, basketItems, mode, budget]);
+
+  // Handler para carregar snapshot da URL se presente
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const snapshotId = params.get("snapshot");
+    if (snapshotId && supabase) {
+      const loadSnapshot = async () => {
+        const { data, error } = await supabase
+          .from('smart_baskets')
+          .select('*')
+          .eq('id', snapshotId)
+          .single();
+        
+        if (data && !error) {
+          // Verifica expiração de 5 min se for compartilhado (usando created_at como base)
+          const createdAt = new Date(data.created_at).getTime();
+          const now = new Date().getTime();
+          const isExpired = (now - createdAt) > (5 * 60 * 1000);
+          
+          if (isExpired) {
+            setToast("Este link de compartilhamento expirou (5 min).", "warning");
+            return;
+          }
+
+          const items = data.items.map((i: any) => ({
+            productName: i.product_name,
+            category: i.category,
+            quantity: i.quantity,
+            unit: i.unit,
+            isEssential: i.is_essential
+          }));
+
+          setBasketItems(items);
+          setMode(data.optimization_mode);
+          setBudget(data.budget);
+          setStep(3);
+          setToast("Cesta compartilhada carregada com sucesso!");
+        }
+      };
+      loadSnapshot();
+    }
+  }, [supabase]);
 
   // Mantém a lista sincronizada com os produtos enviados à cesta em outras páginas.
   useEffect(() => {
@@ -1668,6 +1721,37 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                           </>
                         )}
                       </button>
+                      <button 
+                        className="button button--ghost button--small"
+                        style={{ width: '100%', marginTop: '0.25rem', border: '1px solid var(--border)' }}
+                        onClick={() => {
+                          const url = window.location.href;
+                          const text = `Confira minha cesta no PreçoCerto Feijó: ${url}`;
+                          window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                        }}
+                      >
+                        <Share2 size={14} /> Compartilhar Área
+                      </button>
+                      
+                      {user && (
+                        <button 
+                          className="button button--primary button--small"
+                          style={{ width: '100%', marginTop: '0.25rem', background: '#25D366', color: 'white', border: 'none' }}
+                          onClick={async () => {
+                            if (!user) return;
+                            try {
+                              const snapshot = await getBasketSnapshot(user.id, mode, budget, basketItems);
+                              const expiry = new Date(Date.now() + 5 * 60 * 1000).toLocaleTimeString();
+                              const text = `Minha Cesta Inteligente (Expira às ${expiry}):\nTotal: ${money(optimizationResult?.total || 0)}\n\nVeja a lista e salve no seu perfil: ${window.location.origin}/cesta?snapshot=${snapshot.id}`;
+                              window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                            } catch (err) {
+                              setToast("Erro ao gerar link de compartilhamento.");
+                            }
+                          }}
+                        >
+                          <Share2 size={14} /> Compartilhar Cesta (5 min)
+                        </button>
+                      )}
                     </div>
 
                   </div>
@@ -3099,7 +3183,27 @@ function EstablishmentPage({ store, products, addBasket }: { store?: StoreRow; p
     </section>
 
     <section className="shell store-catalog-section">
-      <div className="store-catalog-heading"><div><span className="eyebrow">Catálogo da loja</span><h2>Encontre um produto rapidamente</h2><p>Busque por nome, marca, categoria ou código de barras.</p></div><span className="store-result-count"><b>{visibleProducts.length}</b> de {storeProducts.length} produtos</span></div>
+      <div className="store-catalog-heading">
+        <div style={{ flex: 1 }}>
+          <span className="eyebrow">Catálogo da loja</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2>Encontre um produto rapidamente</h2>
+              <p>Busque por nome, marca, categoria ou código de barras.</p>
+            </div>
+            <button 
+              className="button button--outline button--small"
+              onClick={() => {
+                const text = `Confira os preços de ${store.name} no PreçoCerto Feijó: ${window.location.href}`;
+                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+              }}
+            >
+              <Share2 size={16} /> Compartilhar Loja
+            </button>
+          </div>
+        </div>
+        <span className="store-result-count"><b>{visibleProducts.length}</b> de {storeProducts.length} produtos</span>
+      </div>
       <div className="store-search-panel">
         <label className="store-search"><Search/><input value={search} onChange={event => setSearch(event.target.value)} placeholder={`Buscar em ${store.name}…`} aria-label={`Buscar produtos em ${store.name}`} />{search && <button onClick={() => setSearch("")} aria-label="Limpar busca"><X/></button>}</label>
         <label className="store-sort"><SlidersHorizontal/><span className="sr-only">Ordenar produtos</span><select value={sort} onChange={event => setSort(event.target.value as typeof sort)}><option value="featured">Mais recentes</option><option value="lowest">Menor preço</option><option value="name">Ordem alfabética</option></select></label>
