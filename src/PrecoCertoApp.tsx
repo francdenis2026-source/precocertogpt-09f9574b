@@ -4495,8 +4495,8 @@ export default function PrecoCertoApp() {
     }
   };
 
-  const handleUserLogin = () => {
-    const newUser = { name: "Usuário PreçoCerto" };
+  const handleUserLogin = (userData?: any) => {
+    const newUser = userData || { name: "Usuário PreçoCerto" };
     setUser(newUser);
     localStorage.setItem("precocerto:user", JSON.stringify(newUser));
     try { setFavorites(JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]")); }
