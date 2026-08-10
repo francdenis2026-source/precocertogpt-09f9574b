@@ -3823,7 +3823,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [activeBrand, setActiveBrand] = useState("all");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [updateRecency, setUpdateRecency] = useState("all"); // 'all', '7d', '24h'
-  const [sortBy, setSortBy] = useState<"price" | "unit" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
+  const [sortBy, setSortBy] = useState<"price" | "avg_price" | "max_price" | "unit" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
   const [isSearching, setIsSearching] = useState(false);
 
   // Usando evento global para unificar comportamento do modal
