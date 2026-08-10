@@ -16,6 +16,7 @@ import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MerchantDashboard } from "./components/MerchantDashboard";
 import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
+import { MerchantBusinessSetupShortcut } from "./components/MerchantBusinessSetupShortcut";
 import { MerchantOnboardingPage } from "./components/MerchantOnboardingPage";
 import { PlatformAdminDashboard } from "./components/PlatformAdminDashboard";
 import { AdminMerchantManagement } from "./components/AdminMerchantManagement";
@@ -38,6 +39,7 @@ export default function App() {
       <FooterCompactUx />
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
+      <MerchantBusinessSetupShortcut />
       <Routes>
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
         <Route path="/painel-lojista" element={<MerchantDashboard />} />
