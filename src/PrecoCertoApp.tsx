@@ -3436,7 +3436,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
               <h2>Histórico de Ações Recentes</h2>
             </div>
             <div className="price-table-card">
-              {JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]").slice(0, 5).map((a: any, i: number) => (
+              {(JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]") as any[]).slice(0, 5).map((a: any, i: number) => (
                 <div key={i} className="price-row" style={{ padding: '0.75rem 1rem' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                      {a.action === 'favorite' ? <Heart size={14} color="var(--red)"/> : <Bell size={14} color="var(--blue)"/>}
