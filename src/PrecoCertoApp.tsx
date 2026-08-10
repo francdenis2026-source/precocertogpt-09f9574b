@@ -2077,6 +2077,20 @@ function UserBasketHistory({ user, products }: { user: any; products: Product[] 
     }
   };
 
+  const handleRevoke = async (id: string) => {
+    if (!supabase) return;
+    try {
+      const { error } = await supabase.from('smart_baskets').update({ status: 'revoked' }).eq('id', id);
+      if (error) throw error;
+      setBaskets(prev => prev.map(b => b.id === id ? { ...b, status: 'revoked' } : b));
+      if (typeof (window as any).setGlobalToast === 'function') {
+        (window as any).setGlobalToast("Link de compartilhamento revogado.", "success");
+      }
+    } catch (err: any) {
+      alert("Erro ao revogar: " + err.message);
+    }
+  };
+
   const handleRename = async (id: string) => {
     if (!newName.trim() || !supabase) return;
     try {
