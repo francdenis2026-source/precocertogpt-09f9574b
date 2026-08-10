@@ -13,7 +13,7 @@ const steps: Array<{ status: OrderStatus; label: string; icon: any }> = [
   { status: "out_for_delivery", label: "Saiu para entrega", icon: Truck },
   { status: "delivered", label: "Entregue", icon: CheckCircle2 },
 ];
-const rank: Record<OrderStatus, number> = { pending_payment: 0, paid: 1, accepted: 2, preparing: 3, ready: 4, out_for_delivery: 5, delivered: 6, cancelled: -1 };
+const rank: Record<OrderStatus, number> = { pending_payment: 0, pending_review: 0.5, paid: 1, accepted: 2, preparing: 3, ready: 4, out_for_delivery: 5, delivered: 6, cancelled: -1 };
 
 export function CustomerOrders() {
   const [orders, setOrders] = useState<MerchantOrder[]>([]);
