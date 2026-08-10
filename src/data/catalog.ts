@@ -1,12 +1,14 @@
 // Catálogo PreçoCerto — fonte única de dados (antes servido pelo D1 via /api/catalog).
 // Mantém a mesma forma de dados consumida pela interface, agregando preços por produto.
 
+export type ProductOffer = { establishmentId: string | number; establishmentSlug: string; establishment: string; neighborhood: string; storeColor: string; value: number; capturedAt: string; previousPrice?: number };
+
 export type Product = {
   id: string | number; slug: string; name: string; brand: string; category: string; size: string;
   unit: string; barcode?: string; minPrice: number; avgPrice: number; maxPrice: number;
   storeCount: number; establishmentId: string | number; establishmentSlug: string; establishment: string;
   neighborhood: string; storeColor: string; capturedAt: string; previousPrice?: number;
-  image_url?: string; source?: string; updated_at?: string; price_history?: { date: string; value: number }[];
+  image_url?: string; source?: string; updated_at?: string; price_history?: { date: string; value: number }[]; offers?: ProductOffer[];
 };
 
 

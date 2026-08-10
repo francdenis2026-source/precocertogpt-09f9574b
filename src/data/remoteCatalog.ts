@@ -131,8 +131,15 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
         
         if (!rows.length) return null;
 
-        const values = rows.map(row => toNumber(row.value));
-        const best = rows.reduce((lowest, row) =>
+        // Um produto pode ter histórico em várias lojas. Para a comparação
+        // atual usamos somente o registro mais recente de cada estabelecimento.
+        const latestByStore = Array.from(rows.reduce((map, row) => {
+          const current = map.get(String(row.establishment_id));
+          if (!current || Date.parse(row.captured_at || "") >= Date.parse(current.captured_at || "")) map.set(String(row.establishment_id), row);
+          return map;
+        }, new Map<string, PriceRow>()).values());
+        const values = latestByStore.map(row => toNumber(row.value));
+        const best = latestByStore.reduce((lowest, row) =>
           toNumber(row.value) < toNumber(lowest.value) ? row : lowest,
         );
         const store = storeRows.find(item => String(item.id) === String(best.establishment_id));
@@ -152,7 +159,7 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
           minPrice: round(Math.min(...values)),
           avgPrice: round(values.reduce((total, value) => total + value, 0) / values.length),
           maxPrice: round(Math.max(...values)),
-          storeCount: new Set(rows.map(row => row.establishment_id)).size,
+          storeCount: latestByStore.length,
           establishmentId: store.id,
           establishmentSlug: String(store.id),
           establishment: store.name ?? "Estabelecimento",
@@ -163,6 +170,20 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
           image_url: product.image_url || undefined,
           source: "Coleta Manual",
           updated_at: best.captured_at || undefined,
+          offers: latestByStore.map(row => {
+            const offerStore = storeRows.find(item => String(item.id) === String(row.establishment_id));
+            const offerPrevious = toNumber(row.previous_value);
+            return {
+              establishmentId: row.establishment_id,
+              establishmentSlug: String(row.establishment_id),
+              establishment: offerStore?.name ?? "Estabelecimento",
+              neighborhood: offerStore?.neighborhood ?? "—",
+              storeColor: offerStore?.brand_color ?? "#1473E6",
+              value: round(toNumber(row.value)),
+              capturedAt: row.captured_at ?? new Date().toISOString(),
+              previousPrice: Number.isFinite(offerPrevious) ? round(offerPrevious) : undefined,
+            };
+          }).sort((a, b) => a.value - b.value),
           price_history: rows
             .map(r => ({ date: r.captured_at || new Date().toISOString(), value: toNumber(r.value) }))
             .sort((a, b) => Date.parse(a.date) - Date.parse(b.date))

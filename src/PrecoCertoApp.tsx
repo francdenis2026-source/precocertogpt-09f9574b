@@ -14,7 +14,7 @@ import { fetchCatalog } from "./data/remoteCatalog";
 import { supabase } from "./lib/supabase";
 import { isEnabled } from "./config/features";
 import { freshnessLabels, priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
-import { searchProducts } from "./lib/productSearch";
+import { normalizeSearchText, searchProducts } from "./lib/productSearch";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
 import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
@@ -481,6 +481,7 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
   const navLinks = [
     { label: "Comparar preços", href: "/buscar" },
     { label: "Ofertas", href: "/melhores-precos" },
+    { label: "Açougues", href: "/acougues" },
     { label: "Cesta inteligente", href: "/cesta-basica" },
     { label: "Estabelecimentos", href: "/estabelecimentos" },
     { label: "Planos", href: "/planos" }
@@ -560,6 +561,7 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
           </div>
           <nav aria-label="Links rápidos">
             <a href="/buscar" onClick={() => setOpen(false)}>Comparar preços</a>
+            <a href="/acougues" onClick={() => setOpen(false)}>Açougues e carnes</a>
             <a href="/cesta-basica" onClick={() => setOpen(false)}>Cesta inteligente</a>
             <a href="/estabelecimentos" onClick={() => setOpen(false)}>Estabelecimentos</a>
             <a href="/melhores-precos" onClick={() => setOpen(false)}>Ofertas de hoje</a>
@@ -578,7 +580,7 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
 }
 
 function Footer() {
-  return <footer className="site-footer"><div className="shell footer-grid"><div><Brand inverse /><p>Compare preços reais no comércio de Feijó e transforme cada compra em economia.</p><span className="footer-place"><MapPin size={15} /> Feijó • Acre • Brasil</span></div><div><h3>Descobrir</h3><a href="/buscar">Comparar preços</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/farmacias">Farmácias de plantão</a></div><div><h3>PreçoCerto</h3><a href="/#como-funciona">Como funciona</a><a href="/lojista">Para empresas</a><a href="/colaborar">Colaborar</a><a href="/fale-conosco">Fale conosco</a></div><div><h3>Conta</h3><a href="/login">Entrar</a><a href="/cadastro">Criar conta</a><a href="/planos">Planos</a><a href="/admin">Área Administrativa</a></div></div><div className="shell footer-bottom"><span>SKAES NET TECHNOLOGY • FRANC D’NIS</span><span>© 2026 PreçoCerto. Todos os direitos reservados.</span></div></footer>;
+  return <footer className="site-footer"><div className="shell footer-grid"><div><Brand inverse /><p>Compare preços reais no comércio de Feijó e transforme cada compra em economia.</p><span className="footer-place"><MapPin size={15} /> Feijó • Acre • Brasil</span></div><div><h3>Descobrir</h3><a href="/buscar">Comparar preços</a><a href="/acougues">Açougues e carnes</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/farmacias">Farmácias de plantão</a></div><div><h3>PreçoCerto</h3><a href="/#como-funciona">Como funciona</a><a href="/lojista">Para empresas</a><a href="/colaborar">Colaborar</a><a href="/fale-conosco">Fale conosco</a></div><div><h3>Conta</h3><a href="/login">Entrar</a><a href="/cadastro">Criar conta</a><a href="/planos">Planos</a><a href="/admin">Área Administrativa</a></div></div><div className="shell footer-bottom"><span>SKAES NET TECHNOLOGY • FRANC D’NIS</span><span>© 2026 PreçoCerto. Todos os direitos reservados.</span></div></footer>;
 }
 
 function MobileBar({ basketCount }: { basketCount: number }) {
@@ -643,7 +645,10 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
     event.preventDefault(); 
     const queryStr = localValue.trim(); 
     setValue(queryStr); // Aplica imediatamente no submit
-    window.location.href = queryStr ? `/buscar?q=${encodeURIComponent(queryStr)}` : "/buscar"; 
+    const butcherIntent = queryStr && (isButcherQuery(queryStr) || searchProducts(products, queryStr).some(isButcherProduct));
+    window.location.href = queryStr
+      ? `${butcherIntent ? "/acougues" : "/buscar"}?q=${encodeURIComponent(queryStr)}`
+      : "/buscar";
   }
 
   return <div className={`search-combo ${hero ? "search-combo--hero" : ""}`}>
@@ -680,7 +685,7 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
             <a 
               role="option" 
               aria-selected="false" 
-              href={`/buscar?q=${encodeURIComponent(p.name)}`} 
+              href={`${isButcherProduct(p) ? "/acougues" : "/buscar"}?q=${encodeURIComponent(p.name)}`}
               key={p.id}
               className="search-result-item"
             >
@@ -846,7 +851,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
       </div>
     </section>
     <div className="shell metrics-float" style={{ marginTop: '0', transform: 'translateY(-20px)' }} aria-label="Métricas da plataforma"><div><span className="metric-icon"><Store /></span><strong>{count(metrics.stores)}</strong><span>estabelecimentos cadastrados</span></div><div><span className="metric-icon"><PackageSearch /></span><strong>{count(metrics.products)}</strong><span>itens cadastrados</span></div><div><span className="metric-icon"><Activity /></span><strong>{count(metrics.prices)}</strong><span>preços registrados</span></div><small><span /> Base consolidada até 7 de agosto de 2026</small></div>
-    <nav className="shell category-rail" aria-label="Atalhos de compra"><span>Explore por intenção</span><a href="/categoria/mercearia"><PackageSearch /> Mercearia <ArrowRight /></a><a href="/categoria/acougue"><TrendingDown /> Ofertas do dia <ArrowRight /></a><a href="/cesta-basica"><ShoppingBasket /> Cesta essencial <ArrowRight /></a><a href="/estabelecimentos"><Store /> Mercados locais <ArrowRight /></a></nav>
+    <nav className="shell category-rail" aria-label="Atalhos de compra"><span>Explore por intenção</span><a href="/categoria/mercearia"><PackageSearch /> Mercearia <ArrowRight /></a><a href="/acougues"><Store /> Açougues e carnes <ArrowRight /></a><a href="/cesta-basica"><ShoppingBasket /> Cesta essencial <ArrowRight /></a><a href="/estabelecimentos"><Store /> Mercados locais <ArrowRight /></a></nav>
     <section className="section shell featured-products">
       <div className="section-heading">
         <div>
@@ -1625,9 +1630,9 @@ type PlanAudience = "consumer" | "merchant" | "sponsor";
 
 const planCatalog: Record<PlanAudience, Array<{name:string; eyebrow:string; price:number | null; period:string; description:string; features:string[]; cta:string; href:string; featured?:boolean}>> = {
   consumer: [
-    { name:"Essencial", eyebrow:"Grátis para começar", price:0, period:"para sempre", description:"Para pesquisar preços locais e planejar compras sem pagar mensalidade.", features:["Busca ilimitada no catálogo público","Comparação entre estabelecimentos","Cesta de compras no dispositivo","Acesso às ofertas verificadas"], cta:"Criar conta grátis", href:"/cadastro" },
-    { name:"Consulta Inteligente", eyebrow:"Pague somente quando usar", price:4.9, period:"por consulta", description:"Para quem não quer assinatura e precisa de uma cesta otimizada em momentos específicos.", features:["1 análise completa de cesta","Sugestão por orçamento disponível","Comparação entre várias lojas","Resumo pronto para compartilhar"], cta:"Solicitar acesso", href:"/fale-conosco", featured:true },
-    { name:"Economia+", eyebrow:"Uso frequente", price:19.9, period:"por mês", description:"Para famílias que comparam preços toda semana e querem acompanhar sua economia.", features:["Cestas inteligentes recorrentes","Alertas de queda de preço","Histórico de compras e economia","Exportação de listas e cestas"], cta:"Entrar na lista de interesse", href:"/fale-conosco" },
+    { name:"Essencial", eyebrow:"Grátis para sempre", price:0, period:"sem mensalidade", description:"Toda a base necessária para pesquisar e comparar preços locais com transparência.", features:["Busca ilimitada no catálogo público","Comparação entre estabelecimentos","Cesta de compras no dispositivo","Ofertas e preços verificados"], cta:"Criar conta grátis", href:"/cadastro" },
+    { name:"Certo IA Avulso", eyebrow:"Inteligência sob demanda", price:4.9, period:"por consulta", description:"Uma análise completa do Certo IA quando você precisar, sem assumir mensalidade.", features:["1 conversa orientada pelo Certo IA","Cesta otimizada para seu orçamento","Trocas econômicas entre produtos","Plano de compra pronto para compartilhar"], cta:"Quero testar no lançamento", href:"/fale-conosco" },
+    { name:"Economia+", eyebrow:"Melhor para famílias", price:19.9, period:"por mês", description:"Acompanhamento contínuo para transformar comparação de preços em economia recorrente.", features:["40 consultas ao Certo IA por mês","Cestas e rotas de compra inteligentes","Alertas de queda de preço","Histórico de economia e listas exportáveis"], cta:"Entrar na lista prioritária", href:"/fale-conosco", featured:true },
   ],
   merchant: [
     { name:"Presença Local", eyebrow:"Perfil comercial", price:59.9, period:"por mês", description:"Para manter informações, catálogo e preços organizados no PreçoCerto.", features:["Página verificada do estabelecimento","Gestão de catálogo e preços","Logomarca e dados comerciais","Relatório mensal de visualizações"], cta:"Cadastrar meu comércio", href:"/fale-conosco" },
@@ -1646,20 +1651,27 @@ function PlansPage() {
   const plans = planCatalog[audience];
   const faqs = [
     ["Ainda posso usar o PreçoCerto gratuitamente?", "Sim. A pesquisa pública, a comparação de preços e a cesta no dispositivo permanecem no plano Essencial."],
-    ["Os planos pagos já fazem cobrança automática?", "Ainda não. Os valores apresentam a proposta comercial; o cadastro de interesse é confirmado pela equipe antes de qualquer cobrança."],
+    ["O que é o Certo IA?", "É o assistente de economia do PreçoCerto. Ele usará os preços cadastrados para comparar opções, sugerir substituições e organizar uma compra dentro do seu orçamento."],
+    ["Quem poderá usar o Certo IA?", "Somente usuários autenticados com um plano pago ativo ou uma consulta avulsa válida. A autorização e o limite de uso serão verificados no servidor."],
+    ["O Certo IA já está disponível?", "Ainda está em implantação. Você pode entrar na lista prioritária, mas nenhuma cobrança será feita antes da ativação e da sua confirmação."],
     ["Um patrocinador pode alterar o ranking de preços?", "Não. Conteúdo patrocinado será identificado e nunca substituirá o ranking baseado nos preços cadastrados."],
     ["O comerciante precisa pagar para aparecer?", "Não. Estabelecimentos podem continuar no catálogo público. Os planos comerciais adicionam gestão, destaque identificado e métricas."],
   ];
 
   return <div className="plans-page">
-    <section className="plans-hero"><div className="shell plans-hero__inner"><div><span className="eyebrow eyebrow--light">Planos PreçoCerto</span><h1>Economia para quem compra.<br/><span>Crescimento para quem vende.</span></h1><p>Escolha uma forma simples de usar a plataforma. Sem esconder preços, sem misturar publicidade com o ranking e sem obrigar ninguém a assinar.</p><div className="plans-trust"><span><ShieldCheck/> Preços transparentes</span><span><CheckCircle2/> Plano gratuito permanente</span><span><TrendingDown/> Feito para a realidade local</span></div></div><aside><CircleDollarSign/><strong>Comece sem pagar</strong><p>Pesquise, compare e monte sua cesta. Recursos avançados entram apenas quando realmente fizerem sentido para você.</p><a href="#escolher-plano">Ver opções <ArrowRight/></a></aside></div></section>
+    <section className="plans-hero"><div className="shell plans-hero__inner"><div><span className="eyebrow eyebrow--light">Planos PreçoCerto</span><h1>Economize com dados.<br/><span>Decida com inteligência.</span></h1><p>Compare gratuitamente ou desbloqueie uma orientação personalizada para planejar cada compra. Preços claros, limites de uso definidos e publicidade sempre identificada.</p><div className="plans-trust"><span><ShieldCheck/> Preços transparentes</span><span><CheckCircle2/> Plano gratuito permanente</span><span><Sparkles/> Certo IA nos planos pagos</span></div></div><aside><Sparkles/><span className="plans-hero__status">Em implantação</span><strong>Conheça o Certo IA</strong><p>Seu futuro assistente de economia: analisa a cesta, respeita seu orçamento e explica onde vale a pena comprar.</p><a href="#certo-ia">Descobrir vantagens <ArrowRight/></a></aside></div></section>
 
     <main className="shell plans-content" id="escolher-plano">
+      <section className="ai-agent-showcase" id="certo-ia">
+        <div className="ai-agent-copy"><span className="eyebrow">Exclusivo para acesso pago</span><h2>Certo IA, seu assistente pessoal de economia</h2><p>Em vez de entregar uma lista genérica, o Certo IA será conectado ao catálogo do PreçoCerto para transformar preços locais em uma recomendação prática e fácil de entender.</p><div className="ai-agent-benefits"><article><ShoppingBasket/><div><b>Compra dentro do orçamento</b><span>Informe sua lista e quanto pode gastar.</span></div></article><article><TrendingDown/><div><b>Trocas que reduzem o total</b><span>Compare marcas, tamanhos e estabelecimentos.</span></div></article><article><MapPin/><div><b>Rota de compra organizada</b><span>Veja onde encontrar cada item sem complicação.</span></div></article><article><ShieldCheck/><div><b>Respostas com preços reais</b><span>O cálculo vem do catálogo, não de valores inventados.</span></div></article></div><div className="ai-agent-access"><CheckCircle2/><span><b>Acesso protegido:</b> assinatura ativa ou passe avulso, com limite de consultas visível para o usuário.</span></div></div>
+        <aside className="ai-agent-preview" aria-label="Exemplo de conversa com o Certo IA"><header><span><Sparkles/></span><div><b>Certo IA</b><small><i/> Assistente do PreçoCerto</small></div><em>Prévia</em></header><div className="ai-message ai-message--user">Tenho R$ 120 para arroz, feijão, carne e itens de café. Como economizo?</div><div className="ai-message ai-message--assistant"><b>Encontrei uma combinação para o seu orçamento.</b><p>Posso organizar os itens pelos menores preços disponíveis e sugerir substituições antes de fechar sua cesta.</p><div><span>Orçamento respeitado</span><strong>Economia estimada*</strong></div></div><small className="ai-preview-note">*A estimativa final dependerá dos preços disponíveis e da validade de cada oferta.</small></aside>
+      </section>
+
       <header className="plans-heading"><div><span className="eyebrow">Escolha seu objetivo</span><h2>Um modelo justo para cada público</h2><p>Alterne entre consumidor, comércio local e patrocínio institucional.</p></div><div className="plans-audience" role="tablist" aria-label="Tipo de plano"><button role="tab" aria-selected={audience==="consumer"} className={audience==="consumer"?"active":""} onClick={()=>setAudience("consumer")}><UserRound/> Para consumidores</button><button role="tab" aria-selected={audience==="merchant"} className={audience==="merchant"?"active":""} onClick={()=>setAudience("merchant")}><Store/> Para estabelecimentos</button><button role="tab" aria-selected={audience==="sponsor"} className={audience==="sponsor"?"active":""} onClick={()=>setAudience("sponsor")}><Sparkles/> Patrocínios</button></div></header>
 
       <div className={`professional-plan-grid professional-plan-grid--${plans.length}`}>{plans.map(plan=><article className={`professional-plan-card ${plan.featured?"featured":""}`} key={plan.name}>{plan.featured&&<span className="recommended"><Sparkles/> Melhor escolha</span>}<span className="plan-eyebrow">{plan.eyebrow}</span><h3>{plan.name}</h3><p>{plan.description}</p><div className="professional-plan-price">{plan.price===null?<strong>Personalizado</strong>:<><small>A partir de</small><strong>{money(plan.price)}</strong></>}<span>{plan.period}</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={plan.href}>{plan.cta}<ArrowRight/></a><div className="plan-divider"/><b>O que está incluído</b><ul>{plan.features.map(feature=><li key={feature}><CheckCircle2/> {feature}</li>)}</ul></article>)}</div>
 
-      <section className="plans-principles"><div><span className="eyebrow">Compromissos da plataforma</span><h2>Monetização sem perder a confiança</h2></div><div className="principle-grid"><article><TrendingDown/><h3>Ranking independente</h3><p>O menor preço continua sendo definido pelos dados, nunca por pagamento.</p></article><article><Receipt/><h3>Uso avulso</h3><p>Quem não quiser assinatura poderá pagar apenas por uma consulta inteligente.</p></article><article><Store/><h3>Comércio valorizado</h3><p>Planos profissionais melhoram presença e gestão sem apagar estabelecimentos gratuitos.</p></article><article><ShieldCheck/><h3>Publicidade identificada</h3><p>Toda ação patrocinada aparece com sinalização clara para o consumidor.</p></article></div></section>
+      <section className="plans-principles"><div><span className="eyebrow">Compromissos da plataforma</span><h2>Receita sustentável, confiança preservada</h2><p className="principles-intro">Assinaturas, consultas avulsas e serviços para o comércio financiam a operação sem vender a posição no ranking.</p></div><div className="principle-grid"><article><TrendingDown/><h3>Ranking independente</h3><p>O menor preço continua sendo definido pelos dados, nunca por pagamento.</p></article><article><Receipt/><h3>Uso avulso</h3><p>Quem não quiser assinatura poderá comprar apenas uma consulta do Certo IA.</p></article><article><Store/><h3>Comércio valorizado</h3><p>Planos profissionais geram receita com gestão, presença e métricas úteis.</p></article><article><ShieldCheck/><h3>Publicidade identificada</h3><p>Patrocínios ampliam a receita, mas aparecem sempre com sinalização clara.</p></article></div></section>
 
       <section className="plans-faq"><div><span className="eyebrow">Dúvidas frequentes</span><h2>Antes de escolher</h2><p>Respostas diretas sobre acesso, cobrança e transparência.</p></div><div>{faqs.map(([question,answer],index)=><article className={openFaq===index?"open":""} key={question}><button onClick={()=>setOpenFaq(openFaq===index?null:index)} aria-expanded={openFaq===index}><span>{question}</span><ChevronDown/></button>{openFaq===index&&<p>{answer}</p>}</article>)}</div></section>
 
@@ -2426,7 +2438,11 @@ function EstablishmentPage({ store, products, addBasket }: { store?: StoreRow; p
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Todas");
   const [sort, setSort] = useState<"featured" | "lowest" | "name">("featured");
-  const storeProducts = useMemo(() => products.filter(product => String(product.establishmentId) === String(store?.id)), [products, store?.id]);
+  const storeProducts = useMemo(() => products.flatMap(product => {
+    const offer = product.offers?.find(item => String(item.establishmentId) === String(store?.id));
+    if (offer) return [{ ...product, minPrice: offer.value, establishmentId: offer.establishmentId, establishmentSlug: offer.establishmentSlug, establishment: offer.establishment, neighborhood: offer.neighborhood, storeColor: offer.storeColor, capturedAt: offer.capturedAt, previousPrice: offer.previousPrice }];
+    return String(product.establishmentId) === String(store?.id) ? [product] : [];
+  }), [products, store?.id]);
   const categories = useMemo(() => {
     const counts = new Map<string, number>();
     storeProducts.forEach(product => counts.set(product.category || "Outros", (counts.get(product.category || "Outros") ?? 0) + 1));
@@ -2485,6 +2501,68 @@ function EstablishmentPage({ store, products, addBasket }: { store?: StoreRow; p
         </article>)}
       </div> : <div className="store-empty-state"><Search/><h3>Nenhum produto encontrado</h3><p>Tente outro nome ou selecione uma categoria diferente.</p><button className="button button--outline" onClick={() => { setSearch(""); setCategory("Todas"); }}>Limpar filtros</button></div>}
     </section>
+  </main>;
+}
+
+const BUTCHER_TERMS = [
+  "carne", "carnes", "acougue", "bisteca", "alcatra", "patinho", "picanha",
+  "costela", "coxao", "file bovino", "figado", "fraldinha", "linguica",
+  "frango", "coracao bovino", "rabo bovino", "canela bovina", "pescoço bovino",
+];
+
+function isButcherProduct(product: Product) {
+  const text = normalizeSearchText(`${product.name} ${product.category}`);
+  const packagedFood = ["conserva", "macarrao", "noodles", "sopao", "molho"].some(term => text.includes(term));
+  return !packagedFood && BUTCHER_TERMS.some(term => text.includes(normalizeSearchText(term)));
+}
+
+function isButcherQuery(query: string) {
+  const normalized = normalizeSearchText(query);
+  return ["acougue", "acougues", "carne", "carnes", ...BUTCHER_TERMS.slice(4)].some(term => normalized.includes(normalizeSearchText(term)));
+}
+
+function isGenericButcherQuery(query: string) {
+  return ["acougue", "acougues", "carne", "carnes"].includes(normalizeSearchText(query));
+}
+
+function ButchersPage({ products, stores, addBasket }: PageProps) {
+  const [search, setSearch] = useState(() => {
+    const initial = new URLSearchParams(window.location.search).get("q") ?? "";
+    return isGenericButcherQuery(initial) ? "" : initial;
+  });
+  const butcherProducts = useMemo(() => products.filter(isButcherProduct), [products]);
+  const visibleProducts = useMemo(
+    () => searchProducts(butcherProducts, search).sort((a, b) => search ? 0 : a.minPrice - b.minPrice),
+    [butcherProducts, search],
+  );
+  const butcherStoreIds = new Set(butcherProducts.flatMap(product => product.offers?.map(offer => String(offer.establishmentId)) ?? [String(product.establishmentId)]));
+  const butcherStores = stores.filter(store => {
+    const name = normalizeSearchText(store.name);
+    return butcherStoreIds.has(String(store.id)) || name.includes("carne") || name.includes("acougue") || name.includes("frigorifico");
+  });
+
+  return <main className="butcher-page">
+    <section className="butcher-hero">
+      <div className="shell butcher-hero__inner">
+        <div><span className="eyebrow eyebrow--gold">Guia local de carnes</span><h1>Açougues e carnes em Feijó</h1><p>Encontre cortes, frangos e linguiças com preço verificado. Os resultados reúnem açougues e setores de carnes dos estabelecimentos locais.</p></div>
+        <div className="butcher-hero__stats"><span><Store/><b>{butcherStores.length}</b><small>estabelecimentos com preços</small></span><span><PackageSearch/><b>{butcherProducts.length}</b><small>produtos de açougue</small></span></div>
+      </div>
+    </section>
+
+    <div className="shell butcher-content">
+      <section className="butcher-stores">
+        <div className="section-heading compact"><div><span className="eyebrow">Onde comprar</span><h2>Açougues e setores de carnes</h2><p>Abra o estabelecimento para consultar os produtos monitorados.</p></div></div>
+        <div className="butcher-store-list">{butcherStores.map(store => <a href={`/estabelecimento/${store.slug}`} key={store.id}><span className="store-logo" style={{background:store.color}}>{store.name.split(/\s+/).slice(0,2).map(word => word[0]).join("")}</span><span><b>{store.name}</b><small>{store.neighborhood} · {store.products} produtos cadastrados</small></span><ArrowRight/></a>)}</div>
+      </section>
+
+      <section className="butcher-catalog">
+        <div className="butcher-catalog__head"><div><span className="eyebrow">Comparação de preços</span><h2>Carnes disponíveis</h2><p>{visibleProducts.length} resultados organizados pelo menor preço.</p></div><label><Search/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar picanha, frango, costela…" aria-label="Buscar carnes"/>{search && <button onClick={() => setSearch("")} aria-label="Limpar busca"><X/></button>}</label></div>
+        {visibleProducts.length ? <div className="butcher-product-grid">{visibleProducts.map(product => <article key={product.id}>
+          <a className="butcher-product-image" href={`/produto/${product.slug}`}><ProductImage product={product}/><span className="verified-chip"><ShieldCheck/> Verificado</span></a>
+          <div className="butcher-product-body"><span className="category-tag">{product.category} · {product.size}</span><a href={`/produto/${product.slug}`}><h3>{product.name}</h3></a><a className="butcher-product-store" href={`/estabelecimento/${product.establishmentSlug}`}><Store/><span><b>{product.establishment}</b><small>{product.neighborhood}</small></span></a><div className="butcher-product-price"><span><small>Menor preço</small><strong>{money(product.minPrice)}</strong></span><span><small>Média local</small><b>{money(product.avgPrice)}</b></span></div><div className="butcher-product-actions"><button className="button button--primary" onClick={() => addBasket(product)}><Plus/> Adicionar</button><a className="button button--outline" href={`/produto/${product.slug}`}>Comparar</a></div></div>
+        </article>)}</div> : <div className="no-results"><PackageSearch/><h2>Nenhuma carne encontrada</h2><p>Tente outro corte ou limpe a pesquisa.</p><button className="button button--outline" onClick={() => setSearch("")}>Limpar pesquisa</button></div>}
+      </section>
+    </div>
   </main>;
 }
 
@@ -3753,6 +3831,7 @@ export default function PrecoCertoApp() {
   let page:ReactNode;
   if(pathname==="/") page=<HomePage {...props}/>;
   else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
+  else if(pathname==="/acougues"||pathname==="/categoria/acougue") page=<ButchersPage {...props}/>;
   else if(pathname==="/planos" && isEnabled("consumerPlans")) page=<PlansPage/>;
   else if(pathname==="/alertas"||pathname==="/perfil") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user}/>;
   else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;

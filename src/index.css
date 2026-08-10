@@ -2798,15 +2798,18 @@ body.modal-open {
 .plans-trust{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:25px}.plans-trust span{display:flex;align-items:center;gap:6px;font-size:9px;font-weight:800;color:#dce9f2;text-transform:uppercase;letter-spacing:.6px}.plans-trust svg{width:14px;color:#65dc54}
 .plans-hero aside{padding:26px;border:1px solid rgba(255,255,255,.16);border-radius:17px;background:rgba(3,24,46,.58);box-shadow:0 25px 60px rgba(0,0,0,.2);backdrop-filter:blur(13px)}.plans-hero aside>svg{width:35px;height:35px;color:#65dc54;margin-bottom:14px}.plans-hero aside strong{display:block;color:#fff;font-size:21px}.plans-hero aside p{color:#aebfcd;font-size:10px;line-height:1.6}.plans-hero aside a{display:inline-flex;align-items:center;gap:6px;color:#65dc54;font-size:10px;font-weight:850}.plans-hero aside a svg{width:13px}
 .plans-content{padding-block:55px 80px}.plans-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:35px;margin-bottom:27px}.plans-heading h2,.plans-principles h2,.plans-faq h2{font-size:clamp(28px,3.4vw,40px);letter-spacing:-.04em;margin:5px 0 6px}.plans-heading p,.plans-faq>div:first-child p{color:var(--muted);font-size:11px;margin:0}
+.plans-hero__status{display:inline-flex;margin-bottom:8px;padding:4px 7px;border:1px solid rgba(101,220,84,.28);border-radius:99px;color:#9ceb91;background:rgba(101,220,84,.1);font-size:7px;font-weight:900;letter-spacing:.8px;text-transform:uppercase}
+.ai-agent-showcase{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:55px;align-items:center;margin-bottom:60px;padding:45px;border:1px solid color-mix(in srgb,var(--blue) 28%,var(--border));border-radius:22px;background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--blue-soft) 50%,var(--surface)));box-shadow:0 25px 70px rgba(5,38,74,.08)}.ai-agent-showcase:before{content:"";position:absolute;width:260px;height:260px;left:-150px;bottom:-170px;border:55px solid color-mix(in srgb,var(--blue) 8%,transparent);border-radius:50%}.ai-agent-copy{position:relative;z-index:1}.ai-agent-copy h2{max-width:650px;margin:7px 0 12px;font-size:clamp(30px,4vw,46px);line-height:1.04;letter-spacing:-.045em}.ai-agent-copy>p{max-width:680px;margin:0;color:var(--muted);font-size:12px;line-height:1.7}.ai-agent-benefits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:25px}.ai-agent-benefits article{display:flex;align-items:flex-start;gap:10px;padding:13px;border:1px solid var(--border);border-radius:11px;background:var(--surface)}.ai-agent-benefits svg{width:18px;height:18px;flex:0 0 auto;color:var(--blue)}.ai-agent-benefits b,.ai-agent-benefits span{display:block}.ai-agent-benefits b{font-size:10px}.ai-agent-benefits span{margin-top:2px;color:var(--muted);font-size:8px;line-height:1.45}.ai-agent-access{display:flex;align-items:flex-start;gap:9px;margin-top:18px;color:var(--text);font-size:9px;line-height:1.55}.ai-agent-access svg{width:16px;flex:0 0 auto;color:var(--green)}
+.ai-agent-preview{position:relative;z-index:1;padding:18px;border:1px solid rgba(255,255,255,.12);border-radius:18px;color:#fff;background:linear-gradient(155deg,#0b3557,#03182e);box-shadow:0 25px 55px rgba(3,24,46,.24)}.ai-agent-preview header{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.12)}.ai-agent-preview header>span{width:37px;height:37px;display:grid;place-items:center;border-radius:11px;color:#03182e;background:#65dc54}.ai-agent-preview header svg{width:19px}.ai-agent-preview header div{display:grid}.ai-agent-preview header b{font-size:11px}.ai-agent-preview header small{display:flex;align-items:center;gap:5px;color:#b9cad7;font-size:7px}.ai-agent-preview header i{width:5px;height:5px;border-radius:50%;background:#65dc54}.ai-agent-preview header em{margin-left:auto;padding:4px 7px;border-radius:99px;color:#b9cad7;background:rgba(255,255,255,.08);font-size:6px;font-style:normal;text-transform:uppercase}.ai-message{width:89%;margin-top:13px;padding:11px 12px;border-radius:12px;font-size:8px;line-height:1.55}.ai-message--user{margin-left:auto;border-bottom-right-radius:3px;color:#102a3d;background:#fff}.ai-message--assistant{border-bottom-left-radius:3px;background:rgba(255,255,255,.1)}.ai-message--assistant>b{font-size:9px}.ai-message--assistant p{margin:5px 0 10px;color:#c8d7e4}.ai-message--assistant>div{display:flex;justify-content:space-between;gap:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.11);color:#9ceb91;font-size:7px}.ai-preview-note{display:block;margin-top:11px;color:#91a9ba;font-size:6px;line-height:1.5}
 .plans-audience{display:flex;gap:4px;padding:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px}.plans-audience button{height:39px;display:flex;align-items:center;gap:6px;padding:0 11px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:8px;font-weight:850;white-space:nowrap}.plans-audience button svg{width:13px}.plans-audience button.active{background:var(--surface);color:var(--blue-hover);box-shadow:0 4px 14px rgba(5,38,74,.08)}
 .professional-plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}.professional-plan-grid--2{grid-template-columns:repeat(2,minmax(0,390px));justify-content:center}.professional-plan-card{position:relative;display:flex;flex-direction:column;min-width:0;padding:27px;background:var(--surface);border:1px solid var(--border);border-radius:15px;box-shadow:0 10px 30px rgba(5,38,74,.045);transition:.2s ease}.professional-plan-card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--blue) 35%,var(--border));box-shadow:0 20px 42px rgba(5,38,74,.09)}.professional-plan-card.featured{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-glass),0 20px 45px rgba(5,38,74,.1)}
 .professional-plan-card .recommended{position:absolute;right:16px;top:15px;display:flex;align-items:center;gap:4px;padding:5px 8px;border-radius:6px;background:var(--blue);color:#05264a;font-size:6px;font-weight:900;letter-spacing:.6px;text-transform:uppercase}.professional-plan-card .recommended svg{width:10px}.plan-eyebrow{font-size:7px;font-weight:850;text-transform:uppercase;letter-spacing:1.1px;color:var(--blue-hover);margin-bottom:7px}.professional-plan-card h3{font-size:23px;letter-spacing:-.035em;margin:0 0 7px}.professional-plan-card>p{min-height:49px;color:var(--muted);font-size:9px;line-height:1.6;margin:0}.professional-plan-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 7px;margin:20px 0}.professional-plan-price small{width:100%;font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}.professional-plan-price strong{font-size:29px;color:var(--text-main);letter-spacing:-.04em}.professional-plan-price span{font-size:8px;color:var(--muted)}.professional-plan-card>.button{min-height:42px;font-size:8px}.professional-plan-card>.button svg{width:13px}.plan-divider{height:1px;background:var(--border);margin:21px 0 16px}.professional-plan-card>b{font-size:8px;text-transform:uppercase;letter-spacing:.8px}.professional-plan-card ul{display:grid;gap:10px;padding:0;margin:14px 0 0;list-style:none}.professional-plan-card li{display:flex;align-items:flex-start;gap:7px;color:var(--text);font-size:9px}.professional-plan-card li svg{width:13px;height:13px;color:var(--blue);flex:0 0 auto}
-.plans-principles{display:grid;grid-template-columns:280px 1fr;gap:45px;margin-top:62px;padding:34px;background:var(--surface);border:1px solid var(--border);border-radius:17px}.principle-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.principle-grid article{padding:17px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px}.principle-grid svg{width:19px;color:var(--blue)}.principle-grid h3{font-size:12px;margin:8px 0 4px}.principle-grid p{font-size:8px;line-height:1.55;color:var(--muted);margin:0}
+.plans-principles{display:grid;grid-template-columns:280px 1fr;gap:45px;margin-top:62px;padding:34px;background:var(--surface);border:1px solid var(--border);border-radius:17px}.principles-intro{color:var(--muted);font-size:9px;line-height:1.6}.principle-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.principle-grid article{padding:17px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px}.principle-grid svg{width:19px;color:var(--blue)}.principle-grid h3{font-size:12px;margin:8px 0 4px}.principle-grid p{font-size:8px;line-height:1.55;color:var(--muted);margin:0}
 .plans-faq{display:grid;grid-template-columns:300px 1fr;gap:45px;margin-top:65px}.plans-faq>div:last-child{border-top:1px solid var(--border)}.plans-faq article{border-bottom:1px solid var(--border)}.plans-faq article>button{width:100%;min-height:57px;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:0;border:0;background:none;color:var(--text-main);font-size:11px;font-weight:800;text-align:left}.plans-faq article>button svg{width:16px;transition:.2s ease}.plans-faq article.open>button svg{transform:rotate(180deg);color:var(--blue)}.plans-faq article>p{color:var(--muted);font-size:9px;line-height:1.65;margin:-4px 0 18px;padding-right:35px}
 .plans-cta{display:flex;align-items:center;justify-content:space-between;gap:35px;margin-top:65px;padding:35px 38px;border-radius:17px;color:#fff;background:linear-gradient(130deg,#03182e,#07345d)}.plans-cta h2{color:#fff;font-size:30px;margin:5px 0}.plans-cta p{font-size:10px;color:#b8c9d7;margin:0}.plans-cta .button{flex:0 0 auto}
 [data-theme='dark'] .professional-plan-card.featured{box-shadow:0 0 0 2px var(--blue-glass),0 20px 45px rgba(0,0,0,.25)}
-@media(max-width:980px){.plans-hero__inner{grid-template-columns:1fr;gap:28px}.plans-hero aside{max-width:600px}.plans-heading{align-items:flex-start;display:grid}.professional-plan-grid{grid-template-columns:repeat(2,1fr)}.professional-plan-grid--2{grid-template-columns:repeat(2,1fr)}.plans-principles,.plans-faq{grid-template-columns:1fr;gap:20px}}
-@media(max-width:650px){.plans-hero__inner{padding-block:38px 42px}.plans-hero h1{font-size:38px}.plans-trust{display:grid}.plans-hero aside{display:none}.plans-content{padding-block:35px 55px}.plans-audience{width:100%;overflow-x:auto}.plans-audience button{flex:1;justify-content:center}.plans-heading{margin-bottom:18px}.professional-plan-grid,.professional-plan-grid--2{grid-template-columns:1fr}.professional-plan-card{padding:23px}.professional-plan-card>p{min-height:0}.plans-principles{padding:22px;margin-top:42px}.principle-grid{grid-template-columns:1fr}.plans-faq{margin-top:45px}.plans-cta{align-items:flex-start;display:grid;padding:27px}.plans-cta h2{font-size:26px}.plans-cta .button{width:100%}}
+@media(max-width:980px){.plans-hero__inner{grid-template-columns:1fr;gap:28px}.plans-hero aside{max-width:600px}.ai-agent-showcase{grid-template-columns:1fr;gap:30px}.ai-agent-preview{max-width:620px}.plans-heading{align-items:flex-start;display:grid}.professional-plan-grid{grid-template-columns:repeat(2,1fr)}.professional-plan-grid--2{grid-template-columns:repeat(2,1fr)}.plans-principles,.plans-faq{grid-template-columns:1fr;gap:20px}}
+@media(max-width:650px){.plans-hero__inner{padding-block:38px 42px}.plans-hero h1{font-size:38px}.plans-trust{display:grid}.plans-hero aside{display:none}.plans-content{padding-block:35px 55px}.ai-agent-showcase{margin-bottom:42px;padding:24px}.ai-agent-benefits{grid-template-columns:1fr}.plans-audience{width:100%;overflow-x:auto}.plans-audience button{flex:1;justify-content:center}.plans-heading{margin-bottom:18px}.professional-plan-grid,.professional-plan-grid--2{grid-template-columns:1fr}.professional-plan-card{padding:23px}.professional-plan-card>p{min-height:0}.plans-principles{padding:22px;margin-top:42px}.principle-grid{grid-template-columns:1fr}.plans-faq{margin-top:45px}.plans-cta{align-items:flex-start;display:grid;padding:27px}.plans-cta h2{font-size:26px}.plans-cta .button{width:100%}}
 
 /* ==========================================
    1. HERO SECTION APRIMORADA
@@ -2973,6 +2976,150 @@ body,.site-header,.mobile-bar,.drawer-panel,.admin-shell,.admin-main,.auth-form-
 @media(max-width:1150px){.professional-results-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:820px){.search-command{padding:20px}.search-command__intro{align-items:flex-start}.search-command__trust{display:none}.professional-search-layout{grid-template-columns:1fr}.professional-filters{display:none;position:static}.professional-search-layout.filters-open .professional-filters{display:block}.professional-filter-apply{display:flex}.professional-results-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.professional-results-head{align-items:flex-start}.professional-results-head>label{min-width:160px}}
 @media(max-width:560px){.search-command{padding:16px;border-radius:14px}.search-command__intro h1{font-size:27px}.search-command__intro p{font-size:9px}.search-command__actions>span{display:none}.search-command__actions button{flex:1;justify-content:center}.professional-results-head{display:grid}.professional-results-head>label{min-width:0}.professional-results-grid{grid-template-columns:1fr}.professional-result-card{display:grid;grid-template-columns:115px 1fr}.professional-result-card__visual{height:100%;min-height:245px;border-bottom:0;border-right:1px solid var(--border)}.professional-result-card__visual>.category-tag{font-size:6px}.professional-price-analysis{grid-template-columns:1fr 1fr}.professional-price-analysis .saving{display:none}.professional-insights>span:first-child{display:none}.professional-result-card__footer{grid-template-columns:1fr auto}.professional-report-button{display:none}.professional-pagination span{display:none}}
+
+/* Área especializada de açougues e carnes */
+.butcher-page{background:var(--bg);min-height:70vh}.butcher-hero{color:#fff;background:radial-gradient(circle at 85% 10%,rgba(225,86,55,.34),transparent 34%),linear-gradient(125deg,#35120d,#7d2419)}.butcher-hero__inner{min-height:310px;display:grid;grid-template-columns:1.35fr .65fr;align-items:center;gap:50px;padding-block:55px}.butcher-hero h1{max-width:720px;margin:10px 0 14px;color:#fff;font-size:clamp(38px,5vw,61px)}.butcher-hero p{max-width:690px;margin:0;color:#f3d9d3;font-size:16px}.butcher-hero__stats{display:grid;grid-template-columns:1fr 1fr;overflow:hidden;border:1px solid rgba(255,255,255,.18);border-radius:18px;background:rgba(53,18,13,.55);backdrop-filter:blur(14px)}.butcher-hero__stats span{display:grid;justify-items:center;padding:24px 14px;text-align:center}.butcher-hero__stats span+span{border-left:1px solid rgba(255,255,255,.15)}.butcher-hero__stats svg{width:25px;color:#ffb09d}.butcher-hero__stats b{font:850 30px Manrope,sans-serif}.butcher-hero__stats small{color:#edc8bf;font-size:10px}.butcher-content{display:grid;gap:48px;padding-block:48px 80px}.butcher-store-list{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.butcher-store-list>a{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--surface);transition:.18s ease}.butcher-store-list>a:hover{border-color:#bd5a45;transform:translateY(-2px);box-shadow:var(--shadow-sm)}.butcher-store-list .store-logo{width:46px;height:46px;color:#fff}.butcher-store-list b,.butcher-store-list small{display:block}.butcher-store-list b{font-size:13px}.butcher-store-list small{color:var(--muted);font-size:10px}.butcher-store-list svg{width:16px;color:var(--muted)}.butcher-catalog__head{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:22px}.butcher-catalog__head h2{margin:6px 0;font-size:34px}.butcher-catalog__head p{margin:0;color:var(--muted)}.butcher-catalog__head>label{width:min(100%,430px);height:52px;display:flex;align-items:center;gap:9px;padding:0 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.butcher-catalog__head input{min-width:0;flex:1;border:0;outline:0;background:transparent}.butcher-catalog__head label>svg{width:18px;color:#a43a27}.butcher-catalog__head label>button{border:0;background:none;color:var(--muted)}.butcher-product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.butcher-product-grid>article{overflow:hidden;border:1px solid var(--border);border-radius:14px;background:var(--surface);transition:.18s ease}.butcher-product-grid>article:hover{transform:translateY(-3px);box-shadow:var(--shadow)}.butcher-product-image{position:relative;height:190px;display:grid;place-items:center;background:linear-gradient(180deg,#fff,#f8f1ef);border-bottom:1px solid var(--border)}.butcher-product-image .product-photo{width:100%;height:100%}.butcher-product-image img{width:82%;height:84%;object-fit:contain}.butcher-product-body{padding:14px}.butcher-product-body h3{height:38px;margin:6px 0 12px;overflow:hidden;font-size:14px;line-height:1.35}.butcher-product-store{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;padding:8px;border-radius:9px;background:var(--surface-2)}.butcher-product-store>svg{width:15px;color:#a43a27}.butcher-product-store b,.butcher-product-store small{display:block}.butcher-product-store b{font-size:10px}.butcher-product-store small{color:var(--muted);font-size:9px}.butcher-product-price{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:13px 0}.butcher-product-price>span{display:grid}.butcher-product-price small{color:var(--muted);font-size:9px}.butcher-product-price strong{color:#218e18;font-size:23px}.butcher-product-price b{font-size:12px}.butcher-product-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.butcher-product-actions .button{min-height:38px;padding-inline:8px;font-size:10px}
+@media(max-width:1050px){.butcher-hero__inner{grid-template-columns:1fr}.butcher-hero__stats{max-width:500px}.butcher-product-grid{grid-template-columns:repeat(3,1fr)}.butcher-store-list{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.butcher-hero__inner{padding-block:42px}.butcher-catalog__head{display:grid;align-items:start}.butcher-catalog__head>label{width:100%}.butcher-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.butcher-store-list{grid-template-columns:1fr}}
+@media(max-width:480px){.butcher-hero h1{font-size:38px}.butcher-product-grid{grid-template-columns:1fr}.butcher-product-grid>article{display:grid;grid-template-columns:120px 1fr}.butcher-product-image{height:100%;min-height:260px;border-bottom:0;border-right:1px solid var(--border)}}
+
+/* Auditoria global do modo claro — contraste WCAG e superfícies consistentes */
+:root:not([data-theme='dark']) {
+  color-scheme: light;
+  --bg: #f4f7fa;
+  --surface: #ffffff;
+  --surface-2: #edf2f6;
+  --surface-3: #dde5ec;
+  --text: #263746;
+  --text-main: #102a3d;
+  --navy: #09253b;
+  --navy-light: #17384f;
+  --muted: #465d6f;
+  --tertiary: #526979;
+  --border: #cfd9e1;
+  --border-strong: #aebdc8;
+  --blue: #075fc7;
+  --blue-hover: #064fa5;
+  --green: #087548;
+  --gold: #a85d00;
+  --orange: #b94708;
+}
+
+:root:not([data-theme='dark']) body,
+:root:not([data-theme='dark']) .app { background:#f4f7fa; color:#102a3d; }
+:root:not([data-theme='dark']) h1,
+:root:not([data-theme='dark']) h2,
+:root:not([data-theme='dark']) h3,
+:root:not([data-theme='dark']) h4 { color:inherit; }
+:root:not([data-theme='dark']) input,
+:root:not([data-theme='dark']) select,
+:root:not([data-theme='dark']) textarea { color:#102a3d; background-color:#fff; border-color:#aebdc8; }
+:root:not([data-theme='dark']) input::placeholder,
+:root:not([data-theme='dark']) textarea::placeholder { color:#5b7080; opacity:1; }
+:root:not([data-theme='dark']) option { color:#102a3d; background:#fff; }
+:root:not([data-theme='dark']) .site-header:not(.site-header--absolute),
+:root:not([data-theme='dark']) .site-header--scrolled { color:#102a3d; background:rgba(255,255,255,.97); border-color:#cfd9e1; }
+:root:not([data-theme='dark']) .desktop-nav,
+:root:not([data-theme='dark']) .header-location,
+:root:not([data-theme='dark']) .header-login-link { color:#263f52; }
+:root:not([data-theme='dark']) .desktop-nav a.active { color:#064fa5; background:#e8f1fb; }
+:root:not([data-theme='dark']) .icon-button,
+:root:not([data-theme='dark']) .button--outline,
+:root:not([data-theme='dark']) .button--ghost { color:#102a3d; background:#fff; border-color:#aebdc8; }
+:root:not([data-theme='dark']) .button--primary { color:#fff; background:#075fc7; }
+:root:not([data-theme='dark']) .button--gold { color:#102a3d; background:#f2b72f; }
+:root:not([data-theme='dark']) .eyebrow { color:#0755ad; }
+:root:not([data-theme='dark']) .hero .eyebrow,
+:root:not([data-theme='dark']) .search-command .eyebrow,
+:root:not([data-theme='dark']) .generic-hero .eyebrow,
+:root:not([data-theme='dark']) .plans-hero .eyebrow,
+:root:not([data-theme='dark']) .store-detail-hero .eyebrow,
+:root:not([data-theme='dark']) .butcher-hero .eyebrow,
+:root:not([data-theme='dark']) .auth-brand-panel .eyebrow { color:#f4c75c!important; }
+
+:root:not([data-theme='dark']) .section-heading p,
+:root:not([data-theme='dark']) .page-title p,
+:root:not([data-theme='dark']) .center-heading p,
+:root:not([data-theme='dark']) .plans-heading p,
+:root:not([data-theme='dark']) .professional-results-head small,
+:root:not([data-theme='dark']) .professional-result-card__meta,
+:root:not([data-theme='dark']) .professional-result-store small,
+:root:not([data-theme='dark']) .professional-price-main small,
+:root:not([data-theme='dark']) .professional-price-analysis small,
+:root:not([data-theme='dark']) .professional-insights>span,
+:root:not([data-theme='dark']) .professional-insights>button,
+:root:not([data-theme='dark']) .store-catalog-heading p,
+:root:not([data-theme='dark']) .store-result-count,
+:root:not([data-theme='dark']) .store-card small,
+:root:not([data-theme='dark']) .store-product-card p,
+:root:not([data-theme='dark']) .butcher-store-list small,
+:root:not([data-theme='dark']) .butcher-product-store small,
+:root:not([data-theme='dark']) .butcher-product-price small,
+:root:not([data-theme='dark']) .generic-main p,
+:root:not([data-theme='dark']) .compact-product small,
+:root:not([data-theme='dark']) .auth-form>p,
+:root:not([data-theme='dark']) .auth-form label small,
+:root:not([data-theme='dark']) .auth-switch,
+:root:not([data-theme='dark']) .admin-main small,
+:root:not([data-theme='dark']) .admin-card-head p,
+:root:not([data-theme='dark']) .admin-tr small,
+:root:not([data-theme='dark']) .admin-card-foot,
+:root:not([data-theme='dark']) .history-unavailable small,
+:root:not([data-theme='dark']) .real-price-history small,
+:root:not([data-theme='dark']) .basket-items small,
+:root:not([data-theme='dark']) .builder-head p,
+:root:not([data-theme='dark']) .route-stop small,
+:root:not([data-theme='dark']) .summary-total small,
+:root:not([data-theme='dark']) .plan-grid article>p,
+:root:not([data-theme='dark']) .plan-price span { color:#465d6f!important; }
+
+:root:not([data-theme='dark']) .metrics-float,
+:root:not([data-theme='dark']) .visual-product-card,
+:root:not([data-theme='dark']) .price-table-card,
+:root:not([data-theme='dark']) .store-card,
+:root:not([data-theme='dark']) .benefit-card,
+:root:not([data-theme='dark']) .dashboard-preview,
+:root:not([data-theme='dark']) .professional-filters,
+:root:not([data-theme='dark']) .professional-result-card,
+:root:not([data-theme='dark']) .generic-main,
+:root:not([data-theme='dark']) .butcher-store-list>a,
+:root:not([data-theme='dark']) .butcher-product-grid>article,
+:root:not([data-theme='dark']) .basket-builder,
+:root:not([data-theme='dark']) .basket-summary,
+:root:not([data-theme='dark']) .plan-grid article,
+:root:not([data-theme='dark']) .professional-plan-card,
+:root:not([data-theme='dark']) .admin-card,
+:root:not([data-theme='dark']) .admin-modal-content { color:#102a3d; background-color:#fff; border-color:#c7d3dc; }
+:root:not([data-theme='dark']) .professional-result-store,
+:root:not([data-theme='dark']) .professional-price-analysis,
+:root:not([data-theme='dark']) .butcher-product-store,
+:root:not([data-theme='dark']) .store-category-nav,
+:root:not([data-theme='dark']) .coverage,
+:root:not([data-theme='dark']) .history-unavailable { color:#17384f; background:#edf2f6; border-color:#c7d3dc; }
+:root:not([data-theme='dark']) .professional-filters select,
+:root:not([data-theme='dark']) .professional-price-range input,
+:root:not([data-theme='dark']) .professional-results-head select,
+:root:not([data-theme='dark']) .store-search,
+:root:not([data-theme='dark']) .store-sort,
+:root:not([data-theme='dark']) .butcher-catalog__head>label { color:#102a3d; background:#fff; border-color:#aebdc8; }
+:root:not([data-theme='dark']) .admin-shell,
+:root:not([data-theme='dark']) .admin-main { color:#102a3d; background:#edf2f6; }
+:root:not([data-theme='dark']) .admin-main>header { border-color:#bdcad4; }
+:root:not([data-theme='dark']) .admin-th { color:#334e62; background:#e7edf2; }
+:root:not([data-theme='dark']) .status-banner--error { color:#8f1d1d!important; background:#fff0f0!important; }
+
+/* Fotografia local e heros coerentes com supermercado, economia e comércio local */
+.hero-photo { background-image:url('/supermercado-premium.jpg')!important; background-position:center 58%!important; filter:saturate(.92) contrast(1.06) brightness(.78)!important; animation:none!important; }
+.hero-wash { background:linear-gradient(90deg,rgba(3,20,36,.97) 0%,rgba(3,26,48,.9) 45%,rgba(3,31,53,.38) 78%,rgba(3,24,43,.2)),linear-gradient(0deg,rgba(3,24,43,.82),transparent 35%)!important; }
+.search-command { background-image:linear-gradient(110deg,rgba(3,24,46,.98),rgba(7,52,93,.91) 66%,rgba(7,85,62,.72)),url('/supermercado-hero.jpg')!important; background-size:cover!important; background-position:center 52%!important; }
+.generic-hero { background-image:linear-gradient(110deg,rgba(3,24,46,.97),rgba(7,52,93,.82)),url('/supermercado-hero.jpg')!important; background-size:cover!important; background-position:center!important; }
+.plans-hero { background-image:linear-gradient(110deg,rgba(3,24,46,.97),rgba(4,62,57,.84)),url('/supermercado-premium.jpg')!important; background-size:cover!important; background-position:center 55%!important; }
+.auth-brand-panel { background-image:linear-gradient(145deg,rgba(3,21,35,.97),rgba(8,57,89,.84)),url('/supermercado-hero.jpg')!important; background-size:cover!important; background-position:center!important; }
+.store-detail-hero { background-image:linear-gradient(110deg,rgba(3,24,46,.97),color-mix(in srgb,var(--store-color) 48%,rgba(7,52,93,.82))),url('/supermercado-hero.jpg')!important; background-size:cover!important; background-position:center 55%!important; }
+.butcher-hero { background-image:linear-gradient(110deg,rgba(45,13,8,.97),rgba(123,35,24,.82)),url('/supermercado-premium.jpg')!important; background-size:cover!important; background-position:center 62%!important; }
+.final-cta { background-image:linear-gradient(110deg,rgba(3,24,46,.98),rgba(7,52,93,.84)),url('/supermercado-hero.jpg')!important; background-size:cover!important; background-position:center!important; }
+
+.hero h1,.hero p,.hero-trust,.search-command h1,.search-command p,.search-command__actions button,.search-command__actions>span,.generic-hero h1,.generic-hero p,.plans-hero h1,.plans-hero p,.store-detail-hero h1,.store-detail-hero p,.butcher-hero h1,.butcher-hero p,.final-cta h2,.final-cta p,.auth-brand-panel h1,.auth-brand-panel p { text-shadow:0 2px 18px rgba(0,0,0,.38); }
 .real-price-history{display:grid;margin-top:10px;border:1px solid var(--border);border-radius:10px;overflow:hidden}.real-price-history>div{display:grid;grid-template-columns:1fr auto 70px;align-items:center;gap:10px;padding:9px 11px;border-bottom:1px solid var(--border)}.real-price-history>div:last-child{border:0}.real-price-history span{display:flex;align-items:center;gap:6px;color:var(--muted)}.real-price-history svg{width:12px}.real-price-history small{font-size:8px}.real-price-history strong{font-size:10px}.real-price-history em{display:flex;align-items:center;justify-content:flex-end;gap:3px;font-size:8px;font-style:normal;font-weight:800}.real-price-history em.down{color:var(--green)}.real-price-history em.up{color:var(--red)}.history-unavailable{display:flex;align-items:center;gap:10px;margin-top:10px;padding:13px;border:1px dashed var(--border-strong);border-radius:10px;background:var(--surface-2)}.history-unavailable>svg{width:22px;color:var(--tertiary)}.history-unavailable span{display:grid}.history-unavailable b{font-size:9px}.history-unavailable small{color:var(--muted);font-size:7px}.compare-bar{background:var(--surface)!important;border:1px solid var(--blue)!important;padding:8px 10px!important;border-radius:12px!important;box-shadow:0 18px 42px rgba(5,38,74,.2)!important;gap:10px!important}.compare-bar .button{min-height:36px;font-size:8px}.compare-table-wrapper th,.compare-table-wrapper td{border-color:var(--border)!important;color:var(--text-main)}[data-theme='dark'] .admin-modal-content{background:var(--surface)!important}
 
 /* Refatoração global — hero, legibilidade, densidade e consistência */
