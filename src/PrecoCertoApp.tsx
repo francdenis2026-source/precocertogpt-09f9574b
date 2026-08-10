@@ -654,23 +654,35 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
   }
 
   return <div className={`search-combo ${hero ? "search-combo--hero" : ""}`}>
-    <form onSubmit={submit} role="search">
-      <Search size={20} className="search-combo__icon" aria-hidden="true" />
-      <label className="sr-only" htmlFor={hero ? "hero-search" : "page-search"}>Buscar produto</label>
-      <input 
-        id={hero ? "hero-search" : "page-search"} 
-        className="search-combo__input"
-        role="combobox" 
-        value={localValue} 
-        onChange={e => setLocalValue(e.target.value)} 
-        onFocus={() => setFocused(true)} 
-        onBlur={() => setTimeout(() => setFocused(false), 200)} 
-        placeholder="Busque arroz, café, carne, leite..." 
-        autoComplete="off" 
-        aria-expanded={focused} 
-        aria-controls={hero ? "hero-suggestions" : "page-suggestions"} 
-        aria-autocomplete="list" 
-      />
+    <form onSubmit={submit} role="search" className="search-combo__form">
+      <div className="search-combo__input-wrapper">
+        <Search size={22} className="search-combo__icon" aria-hidden="true" />
+        <label className="sr-only" htmlFor={hero ? "hero-search" : "page-search"}>Buscar produto</label>
+        <input 
+          id={hero ? "hero-search" : "page-search"} 
+          className="search-combo__input"
+          role="combobox" 
+          value={localValue} 
+          onChange={e => setLocalValue(e.target.value)} 
+          onFocus={() => setFocused(true)} 
+          onBlur={() => setTimeout(() => setFocused(false), 200)} 
+          placeholder="Busque arroz, café, carne, leite..." 
+          autoComplete="off" 
+          aria-expanded={focused} 
+          aria-controls={hero ? "hero-suggestions" : "page-suggestions"} 
+          aria-autocomplete="list" 
+        />
+        {localValue && (
+          <button 
+            type="button" 
+            className="search-combo__clear" 
+            onClick={() => setLocalValue("")}
+            aria-label="Limpar busca"
+          >
+            <X size={18} />
+          </button>
+        )}
+      </div>
       <button className="button button--primary search-combo__button" type="submit">
         <span className="search-combo__button-text">Comparar preços</span>
         <ArrowRight size={18} />
@@ -679,34 +691,50 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
 
     {focused && (
       <div className="search-results-dynamic" id={hero ? "hero-suggestions" : "page-suggestions"} role="listbox">
-        <div className="suggestions-label" style={{ padding: '0.75rem 1rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--muted)', background: 'var(--surface-2)' }}>
-          {localValue ? `${suggestions.length} melhores correspondências` : "Preços em destaque em Feijó"}
+        <div className="suggestions-header">
+          <Sparkles size={14} className="suggestions-header-icon" />
+          <span>{localValue ? `${suggestions.length} melhores correspondências` : "Sugestões para você"}</span>
         </div>
+        
         {suggestions.length > 0 ? (
-          suggestions.map(p => (
-            <a 
-              role="option" 
-              aria-selected="false" 
-              href={`${isButcherProduct(p) ? "/acougues" : "/buscar"}?q=${encodeURIComponent(p.name)}`}
-              key={p.id}
-              className="search-result-item"
-            >
-              <ProductImage product={p} size="compact" />
-              <div style={{ flex: 1 }}>
-                <strong>{p.name}</strong>
-                <small>{p.brand} • {p.category}</small>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <b style={{ color: 'var(--green)', display: 'block' }}>{money(p.minPrice)}</b>
-                <small style={{ fontSize: '0.7rem' }}>{p.establishment}</small>
-              </div>
-            </a>
-          ))
+          <div className="suggestions-list">
+            {suggestions.map(p => (
+              <a 
+                role="option" 
+                aria-selected="false" 
+                href={`${isButcherProduct(p) ? "/acougues" : "/buscar"}?q=${encodeURIComponent(p.name)}`}
+                key={p.id}
+                className="search-result-item"
+              >
+                <div className="search-result-item__image">
+                  <ProductImage product={p} size="compact" />
+                </div>
+                <div className="search-result-item__info">
+                  <strong className="search-result-item__name">{p.name}</strong>
+                  <span className="search-result-item__meta">{p.brand} • {p.category}</span>
+                </div>
+                <div className="search-result-item__pricing">
+                  <b className="search-result-item__price">{money(p.minPrice)}</b>
+                  <small className="search-result-item__store">{p.establishment}</small>
+                </div>
+              </a>
+            ))}
+          </div>
         ) : localValue.length > 2 ? (
-          <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.9rem' }}>
-            Nenhum resultado direto para "{localValue}"
+          <div className="suggestions-empty">
+            <PackageSearch size={32} />
+            <p>Nenhum resultado direto para <strong>"{localValue}"</strong></p>
+            <span>Tente usar termos mais genéricos</span>
           </div>
         ) : null}
+        
+        {localValue.length > 0 && suggestions.length > 0 && (
+          <div className="suggestions-footer">
+            <a href={`/buscar?q=${encodeURIComponent(localValue)}`}>
+              Ver todos os resultados para "{localValue}" <ArrowRight size={14} />
+            </a>
+          </div>
+        )}
       </div>
     )}
   </div>;
