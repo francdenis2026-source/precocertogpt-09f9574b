@@ -7,6 +7,7 @@ const defaultMessage = "Este estabelecimento ainda não oferece vendas online pe
 
 export function MerchantOnlineSalesControl() {
   const [membership, setMembership] = useState<any>(null);
+  const [merchantConfig, setMerchantConfig] = useState<any>(null);
   const [paymentConnected, setPaymentConnected] = useState(false);
   const [activeProducts, setActiveProducts] = useState(0);
   const [enabled, setEnabled] = useState(false);
@@ -15,7 +16,7 @@ export function MerchantOnlineSalesControl() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
 
-  const merchant = membership?.merchants as any;
+  const merchant = merchantConfig || membership?.merchants as any;
   const merchantId = membership?.merchant_id || "";
   const channelReady = Boolean(merchant?.delivery_enabled || merchant?.pickup_enabled);
   const merchantActive = merchant?.status === "active";
@@ -32,14 +33,16 @@ export function MerchantOnlineSalesControl() {
     setLoading(true);
     const member = await loadMerchantMembership();
     setMembership(member);
-    if (member?.merchant_id) {
-      const [products, payment] = await Promise.all([
+    if (member?.merchant_id && supabase) {
+      const [products, payment, merchantRow] = await Promise.all([
         loadMerchantProducts(member.merchant_id),
         loadMerchantPaymentStatus(member.merchant_id),
+        supabase.from("merchants").select("id,name,status,delivery_enabled,pickup_enabled,online_sales_enabled,online_sales_message,online_sales_started_at").eq("id",member.merchant_id).maybeSingle(),
       ]);
       setActiveProducts(products.filter(product => product.active && product.available).length);
       setPaymentConnected(payment?.status === "connected");
-      const m = member.merchants as any;
+      const m = merchantRow.data || member.merchants as any;
+      setMerchantConfig(m);
       setEnabled(Boolean(m?.online_sales_enabled));
       setMessage(m?.online_sales_message || defaultMessage);
     }
@@ -61,7 +64,10 @@ export function MerchantOnlineSalesControl() {
       online_sales_started_at: nextEnabled ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
     }).eq("id", merchantId);
-    if (!error) setEnabled(nextEnabled);
+    if (!error) {
+      setEnabled(nextEnabled);
+      setMerchantConfig((current:any)=>({...current,online_sales_enabled:nextEnabled,online_sales_message:message.trim()||defaultMessage}));
+    }
     setNotice(error?.message || (nextEnabled ? "Vendas online ativadas. Os produtos elegíveis já podem receber compras." : "Vendas online pausadas. A comparação de preços continua pública."));
     setSaving(false);
   }
@@ -72,7 +78,7 @@ export function MerchantOnlineSalesControl() {
   return <main style={s.page}><div style={s.container}>
     <a href="/painel-lojista" style={s.back}><ArrowLeft size={16}/> Voltar ao painel</a>
     <header style={s.header}>
-      <div><span style={s.eyebrow}>PUBLICAÇÃO COMERCIAL</span><h1 style={s.h1}>Vendas online</h1><p style={s.lead}>O Preço Certo só libera “Comprar” quando a operação está realmente pronta. Compare preços pode continuar funcionando mesmo com vendas pausadas.</p></div>
+      <div><span style={s.eyebrow}>PUBLICAÇÃO COMERCIAL</span><h1 style={s.h1}>Vendas online</h1><p style={s.lead}>O Preço Certo só libera “Comprar” quando a operação está realmente pronta. A comparação de preços continua funcionando mesmo com vendas pausadas.</p></div>
       <div style={{...s.statusCard,...(enabled && ready ? s.statusLive : {})}}>{enabled && ready ? <><CheckCircle2 size={22}/><span><b>Vendas online ativas</b><small>Compra pública liberada para produtos elegíveis</small></span></> : <><CircleOff size={22}/><span><b>Vendas online não publicadas</b><small>O público continua vendo os preços</small></span></>}</div>
     </header>
 
