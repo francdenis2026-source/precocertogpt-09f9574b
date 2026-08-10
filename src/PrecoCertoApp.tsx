@@ -3250,20 +3250,84 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
       }
     };
 
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [profileData, setProfileData] = useState({
+      name: (user as any)?.name || "",
+      address: (user as any)?.address || "",
+      phone: (user as any)?.phone || "",
+      whatsapp: (user as any)?.whatsapp || "",
+      referencePoint: (user as any)?.referencePoint || "",
+      cpf: (user as any)?.cpf || ""
+    });
+
+    const handleUpdateProfile = (e: React.FormEvent) => {
+      e.preventDefault();
+      const updatedUser = { ...user, ...profileData };
+      setUser(updatedUser as any);
+      localStorage.setItem("precocerto:user", JSON.stringify(updatedUser));
+      setIsEditingProfile(false);
+      if (typeof (window as any).setGlobalToast === 'function') {
+        (window as any).setGlobalToast("Perfil atualizado com sucesso!", "success");
+      }
+    };
+
     return (
       <div className="shell page-shell generic-page">
         <section className="generic-hero">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
             <div style={{ width: '80px', height: '80px', background: 'var(--blue-soft)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--blue)' }}>
               <UserRound size={40} />
             </div>
-            <div>
+            <div style={{ flex: 1, minWidth: '240px' }}>
               <span className="eyebrow">Minha Conta</span>
-              <h1>{user?.name || "Usuário PreçoCerto"}</h1>
+              <h1>{(user as any)?.name || "Usuário PreçoCerto"}</h1>
               <p>Gerencie seus alertas, favoritos e preferências de economia em Feijó.</p>
             </div>
+            <button className="button button--primary" onClick={() => setIsEditingProfile(true)}>Editar Meus Dados</button>
           </div>
         </section>
+
+        {isEditingProfile && (
+          <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="modal-content" style={{ maxWidth: '500px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+              <div className="modal-header">
+                <h2>Editar Perfil</h2>
+                <button className="icon-button" onClick={() => setIsEditingProfile(false)}><X /></button>
+              </div>
+              <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem' }}>
+                <div className="form-group">
+                  <label>Nome Completo</label>
+                  <input className="admin-input" value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label>Endereço</label>
+                  <input className="admin-input" value={profileData.address} onChange={e => setProfileData({...profileData, address: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>Telefone</label>
+                  <input className="admin-input" value={profileData.phone} onChange={e => setProfileData({...profileData, phone: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>WhatsApp</label>
+                  <input className="admin-input" value={profileData.whatsapp} onChange={e => setProfileData({...profileData, whatsapp: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>Ponto de Referência</label>
+                  <input className="admin-input" value={profileData.referencePoint} onChange={e => setProfileData({...profileData, referencePoint: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>CPF (Bloqueado para edição)</label>
+                  <input className="admin-input" value={profileData.cpf} readOnly style={{ background: 'var(--surface-3)', opacity: 0.7, cursor: 'not-allowed' }} />
+                  <small style={{ color: 'var(--muted)' }}>Para alterar o CPF, entre em contato com o suporte.</small>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <button type="submit" className="button button--primary" style={{ flex: 1 }}>Salvar Alterações</button>
+                  <button type="button" className="button button--ghost" onClick={() => setIsEditingProfile(false)}>Cancelar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         <div className="generic-grid">
           <section className="generic-main">
