@@ -20,6 +20,7 @@ import { MerchantBusinessSetupShortcut } from "./components/MerchantBusinessSetu
 import { MerchantCatalogStudio } from "./components/MerchantCatalogStudio";
 import { MerchantManagementCenter } from "./components/MerchantManagementCenter";
 import { MerchantOnboardingPage } from "./components/MerchantOnboardingPage";
+import { MerchantStorefront } from "./components/MerchantStorefront";
 import { PlatformAdminDashboard } from "./components/PlatformAdminDashboard";
 import { AdminMerchantManagement } from "./components/AdminMerchantManagement";
 import { CustomerOrders } from "./components/CustomerOrders";
@@ -44,6 +45,7 @@ export default function App() {
       <MerchantBusinessSetupShortcut />
       <Routes>
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
+        <Route path="/loja/:merchantId" element={<MerchantStorefront />} />
         <Route path="/painel-lojista" element={<MerchantDashboard />} />
         <Route path="/painel-lojista/gestao" element={<MerchantManagementCenter />} />
         <Route path="/painel-lojista/catalogo" element={<MerchantCatalogStudio />} />
