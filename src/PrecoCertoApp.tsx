@@ -1146,7 +1146,20 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
   };
 
   const removeItem = (name: string) => {
-    setBasketItems(prev => prev.filter(i => i.productName !== name));
+    setBasketItems(prev => {
+      const removedItem = prev.find(i => i.productName === name);
+      if (removedItem) {
+        // Registro no histórico
+        const historyKey = "precocerto:basket_history";
+        const history = JSON.parse(localStorage.getItem(historyKey) ?? "[]");
+        history.unshift({
+          at: new Date().toISOString(),
+          action: `Removeu ${name} da cesta`
+        });
+        localStorage.setItem(historyKey, JSON.stringify(history.slice(0, 50)));
+      }
+      return prev.filter(i => i.productName !== name);
+    });
     const inCart = initialCart.find(p => p.name === name);
     if (inCart) removeBasket(inCart.id);
   };
@@ -1161,13 +1174,32 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
   };
 
   const updateQuantity = (name: string, delta: number) => {
-    setBasketItems(prev => prev.map(i => {
-      if (i.productName === name) {
-        const newQty = Math.max(1, i.quantity + delta);
-        return { ...i, quantity: newQty };
+    setBasketItems(prev => {
+      const item = prev.find(i => i.productName === name);
+      if (!item) return prev;
+      
+      const newQty = Math.max(1, item.quantity + delta);
+      
+      // Simulação de validação de estoque (limite de 20 unidades por item como exemplo)
+      const STOCK_LIMIT = 20;
+      if (newQty > STOCK_LIMIT) {
+        if (typeof (window as any).setGlobalToast === 'function') {
+          (window as any).setGlobalToast(`Limite de estoque atingido para ${name} (${STOCK_LIMIT} un).`, "warning");
+        }
+        return prev;
       }
-      return i;
-    }));
+
+      // Registro no histórico
+      const historyKey = "precocerto:basket_history";
+      const history = JSON.parse(localStorage.getItem(historyKey) ?? "[]");
+      history.unshift({
+        at: new Date().toISOString(),
+        action: `Alterou quantidade de ${name}: ${item.quantity} -> ${newQty}`
+      });
+      localStorage.setItem(historyKey, JSON.stringify(history.slice(0, 50)));
+
+      return prev.map(i => i.productName === name ? { ...i, quantity: newQty } : i);
+    });
   };
 
   useEffect(() => {
@@ -1507,13 +1539,30 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                       justifyContent: 'space-between',
                       alignItems: 'center'
                     }}>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 600 }}>Total Estimado</span>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 600 }}>Total Estimado</span>
+                        {syncStatus === "error" && (
+                          <span style={{ fontSize: '0.65rem', color: 'var(--orange)', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                            <Database size={10} /> Modo Offline (Sinc. pausada)
+                          </span>
+                        )}
+                      </div>
                       <strong style={{ fontSize: '1.25rem', color: 'var(--blue)', letterSpacing: '-0.02em', fontWeight: 800 }}>
                         {money(basketItems.reduce((sum, item) => {
                           const prod = findProduct(item.productName);
                           return sum + ((prod?.minPrice || 0) * item.quantity);
                         }, 0))}
                       </strong>
+                    </div>
+                    <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                      <button 
+                        className="button button--outline button--small button--full"
+                        onClick={downloadPDF}
+                        disabled={basketItems.length === 0}
+                        title="Exportar PDF do resumo"
+                      >
+                        <Download size={14} /> PDF Resumo
+                      </button>
                     </div>
                   </div>
                 )}
@@ -1527,6 +1576,23 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                 <button className="button button--ghost button--full" onClick={() => setStep(1)}>
                   <ArrowLeft /> Voltar para o modo
                 </button>
+                
+                <div className="basket-history-toggle" style={{ marginTop: '1rem' }}>
+                   <button 
+                     className="button button--ghost button--small button--full"
+                     onClick={() => {
+                        const history = JSON.parse(localStorage.getItem("precocerto:basket_history") ?? "[]");
+                        if (history.length === 0) {
+                          alert("Nenhum histórico disponível ainda.");
+                          return;
+                        }
+                        const text = history.map((h: any) => `[${new Date(h.at).toLocaleTimeString()}] ${h.action}`).join("\n");
+                        alert("Histórico da Cesta:\n\n" + text);
+                     }}
+                   >
+                     <Clock3 size={14} /> Ver Histórico de Alterações
+                   </button>
+                </div>
               </aside>
             </div>
           </section>
