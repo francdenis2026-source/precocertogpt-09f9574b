@@ -18,6 +18,7 @@ import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgr
 import { MerchantDashboard } from "./components/MerchantDashboard";
 import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
 import { MerchantBusinessSetupShortcut } from "./components/MerchantBusinessSetupShortcut";
+import { MerchantDemoSwitcher } from "./components/MerchantDemoSwitcher";
 import { MerchantCatalogStudio } from "./components/MerchantCatalogStudio";
 import { MerchantManagementCenter } from "./components/MerchantManagementCenter";
 import { MerchantOnlineSalesControl } from "./components/MerchantOnlineSalesControl";
@@ -46,6 +47,7 @@ export default function App() {
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
       <MerchantBusinessSetupShortcut />
+      <MerchantDemoSwitcher />
       <Routes>
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
         <Route path="/loja/:merchantId" element={<MerchantOnlineStoreRoute />} />
