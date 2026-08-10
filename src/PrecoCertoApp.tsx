@@ -4573,6 +4573,11 @@ export default function PrecoCertoApp() {
     });
   }
 
+  const setUserAndUpdateStorage = (newUser: any) => {
+    setUser(newUser);
+    localStorage.setItem("precocerto:user", JSON.stringify(newUser));
+  };
+
   const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user,setUser: setUserAndUpdateStorage}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites]);
 
   const handleAdminAuth = (success: boolean) => {
@@ -4592,10 +4597,6 @@ export default function PrecoCertoApp() {
     setToast("Bem-vindo ao PreçoCerto!");
   };
 
-  const setUserAndUpdateStorage = (newUser: any) => {
-    setUser(newUser);
-    localStorage.setItem("precocerto:user", JSON.stringify(newUser));
-  };
 
   const handleLogout = () => {
     setUser(null);
