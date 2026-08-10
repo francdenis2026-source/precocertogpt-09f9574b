@@ -242,7 +242,7 @@ export async function saveBasket(
     basketId = basket.id;
   }
 
-  await replaceBasketChildren(basketId, items, result);
+  await replaceBasketChildren(basketId as string, items, result);
   return basketId;
 }
 

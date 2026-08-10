@@ -14,8 +14,8 @@ export function MercadoPagoCallback() {
       const oauthState = params.get("state");
       const merchantId = sessionStorage.getItem("pc_mp_merchant_id");
       if (!code || !oauthState || !merchantId) { setState("error"); setMessage("Dados da autorização incompletos. Inicie a conexão novamente no painel da loja."); return; }
-      const { error } = await supabase.functions.invoke("mercadopago-oauth", { body: { action:"callback", merchantId, code, state:oauthState } });
-      if (error) { setState("error"); setMessage(error.message || "Não foi possível concluir a conexão."); return; }
+      const { data, error } = await supabase.functions.invoke("mercadopago-oauth", { body: { action:"callback", merchantId, code, state:oauthState } });
+      if (error || data?.error) { setState("error"); setMessage(data?.error || error?.message || "Não foi possível concluir a conexão."); return; }
       sessionStorage.removeItem("pc_mp_merchant_id");
       setState("success");
       setMessage("Conta Mercado Pago conectada com sucesso.");
