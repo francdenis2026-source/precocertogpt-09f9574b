@@ -8,6 +8,7 @@ import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { HeaderStickyUx } from "./components/HeaderStickyUx";
 import { HomeExperienceRefactor } from "./components/HomeExperienceRefactor";
 import { HomeMobilePolish } from "./components/HomeMobilePolish";
+import { HomeSearchPortalPolish } from "./components/HomeSearchPortalPolish";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
       <HeaderStickyUx />
       <HomeExperienceRefactor />
       <HomeMobilePolish />
+      <HomeSearchPortalPolish />
       <Routes>
         <Route path="*" element={<PrecoCertoApp />} />
       </Routes>
