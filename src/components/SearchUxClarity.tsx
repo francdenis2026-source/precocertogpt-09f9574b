@@ -31,10 +31,8 @@ function ensureSearchHelp() {
 }
 
 function applySearchUx(pathname: string) {
-  // /buscar é a área de pesquisa. Não deve ser apresentada como se fosse o comparador.
   document.querySelectorAll<HTMLAnchorElement>('a[href="/buscar"]').forEach(link => {
-    const text = link.textContent?.trim();
-    if (text === "Comparar preços") link.textContent = "Buscar produtos";
+    if (link.textContent?.trim() === "Comparar preços") link.textContent = "Buscar produtos";
   });
 
   document.querySelectorAll<HTMLElement>(".search-combo__button-text").forEach(label => {
@@ -42,18 +40,16 @@ function applySearchUx(pathname: string) {
   });
 
   document.querySelectorAll<HTMLAnchorElement>(".header-search-button").forEach(link => {
-    link.setAttribute("aria-label", "Pesquisar produtos");
-    link.setAttribute("title", "Pesquisar produtos");
+    if (link.getAttribute("aria-label") !== "Pesquisar produtos") link.setAttribute("aria-label", "Pesquisar produtos");
+    if (link.getAttribute("title") !== "Pesquisar produtos") link.setAttribute("title", "Pesquisar produtos");
   });
 
-  // A ação secundária do hero é descoberta de ofertas, não outra entrada para a mesma busca.
   const heroOffer = document.querySelector<HTMLAnchorElement>('.hero-actions > a.button--white[href="/buscar"]');
   if (heroOffer) {
     heroOffer.href = "/melhores-precos";
     replaceOwnText(heroOffer, "Explorar ofertas", "Ver ofertas de hoje");
   }
 
-  // Em cards, abrir um produto serve para ver preços por loja; "Comparar" sozinho é ambíguo.
   document.querySelectorAll<HTMLAnchorElement>('.visual-product-actions a[href^="/produto/"]').forEach(link => {
     if (link.textContent?.trim() === "Comparar") link.textContent = "Ver preços";
   });
@@ -66,40 +62,48 @@ function applySearchUx(pathname: string) {
           node.textContent = node.textContent.replace("Comparar", "Selecionar para comparar");
         }
       }
+    }
+    if (button.getAttribute("aria-label") !== "Selecionar este produto para comparação") {
       button.setAttribute("aria-label", "Selecionar este produto para comparação");
     }
   });
 
   if (pathname === "/buscar") {
     const title = document.querySelector<HTMLElement>(".search-command__intro h1");
-    if (title?.textContent?.trim() === "Compare antes de comprar") {
-      title.textContent = "Encontre o produto que você procura";
-    }
+    const desiredTitle = "Encontre o produto que você procura";
+    if (title && title.textContent?.trim() !== desiredTitle) title.textContent = desiredTitle;
 
     const intro = document.querySelector<HTMLElement>(".search-command__intro p");
-    if (intro) {
-      intro.textContent = "Digite o nome do produto, encontre rapidamente os preços disponíveis em Feijó e veja onde está mais barato.";
-    }
+    const desiredIntro = "Digite o nome do produto, encontre rapidamente os preços disponíveis em Feijó e veja onde está mais barato.";
+    if (intro && intro.textContent?.trim() !== desiredIntro) intro.textContent = desiredIntro;
 
     ensureSearchHelp();
   }
 }
 
-/**
- * Uniformiza a linguagem de busca e comparação sem alterar os cálculos ou os
- * dados. A pesquisa é a ação primária; comparar passa a ser uma ação explícita
- * realizada depois que o usuário encontra produtos.
- */
 export function SearchUxClarity() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const apply = () => applySearchUx(pathname);
-    apply();
+    let frame = 0;
+    const apply = () => {
+      frame = 0;
+      applySearchUx(pathname);
+    };
+    const scheduleApply = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(apply);
+    };
 
-    const observer = new MutationObserver(apply);
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    apply();
+    const root = document.getElementById("root") ?? document.body;
+    const observer = new MutationObserver(scheduleApply);
+    observer.observe(root, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [pathname]);
 
   return null;
