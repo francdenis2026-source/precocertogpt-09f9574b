@@ -1,5 +1,6 @@
 import { Product } from "../data/catalog";
 import { unitPrice, MeasureBase } from "./pricing";
+import { supabase } from "./supabase";
 
 export interface LatLng {
   lat: number;
@@ -73,21 +74,18 @@ export function optimizeBasket(
   budget?: number,
   userLocation?: LatLng
 ): BasketResult {
-  // 1. Mapear itens da cesta para produtos do catálogo
   const mappedItems = items.map(config => {
-    // Busca aproximada no catálogo (por nome/categoria)
-    const matches = catalog.filter(p => 
+    const matches = catalog.filter(p =>
       p.name.toLowerCase().includes(config.productName.toLowerCase()) ||
       (p.category && config.category && p.category === config.category)
     );
-    
+
     return { config, matches };
   });
 
   let selectedItems: BasketResult['items'] = [];
 
   if (mode === 'cheapest_multi') {
-    // Modo: Mais Barata (Lojas Múltiplas) - Pega o absoluto menor para cada item
     selectedItems = mappedItems.map(({ config, matches }) => {
       const bestProduct = matches.sort((a, b) => a.minPrice - b.minPrice)[0];
       const quantity = config.quantity;
@@ -103,17 +101,8 @@ export function optimizeBasket(
       };
     }).filter(i => i.product);
   } else if (mode === 'cheapest_single') {
-    // Modo: Loja Única - Encontra a loja que tem o menor total para os itens disponíveis
-    const storeTotals: Record<string, { total: number; items: BasketResult['items'] }> = {};
-    
-    // Simplificação: no catálogo atual, cada "Product" já vem com sua melhor loja vinculada.
-    // Para uma otimização real de loja única, precisaríamos dos preços brutos de TODAS as lojas para cada produto.
-    // Como o catálogo agregado do PreçoCerto foca no "melhor preço", vamos simular buscando o estabelecimento
-    // que aparece com mais frequência como "melhor" ou computar via dados de preços se disponíveis.
-    
-    // Mock para MVP: se for loja única, priorizamos o estabelecimento do primeiro item mais barato.
     const primaryStore = mappedItems[0]?.matches.sort((a, b) => a.minPrice - b.minPrice)[0]?.establishment;
-    
+
     selectedItems = mappedItems.map(({ config, matches }) => {
       const storeMatch = matches.find(p => p.establishment === primaryStore) || matches.sort((a, b) => a.minPrice - b.minPrice)[0];
       const quantity = config.quantity;
@@ -129,7 +118,6 @@ export function optimizeBasket(
       };
     }).filter(i => i.product);
   } else if (mode === 'best_value') {
-    // Modo: Melhor Custo-Benefício (Considerando Deslocamento)
     selectedItems = mappedItems.map(({ config, matches }) => {
       const best = matches.slice().sort((a, b) => {
         const distA = distanceFromOrigin(a.neighborhood, userLocation);
@@ -149,7 +137,6 @@ export function optimizeBasket(
       };
     }).filter(i => i.product);
   } else {
-    // Fallback/Within Budget
     selectedItems = mappedItems.map(({ config, matches }) => {
       const bestProduct = matches.sort((a, b) => a.minPrice - b.minPrice)[0];
       return {
@@ -164,8 +151,6 @@ export function optimizeBasket(
   }
 
   const total = selectedItems.reduce((sum, i) => sum + i.subtotal, 0);
-  
-  // Cálculo de economia (vs Preço Médio ou Preço Máximo)
   const avgTotal = selectedItems.reduce((sum, i) => sum + (i.product.avgPrice * i.quantity), 0);
   const savings = Math.max(0, avgTotal - total);
 
@@ -186,7 +171,6 @@ export function optimizeBasket(
     storeBreakdown[item.establishment].itemCount += 1;
   });
 
-  // Custo total de deslocamento: uma parada por estabelecimento visitado.
   const travelCost = Math.round(
     Object.values(storeBreakdown).reduce((sum, s) => sum + (s.estimatedTravelCost || 0), 0) * 100,
   ) / 100;
@@ -200,6 +184,13 @@ export function optimizeBasket(
   };
 }
 
+function requireSupabase() {
+  if (!supabase) {
+    throw new Error('Supabase indisponível. Verifique a configuração da conexão antes de salvar a cesta.');
+  }
+  return supabase;
+}
+
 export async function saveBasket(
   userId: string,
   name: string,
@@ -208,7 +199,9 @@ export async function saveBasket(
   items: BasketItemConfig[],
   result: BasketResult
 ) {
-  const { data: basket, error: bError } = await (window as any).supabase
+  const client = requireSupabase();
+
+  const { data: basket, error: bError } = await client
     .from('smart_baskets')
     .insert({
       user_id: userId,
@@ -220,11 +213,11 @@ export async function saveBasket(
     .single();
 
   if (bError) throw bError;
+  if (!basket?.id) throw new Error('A cesta foi criada sem um identificador válido.');
 
   const basketId = basket.id;
 
-  // Insert items
-  const { error: iError } = await (window as any).supabase
+  const { error: iError } = await client
     .from('smart_basket_items')
     .insert(items.map(i => ({
       basket_id: basketId,
@@ -237,8 +230,7 @@ export async function saveBasket(
 
   if (iError) throw iError;
 
-  // Insert snapshots
-  const { error: sError } = await (window as any).supabase
+  const { error: sError } = await client
     .from('basket_snapshots')
     .insert(result.items.map(item => ({
       basket_id: basketId,
@@ -256,7 +248,8 @@ export async function saveBasket(
 }
 
 export async function getBasketSnapshot(basketId: string) {
-  const { data, error } = await (window as any).supabase
+  const client = requireSupabase();
+  const { data, error } = await client
     .from('smart_baskets')
     .select(`
       *,
