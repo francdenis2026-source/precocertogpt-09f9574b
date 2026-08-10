@@ -110,24 +110,27 @@ export function DorinhaAuthorStore() {
 
   const external = profile.merchant.external_stores || [];
 
-  return <main style={s.page}>
+  return <main style={s.page} className="db-author-page">
     <style>{`
-      .db-hero-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(430px,1.1fr);gap:clamp(34px,6vw,84px);align-items:center}
-      .db-hero-title{font-size:clamp(3.2rem,6vw,5.5rem);line-height:.88;letter-spacing:-.065em;margin:14px 0 18px;max-width:720px}
+      .db-author-page{padding-top:0!important}
+      .db-hero-grid{display:grid;grid-template-columns:minmax(0,.92fr) minmax(440px,1.08fr);gap:clamp(28px,5vw,68px);align-items:center}
+      .db-hero-copy{position:relative;padding-left:22px}
+      .db-hero-copy:before{content:"";position:absolute;left:0;top:4px;width:2px;height:88px;border-radius:9px;background:linear-gradient(#f4dba9,rgba(244,219,169,0));box-shadow:0 0 24px rgba(231,199,141,.28)}
+      .db-hero-title{font-size:clamp(3.1rem,5.6vw,5rem);line-height:.88;letter-spacing:-.065em;margin:13px 0 16px;max-width:720px;text-shadow:0 15px 44px rgba(0,0,0,.25)}
       .db-hero-title em{font-style:normal;color:#e7c78d}
-      .db-hero-art{position:relative;min-height:430px;display:grid;place-items:center;isolation:isolate}
-      .db-cover-stage{position:relative;width:min(100%,620px);height:400px}
-      .db-hero-cover{position:absolute;display:block;width:190px;height:286px;object-fit:contain;border-radius:3px 9px 9px 3px;filter:drop-shadow(0 24px 28px rgba(5,2,11,.44));transform-origin:50% 100%;transition:transform .35s ease,filter .35s ease}
-      .db-hero-cover:nth-child(1){left:4%;bottom:23px;transform:rotate(-13deg) translateY(15px);z-index:1}
-      .db-hero-cover:nth-child(2){left:27%;bottom:47px;transform:rotate(-4deg);z-index:3}
-      .db-hero-cover:nth-child(3){right:24%;bottom:43px;transform:rotate(5deg);z-index:4}
-      .db-hero-cover:nth-child(4){right:1%;bottom:18px;transform:rotate(13deg) translateY(18px);z-index:2}
+      .db-hero-art{position:relative;min-height:410px;display:grid;place-items:center;isolation:isolate}
+      .db-cover-stage{position:relative;width:min(100%,590px);height:385px}
+      .db-hero-cover{position:absolute;display:block;width:172px;height:260px;object-fit:contain;border-radius:3px 9px 9px 3px;filter:drop-shadow(0 25px 25px rgba(18,6,22,.52));transform-origin:50% 100%;transition:transform .35s ease,filter .35s ease}
+      .db-hero-cover:nth-child(1){left:5%;bottom:24px;transform:rotate(-13deg) translateY(15px);z-index:1}
+      .db-hero-cover:nth-child(2){left:29%;bottom:49px;transform:rotate(-4deg);z-index:3}
+      .db-hero-cover:nth-child(3){right:24%;bottom:44px;transform:rotate(5deg);z-index:4}
+      .db-hero-cover:nth-child(4){right:0;bottom:19px;transform:rotate(13deg) translateY(18px);z-index:2}
       .db-cover-stage:hover .db-hero-cover:nth-child(1){transform:rotate(-15deg) translate(-6px,5px)}
       .db-cover-stage:hover .db-hero-cover:nth-child(2){transform:rotate(-5deg) translateY(-10px)}
       .db-cover-stage:hover .db-hero-cover:nth-child(3){transform:rotate(6deg) translateY(-12px)}
       .db-cover-stage:hover .db-hero-cover:nth-child(4){transform:rotate(15deg) translate(6px,7px)}
-      .db-stage-glow{position:absolute;left:8%;right:8%;bottom:3%;height:30%;border-radius:50%;background:radial-gradient(ellipse,rgba(230,200,137,.29),transparent 68%);filter:blur(22px);z-index:-1}
-      .db-stage-note{position:absolute;right:3%;top:20px;max-width:180px;padding:12px 13px;border:1px solid rgba(255,255,255,.17);border-radius:14px;background:rgba(23,13,35,.58);backdrop-filter:blur(14px);color:#e4d9e7;font-size:10px;line-height:1.45;box-shadow:0 14px 36px rgba(0,0,0,.2)}
+      .db-stage-glow{position:absolute;left:8%;right:5%;bottom:2%;height:35%;border-radius:50%;background:radial-gradient(ellipse,rgba(238,202,128,.42),transparent 69%);filter:blur(22px);z-index:-1}
+      .db-stage-note{position:absolute;right:2%;top:10px;max-width:178px;padding:11px 13px;border:1px solid rgba(255,255,255,.25);border-radius:14px;background:rgba(36,17,42,.68);backdrop-filter:blur(16px);color:#f2e8ef;font-size:10px;line-height:1.45;box-shadow:0 14px 36px rgba(0,0,0,.24)}
       .db-stage-note b{display:block;color:#f0d398;font-size:11px;margin-bottom:3px}
       .db-top-label a{color:inherit;text-decoration:none;transition:color .18s ease}
       .db-top-label a:hover{color:#35233f}
@@ -138,8 +141,8 @@ export function DorinhaAuthorStore() {
       .db-action:hover{transform:translateY(-2px)}
       .db-book:hover{transform:translateY(-5px);box-shadow:0 22px 60px rgba(29,18,44,.12)}
       @media(max-width:1050px){.db-hero-grid{grid-template-columns:minmax(0,1fr) minmax(350px,.85fr);gap:20px}.db-cover-stage{transform:scale(.84)}.db-book-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.db-about-grid,.db-contact-grid{grid-template-columns:1fr}.db-external-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-      @media(max-width:790px){.db-hero-grid{grid-template-columns:1fr}.db-hero-art{min-height:330px;margin-top:-25px}.db-cover-stage{height:330px;transform:scale(.78)}.db-stage-note{display:none}.db-hero-copy{text-align:center}.db-hero-copy .db-hero-actions,.db-hero-copy [data-hero-badges],.db-hero-copy [data-hero-foot]{justify-content:center}}
-      @media(max-width:640px){.db-book-grid,.db-external-grid{grid-template-columns:1fr}.db-hero-title{font-size:clamp(2.75rem,15vw,4.2rem)}.db-top-label,.db-icon-label{display:none}.db-hero-actions{display:grid!important}.db-hero-actions>*{width:100%;justify-content:center}.db-section{padding-left:18px!important;padding-right:18px!important}.db-contact-actions{display:grid!important}.db-contact-actions>*{width:100%;justify-content:center}.db-hero-art{min-height:275px;margin-top:-35px}.db-cover-stage{height:300px;transform:scale(.63)}.db-about-facts{grid-template-columns:1fr!important}.db-section-head{align-items:flex-start!important}.db-catalog-count{display:none!important}}
+      @media(max-width:790px){.db-hero-grid{grid-template-columns:1fr}.db-hero-art{min-height:320px;margin-top:-24px}.db-cover-stage{height:330px;transform:scale(.78)}.db-stage-note{display:none}.db-hero-copy{text-align:center;padding-left:0}.db-hero-copy:before{display:none}.db-hero-copy .db-hero-actions,.db-hero-copy [data-hero-badges],.db-hero-copy [data-hero-foot]{justify-content:center}}
+      @media(max-width:640px){.db-book-grid,.db-external-grid{grid-template-columns:1fr}.db-hero-title{font-size:clamp(2.75rem,15vw,4.2rem)}.db-top-label,.db-icon-label{display:none}.db-hero-actions{display:grid!important}.db-hero-actions>*{width:100%;justify-content:center}.db-section{padding-left:18px!important;padding-right:18px!important}.db-contact-actions{display:grid!important}.db-contact-actions>*{width:100%;justify-content:center}.db-hero-art{min-height:265px;margin-top:-34px}.db-cover-stage{height:290px;transform:scale(.62)}.db-about-facts{grid-template-columns:1fr!important}.db-section-head{align-items:flex-start!important}.db-catalog-count{display:none!important}}
     `}</style>
 
     <header style={s.topbar}>
@@ -151,7 +154,7 @@ export function DorinhaAuthorStore() {
       </div>
     </header>
 
-    <section style={{...s.hero,backgroundImage:`linear-gradient(100deg,rgba(12,7,22,.97) 0%,rgba(25,13,39,.9) 46%,rgba(38,19,43,.66) 100%),url('/dorinha-literary-bg.webp'),${heroPattern}`}}>
+    <section style={{...s.hero,backgroundImage:`linear-gradient(90deg,rgba(15,7,20,.76) 0%,rgba(28,10,29,.28) 48%,rgba(35,13,31,.08) 100%),url('/dorinha-hero-art-v2.webp'),${heroPattern}`}}>
       <div style={s.heroGlow}/>
       <div style={s.heroInner} className="db-section db-hero-grid">
         <div className="db-hero-copy">
