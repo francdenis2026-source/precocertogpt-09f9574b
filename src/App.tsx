@@ -6,9 +6,7 @@ import { SearchUxClarity } from "./components/SearchUxClarity";
 import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { HeaderStickyUx } from "./components/HeaderStickyUx";
-import { HomepageProfessionalRewrite } from "./components/HomepageProfessionalRewrite";
-import { HomeSearchFocusUx } from "./components/HomeSearchFocusUx";
-import { DarkThemeConsistency } from "./components/DarkThemeConsistency";
+import { HomeExperienceRefactor } from "./components/HomeExperienceRefactor";
 
 export default function App() {
   return (
@@ -18,9 +16,7 @@ export default function App() {
       <ProductInteractionUx />
       <PublicCatalogUxFixes />
       <HeaderStickyUx />
-      <HomepageProfessionalRewrite />
-      <HomeSearchFocusUx />
-      <DarkThemeConsistency />
+      <HomeExperienceRefactor />
       <Routes>
         <Route path="*" element={<PrecoCertoApp />} />
       </Routes>
