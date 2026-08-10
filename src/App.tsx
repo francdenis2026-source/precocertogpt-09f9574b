@@ -12,6 +12,7 @@ import { HomeSearchPortalPolish } from "./components/HomeSearchPortalPolish";
 import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { FooterCompactUx } from "./components/FooterCompactUx";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
+import { CollaboratePage, ContactPage, MerchantSignupPage, PharmaciesPage } from "./components/PublicFooterServicePages";
 
 export default function App() {
   return (
@@ -28,6 +29,10 @@ export default function App() {
       <FooterCompactUx />
       <RadarShowcaseUx />
       <Routes>
+        <Route path="/lojista" element={<MerchantSignupPage />} />
+        <Route path="/colaborar" element={<CollaboratePage />} />
+        <Route path="/fale-conosco" element={<ContactPage />} />
+        <Route path="/farmacias" element={<PharmaciesPage />} />
         <Route path="*" element={<PrecoCertoApp />} />
       </Routes>
     </BrowserRouter>
