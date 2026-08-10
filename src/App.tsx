@@ -18,6 +18,7 @@ import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgr
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
 import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
 import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
+import { BasketSessionFlow } from "./components/BasketSessionFlow";
 import { MerchantDashboard } from "./components/MerchantDashboard";
 import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
 import { MerchantBusinessSetupShortcut } from "./components/MerchantBusinessSetupShortcut";
@@ -53,6 +54,7 @@ export default function App() {
       <MerchantBusinessSetupShortcut />
       <MerchantDemoSwitcher />
       <EstablishmentsNavBridge />
+      <BasketSessionFlow />
       <Routes>
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
