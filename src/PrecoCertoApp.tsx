@@ -1317,7 +1317,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     <div className="shell page-shell basket-page">
       <header className="page-title">
         <div>
-          <span className="eyebrow">Fase 2 — Cesta Inteligente Determinística</span>
+          <span className="eyebrow">Planejador de Compras Inteligente</span>
           <h1>Planejador de Compras</h1>
           <p>Cálculo matemático para encontrar o menor preço real em Feijó.</p>
         </div>
