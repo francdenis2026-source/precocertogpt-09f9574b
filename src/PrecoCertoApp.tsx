@@ -524,7 +524,7 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
       <div className="header-actions">
         <ThemeToggle compact />
         <a className="icon-button header-action-button header-search-button" href="/buscar" aria-label="Pesquisar produtos" title="Buscar produtos"><Search size={20} aria-hidden="true" /></a>
-        <a className="icon-button header-action-button basket-button favorites-button" href={user ? "/favoritos" : "/login"} aria-label={user ? `${favoritesCount} produtos favoritos` : "Entre para salvar favoritos"} title={user ? "Abrir favoritos" : "Entre para salvar favoritos"}><Heart size={20} fill={favoritesCount > 0 ? "currentColor" : "none"} aria-hidden="true" />{favoritesCount > 0 && <span aria-hidden="true">{favoritesCount}</span>}</a>
+        <a className="icon-button header-action-button basket-button favorites-button" href="/favoritos" aria-label={user ? `${favoritesCount} produtos favoritos` : "Entre para salvar favoritos"} title={user ? "Abrir favoritos" : "Entre para salvar favoritos"} onClick={(e) => { if (!user) { e.preventDefault(); window.location.href = `/login?redirect=${encodeURIComponent('/favoritos')}`; } }}><Heart size={20} fill={favoritesCount > 0 ? "currentColor" : "none"} aria-hidden="true" />{favoritesCount > 0 && <span aria-hidden="true">{favoritesCount}</span>}</a>
         <a className="icon-button header-action-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`} title="Abrir cesta"><ShoppingBasket size={20} aria-hidden="true" />{basketCount > 0 && <span key={basketCount} aria-hidden="true">{basketCount}</span>}</a>
 
         {user ? (
@@ -588,7 +588,7 @@ function Footer() {
   return <footer className="site-footer"><div className="shell footer-grid"><div><Brand inverse /><p>Compare preços reais no comércio de Feijó e transforme cada compra em economia.</p><span className="footer-place"><MapPin size={15} /> Feijó • Acre • Brasil</span></div><div><h3>Descobrir</h3><a href="/buscar">Comparar preços</a><a href="/acougues">Açougues e carnes</a><a href="/cesta-basica">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/farmacias">Farmácias de plantão</a></div><div><h3>PreçoCerto</h3><a href="/#como-funciona">Como funciona</a><a href="/lojista">Para empresas</a><a href="/colaborar">Colaborar</a><a href="/fale-conosco">Fale conosco</a></div><div><h3>Conta</h3><a href="/login">Entrar</a><a href="/cadastro">Criar conta</a><a href="/planos">Planos</a><a href="/admin">Área Administrativa</a></div></div><div className="shell footer-bottom"><span>SKAES NET TECHNOLOGY • FRANC D’NIS</span><span>© 2026 PreçoCerto. Todos os direitos reservados.</span></div></footer>;
 }
 
-function MobileBar({ basketCount }: { basketCount: number }) {
+function MobileBar({ basketCount, favoritesCount }: { basketCount: number; favoritesCount: number }) {
   const { pathname } = useLocation();
   const isActive = (path: string) => pathname === path || (path !== "/" && pathname.startsWith(path));
   
@@ -605,10 +605,10 @@ function MobileBar({ basketCount }: { basketCount: number }) {
       <Sparkles aria-hidden="true" />
       <span>Cesta IA</span>
     </a>
-    <a href="/cesta" className={`mobile-basket ${isActive("/cesta") ? "active" : ""}`} aria-current={isActive("/cesta") ? "page" : undefined}>
-      <ShoppingBasket aria-hidden="true" />
-      {basketCount > 0 && <b aria-hidden="true">{basketCount}</b>}
-      <span>Minha Cesta</span>
+    <a href="/favoritos" className={`mobile-basket ${isActive("/favoritos") ? "active" : ""}`} aria-current={isActive("/favoritos") ? "page" : undefined}>
+      <Heart aria-hidden="true" fill={favoritesCount > 0 ? "currentColor" : "none"} />
+      {favoritesCount > 0 && <b aria-hidden="true">{favoritesCount}</b>}
+      <span>Favoritos</span>
     </a>
     <a href="/perfil" className={isActive("/perfil") ? "active" : ""} aria-current={isActive("/perfil") ? "page" : undefined}>
       <UserRound aria-hidden="true" />
@@ -4439,7 +4439,7 @@ export default function PrecoCertoApp() {
     <Header basketCount={cart.length} favoritesCount={favorites.length} user={user} onLogout={handleLogout}/>
     <main><div className="page-transition-enter-active" key={pathname}>{page}</div></main>
     <Footer/>
-    <MobileBar basketCount={cart.length}/>
+    <MobileBar basketCount={cart.length} favoritesCount={favorites.length}/>
     {toast && (
       <div 
         className={`toast ${toastExit ? "toast--exit" : ""}`}
