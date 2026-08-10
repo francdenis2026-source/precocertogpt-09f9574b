@@ -115,7 +115,7 @@ export function DorinhaAuthorStore() {
   if (loading) return <main style={s.loading}><BookOpen size={36}/><strong>Preparando a biblioteca da autora…</strong></main>;
   if (!profile) return <main style={s.loading}><BookOpen size={36}/><h1>Loja da autora indisponível</h1><a href="/estabelecimentos">Voltar aos estabelecimentos</a></main>;
 
-  const external = profile.merchant.external_stores || [];
+  const external = (profile.merchant.external_stores || []).filter(s => s.label !== 'Apple Books');
 
   return <main style={s.page} className="db-author-page">
     <style>{`
@@ -164,7 +164,7 @@ export function DorinhaAuthorStore() {
       #contato .db-contact-grid h2{font-size:clamp(1.75rem,3.2vw,2.45rem);max-width:620px}
       #contato .db-contact-grid h2{color:#fffafc}
       #contato .db-contact-grid small{color:#f0e8f2;font-size:12px;line-height:1.55}
-      .db-external-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+      .db-external-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:900px}
       .db-external-grid strong{font-size:14px}.db-external-grid small{font-size:12px;color:#6a5f6e}
       .db-book p{hyphens:auto}
       .db-book-price strong{font-variant-numeric:tabular-nums}
