@@ -3189,6 +3189,44 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
 
   if (path === "/perfil" || path === "/favoritos") {
     if (!user) return <div className="shell page-shell generic-page"><section className="favorites-login-gate"><Heart/><span className="eyebrow">Favoritos protegidos</span><h1>Entre para salvar seus produtos</h1><p>Seus favoritos ficam disponíveis somente na sua área de cliente.</p><a className="button button--primary" href={`/login?redirect=${encodeURIComponent(path)}`}>Entrar na minha conta <ArrowRight/></a></section></div>;
+    
+    // Tratamento de carregamento e erro para dados que dependem da renderização
+    const [isDataLoading, setIsDataLoading] = React.useState(true);
+    const [dataError, setDataError] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+      const timer = setTimeout(() => {
+        try {
+          setIsDataLoading(false);
+        } catch (err) {
+          setDataError("Falha ao carregar suas preferências. Tente recarregar a página.");
+          setIsDataLoading(false);
+        }
+      }, 400); // Simulamos um pequeno delay para feedback visual
+      return () => clearTimeout(timer);
+    }, []);
+
+    if (isDataLoading) {
+      return (
+        <div className="shell page-shell generic-page" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div className="loading-spinner" style={{ width: '40px', height: '40px', border: '3px solid var(--surface-3)', borderTopColor: 'var(--blue)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          <p style={{ marginTop: '1rem', color: 'var(--muted)' }}>Carregando seu painel...</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      );
+    }
+
+    if (dataError) {
+      return (
+        <div className="shell page-shell generic-page" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+          <div style={{ color: 'var(--red)', marginBottom: '1.5rem' }}><PackageSearch size={48} /></div>
+          <h1>Ops! Algo deu errado</h1>
+          <p>{dataError}</p>
+          <button className="button button--primary" style={{ marginTop: '1.5rem' }} onClick={() => window.location.reload()}>Tentar novamente</button>
+        </div>
+      );
+    }
+
     const favProducts = products.filter(p => favorites.includes(String(p.id)));
     
     return (
