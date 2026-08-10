@@ -3256,6 +3256,20 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
 
     const handleUpdateProfile = (e: React.FormEvent) => {
       e.preventDefault();
+      
+      const errors = [];
+      if (profileData.name.trim().length < 3) errors.push("Nome deve ter pelo menos 3 caracteres.");
+      if (profileData.address.trim().length < 5) errors.push("Informe um endereço válido.");
+      if (profileData.phone && !/^\d{10,11}$/.test(profileData.phone.replace(/\D/g, ""))) errors.push("Telefone inválido (use DDD + número).");
+      if (profileData.whatsapp && !/^\d{10,11}$/.test(profileData.whatsapp.replace(/\D/g, ""))) errors.push("WhatsApp inválido (use DDD + número).");
+
+      if (errors.length > 0) {
+        if (typeof (window as any).setGlobalToast === 'function') {
+          (window as any).setGlobalToast(errors[0], "error");
+        }
+        return;
+      }
+
       const updatedUser = { ...user, ...profileData };
       if (setUser) setUser(updatedUser);
       localStorage.setItem("precocerto:user", JSON.stringify(updatedUser));
