@@ -15,6 +15,7 @@ import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { FooterCompactUx } from "./components/FooterCompactUx";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
+import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
 import { MerchantDashboard } from "./components/MerchantDashboard";
 import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
 import { MerchantBusinessSetupShortcut } from "./components/MerchantBusinessSetupShortcut";
@@ -46,6 +47,7 @@ export default function App() {
       <FooterCompactUx />
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
+      <MarketplacePositioningSection />
       <MerchantBusinessSetupShortcut />
       <MerchantDemoSwitcher />
       <Routes>
