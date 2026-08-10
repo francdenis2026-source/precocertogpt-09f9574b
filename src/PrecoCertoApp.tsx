@@ -1638,16 +1638,37 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                         }, 0))}
                       </strong>
                     </div>
-                    <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <button 
-                        className="button button--outline button--small button--full"
+                        className="button button--outline button--small"
+                        style={{ flex: 1 }}
                         onClick={downloadPDF}
                         disabled={basketItems.length === 0}
                         title="Exportar PDF do resumo"
                       >
-                        <Download size={14} /> PDF Resumo
+                        <Download size={14} /> PDF
+                      </button>
+                      <button 
+                        className={`button ${user ? 'button--primary' : 'button--outline'} button--small`}
+                        style={{ flex: 1.5 }}
+                        onClick={() => {
+                          if (!user) {
+                            localStorage.setItem("pc:pending_save_basket", "true");
+                            window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+                            return;
+                          }
+                          handleSaveBasket();
+                        }}
+                        disabled={basketItems.length === 0 || isSaving}
+                      >
+                        {isSaving ? 'Salvando...' : (
+                          <>
+                            <Save size={14} /> Salvar Lista
+                          </>
+                        )}
                       </button>
                     </div>
+
                   </div>
                 )}
                 <button 
