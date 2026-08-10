@@ -1,4 +1,4 @@
-import { Boxes, Settings2 } from "lucide-react";
+import { Boxes, Layers3, Settings2 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 export function MerchantBusinessSetupShortcut() {
@@ -21,6 +21,9 @@ export function MerchantBusinessSetupShortcut() {
 
   return (
     <div style={{ position:"fixed", right:20, bottom:20, zIndex:1000, display:"flex", gap:8, flexWrap:"wrap", justifyContent:"flex-end" }}>
+      <a href="/painel-lojista/catalogo" title="Gerenciar cardápio, variações e adicionais" style={{...base,background:"#155e75"}}>
+        <Layers3 size={17}/> Estúdio de catálogo
+      </a>
       <a href="/painel-lojista/gestao" title="Gerenciar catálogo, entrega, financeiro e equipe" style={{...base,background:"#183d2b"}}>
         <Boxes size={17}/> Gestão da loja
       </a>
