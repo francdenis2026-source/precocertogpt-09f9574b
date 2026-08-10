@@ -6,6 +6,7 @@ import { MaxPriceStoreLabels } from "./components/MaxPriceStoreLabels";
 import { SearchUxClarity } from "./components/SearchUxClarity";
 import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
+import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
 import { HeaderStickyUx } from "./components/HeaderStickyUx";
 import { HomeExperienceRefactor } from "./components/HomeExperienceRefactor";
 import { HomeMobilePolish } from "./components/HomeMobilePolish";
@@ -19,8 +20,9 @@ import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
 import { MerchantBusinessSetupShortcut } from "./components/MerchantBusinessSetupShortcut";
 import { MerchantCatalogStudio } from "./components/MerchantCatalogStudio";
 import { MerchantManagementCenter } from "./components/MerchantManagementCenter";
+import { MerchantOnlineSalesControl } from "./components/MerchantOnlineSalesControl";
+import { MerchantOnlineStoreRoute } from "./components/MerchantOnlineStoreRoute";
 import { MerchantOnboardingPage } from "./components/MerchantOnboardingPage";
-import { MerchantStorefront } from "./components/MerchantStorefront";
 import { PlatformAdminDashboard } from "./components/PlatformAdminDashboard";
 import { AdminMerchantManagement } from "./components/AdminMerchantManagement";
 import { CustomerOrders } from "./components/CustomerOrders";
@@ -34,6 +36,7 @@ export default function App() {
       <SearchUxClarity />
       <ProductInteractionUx />
       <PublicCatalogUxFixes />
+      <PublicOnlineSalesAvailability />
       <HeaderStickyUx />
       <HomeExperienceRefactor />
       <HomeMobilePolish />
@@ -45,11 +48,12 @@ export default function App() {
       <MerchantBusinessSetupShortcut />
       <Routes>
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
-        <Route path="/loja/:merchantId" element={<MerchantStorefront />} />
+        <Route path="/loja/:merchantId" element={<MerchantOnlineStoreRoute />} />
         <Route path="/painel-lojista" element={<MerchantDashboard />} />
         <Route path="/painel-lojista/gestao" element={<MerchantManagementCenter />} />
         <Route path="/painel-lojista/catalogo" element={<MerchantCatalogStudio />} />
         <Route path="/painel-lojista/configurar-negocio" element={<MerchantBusinessSetup />} />
+        <Route path="/painel-lojista/vendas-online" element={<MerchantOnlineSalesControl />} />
         <Route path="/meus-pedidos" element={<CustomerOrders />} />
         <Route path="/integracoes/mercadopago/callback" element={<MercadoPagoCallback />} />
         <Route path="/admin/plataforma" element={<PlatformAdminDashboard />} />
