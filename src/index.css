@@ -2562,13 +2562,32 @@ textarea.admin-input {
 }
 
 .item-qty button {
-  width: 24px;
-  height: 24px;
-  border: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
   background: white;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.item-qty button:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.item-qty button:active:not(:disabled) {
+  transform: scale(0.95);
+  background: var(--surface-3);
+}
+
+.item-qty button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .quick-grid {
@@ -2584,17 +2603,30 @@ textarea.admin-input {
   background: var(--surface);
   border: 1.5px solid var(--border);
   font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: var(--transition);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.quick-pill:hover:not(.active) {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.quick-pill:active {
+  transform: scale(0.97);
 }
 
 .quick-pill.active {
-  background: var(--blue-soft);
+  background: var(--blue);
   border-color: var(--blue);
-  color: var(--blue);
+  color: white;
+  box-shadow: 0 4px 12px var(--blue-glass);
 }
 
 .result-kpis {
