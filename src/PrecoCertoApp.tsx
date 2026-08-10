@@ -3216,6 +3216,20 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     }
   }, [path]);
 
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: (user as any)?.name || "",
+        address: (user as any)?.address || "",
+        phone: (user as any)?.phone || "",
+        whatsapp: (user as any)?.whatsapp || "",
+        referencePoint: (user as any)?.referencePoint || "",
+        cpf: (user as any)?.cpf || ""
+      });
+    }
+  }, [user]);
+
+
 
   if (path === "/perfil" || path === "/favoritos") {
     if (!user) return <div className="shell page-shell generic-page"><section className="favorites-login-gate"><Heart/><span className="eyebrow">Favoritos protegidos</span><h1>Entre para salvar seus produtos</h1><p>Seus favoritos ficam disponíveis somente na sua área de cliente.</p><a className="button button--primary" href={`/login?redirect=${encodeURIComponent(path)}`}>Entrar na minha conta <ArrowRight/></a></section></div>;
