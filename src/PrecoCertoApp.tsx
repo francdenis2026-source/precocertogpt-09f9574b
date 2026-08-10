@@ -3332,53 +3332,88 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
               <p>{isFavoritesView ? "Produtos que você marcou com o coração para acesso rápido." : "Gerencie seus dados e preferências."}</p>
             </div>
             
-            {favProducts.length > 0 ? (
-              <div className="visual-product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-                {favProducts.map(p => (
-                  <article className="visual-product-card" key={p.id}>
-                    <div 
-                      className="visual-product-image" 
-                      onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
-                      style={{ height: '120px', cursor: 'pointer' }}
-                    >
-                      <ProductImage product={p} size="compact" />
-                    </div>
-                    <div className="visual-product-content" style={{ padding: '1rem' }}>
+            {isFavoritesView && (
+              favProducts.length > 0 ? (
+                <div className="visual-product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+                  {favProducts.map(p => (
+                    <article className="visual-product-card" key={p.id}>
                       <div 
-                        className="visual-product-name" 
+                        className="visual-product-image" 
                         onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
-                        style={{ fontSize: '0.9rem', height: '2.5rem', cursor: 'pointer' }}
+                        style={{ height: '120px', cursor: 'pointer' }}
                       >
-                        {p.name}
+                        <ProductImage product={p} size="compact" />
                       </div>
-                      <div className="visual-price">
-                        <strong>{money(p.minPrice)}</strong>
+                      <div className="visual-product-content" style={{ padding: '1rem' }}>
+                        <div 
+                          className="visual-product-name" 
+                          onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
+                          style={{ fontSize: '0.9rem', height: '2.5rem', cursor: 'pointer' }}
+                        >
+                          {p.name}
+                        </div>
+                        <div className="visual-price">
+                          <strong>{money(p.minPrice)}</strong>
+                        </div>
+                        <div className="visual-product-actions">
+                          <button className="button button--primary button--small" onClick={() => addBasket(p)}><Plus size={14}/> Cesta</button>
+                          <button className="button button--ghost button--small" onClick={() => {
+                            toggleFavorite(String(p.id));
+                          }}><Trash2 size={14}/></button>
+                        </div>
                       </div>
-                      <div className="visual-product-actions">
-                        <button className="button button--primary button--small" onClick={() => addBasket(p)}><Plus size={14}/> Cesta</button>
-                        <button className="button button--ghost button--small" onClick={() => {
-                          toggleFavorite(String(p.id));
-                        }}><Trash2 size={14}/></button>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--surface-2)', borderRadius: '12px', border: '2px dashed var(--surface-3)' }}>
-                <div style={{ position: 'relative', display: 'inline-block', marginBottom: '1.5rem' }}>
-                  <Heart size={48} style={{ opacity: 0.1 }} />
-                  <Search size={20} style={{ position: 'absolute', bottom: -5, right: -5, color: 'var(--blue)' }} />
+                    </article>
+                  ))}
                 </div>
-                <h3>Sua lista está vazia</h3>
-                <p style={{ maxWidth: '300px', margin: '0 auto 1.5rem', color: 'var(--muted)' }}>
-                  Você ainda não favoritou nenhum produto. Adicione itens para acompanhar preços rapidamente.
-                </p>
-                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-                  <a href="/buscar" className="button button--primary">
-                    <Search size={16} /> Explorar Ofertas
-                  </a>
-                  <a href="/" className="button button--ghost">Ver Início</a>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--surface-2)', borderRadius: '12px', border: '2px dashed var(--surface-3)' }}>
+                  <div style={{ position: 'relative', display: 'inline-block', marginBottom: '1.5rem' }}>
+                    <Heart size={48} style={{ opacity: 0.1 }} />
+                    <Search size={20} style={{ position: 'absolute', bottom: -5, right: -5, color: 'var(--blue)' }} />
+                  </div>
+                  <h3>Sua lista está vazia</h3>
+                  <p style={{ maxWidth: '300px', margin: '0 auto 1.5rem', color: 'var(--muted)' }}>
+                    Você ainda não favoritou nenhum produto. Adicione itens para acompanhar preços rapidamente.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                    <a href="/buscar" className="button button--primary">
+                      <Search size={16} /> Explorar Ofertas
+                    </a>
+                    <a href="/" className="button button--ghost">Ver Início</a>
+                  </div>
+                </div>
+              )
+            )}
+
+            {isProfileView && (
+              <div className="price-table-card" style={{ padding: '1.5rem', display: 'grid', gap: '1.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                  <div>
+                    <span className="eyebrow" style={{ fontSize: '0.7rem' }}>Nome Completo</span>
+                    <p style={{ margin: '0.25rem 0 0', fontWeight: 600 }}>{profileData.name || "Não informado"}</p>
+                  </div>
+                  <div>
+                    <span className="eyebrow" style={{ fontSize: '0.7rem' }}>CPF</span>
+                    <p style={{ margin: '0.25rem 0 0', fontWeight: 600 }}>{profileData.cpf || "Não informado"}</p>
+                  </div>
+                  <div>
+                    <span className="eyebrow" style={{ fontSize: '0.7rem' }}>Telefone</span>
+                    <p style={{ margin: '0.25rem 0 0', fontWeight: 600 }}>{profileData.phone || "Não informado"}</p>
+                  </div>
+                  <div>
+                    <span className="eyebrow" style={{ fontSize: '0.7rem' }}>WhatsApp</span>
+                    <p style={{ margin: '0.25rem 0 0', fontWeight: 600 }}>{profileData.whatsapp || "Não informado"}</p>
+                  </div>
+                </div>
+                <div>
+                  <span className="eyebrow" style={{ fontSize: '0.7rem' }}>Endereço e Referência</span>
+                  <p style={{ margin: '0.25rem 0 0', fontWeight: 600 }}>
+                    {profileData.address || "Endereço não informado"}
+                    {profileData.referencePoint && <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 400 }}>{profileData.referencePoint}</span>}
+                  </p>
+                </div>
+                <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--surface-3)' }}>
+                  <button className="button button--ghost button--small" onClick={() => setIsEditingProfile(true)}>Atualizar Meus Dados</button>
                 </div>
               </div>
             )}
