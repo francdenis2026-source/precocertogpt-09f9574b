@@ -2643,11 +2643,21 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
               <div className="visual-product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                 {favProducts.map(p => (
                   <article className="visual-product-card" key={p.id}>
-                    <a className="visual-product-image" href={`/produto/${p.slug}`} style={{ height: '120px' }}>
+                    <div 
+                      className="visual-product-image" 
+                      onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
+                      style={{ height: '120px', cursor: 'pointer' }}
+                    >
                       <ProductImage product={p} size="compact" />
-                    </a>
+                    </div>
                     <div className="visual-product-content" style={{ padding: '1rem' }}>
-                      <a className="visual-product-name" href={`/produto/${p.slug}`} style={{ fontSize: '0.9rem', height: '2.5rem' }}>{p.name}</a>
+                      <div 
+                        className="visual-product-name" 
+                        onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
+                        style={{ fontSize: '0.9rem', height: '2.5rem', cursor: 'pointer' }}
+                      >
+                        {p.name}
+                      </div>
                       <div className="visual-price">
                         <strong>{money(p.minPrice)}</strong>
                       </div>
