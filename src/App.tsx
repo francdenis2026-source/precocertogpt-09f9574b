@@ -11,6 +11,7 @@ import { HomeMobilePolish } from "./components/HomeMobilePolish";
 import { HomeSearchPortalPolish } from "./components/HomeSearchPortalPolish";
 import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { FooterCompactUx } from "./components/FooterCompactUx";
+import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
       <HomeSearchPortalPolish />
       <HomeSearchKeyboardUx />
       <FooterCompactUx />
+      <RadarShowcaseUx />
       <Routes>
         <Route path="*" element={<PrecoCertoApp />} />
       </Routes>
