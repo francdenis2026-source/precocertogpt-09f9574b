@@ -13,11 +13,7 @@ function highestOffer(product: Product): ProductOffer | undefined {
 
 function buildProductLookup(products: Product[]) {
   const lookup = new Map<string, Product>();
-
-  products.forEach(product => {
-    lookup.set(normalize(product.name), product);
-  });
-
+  products.forEach(product => lookup.set(normalize(product.name), product));
   return lookup;
 }
 
@@ -30,15 +26,16 @@ function annotateMaxPriceStores(lookup: Map<string, Product>) {
     const offer = product ? highestOffer(product) : undefined;
     if (!offer) return;
 
-    const priceBlocks = Array.from(
-      card.querySelectorAll<HTMLElement>(".professional-price-analysis > span"),
-    );
+    const priceBlocks = Array.from(card.querySelectorAll<HTMLElement>(".professional-price-analysis > span"));
     const maxPriceBlock = priceBlocks.find(block =>
       block.querySelector("small")?.textContent?.trim() === "Maior preço",
     );
     if (!maxPriceBlock) return;
 
+    const desiredText = `em ${offer.establishment}`;
+    const desiredTitle = `Maior preço encontrado em ${offer.establishment}`;
     let label = maxPriceBlock.querySelector<HTMLElement>(`.${LABEL_CLASS}`);
+
     if (!label) {
       label = document.createElement("small");
       label.className = LABEL_CLASS;
@@ -53,34 +50,44 @@ function annotateMaxPriceStores(lookup: Map<string, Product>) {
       label.style.lineHeight = "1.25";
       label.style.color = "var(--muted)";
       label.style.opacity = "0.9";
+      label.textContent = desiredText;
+      label.title = desiredTitle;
+      label.setAttribute("aria-label", desiredTitle);
       maxPriceBlock.appendChild(label);
+      return;
     }
 
-    label.textContent = `em ${offer.establishment}`;
-    label.title = `Maior preço encontrado em ${offer.establishment}`;
-    label.setAttribute("aria-label", `Maior preço encontrado em ${offer.establishment}`);
+    // Evita escrever no DOM quando nada mudou. Isso impede o MutationObserver
+    // de reagir às próprias alterações em um loop contínuo.
+    if (label.textContent !== desiredText) label.textContent = desiredText;
+    if (label.title !== desiredTitle) label.title = desiredTitle;
+    if (label.getAttribute("aria-label") !== desiredTitle) label.setAttribute("aria-label", desiredTitle);
   });
 }
 
-/**
- * Acrescenta, de forma visualmente secundária, o estabelecimento associado ao
- * maior preço nos cards da pesquisa. A informação vem da mesma lista de ofertas
- * usada para calcular minPrice/avgPrice/maxPrice; nenhum preço é recalculado aqui.
- */
 export function MaxPriceStoreLabels() {
   useEffect(() => {
     let active = true;
     let observer: MutationObserver | undefined;
+    let frame = 0;
 
     void fetchCatalog().then(catalog => {
       if (!active) return;
-
       const lookup = buildProductLookup(catalog.products);
-      const applyLabels = () => annotateMaxPriceStores(lookup);
+
+      const applyLabels = () => {
+        frame = 0;
+        annotateMaxPriceStores(lookup);
+      };
+      const scheduleApply = () => {
+        if (frame) return;
+        frame = requestAnimationFrame(applyLabels);
+      };
 
       applyLabels();
-      observer = new MutationObserver(applyLabels);
-      observer.observe(document.body, { childList: true, subtree: true });
+      const root = document.getElementById("root") ?? document.body;
+      observer = new MutationObserver(scheduleApply);
+      observer.observe(root, { childList: true, subtree: true });
     }).catch(error => {
       console.warn("Não foi possível identificar o estabelecimento do maior preço.", error);
     });
@@ -88,6 +95,7 @@ export function MaxPriceStoreLabels() {
     return () => {
       active = false;
       observer?.disconnect();
+      if (frame) cancelAnimationFrame(frame);
     };
   }, []);
 
