@@ -20,6 +20,7 @@ import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarket
 import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
 import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
 import { BasketSessionFlow } from "./components/BasketSessionFlow";
+import { AuthorMerchantDashboardWelcome } from "./components/AuthorMerchantDashboardWelcome";
 import { MerchantDashboard } from "./components/MerchantDashboard";
 import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
 import { MerchantBusinessSetupShortcut } from "./components/MerchantBusinessSetupShortcut";
@@ -56,6 +57,7 @@ export default function App() {
       <MerchantDemoSwitcher />
       <EstablishmentsNavBridge />
       <BasketSessionFlow />
+      <AuthorMerchantDashboardWelcome />
       <Routes>
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/autora/dorinha-barroso" element={<DorinhaAuthorStore />} />
