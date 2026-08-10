@@ -58,7 +58,14 @@ CREATE POLICY "Users can manage their own baskets"
 ON public.smart_baskets
 FOR ALL
 TO authenticated
-USING (auth.uid() = user_id);
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Public can view shared baskets"
+ON public.smart_baskets
+FOR SELECT
+TO anon, authenticated
+USING (true);
 
 CREATE POLICY "Users can manage items of their own baskets"
 ON public.smart_basket_items
@@ -67,13 +74,37 @@ TO authenticated
 USING (EXISTS (
     SELECT 1 FROM public.smart_baskets
     WHERE id = basket_id AND user_id = auth.uid()
+))
+WITH CHECK (EXISTS (
+    SELECT 1 FROM public.smart_baskets
+    WHERE id = basket_id AND user_id = auth.uid()
 ));
 
-CREATE POLICY "Users can view snapshots of their own baskets"
+CREATE POLICY "Public can view items of shared baskets"
+ON public.smart_basket_items
+FOR SELECT
+TO anon, authenticated
+USING (true);
+
+CREATE POLICY "Users can manage snapshots of their own baskets"
 ON public.basket_snapshots
 FOR ALL
 TO authenticated
 USING (EXISTS (
     SELECT 1 FROM public.smart_baskets
     WHERE id = basket_id AND user_id = auth.uid()
+))
+WITH CHECK (EXISTS (
+    SELECT 1 FROM public.smart_baskets
+    WHERE id = basket_id AND user_id = auth.uid()
 ));
+
+CREATE POLICY "Public can view snapshots of shared baskets"
+ON public.basket_snapshots
+FOR SELECT
+TO anon, authenticated
+USING (true);
+
+GRANT SELECT ON public.smart_baskets TO anon;
+GRANT SELECT ON public.smart_basket_items TO anon;
+GRANT SELECT ON public.basket_snapshots TO anon;
