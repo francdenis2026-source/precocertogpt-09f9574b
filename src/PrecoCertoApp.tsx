@@ -1057,6 +1057,39 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     }));
   });
 
+  // Efeito para carregar cesta do banco de dados quando o usuário loga
+  useEffect(() => {
+    async function loadUserBasket() {
+      if (!user) return;
+      try {
+        const { data: baskets, error } = await supabase
+          .from('smart_baskets')
+          .select('*, items:smart_basket_items(*)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) throw error;
+        if (baskets && baskets.length > 0) {
+          const latest = baskets[0];
+          const mappedItems = latest.items.map((i: any) => ({
+            productName: i.product_name,
+            category: i.category,
+            quantity: i.quantity,
+            unit: i.unit,
+            isEssential: i.is_essential
+          }));
+          setBasketItems(mappedItems);
+          setMode(latest.optimization_mode);
+          setBudget(latest.budget);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar cesta do banco:", err);
+      }
+    }
+    loadUserBasket();
+  }, [user]);
+
   // Persiste itens da cesta no localStorage conforme mudam
   useEffect(() => {
     localStorage.setItem("precocerto:active_basket_items", JSON.stringify(basketItems));
