@@ -29,7 +29,9 @@ export function DorinhaCommerceEnhancer(){
  useEffect(()=>{if(!active||!profile)return;const enhance=()=>{document.querySelectorAll("article").forEach(card=>{const title=Array.from(card.querySelectorAll("h3,strong")).map(x=>x.textContent?.trim()).find(t=>profile.books.some(b=>b.name===t));if(!title)return;const b=profile.books.find(x=>x.name===title);if(!b)return;const direct=Array.from(card.querySelectorAll("a")).find(a=>a.textContent?.includes("Comprar direto"));if(direct&&!direct.getAttribute("data-pc-pix")){direct.setAttribute("data-pc-pix",b.slug);direct.setAttribute("href",`?comprar=${encodeURIComponent(b.slug)}`);direct.innerHTML="Comprar com PIX";direct.addEventListener("click",e=>{e.preventDefault();setBook(b);history.replaceState(null,"",`${location.pathname}?comprar=${encodeURIComponent(b.slug)}`)});const row=document.createElement("div");row.setAttribute("data-pc-book-tools",b.slug);row.style.cssText="display:flex;gap:6px;margin-top:8px";if(b.preview_url){const a=document.createElement("a");a.href=b.preview_url;a.target="_blank";a.rel="noreferrer";a.textContent="Ler prévia";a.style.cssText="flex:1;text-align:center;padding:9px;border:1px solid #ded6df;border-radius:9px;text-decoration:none;color:#493c4e;font-size:11px;font-weight:800";row.appendChild(a)}const q=document.createElement("button");q.type="button";q.textContent="QR da obra";q.style.cssText="flex:1;padding:9px;border:1px solid #ded6df;border-radius:9px;background:#fff;color:#493c4e;font-size:11px;font-weight:800;cursor:pointer";q.onclick=()=>{setBook(b);setShowQr(true)};row.appendChild(q);direct.parentElement?.parentElement?.appendChild(row)}})};enhance();const mo=new MutationObserver(enhance);mo.observe(document.body,{subtree:true,childList:true});return()=>mo.disconnect()},[active,profile,location.pathname]);
  const unit=useMemo(()=>book?Number(book.promotional_price??book.price??0):0,[book]);
  function close(){setBook(null);setPix(null);setError("");setShowQr(false);if(active)history.replaceState(null,"",location.pathname)}
- function formatField(e:ChangeEvent<HTMLInputElement>,formatter:(value:string)=>string){e.currentTarget.value=formatter(e.currentTarget.value)}
+ function formatField(e: any, formatter: (value: string) => string) {
+   e.target.value = formatter(e.target.value);
+ }
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(!book||!supabase)return;setBusy(true);setError("");setPix(null);
   const fd=new FormData(e.currentTarget);
@@ -54,10 +56,10 @@ export function DorinhaCommerceEnhancer(){
    {book.preview_url&&<a href={book.preview_url} target="_blank" rel="noreferrer" style={s.preview}><BookOpen size={16}/> Ler uma prévia antes de comprar</a>}
    <div style={s.sectionLabel}>DADOS DO COMPRADOR</div>
    <div className="pc-pix-fields" style={s.fields}>
-    <label style={s.label}>Nome completo<input style={s.input} name="name" required minLength={3} maxLength={120} autoComplete="name" placeholder="SEU NOME COMPLETO" onInput={e=>formatField(e as ChangeEvent<HTMLInputElement>,upperName)}/></label>
-    <label style={s.label}>E-mail para confirmação<input style={s.input} name="email" type="email" required maxLength={160} autoComplete="email" placeholder="seuemail@exemplo.com" onInput={e=>formatField(e as ChangeEvent<HTMLInputElement>,lowerEmail)}/></label>
-    <label style={s.label}>CPF<input style={s.input} name="cpf" inputMode="numeric" required maxLength={14} placeholder="000.000.000-00" onInput={e=>formatField(e as ChangeEvent<HTMLInputElement>,maskCpf)}/></label>
-    <label style={s.label}>Telefone <small>(opcional)</small><input style={s.input} name="phone" inputMode="tel" autoComplete="tel" maxLength={15} placeholder="(68) 99999-9999" onInput={e=>formatField(e as ChangeEvent<HTMLInputElement>,maskPhone)}/></label>
+     <label style={s.label}>Nome completo<input style={s.input} name="name" required minLength={3} maxLength={120} autoComplete="name" placeholder="SEU NOME COMPLETO" onInput={e=>formatField(e,upperName)}/></label>
+     <label style={s.label}>E-mail para confirmação<input style={s.input} name="email" type="email" required maxLength={160} autoComplete="email" placeholder="seuemail@exemplo.com" onInput={e=>formatField(e,lowerEmail)}/></label>
+     <label style={s.label}>CPF<input style={s.input} name="cpf" inputMode="numeric" required maxLength={14} placeholder="000.000.000-00" onInput={e=>formatField(e,maskCpf)}/></label>
+     <label style={s.label}>Telefone <small>(opcional)</small><input style={s.input} name="phone" inputMode="tel" autoComplete="tel" maxLength={15} placeholder="(68) 99999-9999" onInput={e=>formatField(e,maskPhone)}/></label>
     <label style={s.label}>Quantidade<select style={s.input} name="quantity" defaultValue="1" required>{[1,2,3,4,5,6,7,8,9,10].map(q=><option key={q} value={q}>{q} {q===1?"exemplar":"exemplares"}</option>)}</select></label>
    </div>
    {error&&<div role="alert" style={s.error}><strong>Não foi possível gerar o PIX.</strong><span>{error}</span></div>}
