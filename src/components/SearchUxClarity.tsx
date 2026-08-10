@@ -9,6 +9,46 @@ function replaceOwnText(element: Element, from: string, to: string) {
   }
 }
 
+function ensureSearchPositionStyles() {
+  if (document.getElementById("pc-search-position-fix")) return;
+  const style = document.createElement("style");
+  style.id = "pc-search-position-fix";
+  style.textContent = `
+    body:has(.search-command) main,
+    body:has(.search-command) .app main {
+      padding-top: 0 !important;
+    }
+
+    .search-command {
+      margin-top: 8px !important;
+      padding-top: 0 !important;
+    }
+
+    .search-command__intro {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+
+    .search-command__intro h1 {
+      margin-top: 0 !important;
+    }
+
+    @media (min-width: 761px) {
+      .site-header + main .search-command,
+      main .search-command:first-child {
+        margin-top: 6px !important;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .search-command {
+        margin-top: 4px !important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 function ensureSearchHelp() {
   const command = document.querySelector<HTMLElement>(".search-command");
   if (!command || document.querySelector(".search-ux-guide")) return;
@@ -31,6 +71,8 @@ function ensureSearchHelp() {
 }
 
 function applySearchUx(pathname: string) {
+  ensureSearchPositionStyles();
+
   document.querySelectorAll<HTMLAnchorElement>('a[href="/buscar"]').forEach(link => {
     if (link.textContent?.trim() === "Comparar preços") link.textContent = "Buscar produtos";
   });
