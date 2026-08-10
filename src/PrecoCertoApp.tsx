@@ -4597,10 +4597,6 @@ export default function PrecoCertoApp() {
     setToast("Bem-vindo ao PreçoCerto!");
   };
 
-  const setUserAndUpdateStorage = (newUser: any) => {
-    setUser(newUser);
-    localStorage.setItem("precocerto:user", JSON.stringify(newUser));
-  };
 
   const handleLogout = () => {
     setUser(null);
