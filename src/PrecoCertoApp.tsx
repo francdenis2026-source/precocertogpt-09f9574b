@@ -14,6 +14,7 @@ import { fetchCatalog } from "./data/remoteCatalog";
 import { supabase } from "./lib/supabase";
 import { isEnabled } from "./config/features";
 import { freshnessLabels, priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
+import { searchProducts } from "./lib/productSearch";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
 import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
@@ -633,18 +634,10 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
     setLocalValue(value);
   }, [value]);
 
-  const normalize = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-  const q = normalize(localValue);
-  
   const suggestions = useMemo(() => {
-    if (!localValue) return products.slice(0, 6);
-    return products.filter(p => 
-      normalize(p.name).includes(q) || 
-      normalize(p.category).includes(q) || 
-      normalize(p.brand).includes(q) ||
-      (p.barcode && p.barcode.includes(localValue))
-    ).slice(0, 6);
-  }, [localValue, products, q]);
+    const matches = searchProducts(products, localValue);
+    return (localValue ? matches : matches.sort((a, b) => a.minPrice - b.minPrice)).slice(0, 6);
+  }, [localValue, products]);
 
   function submit(event: FormEvent) { 
     event.preventDefault(); 
@@ -680,7 +673,7 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
     {focused && (
       <div className="search-results-dynamic" id={hero ? "hero-suggestions" : "page-suggestions"} role="listbox">
         <div className="suggestions-label" style={{ padding: '0.75rem 1rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--muted)', background: 'var(--surface-2)' }}>
-          {localValue ? "Sugestões em Feijó" : "Produtos em alta"}
+          {localValue ? `${suggestions.length} melhores correspondências` : "Preços em destaque em Feijó"}
         </div>
         {suggestions.length > 0 ? (
           suggestions.map(p => (
@@ -3186,17 +3179,8 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  const normalize = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-
   const filtered = useMemo(() => {
-    let result = products.filter(p => {
-      const q = normalize(query);
-      const matchesQuery = !query || 
-        normalize(p.name).includes(q) || 
-        normalize(p.category).includes(q) || 
-        normalize(p.brand).includes(q) ||
-        (p.barcode && p.barcode.includes(query));
-
+    let result = searchProducts(products, query).filter(p => {
       const matchesCategory = activeCategory === "all" || p.category === activeCategory;
       const matchesStore = activeStore === "all" || p.establishment === activeStore;
       const matchesBrand = activeBrand === "all" || p.brand === activeBrand;
@@ -3207,10 +3191,12 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
         || (updateRecency === "7d" && daysSinceUpdate <= 7)
         || (updateRecency === "24h" && daysSinceUpdate === 0);
 
-      return matchesQuery && matchesCategory && matchesStore && matchesBrand && matchesPrice && matchesRecency;
+      return matchesCategory && matchesStore && matchesBrand && matchesPrice && matchesRecency;
     });
 
-    if (sortBy === "price") {
+    if (query && sortBy === "price") {
+      // A relevância da pesquisa vem primeiro; o menor preço desempata.
+    } else if (sortBy === "price") {
       result.sort((a, b) => a.minPrice - b.minPrice);
     } else if (sortBy === "unit") {
       // Menor preço unitário: itens sem medida conversível vão para o fim.

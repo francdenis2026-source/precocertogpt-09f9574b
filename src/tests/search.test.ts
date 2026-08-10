@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { normalize } from '../data/remoteCatalog';
+import { normalizeSearchText, searchProducts } from '../lib/productSearch';
 
 
 describe('Normalização de Busca', () => {
@@ -11,6 +12,32 @@ describe('Normalização de Busca', () => {
 
   it('deve lidar com espaços extras', () => {
     expect(normalize('  Arroz  ')).toBe('arroz');
+  });
+});
+
+describe('Busca de produtos por relevância', () => {
+  const base = {
+    slug: '', category: 'Mercearia', size: '1 kg', unit: 'pacote',
+    minPrice: 1, avgPrice: 2, maxPrice: 3, storeCount: 1,
+    establishmentId: 1, establishmentSlug: 'loja', establishment: 'Loja',
+    neighborhood: 'Centro', storeColor: '#000', capturedAt: new Date().toISOString(),
+  };
+  const products = [
+    { ...base, id: 1, name: 'Arroz Tio João Tipo 1', brand: 'Tio João', minPrice: 29.9 },
+    { ...base, id: 2, name: 'Arroz Branco Bernardo', brand: 'Bernardo', minPrice: 6.5 },
+    { ...base, id: 3, name: 'Feijão Carioca', brand: 'Kicaldo', minPrice: 8.2 },
+  ];
+
+  it('encontra palavras fora da ordem e sem acentos', () => {
+    expect(searchProducts(products, 'joao arroz').map(p => p.id)).toEqual([1]);
+  });
+
+  it('prioriza a melhor correspondência, não apenas o menor preço', () => {
+    expect(searchProducts(products, 'arroz tio')[0].id).toBe(1);
+  });
+
+  it('normaliza pontuação e espaços repetidos', () => {
+    expect(normalizeSearchText('  Café—500g  ')).toBe('cafe 500g');
   });
 });
 
