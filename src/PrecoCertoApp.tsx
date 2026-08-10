@@ -3193,6 +3193,18 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
   }, []);
   const alertProducts = useMemo(() => products.filter(p => alerts.some((a: any) => String(a.id) === String(p.id))), [products, alerts]);
 
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (path === "/perfil" || path === "/favoritos") {
+      const timer = setTimeout(() => {
+        setIsDataLoading(false);
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [path]);
+
   if (path === "/perfil" || path === "/favoritos") {
     if (!user) return <div className="shell page-shell generic-page"><section className="favorites-login-gate"><Heart/><span className="eyebrow">Favoritos protegidos</span><h1>Entre para salvar seus produtos</h1><p>Seus favoritos ficam disponíveis somente na sua área de cliente.</p><a className="button button--primary" href={`/login?redirect=${encodeURIComponent(path)}`}>Entrar na minha conta <ArrowRight/></a></section></div>;
     
