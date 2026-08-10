@@ -3410,6 +3410,49 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
               </div>
               <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem' }}>
                 <div className="form-group">
+                  <label>Foto de Perfil (URL)</label>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input 
+                      className="admin-input" 
+                      placeholder="https://..." 
+                      value={profileData.avatarUrl} 
+                      onChange={e => setProfileData({...profileData, avatarUrl: e.target.value})} 
+                      disabled={avatarChangeCount >= 2 && profileData.avatarUrl === (user as any)?.avatarUrl}
+                    />
+                    {(user as any)?.avatarUrl && (
+                      <button 
+                        type="button" 
+                        className="button button--ghost button--small" 
+                        onClick={() => setProfileData({...profileData, avatarUrl: ""})}
+                        style={{ color: 'var(--red)' }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                  <div style={{ marginTop: '0.5rem', background: 'var(--surface-3)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--blue)', fontSize: '0.8rem', fontWeight: 600 }}>
+                      <AlertTriangle size={14} />
+                      <span>Política de Avatar PreçoCerto</span>
+                    </div>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
+                      Por segurança, permitimos apenas <b>2 trocas de foto por ano</b>. 
+                      {avatarChangeCount >= 2 ? (
+                        <span style={{ color: 'var(--red)', display: 'block', marginTop: '0.25rem' }}>Limite atingido para o ano de {lastAvatarReset}.</span>
+                      ) : (
+                        <span style={{ color: 'var(--green)', display: 'block', marginTop: '0.25rem' }}>Você ainda possui {2 - avatarChangeCount} troca(s) disponível(eis).</span>
+                      )}
+                    </p>
+                    <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'center' }}>
+                      <svg width="40" height="20" viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 2L10 18H30L20 2Z" stroke={avatarChangeCount >= 2 ? "var(--red)" : "var(--blue)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <circle cx="20" cy="11" r="2" fill={avatarChangeCount >= 2 ? "var(--red)" : "var(--blue)"}/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
                   <label>Nome Completo</label>
                   <input className="admin-input" value={profileData.name} onChange={e => setProfileData({...profileData, name: e.target.value})} required />
                 </div>
