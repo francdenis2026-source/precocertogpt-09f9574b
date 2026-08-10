@@ -3184,8 +3184,14 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
   };
   const defaultInfo:[string,string,ReactNode] = ["PreçoCerto em Feijó","Economia inteligente para sua próxima compra",<Sparkles key="i"/>];
   const info = isStore ? ["Estabelecimento verificado", stores[0]?.name ?? "Comércio local", <Store key="s"/>] as [string,string,ReactNode] : isProduct ? ["Produto monitorado", products[0]?.name ?? "Produto local", <PackageSearch key="p"/>] as [string,string,ReactNode] : (routeInfo[path] ?? defaultInfo);
-  const alerts = JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]").filter((a: any) => a.action === "alert");
-  const alertProducts = products.filter(p => alerts.some((a: any) => String(a.id) === String(p.id)));
+  const alerts = useMemo(() => {
+    try {
+      return (JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]") as any[]).filter((a: any) => a.action === "alert");
+    } catch {
+      return [];
+    }
+  }, []);
+  const alertProducts = useMemo(() => products.filter(p => alerts.some((a: any) => String(a.id) === String(p.id))), [products, alerts]);
 
   if (path === "/perfil" || path === "/favoritos") {
     if (!user) return <div className="shell page-shell generic-page"><section className="favorites-login-gate"><Heart/><span className="eyebrow">Favoritos protegidos</span><h1>Entre para salvar seus produtos</h1><p>Seus favoritos ficam disponíveis somente na sua área de cliente.</p><a className="button button--primary" href={`/login?redirect=${encodeURIComponent(path)}`}>Entrar na minha conta <ArrowRight/></a></section></div>;
