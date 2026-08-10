@@ -3669,8 +3669,19 @@ export default function PrecoCertoApp() {
   useEffect(() => {
     const handler = (e: any) => setSelectedProduct(e.detail);
     window.addEventListener('pc:open-product-details', handler);
-    return () => window.removeEventListener('pc:open-product-details', handler);
-  }, []);
+    
+    // Controle de overflow do body quando o modal está aberto
+    if (selectedProduct) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+
+    return () => {
+      window.removeEventListener('pc:open-product-details', handler);
+      document.body.classList.remove('modal-open');
+    };
+  }, [selectedProduct]);
 
   function addBasket(p: Product) {
     setCart(current => {
