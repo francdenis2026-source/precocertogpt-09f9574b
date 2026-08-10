@@ -1127,21 +1127,31 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const snapshotId = params.get("snapshot");
-    if (snapshotId && supabase) {
+    const activeSupabase = supabase; // Local stable reference
+    
+    if (snapshotId && activeSupabase) {
       const loadSnapshot = async () => {
-        if (!supabase) return; // redundant check for TS
-        const { data, error } = await supabase
-          .from('smart_baskets')
-          .select('*')
-          .eq('id', snapshotId)
-          .single();
-        
-        if (data && !error) {
-          // Verifica expiração de 5 min se for compartilhado (usando created_at como base)
+        try {
+          const { data, error } = await activeSupabase
+            .from('smart_baskets')
+            .select('*')
+            .eq('id', snapshotId)
+            .single();
+          
+          if (error) throw error;
+          if (!data) return;
+
+          // Verifica se foi revogado manualmente ou se expirou (5 min)
           const createdAt = new Date(data.created_at).getTime();
           const now = new Date().getTime();
           const isExpired = (now - createdAt) > (5 * 60 * 1000);
+          const isRevoked = data.status === 'revoked';
           
+          if (isRevoked) {
+            window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Este link de compartilhamento foi revogado pelo proprietário.", type: "error" } }));
+            return;
+          }
+
           if (isExpired) {
             window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Este link de compartilhamento expirou (5 min).", type: "warning" } }));
             return;
@@ -1160,6 +1170,9 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
           setBudget(data.budget);
           setStep(3);
           window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cesta compartilhada carregada com sucesso!", type: "success" } }));
+        } catch (err) {
+          console.error("Erro ao carregar snapshot:", err);
+          window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Não foi possível carregar a cesta compartilhada.", type: "error" } }));
         }
       };
       loadSnapshot();
@@ -2064,6 +2077,20 @@ function UserBasketHistory({ user, products }: { user: any; products: Product[] 
     }
   };
 
+  const handleRevoke = async (id: string) => {
+    if (!supabase) return;
+    try {
+      const { error } = await supabase.from('smart_baskets').update({ status: 'revoked' }).eq('id', id);
+      if (error) throw error;
+      setBaskets(prev => prev.map(b => b.id === id ? { ...b, status: 'revoked' } : b));
+      if (typeof (window as any).setGlobalToast === 'function') {
+        (window as any).setGlobalToast("Link de compartilhamento revogado.", "success");
+      }
+    } catch (err: any) {
+      alert("Erro ao revogar: " + err.message);
+    }
+  };
+
   const handleRename = async (id: string) => {
     if (!newName.trim() || !supabase) return;
     try {
@@ -2181,11 +2208,43 @@ function UserBasketHistory({ user, products }: { user: any; products: Product[] 
                       </button>
                     </div>
                   )}
-                  <small style={{ color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Clock3 size={12} /> {new Date(basket.created_at).toLocaleString('pt-BR')}
-                  </small>
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <Clock3 size={12}/> {new Date(basket.created_at).toLocaleDateString("pt-BR")}
+                    </span>
+                    {basket.status === 'revoked' ? (
+                      <span style={{ color: 'var(--red)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <AlertTriangle size={12}/> Link Revogado
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--green)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Check size={12}/> Link Ativo
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button 
+                    className="button button--ghost button--small" 
+                    title="Copiar Link" 
+                    onClick={() => {
+                      const url = `${window.location.origin}/cesta?snapshot=${basket.id}`;
+                      navigator.clipboard.writeText(url);
+                      if (typeof (window as any).setGlobalToast === 'function') (window as any).setGlobalToast("Link copiado!", "success");
+                    }}
+                  >
+                    <Share2 size={16} />
+                  </button>
+                  {basket.status !== 'revoked' && (
+                    <button 
+                      className="button button--ghost button--small" 
+                      style={{ color: 'var(--orange)' }} 
+                      title="Revogar Link" 
+                      onClick={() => handleRevoke(basket.id)}
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
                   <button className="button button--ghost button--small" title="Baixar PDF" onClick={() => handleExportPDF(basket)}>
                     <Download size={16} />
                   </button>
@@ -2250,8 +2309,42 @@ function SnapshotPage({ products }: PageProps) {
   useEffect(() => {
     async function load() {
       if (!snapshotId) return;
+      const activeSupabase = (window as any).supabase;
+      if (!activeSupabase) return;
+
       try {
-        const data = await getBasketSnapshot(snapshotId);
+        const { data, error } = await activeSupabase
+          .from('smart_baskets')
+          .select(`
+            *,
+            items:smart_basket_items(*),
+            snapshots:basket_snapshots(*)
+          `)
+          .eq('id', snapshotId)
+          .single();
+        
+        if (error) throw error;
+        if (!data) throw new Error("Cesta não encontrada.");
+
+        // Regra de Negócio: Snapshots só podem ser vistos completos por usuários logados
+        // se o usuário não for o dono e estiver tentando ver detalhes sensíveis (estabelecimentos).
+        const currentSession = await activeSupabase.auth.getSession();
+        const currentUser = currentSession.data.session?.user;
+
+        if (!currentUser && data.status !== 'public') {
+          // Se não estiver logado, oculta os estabelecimentos (segurança)
+          // O usuário ainda pode ver os itens, mas não onde comprar sem logar.
+          data.snapshots = data.snapshots.map((s: any) => ({
+            ...s,
+            establishment_name: "Faça login para ver",
+            establishment_id: null
+          }));
+        }
+
+        if (data.status === 'revoked') {
+          throw new Error("Este link de compartilhamento foi revogado.");
+        }
+
         setSnapshot(data);
       } catch (e: any) {
         setError(e.message);
