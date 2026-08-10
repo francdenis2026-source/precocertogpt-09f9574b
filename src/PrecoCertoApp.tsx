@@ -1129,6 +1129,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     const snapshotId = params.get("snapshot");
     if (snapshotId && supabase) {
       const loadSnapshot = async () => {
+        if (!supabase) return; // redundant check for TS
         const { data, error } = await supabase
           .from('smart_baskets')
           .select('*')
@@ -1142,7 +1143,6 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
           const isExpired = (now - createdAt) > (5 * 60 * 1000);
           
           if (isExpired) {
-            // setToast não está disponível aqui ainda, usamos dispatchEvent
             window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Este link de compartilhamento expirou (5 min).", type: "warning" } }));
             return;
           }
@@ -4844,7 +4844,10 @@ export default function PrecoCertoApp() {
 
   // Toast global listener
   useEffect(() => {
-    const handler = (e: any) => setToast(e.detail.message, e.detail.type || "success");
+    const handler = (e: any) => {
+      const msg = e.detail.message;
+      setToast(msg);
+    };
     window.addEventListener('pc:set-toast', handler);
     return () => window.removeEventListener('pc:set-toast', handler);
   }, []);
