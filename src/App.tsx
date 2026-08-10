@@ -16,14 +16,15 @@ import { FooterCompactUx } from "./components/FooterCompactUx";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
-import { PremiumMarketplaceSpotlight } from "./components/PremiumMarketplaceSpotlight";
 import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
 import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
+import { PublicEstablishmentCatalog } from "./components/PublicEstablishmentCatalog";
 import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
 import { DorinhaCommerceEnhancer } from "./components/DorinhaCommerceEnhancer";
-import { AuthorCatalogEditor } from "./components/AuthorCatalogEditor";
+import { PremiumMarketplaceSpotlight } from "./components/PremiumMarketplaceSpotlight";
 import { BasketSessionFlow } from "./components/BasketSessionFlow";
 import { AuthorMerchantDashboardWelcome } from "./components/AuthorMerchantDashboardWelcome";
+import { AuthorCatalogEditor } from "./components/AuthorCatalogEditor";
 import { MerchantDashboard } from "./components/MerchantDashboard";
 import { MerchantBusinessSetup } from "./components/MerchantBusinessSetup";
 import { MerchantBusinessSetupShortcut } from "./components/MerchantBusinessSetupShortcut";
@@ -65,6 +66,7 @@ export default function App() {
       <DorinhaCommerceEnhancer />
       <Routes>
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
+        <Route path="/estabelecimento/:identifier" element={<PublicEstablishmentCatalog />} />
         <Route path="/autora/dorinha-barroso" element={<DorinhaAuthorStore />} />
         <Route path="/dorinha-barroso" element={<DorinhaAuthorStore />} />
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
