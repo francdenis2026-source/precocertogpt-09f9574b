@@ -22,27 +22,108 @@ function injectStyles() {
     body.pc-home-search-focus .hero-actions .search-combo {
       position: relative !important;
       z-index: 9100 !important;
+      width: 100% !important;
     }
 
+    /* Barra de busca redesenhada */
+    body.pc-home-search-focus .hero-actions .search-combo form {
+      min-height: 60px !important;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      align-items: center !important;
+      gap: 8px !important;
+      padding: 6px 7px 6px 18px !important;
+      border-radius: 18px !important;
+      background: #ffffff !important;
+      border: 1px solid rgba(148, 163, 184, .42) !important;
+      box-shadow: 0 14px 34px rgba(15, 23, 42, .16) !important;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease !important;
+      overflow: hidden !important;
+    }
+
+    body.pc-home-search-focus .hero-actions .search-combo:focus-within form {
+      border-color: rgba(37, 99, 235, .78) !important;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .12), 0 18px 42px rgba(15, 23, 42, .18) !important;
+      transform: translateY(-1px);
+    }
+
+    body.pc-home-search-focus .hero-actions .search-combo__input {
+      min-width: 0 !important;
+      min-height: 46px !important;
+      padding: 0 10px !important;
+      border: 0 !important;
+      outline: 0 !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      color: #0f172a !important;
+      font-size: 1rem !important;
+      font-weight: 500 !important;
+    }
+
+    body.pc-home-search-focus .hero-actions .search-combo__input::placeholder {
+      color: #7c8aa0 !important;
+      opacity: 1 !important;
+    }
+
+    body.pc-home-search-focus .hero-actions .search-combo__button {
+      min-height: 46px !important;
+      padding: 0 20px !important;
+      margin: 0 !important;
+      border-radius: 12px !important;
+      border: 0 !important;
+      background: #2563eb !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      box-shadow: none !important;
+    }
+
+    body.pc-home-search-focus .hero-actions .search-combo__button:hover {
+      background: #1d4ed8 !important;
+      transform: none !important;
+    }
+
+    body.pc-home-search-focus .hero-actions .search-combo__button:active {
+      transform: scale(.98) !important;
+    }
+
+    /* Painel de resultados sempre acima dos demais elementos do hero */
     body.pc-home-search-focus .hero-actions .search-results-dynamic {
       position: absolute !important;
-      top: calc(100% + 12px) !important;
+      top: calc(100% + 10px) !important;
       left: 0 !important;
       right: auto !important;
       width: min(780px, calc(100vw - 32px)) !important;
       max-height: min(520px, calc(100vh - 170px)) !important;
       overflow-y: auto !important;
       overscroll-behavior: contain !important;
-      z-index: 99999 !important;
+      z-index: 2147483000 !important;
       margin: 0 !important;
       padding: 0 !important;
       background: #ffffff !important;
       color: #0f172a !important;
       border: 1px solid #dbe3ee !important;
       border-radius: 18px !important;
-      box-shadow: 0 26px 70px rgba(15, 23, 42, .28), 0 8px 22px rgba(15, 23, 42, .12) !important;
+      box-shadow: 0 32px 80px rgba(15, 23, 42, .34), 0 8px 24px rgba(15, 23, 42, .14) !important;
       backdrop-filter: none !important;
       isolation: isolate !important;
+    }
+
+    /* Rebaixa explicitamente as duas faixas informativas e demais blocos abaixo da busca */
+    body.pc-home-search-focus .hero-trust,
+    body.pc-home-search-focus .hero-insight,
+    body.pc-home-search-focus .metrics-float,
+    body.pc-home-search-focus .category-rail,
+    body.pc-home-search-focus .benefits-section {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+
+    body.pc-home-search-focus.pc-search-open .hero-trust,
+    body.pc-home-search-focus.pc-search-open .hero-insight,
+    body.pc-home-search-focus.pc-search-open .metrics-float,
+    body.pc-home-search-focus.pc-search-open .category-rail,
+    body.pc-home-search-focus.pc-search-open .benefits-section {
+      z-index: 0 !important;
     }
 
     body.pc-home-search-focus[data-theme='dark'] .hero-actions .search-results-dynamic,
@@ -50,6 +131,19 @@ function injectStyles() {
       background: #111827 !important;
       color: #f8fafc !important;
       border-color: #334155 !important;
+    }
+
+    [data-theme='dark'] body.pc-home-search-focus .hero-actions .search-combo form {
+      background: #111827 !important;
+      border-color: #334155 !important;
+    }
+
+    [data-theme='dark'] body.pc-home-search-focus .hero-actions .search-combo__input {
+      color: #f8fafc !important;
+    }
+
+    [data-theme='dark'] body.pc-home-search-focus .hero-actions .search-combo__input::placeholder {
+      color: #94a3b8 !important;
     }
 
     body.pc-home-search-focus .hero-actions .search-results-dynamic .suggestions-label {
@@ -126,6 +220,19 @@ function injectStyles() {
     }
 
     @media (max-width: 820px) {
+      body.pc-home-search-focus .hero-actions .search-combo form {
+        min-height: 56px !important;
+        padding: 5px 5px 5px 12px !important;
+        border-radius: 16px !important;
+      }
+      body.pc-home-search-focus .hero-actions .search-combo__input {
+        min-height: 44px !important;
+        font-size: .96rem !important;
+      }
+      body.pc-home-search-focus .hero-actions .search-combo__button {
+        min-height: 44px !important;
+        padding: 0 14px !important;
+      }
       body.pc-home-search-focus .hero-actions .search-results-dynamic {
         width: calc(100vw - 24px) !important;
         left: 50% !important;
@@ -180,18 +287,34 @@ export function HomeSearchFocusUx() {
     const onInput = (event: Event) => {
       const input = event.target;
       if (!(input instanceof HTMLInputElement) || input.id !== "hero-search") return;
-      if (!input.value.trim()) return;
+
+      const hasText = input.value.trim().length > 0;
+      document.body.classList.toggle("pc-search-open", hasText);
+      if (!hasText) return;
 
       if (focusTimer) window.clearTimeout(focusTimer);
       focusTimer = window.setTimeout(() => focusSearch(input), 70);
     };
 
+    const onFocusOut = (event: FocusEvent) => {
+      const input = event.target;
+      if (!(input instanceof HTMLInputElement) || input.id !== "hero-search") return;
+      window.setTimeout(() => {
+        const combo = input.closest<HTMLElement>(".search-combo");
+        if (!combo?.contains(document.activeElement) && !input.value.trim()) {
+          document.body.classList.remove("pc-search-open");
+        }
+      }, 180);
+    };
+
     document.addEventListener("input", onInput, true);
+    document.addEventListener("focusout", onFocusOut, true);
 
     return () => {
       if (focusTimer) window.clearTimeout(focusTimer);
-      document.body.classList.remove("pc-home-search-focus", "pc-search-active");
+      document.body.classList.remove("pc-home-search-focus", "pc-search-open", "pc-search-active");
       document.removeEventListener("input", onInput, true);
+      document.removeEventListener("focusout", onFocusOut, true);
     };
   }, [pathname]);
 
