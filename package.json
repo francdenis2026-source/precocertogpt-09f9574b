@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "dev": "vite",
@@ -35,8 +35,8 @@
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "9.39.4",
     "eslint-plugin-jsx-a11y": "6.10.2",
-    "eslint-plugin-react": "7.37.5",
-    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react": "6.10.2",
+    "eslint-plugin-react-hooks": "7.0.1",
     "globals": "16.4.0",
     "tailwindcss": "^4.0.0",
     "typescript": "5.9.3",
