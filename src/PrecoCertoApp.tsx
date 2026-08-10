@@ -867,7 +867,17 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
             <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => toggleFavorite(String(p.id))} aria-pressed={favorites.includes(String(p.id))} aria-label={favorites.includes(String(p.id)) ? `Remover ${p.name} dos favoritos` : `Favoritar ${p.name}`}>
               <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
             </button>
-            <a className="visual-product-image" href={`/produto/${p.slug}`}>
+            <div 
+              className="visual-product-image" 
+              onClick={(e) => {
+                e.preventDefault();
+                // O estado setSelectedProduct está disponível no componente pai SearchPage e na SearchResultCard
+                // Para a Home, precisamos garantir que o estado exista ou usar a rota.
+                // Como o usuário relatou que o modal NÃO abre, vamos unificar o comportamento.
+                window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }));
+              }}
+              style={{ cursor: 'pointer' }}
+            >
               <span className="position-number">0{index + 1}</span>
               <ProductStatusBadge product={p}/>
               <ProductImage product={p} />
@@ -875,11 +885,17 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
                 <span className="price-drop-tag"><TrendingDown size={14}/> -{Math.round((1 - p.minPrice / p.previousPrice) * 100)}%</span>
               )}
               <span className="verified-chip"><ShieldCheck /> Verificado</span>
-            </a>
+            </div>
 
             <div className="visual-product-content">
               <span className="category-tag">{p.category} • {p.size}</span>
-              <a className="visual-product-name" href={`/produto/${p.slug}`}>{p.name}</a>
+              <div 
+                className="visual-product-name" 
+                onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
+                style={{ cursor: 'pointer' }}
+              >
+                {p.name}
+              </div>
               <div className="visual-store">
                 <span className="market-dot" style={{ background: p.storeColor }} />
                 <a href={`/estabelecimento/${p.establishmentSlug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -2627,11 +2643,21 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
               <div className="visual-product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                 {favProducts.map(p => (
                   <article className="visual-product-card" key={p.id}>
-                    <a className="visual-product-image" href={`/produto/${p.slug}`} style={{ height: '120px' }}>
+                    <div 
+                      className="visual-product-image" 
+                      onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
+                      style={{ height: '120px', cursor: 'pointer' }}
+                    >
                       <ProductImage product={p} size="compact" />
-                    </a>
+                    </div>
                     <div className="visual-product-content" style={{ padding: '1rem' }}>
-                      <a className="visual-product-name" href={`/produto/${p.slug}`} style={{ fontSize: '0.9rem', height: '2.5rem' }}>{p.name}</a>
+                      <div 
+                        className="visual-product-name" 
+                        onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: p }))}
+                        style={{ fontSize: '0.9rem', height: '2.5rem', cursor: 'pointer' }}
+                      >
+                        {p.name}
+                      </div>
                       <div className="visual-price">
                         <strong>{money(p.minPrice)}</strong>
                       </div>
@@ -3221,7 +3247,8 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [sortBy, setSortBy] = useState<"price" | "unit" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
   const [isSearching, setIsSearching] = useState(false);
 
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  // Usando evento global para unificar comportamento do modal
+
   const [reportProduct, setReportProduct] = useState<Product | null>(null);
 
   const randomFeatured = useRandomFeatured(products);
@@ -3337,13 +3364,13 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   };
 
   useEffect(() => {
-    if (selectedProduct || reportProduct) {
+    if (reportProduct) {
       document.body.classList.add('modal-open');
     } else {
       document.body.classList.remove('modal-open');
     }
     return () => document.body.classList.remove('modal-open');
-  }, [selectedProduct, reportProduct]);
+  }, [reportProduct]);
 
   return (
     <div className="shell page-shell">
@@ -3396,17 +3423,17 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                 const history = product.price_history || [];
                 const trend = product.previousPrice ? ((product.minPrice - product.previousPrice) / product.previousPrice) * 100 : null;
                 return <article className={`professional-result-card ${selected ? "is-selected" : ""}`} key={product.id}>
-                  <div className="professional-result-card__visual" onClick={() => setSelectedProduct(product)}><ProductImage product={product} size="default"/><span className="category-tag">{product.category}</span><button className={`floating-favorite ${favorites.includes(String(product.id)) ? "active" : ""}`} aria-pressed={favorites.includes(String(product.id))} aria-label={favorites.includes(String(product.id)) ? `Remover ${product.name} dos favoritos` : `Favoritar ${product.name}`} onClick={event => {event.stopPropagation();toggleFavorite(String(product.id));}}><Heart fill={favorites.includes(String(product.id)) ? "currentColor" : "none"}/></button></div>
+                  <div className="professional-result-card__visual" onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: product }))}><ProductImage product={product} size="default"/><span className="category-tag">{product.category}</span><button className={`floating-favorite ${favorites.includes(String(product.id)) ? "active" : ""}`} aria-pressed={favorites.includes(String(product.id))} aria-label={favorites.includes(String(product.id)) ? `Remover ${product.name} dos favoritos` : `Favoritar ${product.name}`} onClick={event => {event.stopPropagation();toggleFavorite(String(product.id));}}><Heart fill={favorites.includes(String(product.id)) ? "currentColor" : "none"}/></button></div>
                   <div className="professional-result-card__body">
                     <div className="professional-result-card__meta"><span>{product.brand} • {product.size}</span><FreshnessBadge product={product}/></div>
-                    <h3 onClick={() => setSelectedProduct(product)}>{product.name}</h3>
+                    <h3 onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: product }))}>{product.name}</h3>
                     <a className="professional-result-store" href={`/estabelecimento/${product.establishmentSlug}`}><Store/><span><b>{product.establishment}</b><small>{product.neighborhood}</small></span><ArrowRight/></a>
                     <div className="professional-price-main"><span><small>Menor preço encontrado</small><strong>{money(product.minPrice)}</strong></span><UnitPriceTag product={product}/></div>
                     <div className="professional-price-analysis"><span><small>Média local</small><b>{money(product.avgPrice)}</b></span><span><small>Maior preço</small><b>{money(product.maxPrice)}</b></span><span className="saving"><small>Economia potencial</small><b>{money(saving)}</b></span></div>
                     <div className="professional-insights">
                       <span><TrendingDown/><b>{spread}%</b> de diferença entre lojas</span>
                       {trend !== null && <span className={trend <= 0 ? "positive" : "negative"}>{trend <= 0 ? <TrendingDown/> : <TrendingUp/>}<b>{Math.abs(Math.round(trend))}%</b> desde o preço anterior</span>}
-                      {history.length > 1 && <button onClick={() => setSelectedProduct(product)}><LineChart/> Ver {history.length} registros históricos</button>}
+                      {history.length > 1 && <button onClick={() => window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: product }))}><LineChart/> Ver {history.length} registros históricos</button>}
                     </div>
                     <div className="professional-result-card__footer"><button className="button button--primary" onClick={() => addBasket(product)}><Plus/> Adicionar à cesta</button><button className={`professional-compare-button ${selected ? "selected" : ""}`} onClick={() => toggleComparison(product)}>{selected ? <CheckCircle2/> : <LineChart/>}{selected ? "Selecionado" : "Comparar"}</button>{isEnabled("priceReports") && <button className="professional-report-button" aria-label="Informar preço incorreto" onClick={() => setReportProduct(product)}><Flag/></button>}</div>
                   </div>
@@ -3421,98 +3448,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
       {reportProduct && <PriceReportModal product={reportProduct} onClose={() => setReportProduct(null)} />}
 
-      {selectedProduct && (
-        <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)} role="dialog" aria-modal="true" aria-labelledby="modal-title">
-          <div className="admin-modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()} tabIndex={-1}>
-            <div className="admin-modal-head">
-              <h3 id="modal-title">Detalhes do Produto</h3>
-              <button className="icon-button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X/></button>
-            </div>
-            <div className="admin-modal-body">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ProductImage product={selectedProduct} size="default" eager />
-                </div>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <span className="category-tag">{selectedProduct.category}</span>
-                    {selectedProduct.previousPrice && selectedProduct.minPrice < selectedProduct.previousPrice && (
-                      <div style={{ background: 'var(--green-soft)', color: 'var(--green)', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                        -{Math.round((1 - selectedProduct.minPrice / selectedProduct.previousPrice) * 100)}% de desconto
-                      </div>
-                    )}
-                  </div>
-                  <h2 style={{ fontSize: '1.75rem', margin: '0.5rem 0', fontWeight: 800 }}>{selectedProduct.name}</h2>
-                  <p style={{ color: 'var(--muted)', marginBottom: '1rem', fontSize: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
-                  
-                  <div className="visual-price" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
-                    <strong style={{ fontSize: '2.25rem', color: 'var(--green)' }}>{money(selectedProduct.minPrice)}</strong>
-                    {selectedProduct.previousPrice && selectedProduct.previousPrice > selectedProduct.minPrice && (
-                      <span className="old-price" style={{ color: 'var(--muted)', textDecoration: 'line-through', fontSize: '1.1rem' }}>{money(selectedProduct.previousPrice)}</span>
-                    )}
-                  </div>
-
-                  <div className="verified-details" style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px' }}>
-                    <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Store size={16} color="var(--blue)" />
-                      <strong style={{ fontSize: '0.95rem' }}>{selectedProduct.establishment}</strong>
-                    </div>
-                    <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                      <MapPin size={16} color="var(--muted)" />
-                      <span>{selectedProduct.neighborhood}, Feijó</span>
-                    </div>
-                    <div className="detail-item" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
-                      <Clock3 size={16} />
-                      <span>Verificado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
-                    </div>
-                  </div>
-                  
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <a 
-                      href={`/estabelecimento/${selectedProduct.establishmentSlug}`} 
-                      className="button button--primary button--full"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      Ir para a loja <ArrowRight size={18} style={{ marginLeft: '8px' }} />
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
-                <h4>Histórico de Variação</h4>
-                {selectedProduct.price_history && selectedProduct.price_history.length > 1 ? (
-                  <div className="real-price-history">
-                    {selectedProduct.price_history.slice(-8).map((record, index, records) => {
-                      const previous = records[index - 1];
-                      const variation = previous ? ((record.value - previous.value) / previous.value) * 100 : 0;
-                      return <div key={`${record.date}-${index}`}><span><Clock3/><small>{new Date(record.date).toLocaleDateString("pt-BR")}</small></span><strong>{money(record.value)}</strong>{index > 0 && <em className={variation <= 0 ? "down" : "up"}>{variation <= 0 ? <TrendingDown/> : <TrendingUp/>}{Math.abs(variation).toFixed(1)}%</em>}</div>;
-                    })}
-                  </div>
-                ) : (
-                  <div className="history-unavailable"><LineChart/><span><b>Histórico ainda insuficiente</b><small>Exibiremos a evolução assim que houver pelo menos duas coletas verificadas.</small></span></div>
-                )}
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
-                  Adicionar à Cesta
-                </button>
-                <button className="button button--outline" style={{ height: '54px' }} onClick={() => { 
-                  if (!user) {
-                    alert("Acesse sua conta para configurar alertas de preço personalizados.");
-                    return;
-                  }
-                  saveAction("alert", "product", String(selectedProduct.id)); 
-                  setSelectedProduct(null); 
-                }}>
-                  <Bell size={18} /> Alertar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal agora é global em PrecoCertoApp */}
       {compareList.length > 0 && (
         <div className="compare-bar" style={{
           position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
@@ -3728,6 +3664,25 @@ export default function PrecoCertoApp() {
   
   const [undoAction, setUndoAction] = useState<(() => void) | null>(null);
 
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => setSelectedProduct(e.detail);
+    window.addEventListener('pc:open-product-details', handler);
+    
+    // Controle de overflow do body quando o modal está aberto
+    if (selectedProduct) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+
+    return () => {
+      window.removeEventListener('pc:open-product-details', handler);
+      document.body.classList.remove('modal-open');
+    };
+  }, [selectedProduct]);
+
   function addBasket(p: Product) {
     setCart(current => {
       if (current.some(i => i.id === p.id)) return current;
@@ -3896,6 +3851,105 @@ export default function PrecoCertoApp() {
         >
           <X size={16} />
         </button>
+      </div>
+    )}
+
+    {selectedProduct && (
+      <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)} role="dialog" aria-modal="true" aria-labelledby="modal-title" style={{ zIndex: 9999 }}>
+        <div className="admin-modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()} tabIndex={-1}>
+          <div className="admin-modal-head">
+            <h3 id="modal-title">Detalhes do Produto</h3>
+            <button className="icon-button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X/></button>
+          </div>
+          <div className="admin-modal-body">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+              <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ProductImage product={selectedProduct} size="default" eager />
+              </div>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <span className="category-tag">{selectedProduct.category}</span>
+                  {selectedProduct.previousPrice && selectedProduct.minPrice < selectedProduct.previousPrice && (
+                    <div style={{ background: 'var(--green-soft)', color: 'var(--green)', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                      -{Math.round((1 - selectedProduct.minPrice / selectedProduct.previousPrice) * 100)}% de desconto
+                    </div>
+                  )}
+                </div>
+                <h2 style={{ fontSize: '1.75rem', margin: '0.5rem 0', fontWeight: 800 }}>{selectedProduct.name}</h2>
+                <p style={{ color: 'var(--muted)', marginBottom: '1rem', fontSize: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
+                
+                <div className="visual-price" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
+                  <strong style={{ fontSize: '2.25rem', color: 'var(--green)' }}>{money(selectedProduct.minPrice)}</strong>
+                  {selectedProduct.previousPrice && selectedProduct.previousPrice > selectedProduct.minPrice && (
+                    <span className="old-price" style={{ color: 'var(--muted)', textDecoration: 'line-through', fontSize: '1.1rem' }}>{money(selectedProduct.previousPrice)}</span>
+                  )}
+                </div>
+
+                <div className="verified-details" style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px' }}>
+                  <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Store size={16} color="var(--blue)" />
+                    <strong style={{ fontSize: '0.95rem' }}>{selectedProduct.establishment}</strong>
+                  </div>
+                  <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                    <MapPin size={16} color="var(--muted)" />
+                    <span>{selectedProduct.neighborhood}, Feijó</span>
+                  </div>
+                  <div className="detail-item" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                    <Clock3 size={16} />
+                    <span>Verificado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '1.5rem' }}>
+                  <a 
+                    href={`/estabelecimento/${selectedProduct.establishmentSlug}`} 
+                    className="button button--primary button--full"
+                    style={{ textDecoration: 'none', justifyContent: 'center' }}
+                  >
+                    Ir para a loja <ArrowRight size={18} style={{ marginLeft: '8px' }} />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+              <h4 style={{ marginBottom: '1rem', fontWeight: 700 }}>Histórico de Variação</h4>
+              {selectedProduct.price_history && selectedProduct.price_history.length > 1 ? (
+                <div className="real-price-history">
+                  {selectedProduct.price_history.slice(-8).map((record, index, records) => {
+                    const previous = records[index - 1];
+                    const variation = previous ? ((record.value - previous.value) / previous.value) * 100 : 0;
+                    return <div key={`${record.date}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid var(--border-soft)' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--muted)', fontSize: '0.85rem' }}><Clock3 size={14}/>{new Date(record.date).toLocaleDateString("pt-BR")}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <strong style={{ fontSize: '1rem' }}>{money(record.value)}</strong>
+                        {index > 0 && <em style={{ fontSize: '0.75rem', fontWeight: 700, color: variation <= 0 ? 'var(--green)' : 'var(--red)', fontStyle: 'normal', display: 'flex', alignItems: 'center', gap: '2px' }}>{variation <= 0 ? <TrendingDown size={12}/> : <TrendingUp size={12}/>}{Math.abs(variation).toFixed(1)}%</em>}
+                      </div>
+                    </div>;
+                  })}
+                </div>
+              ) : (
+                <div className="history-unavailable" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem', background: 'var(--surface-2)', borderRadius: '12px', color: 'var(--muted)' }}><LineChart/><span><b>Histórico ainda insuficiente</b><br/><small>Exibiremos a evolução assim que houver pelo menos duas coletas verificadas.</small></span></div>
+              )}
+            </div>
+          </div>
+          
+          <div className="admin-modal-footer" style={{ borderTop: '1px solid var(--border)', padding: '1.5rem', display: 'flex', gap: '1rem' }}>
+            <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
+              Adicionar à Cesta
+            </button>
+            <button className="button button--outline" style={{ height: '54px' }} onClick={() => { 
+              if (!user) {
+                setToast("Acesse sua conta para configurar alertas de preço.");
+                return;
+              }
+              saveAction("alert", "product", String(selectedProduct.id)); 
+              setSelectedProduct(null); 
+            }}>
+              <Bell size={18} /> Alertar
+            </button>
+          </div>
+        </div>
       </div>
     )}
 
