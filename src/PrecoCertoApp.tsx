@@ -4990,15 +4990,6 @@ export default function PrecoCertoApp() {
               <button className="icon-button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X/></button>
             </div>
           </div>
-                  navigator.clipboard.writeText(url.toString());
-                  setToast("Link do produto copiado!");
-                }}
-              >
-                <Share2 size={18} />
-              </button>
-              <button className="icon-button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X/></button>
-            </div>
-          </div>
           <div className="admin-modal-body">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
               <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
