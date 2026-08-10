@@ -14,6 +14,7 @@ import {
   Truck,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import imagimacaoAsset from "@/assets/uma-viagem-ao-mundo-da-imaginacao.png.asset.json";
 
 type ExternalStore = { label: string; url: string };
 type Book = {
@@ -197,7 +198,20 @@ export function DorinhaAuthorStore() {
         <div className="db-hero-art" aria-label="Coleção de livros de Dorinha Barroso">
           <div className="db-cover-stage">
             <div className="db-stage-glow"/>
-            {profile.books.slice(0,4).map((book,index)=>book.image_url?<img key={book.id} className="db-hero-cover" src={book.image_url} srcSet={responsiveCoverSrcSet(book.image_url)} sizes="(max-width: 640px) 120px, (max-width: 1050px) 135px, 150px" width={300} height={456} loading={index===0?"eager":"lazy"} fetchPriority={index===0?"high":"low"} decoding="async" alt={`Capa de ${book.name}`}/>:null)}
+            {profile.books.slice(0,4).map((book,index)=>{
+              let src = book.image_url;
+              if (book.slug === 'uma-viagem-ao-mundo-da-imaginacao') src = imagimacaoAsset.url;
+              
+              return src ? (
+                <img 
+                  key={book.id} 
+                  className="db-hero-cover" 
+                  src={src} 
+                  alt={`Capa de ${book.name}`}
+                  style={book.slug === 'uma-viagem-ao-mundo-da-imaginacao' ? { objectFit: 'cover' } : {}}
+                />
+              ) : null;
+            })}
             <div className="db-stage-note"><b>COLEÇÃO DA AUTORA</b>{profile.books.length} obras disponíveis para leitores de todo o Brasil.</div>
           </div>
         </div>
@@ -210,10 +224,14 @@ export function DorinhaAuthorStore() {
         <div style={s.catalogCount} className="db-catalog-count"><strong>{profile.books.length}</strong><span>títulos no catálogo</span></div>
       </div>
       <div className="db-book-grid">
-        {profile.books.map(book=><article key={book.id} className="db-book" style={s.bookCard}>
+        {profile.books.map(book=>{
+          let src = book.image_url;
+          if (book.slug === 'uma-viagem-ao-mundo-da-imaginacao') src = imagimacaoAsset.url;
+          
+          return <article key={book.id} className="db-book" style={s.bookCard}>
           <div className={`db-real-cover-shell ${loadedCovers.has(book.id)?"is-loaded":""}`} data-real-cover="1">
             <span className="db-cover-placeholder" aria-hidden="true">Preparando a capa…</span>
-            {book.image_url?<img className="db-real-cover-image" src={book.image_url} srcSet={responsiveCoverSrcSet(book.image_url)} sizes="(max-width: 640px) 68vw, (max-width: 1050px) 34vw, 238px" width={480} height={720} loading="lazy" fetchPriority="low" decoding="async" onLoad={()=>setLoadedCovers(current=>{if(current.has(book.id))return current;const next=new Set(current);next.add(book.id);return next})} alt={`Capa do livro ${book.name}, de Dorinha Barroso`}/>:null}
+            {src?<img className="db-real-cover-image" src={src} sizes="(max-width: 640px) 68vw, (max-width: 1050px) 34vw, 238px" width={480} height={720} loading="lazy" fetchPriority="low" decoding="async" onLoad={()=>setLoadedCovers(current=>{if(current.has(book.id))return current;const next=new Set(current);next.add(book.id);return next})} alt={`Capa do livro ${book.name}, de Dorinha Barroso`} style={book.slug === 'uma-viagem-ao-mundo-da-imaginacao' ? { objectFit: 'cover' } : {}}/>:null}
             <span className="db-real-cover-badge">CAPA OFICIAL</span>
           </div>
           <div style={s.bookBody}>
@@ -227,7 +245,7 @@ export function DorinhaAuthorStore() {
               {book.external_url&&<a href={book.external_url} target="_blank" rel="noreferrer" style={s.externalBtn} title="Ver na Amazon"><ExternalLink size={16}/></a>}
             </div>
           </div>
-        </article>)}
+        </article>})}
       </div>
     </section>
 
