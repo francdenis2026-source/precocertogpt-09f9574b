@@ -3228,6 +3228,8 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
     }
 
     const favProducts = products.filter(p => favorites.includes(String(p.id)));
+    const isFavoritesView = path === "/favoritos";
+    const isProfileView = path === "/perfil";
     
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [profileData, setProfileData] = useState({
