@@ -3284,10 +3284,21 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
                 ))}
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--surface-2)', borderRadius: '12px' }}>
-                <Heart size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                <p>Nenhuma oferta favoritada ainda.</p>
-                <a href="/buscar" className="button button--outline" style={{ marginTop: '1rem' }}>Ver catálogo</a>
+              <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--surface-2)', borderRadius: '12px', border: '2px dashed var(--surface-3)' }}>
+                <div style={{ position: 'relative', display: 'inline-block', marginBottom: '1.5rem' }}>
+                  <Heart size={48} style={{ opacity: 0.1 }} />
+                  <Search size={20} style={{ position: 'absolute', bottom: -5, right: -5, color: 'var(--blue)' }} />
+                </div>
+                <h3>Sua lista está vazia</h3>
+                <p style={{ maxWidth: '300px', margin: '0 auto 1.5rem', color: 'var(--muted)' }}>
+                  Você ainda não favoritou nenhum produto. Adicione itens para acompanhar preços rapidamente.
+                </p>
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                  <a href="/buscar" className="button button--primary">
+                    <Search size={16} /> Explorar Ofertas
+                  </a>
+                  <a href="/" className="button button--ghost">Ver Início</a>
+                </div>
               </div>
             )}
 
