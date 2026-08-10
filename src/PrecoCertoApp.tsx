@@ -4981,8 +4981,15 @@ export default function PrecoCertoApp() {
                 className="icon-button" 
                 title="Compartilhar este produto"
                 onClick={() => {
-                  const url = new URL(window.location.origin + window.location.pathname);
-                  url.searchParams.set("product_id", String(selectedProduct.id));
+                  const text = `Confira ${selectedProduct.name} no PreçoCerto Feijó: ${window.location.origin}/produto/${selectedProduct.slug}`;
+                  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                }}
+              >
+                <Share2 size={18} />
+              </button>
+              <button className="icon-button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X/></button>
+            </div>
+          </div>
                   navigator.clipboard.writeText(url.toString());
                   setToast("Link do produto copiado!");
                 }}
