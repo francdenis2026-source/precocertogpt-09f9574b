@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { normalize } from '../data/remoteCatalog';
-import { normalizeSearchText, searchProducts } from '../lib/productSearch';
+import { normalizeSearchText, searchProducts, suggestProducts } from '../lib/productSearch';
 
 
 describe('Normalização de Busca', () => {
@@ -38,6 +38,18 @@ describe('Busca de produtos por relevância', () => {
 
   it('normaliza pontuação e espaços repetidos', () => {
     expect(normalizeSearchText('  Café—500g  ')).toBe('cafe 500g');
+  });
+
+  it('prevê nomes por prefixo sem aceitar palavras apenas parecidas', () => {
+    expect(suggestProducts(products, 'arr ti').map(p => p.id)).toEqual([1]);
+    expect(suggestProducts(products, 'arranha')).toEqual([]);
+  });
+
+  it('consolida o mesmo produto de lojas diferentes na sugestão', () => {
+    const duplicated = [...products, { ...products[0], id: 4, establishment: 'Outra Loja', minPrice: 27.9 }];
+    const suggestions = suggestProducts(duplicated, 'arroz tio');
+    expect(suggestions.filter(p => p.name === 'Arroz Tio João Tipo 1')).toHaveLength(1);
+    expect(suggestions[0].minPrice).toBe(27.9);
   });
 });
 

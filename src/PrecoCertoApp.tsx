@@ -14,7 +14,7 @@ import { fetchCatalog } from "./data/remoteCatalog";
 import { supabase } from "./lib/supabase";
 import { isEnabled } from "./config/features";
 import { freshnessLabels, priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
-import { normalizeSearchText, searchProducts } from "./lib/productSearch";
+import { normalizeSearchText, searchProducts, suggestProducts } from "./lib/productSearch";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
 import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
@@ -456,7 +456,7 @@ function ThemeToggle({ compact = false }: { compact?: boolean }) {
 }
 
 
-function Header({ basketCount, user, onLogout }: { basketCount: number; user: any; onLogout: () => void }) {
+function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: number; favoritesCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -520,6 +520,7 @@ function Header({ basketCount, user, onLogout }: { basketCount: number; user: an
       <div className="header-actions">
         <ThemeToggle compact />
         <a className="icon-button header-action-button header-search-button" href="/buscar" aria-label="Pesquisar produtos" title="Buscar produtos"><Search size={20} aria-hidden="true" /></a>
+        <a className="icon-button header-action-button basket-button favorites-button" href={user ? "/favoritos" : "/login"} aria-label={user ? `${favoritesCount} produtos favoritos` : "Entre para salvar favoritos"} title={user ? "Abrir favoritos" : "Entre para salvar favoritos"}><Heart size={20} fill={favoritesCount > 0 ? "currentColor" : "none"} aria-hidden="true" />{favoritesCount > 0 && <span aria-hidden="true">{favoritesCount}</span>}</a>
         <a className="icon-button header-action-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`} title="Abrir cesta"><ShoppingBasket size={20} aria-hidden="true" />{basketCount > 0 && <span key={basketCount} aria-hidden="true">{basketCount}</span>}</a>
 
         {user ? (
@@ -637,8 +638,7 @@ function SearchBox({ value, setValue, products, hero = false }: { value: string;
   }, [value]);
 
   const suggestions = useMemo(() => {
-    const matches = searchProducts(products, localValue);
-    return (localValue ? matches : matches.sort((a, b) => a.minPrice - b.minPrice)).slice(0, 6);
+    return suggestProducts(products, localValue, 6);
   }, [localValue, products]);
 
   function submit(event: FormEvent) { 
@@ -780,7 +780,7 @@ function useRandomFeatured(products: Product[]) {
   return randomFeatured;
 }
 
-function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction, syncStatus }: PageProps & { syncStatus?: string }) {
+function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction, favorites, toggleFavorite, syncStatus }: PageProps & { syncStatus?: string }) {
   const [priceMode, setPriceMode] = useState<"recent" | "lowest">("recent");
   const randomFeatured = useRandomFeatured(products);
 
@@ -864,8 +864,8 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
       {syncStatus === "syncing" && products.length === 0 ? <ProductGridSkeleton cards={8}/> : <div className="visual-product-grid stagger-in">
         {(randomFeatured.length > 0 ? randomFeatured : products).slice(0, 8).map((p, index) => (
           <article className="visual-product-card" key={p.id}>
-            <button className="floating-favorite" onClick={() => saveAction("favorite", "product", String(p.id))} aria-label={`Favoritar ${p.name}`}>
-              <Heart />
+            <button className={`floating-favorite ${favorites.includes(String(p.id)) ? "active" : ""}`} onClick={() => toggleFavorite(String(p.id))} aria-pressed={favorites.includes(String(p.id))} aria-label={favorites.includes(String(p.id)) ? `Remover ${p.name} dos favoritos` : `Favoritar ${p.name}`}>
+              <Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"} />
             </button>
             <a className="visual-product-image" href={`/produto/${p.slug}`}>
               <span className="position-number">0{index + 1}</span>
@@ -950,6 +950,9 @@ interface PageProps {
   setQuery: (v: string) => void;
   addBasket: (p: Product) => void;
   saveAction: (action: string, type: string, id: string) => void;
+  favorites: string[];
+  toggleFavorite: (productId: string) => void;
+  user?: any;
 }
 
 const modeLabels: Record<OptimizationMode, string> = {
@@ -2566,7 +2569,7 @@ function ButchersPage({ products, stores, addBasket }: PageProps) {
   </main>;
 }
 
-function GenericPage({ path, products, stores, metrics, addBasket, saveAction, user }: PageProps & { path:string, user?: any }) {
+function GenericPage({ path, products, stores, metrics, addBasket, favorites, toggleFavorite, user }: PageProps & { path:string, user?: any }) {
   const randomFeatured = useRandomFeatured(products);
   const isStore = path.startsWith("/estabelecimento/") || path.startsWith("/loja/");
   const isProduct = path.startsWith("/produto") || path.includes("/produto/");
@@ -2594,8 +2597,8 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
   const alerts = JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]").filter((a: any) => a.action === "alert");
   const alertProducts = products.filter(p => alerts.some((a: any) => String(a.id) === String(p.id)));
 
-  if (path === "/perfil") {
-    const favorites = JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]");
+  if (path === "/perfil" || path === "/favoritos") {
+    if (!user) return <div className="shell page-shell generic-page"><section className="favorites-login-gate"><Heart/><span className="eyebrow">Favoritos protegidos</span><h1>Entre para salvar seus produtos</h1><p>Seus favoritos ficam disponíveis somente na sua área de cliente.</p><a className="button button--primary" href={`/login?redirect=${encodeURIComponent(path)}`}>Entrar na minha conta <ArrowRight/></a></section></div>;
     const favProducts = products.filter(p => favorites.includes(String(p.id)));
     
     return (
@@ -2635,9 +2638,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
                       <div className="visual-product-actions">
                         <button className="button button--primary button--small" onClick={() => addBasket(p)}><Plus size={14}/> Cesta</button>
                         <button className="button button--ghost button--small" onClick={() => {
-                          const newFavs = favorites.filter((id: string) => id !== String(p.id));
-                          localStorage.setItem("precocerto:favorites", JSON.stringify(newFavs));
-                          window.location.reload();
+                          toggleFavorite(String(p.id));
                         }}><Trash2 size={14}/></button>
                       </div>
                     </div>
@@ -2884,7 +2885,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, saveAction, u
                   </small>
                 )}
               </div>
-              <button onClick={() => saveAction("favorite", "product", String(p.id))} aria-label="Favoritar"><Heart/></button>
+              <button className={favorites.includes(String(p.id)) ? "active" : ""} onClick={() => toggleFavorite(String(p.id))} aria-pressed={favorites.includes(String(p.id))} aria-label={favorites.includes(String(p.id)) ? `Remover ${p.name} dos favoritos` : `Favoritar ${p.name}`}><Heart fill={favorites.includes(String(p.id)) ? "currentColor" : "none"}/></button>
               <button className="button button--primary" onClick={() => addBasket(p)}><Plus/> Cesta</button>
             </article>
           ))}
@@ -3205,7 +3206,7 @@ function PriceReportModal({ product, onClose }: { product: Product; onClose: () 
 }
 
 
-function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, fetchError, syncStatus, user }: PageProps & { fetchError?: string | null, syncStatus?: string, user?: any }) {
+function SearchPage({ products, stores, metrics, query, setQuery, addBasket, saveAction, favorites, toggleFavorite, fetchError, syncStatus, user }: PageProps & { fetchError?: string | null, syncStatus?: string, user?: any }) {
   const [compareList, setCompareList] = useState<Product[]>([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -3220,27 +3221,11 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [sortBy, setSortBy] = useState<"price" | "unit" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
   const [isSearching, setIsSearching] = useState(false);
 
-  const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [reportProduct, setReportProduct] = useState<Product | null>(null);
 
   const randomFeatured = useRandomFeatured(products);
   
-  useEffect(() => {
-    const saved = localStorage.getItem("precocerto:favorites");
-    if (saved) setFavorites(JSON.parse(saved));
-  }, []);
-
-  const handleFavorite = async (productId: string) => {
-    const newFavorites = favorites.includes(productId) 
-      ? favorites.filter(id => id !== productId)
-      : [...favorites, productId];
-    
-    setFavorites(newFavorites);
-    localStorage.setItem("precocerto:favorites", JSON.stringify(newFavorites));
-    saveAction("favorite", "product", productId);
-  };
-
   useEffect(() => {
     if (query || activeCategory !== "all" || activeStore !== "all" || activeBrand !== "all") {
       setIsSearching(true);
@@ -3411,7 +3396,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
                 const history = product.price_history || [];
                 const trend = product.previousPrice ? ((product.minPrice - product.previousPrice) / product.previousPrice) * 100 : null;
                 return <article className={`professional-result-card ${selected ? "is-selected" : ""}`} key={product.id}>
-                  <div className="professional-result-card__visual" onClick={() => setSelectedProduct(product)}><ProductImage product={product} size="default"/><span className="category-tag">{product.category}</span><button className={`floating-favorite ${favorites.includes(String(product.id)) ? "active" : ""}`} aria-label={`Favoritar ${product.name}`} onClick={event => {event.stopPropagation();if (!user) return alert("Apenas usuários cadastrados podem favoritar produtos.");handleFavorite(String(product.id));}}><Heart fill={favorites.includes(String(product.id)) ? "currentColor" : "none"}/></button></div>
+                  <div className="professional-result-card__visual" onClick={() => setSelectedProduct(product)}><ProductImage product={product} size="default"/><span className="category-tag">{product.category}</span><button className={`floating-favorite ${favorites.includes(String(product.id)) ? "active" : ""}`} aria-pressed={favorites.includes(String(product.id))} aria-label={favorites.includes(String(product.id)) ? `Remover ${product.name} dos favoritos` : `Favoritar ${product.name}`} onClick={event => {event.stopPropagation();toggleFavorite(String(product.id));}}><Heart fill={favorites.includes(String(product.id)) ? "currentColor" : "none"}/></button></div>
                   <div className="professional-result-card__body">
                     <div className="professional-result-card__meta"><span>{product.brand} • {product.size}</span><FreshnessBadge product={product}/></div>
                     <h3 onClick={() => setSelectedProduct(product)}>{product.name}</h3>
@@ -3655,6 +3640,11 @@ export default function PrecoCertoApp() {
     const saved = localStorage.getItem("precocerto:user");
     return saved ? JSON.parse(saved) : null;
   });
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    if (!localStorage.getItem("precocerto:user")) return [];
+    try { return JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]"); }
+    catch { return []; }
+  });
   // O acesso admin nunca é decidido pelo navegador: consultamos a sessão e os
   // papéis no backend em cada carregamento.
   const [adminAuth, setAdminAuth] = useState(false);
@@ -3771,13 +3761,17 @@ export default function PrecoCertoApp() {
   }
   
   function saveAction(action:string,type:string,id:string){
+    if (action === "favorite") {
+      toggleFavorite(id);
+      return;
+    }
     const key="precocerto:actions";
     const saved=JSON.parse(localStorage.getItem(key)??"[]");
     const isNew = !saved.some((a: any) => a.action === action && a.type === type && a.id === id);
     
     if (isNew) {
       localStorage.setItem(key,JSON.stringify([...saved,{action,type,id,at:new Date().toISOString()}].slice(-200)));
-      setToast(action==="alert"?"Alerta de preço ativado.":"Favoritado.");
+      setToast("Alerta de preço ativado.");
     } else if (action === "alert") {
       setToast("Você já está acompanhando este produto.");
     } else {
@@ -3785,7 +3779,30 @@ export default function PrecoCertoApp() {
     }
   }
 
-  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,fetchError,syncStatus,user}),[products,stores,metrics,query,fetchError,syncStatus,user]);
+  function toggleFavorite(productId: string) {
+    if (!user) {
+      setToast("Entre na sua conta para salvar favoritos.");
+      return;
+    }
+    setFavorites(current => {
+      const removing = current.includes(productId);
+      const next = removing ? current.filter(id => id !== productId) : [...current, productId];
+      localStorage.setItem("precocerto:favorites", JSON.stringify(next));
+      if (removing) {
+        const actions = JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]");
+        localStorage.setItem("precocerto:actions", JSON.stringify(actions.filter((item: any) => !(item.action === "favorite" && item.id === productId))));
+        setToast("Produto removido dos favoritos.");
+      } else {
+        const key = "precocerto:actions";
+        const actions = JSON.parse(localStorage.getItem(key) ?? "[]");
+        localStorage.setItem(key, JSON.stringify([...actions, { action: "favorite", type: "product", id: productId, at: new Date().toISOString() }].slice(-200)));
+        setToast("Produto adicionado aos favoritos.");
+      }
+      return next;
+    });
+  }
+
+  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites]);
 
   const handleAdminAuth = (success: boolean) => {
     if (success) {
@@ -3799,11 +3816,14 @@ export default function PrecoCertoApp() {
     const newUser = { name: "Usuário PreçoCerto" };
     setUser(newUser);
     localStorage.setItem("precocerto:user", JSON.stringify(newUser));
+    try { setFavorites(JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]")); }
+    catch { setFavorites([]); }
     setToast("Bem-vindo ao PreçoCerto!");
   };
 
   const handleLogout = () => {
     setUser(null);
+    setFavorites([]);
     setAdminAuth(false);
     localStorage.removeItem("precocerto:user");
     void signOut();
@@ -3841,7 +3861,7 @@ export default function PrecoCertoApp() {
   else page=<GenericPage {...props} metrics={metrics} path={pathname} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
 
   return <div className="app">
-    <Header basketCount={cart.length} user={user} onLogout={handleLogout}/>
+    <Header basketCount={cart.length} favoritesCount={favorites.length} user={user} onLogout={handleLogout}/>
     <main><div className="page-transition-enter-active" key={pathname}>{page}</div></main>
     <Footer/>
     <MobileBar basketCount={cart.length}/>

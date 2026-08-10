@@ -34,3 +34,29 @@ export function searchProducts(products: Product[], query: string) {
     .sort((a, b) => b.score - a.score || a.product.minPrice - b.product.minPrice || a.product.name.localeCompare(b.product.name, "pt-BR"))
     .map(item => item.product);
 }
+
+/**
+ * Sugestões enquanto o usuário digita. Aceita prefixos de palavras ("arr" →
+ * "arroz"), mas não aproxima palavras apenas parecidas. Ofertas repetidas em
+ * lojas diferentes são consolidadas, mantendo a de menor preço na prévia.
+ */
+export function suggestProducts(products: Product[], query: string, limit = 6) {
+  const q = normalizeSearchText(query);
+  if (!q) return [...products].sort((a, b) => a.minPrice - b.minPrice).slice(0, limit);
+
+  const queryTokens = q.split(" ").filter(Boolean);
+  const matches = products.filter(product => {
+    const searchableWords = normalizeSearchText([
+      product.name, product.brand, product.category, product.size,
+    ].filter(Boolean).join(" ")).split(" ");
+    return queryTokens.every(token => searchableWords.some(word => word.startsWith(token)));
+  });
+
+  const unique = new Map<string, Product>();
+  for (const product of matches.sort((a, b) => productSearchScore(b, q) - productSearchScore(a, q) || a.minPrice - b.minPrice)) {
+    const key = normalizeSearchText([product.name, product.brand, product.size].join("|"));
+    const saved = unique.get(key);
+    if (!saved || product.minPrice < saved.minPrice) unique.set(key, product);
+  }
+  return [...unique.values()].slice(0, limit);
+}
