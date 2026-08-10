@@ -5278,4 +5278,3 @@ function PaymentHistory({ user }: { user: SessionProfile | null }) {
     </div>
   );
 }
-}
