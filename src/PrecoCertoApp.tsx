@@ -3932,24 +3932,22 @@ export default function PrecoCertoApp() {
                 <div className="history-unavailable" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem', background: 'var(--surface-2)', borderRadius: '12px', color: 'var(--muted)' }}><LineChart/><span><b>Histórico ainda insuficiente</b><br/><small>Exibiremos a evolução assim que houver pelo menos duas coletas verificadas.</small></span></div>
               )}
             </div>
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-              <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
-                Adicionar à Cesta
-              </button>
-              <button className="button button--outline" style={{ height: '54px' }} onClick={() => { 
-                if (!user) {
-                  setToast("Acesse sua conta para configurar alertas de preço.");
-                  return;
-                }
-                saveAction("alert", "product", String(selectedProduct.id)); 
-                setSelectedProduct(null); 
-              }}>
-                <Bell size={18} /> Alertar
-              </button>
-            </div>
+          </div>
+          
+          <div className="admin-modal-footer" style={{ borderTop: '1px solid var(--border)', padding: '1.5rem', display: 'flex', gap: '1rem' }}>
+            <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
+              Adicionar à Cesta
+            </button>
+            <button className="button button--outline" style={{ height: '54px' }} onClick={() => { 
+              if (!user) {
+                setToast("Acesse sua conta para configurar alertas de preço.");
+                return;
+              }
+              saveAction("alert", "product", String(selectedProduct.id)); 
+              setSelectedProduct(null); 
+            }}>
+              <Bell size={18} /> Alertar
+            </button>
           </div>
         </div>
       </div>
