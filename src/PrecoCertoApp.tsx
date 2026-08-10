@@ -1902,6 +1902,199 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
 }
 
 
+function UserBasketHistory({ user, products }: { user: any; products: Product[] }) {
+  const [baskets, setBaskets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [newName, setNewName] = useState("");
+
+  const loadBaskets = async () => {
+    if (!user || !supabase) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('smart_baskets')
+        .select('*, items:smart_basket_items(*), snapshots:basket_snapshots(*)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBaskets(data || []);
+    } catch (err) {
+      console.error("Erro ao carregar histórico:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadBaskets();
+  }, [user]);
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!window.confirm(`Tem certeza que deseja excluir a lista "${name}"? Esta ação não pode ser desfeita.`)) return;
+    if (!supabase) return;
+    try {
+      const { error } = await supabase.from('smart_baskets').delete().eq('id', id);
+      if (error) throw error;
+      setBaskets(prev => prev.filter(b => b.id !== id));
+      if (typeof (window as any).setGlobalToast === 'function') {
+        (window as any).setGlobalToast("Lista removida com sucesso.", "success");
+      }
+    } catch (err: any) {
+      alert("Erro ao excluir: " + err.message);
+    }
+  };
+
+  const handleRename = async (id: string) => {
+    if (!newName.trim() || !supabase) return;
+    try {
+      const { error } = await supabase.from('smart_baskets').update({ name: newName }).eq('id', id);
+      if (error) throw error;
+      setBaskets(prev => prev.map(b => b.id === id ? { ...b, name: newName } : b));
+      setEditingId(null);
+      if (typeof (window as any).setGlobalToast === 'function') {
+        (window as any).setGlobalToast("Lista renomeada com sucesso.", "success");
+      }
+    } catch (err: any) {
+      alert("Erro ao renomear: " + err.message);
+    }
+  };
+
+  const handleExportPDF = (basket: any) => {
+    // Simulamos a estrutura que o optimizeBasket retorna para o basketPdf
+    const items = basket.snapshots.map((s: any) => ({
+      product: products.find(p => p.id === s.product_id) || { 
+        name: s.product_name, 
+        minPrice: s.price, 
+        establishment: s.establishment_name,
+        neighborhood: "" 
+      },
+      quantity: basket.items.find((i: any) => i.product_name === s.product_name)?.quantity || 1,
+      subtotal: s.price * (basket.items.find((i: any) => i.product_name === s.product_name)?.quantity || 1),
+      establishment: s.establishment_name,
+      isOptimizationMatch: true
+    }));
+
+    const total = items.reduce((sum: number, i: any) => sum + i.subtotal, 0);
+    const storeBreakdown: Record<string, any> = {};
+    items.forEach((i: any) => {
+      if (!storeBreakdown[i.establishment]) {
+        storeBreakdown[i.establishment] = { storeName: i.establishment, total: 0, itemCount: 0 };
+      }
+      storeBreakdown[i.establishment].total += i.subtotal;
+      storeBreakdown[i.establishment].itemCount++;
+    });
+
+    const result: BasketResult = {
+      total,
+      savings: 0,
+      items,
+      storeBreakdown
+    };
+
+    const plan = planBasketPdf(result, basket.optimization_mode, "portrait");
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const dateLabel = new Date(basket.created_at).toLocaleDateString("pt-BR");
+    const timeLabel = new Date(basket.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    
+    renderPlanToPdf(doc, plan, { dateLabel, timeLabel, money });
+    doc.save(`cesta-${basket.name.replace(/\s+/g, '-').toLowerCase()}.pdf`);
+  };
+
+  const handleLoadBasket = (basket: any) => {
+    const items = basket.items.map((i: any) => ({
+      productName: i.product_name,
+      category: i.category,
+      quantity: i.quantity,
+      unit: i.unit,
+      isEssential: i.is_essential
+    }));
+    
+    localStorage.setItem("precocerto:basket_reopen", JSON.stringify({
+      items,
+      mode: basket.optimization_mode,
+      budget: basket.budget
+    }));
+    localStorage.setItem("precocerto:basket_reopen_meta", JSON.stringify({
+      mode: basket.optimization_mode,
+      budget: basket.budget
+    }));
+    
+    window.location.href = "/cesta";
+  };
+
+  return (
+    <div className="user-history-section" style={{ marginTop: '3rem' }}>
+      <div className="section-heading compact">
+        <h2>Histórico de Listas Salvas ({baskets.length})</h2>
+        <p>Acesse, edite ou exporte seus planejamentos anteriores.</p>
+      </div>
+
+      {loading ? (
+        <div style={{ padding: '2rem', textAlign: 'center' }}>Carregando histórico...</div>
+      ) : baskets.length === 0 ? (
+        <div style={{ padding: '2rem', textAlign: 'center', background: 'var(--surface-2)', borderRadius: '12px' }}>
+          <ListChecks size={32} style={{ opacity: 0.2, marginBottom: '0.5rem' }} />
+          <p>Nenhuma lista salva no seu painel.</p>
+        </div>
+      ) : (
+        <div className="price-table-card">
+          {baskets.map(basket => (
+            <div key={basket.id} className="price-row" style={{ padding: '1.25rem', flexDirection: 'column', alignItems: 'stretch', gap: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  {editingId === basket.id ? (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <input 
+                        className="admin-input" 
+                        value={newName} 
+                        onChange={e => setNewName(e.target.value)}
+                        autoFocus
+                      />
+                      <button className="button button--primary button--small" onClick={() => handleRename(basket.id)}>Salvar</button>
+                      <button className="button button--ghost button--small" onClick={() => setEditingId(null)}>X</button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <strong style={{ fontSize: '1.1rem' }}>{basket.name}</strong>
+                      <button onClick={() => { setEditingId(basket.id); setNewName(basket.name); }} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>
+                        <Edit size={14} />
+                      </button>
+                    </div>
+                  )}
+                  <small style={{ color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Clock3 size={12} /> {new Date(basket.created_at).toLocaleString('pt-BR')}
+                  </small>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="button button--ghost button--small" title="Baixar PDF" onClick={() => handleExportPDF(basket)}>
+                    <Download size={16} />
+                  </button>
+                  <button className="button button--ghost button--small" style={{ color: 'var(--red)' }} title="Excluir lista" onClick={() => handleDelete(basket.id, basket.name)}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-3)', padding: '0.75rem', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.85rem' }}>
+                  <span><strong>{basket.items.length}</strong> itens</span>
+                  <span>Modo: <strong>{modeLabels[basket.optimization_mode as OptimizationMode] || basket.optimization_mode}</strong></span>
+                </div>
+                <button className="button button--primary button--small" onClick={() => handleLoadBasket(basket)}>
+                  Carregar e Editar <ArrowRight size={14} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function SnapshotPage({ products }: PageProps) {
   const { pathname, search } = useLocation();
   const snapshotId = pathname.split('/').pop();
@@ -3076,6 +3269,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
                 </div>
               ))}
             </div>
+            <UserBasketHistory user={user} products={products} />
           </section>
 
           <aside className="generic-aside">
