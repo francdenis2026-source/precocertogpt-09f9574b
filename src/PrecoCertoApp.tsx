@@ -3823,7 +3823,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
   const [activeBrand, setActiveBrand] = useState("all");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [updateRecency, setUpdateRecency] = useState("all"); // 'all', '7d', '24h'
-  const [sortBy, setSortBy] = useState<"price" | "unit" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
+  const [sortBy, setSortBy] = useState<"price" | "avg_price" | "max_price" | "unit" | "date" | "variation">(pathname === "/melhores-precos" ? "variation" : "price");
   const [isSearching, setIsSearching] = useState(false);
 
   // Usando evento global para unificar comportamento do modal
@@ -3867,6 +3867,12 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
       // A relevância da pesquisa vem primeiro; o menor preço desempata.
     } else if (sortBy === "price") {
       result.sort((a, b) => a.minPrice - b.minPrice);
+    } else if (sortBy === "avg_price") {
+      result.sort((a, b) => a.avgPrice - b.avgPrice);
+    } else if (sortBy === "max_price") {
+      result.sort((a, b) => b.maxPrice - a.maxPrice); // Maior preço costuma ser do maior para o menor para ver piores cenários? Ou menor? Usuário pediu "escolher produtos pelo menor, médio ou maior preço", geralmente "por maior" implica descendente. Vamos manter ascendente para consistência com "menor", ou descendente para o "maior".
+      // Se ele quer escolher pelo maior, talvez queira ver os mais caros ou os que tem maior teto.
+      // Vou fazer: menor (asc), médio (asc), maior (desc).
     } else if (sortBy === "unit") {
       // Menor preço unitário: itens sem medida conversível vão para o fim.
       result.sort((a, b) => {
@@ -3991,7 +3997,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
         </aside>
 
         <main className="professional-search-results">
-          <header className="professional-results-head"><div><span>Catálogo local</span><h2>{query ? `Resultados para “${query}”` : "Produtos disponíveis"}</h2><small>{filtered.length} itens encontrados • página {Math.min(currentPage, Math.max(totalPages, 1))} de {Math.max(totalPages, 1)}</small></div><label><span>Ordenar por</span><select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)}><option value="price">Menor preço</option><option value="unit">Menor preço por unidade</option><option value="date">Atualização mais recente</option><option value="variation">Maior queda de preço</option></select></label></header>
+          <header className="professional-results-head"><div><span>Catálogo local</span><h2>{query ? `Resultados para “${query}”` : "Produtos disponíveis"}</h2><small>{filtered.length} itens encontrados • página {Math.min(currentPage, Math.max(totalPages, 1))} de {Math.max(totalPages, 1)}</small></div><label><span>Ordenar por</span><select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)}><option value="price">Menor preço</option><option value="avg_price">Preço médio</option><option value="max_price">Maior preço</option><option value="unit">Menor preço por unidade</option><option value="date">Atualização mais recente</option><option value="variation">Maior queda de preço</option></select></label></header>
 
           {isSearching ? <div className="search-loading"><div className="spinner"/><p>Analisando o catálogo local…</p></div> : paginated.length > 0 ? <>
             <div className="professional-results-grid">
@@ -4536,17 +4542,17 @@ export default function PrecoCertoApp() {
                   <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border-soft)', borderRight: '1px solid var(--border-soft)' }}>
                     <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Médio</span>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--blue)' }}>
-                      {money(selectedProduct.price_history && selectedProduct.price_history.length > 0
+                      {money(selectedProduct.avgPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
                         ? selectedProduct.price_history.reduce((a: number, b: any) => a + b.value, 0) / selectedProduct.price_history.length
-                        : selectedProduct.minPrice)}
+                        : selectedProduct.minPrice))}
                     </strong>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Máximo</span>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--red)' }}>
-                      {money(selectedProduct.price_history && selectedProduct.price_history.length > 0
+                      {money(selectedProduct.maxPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
                         ? Math.max(...selectedProduct.price_history.map((h: any) => h.value))
-                        : (selectedProduct.previousPrice || selectedProduct.minPrice))}
+                        : (selectedProduct.previousPrice || selectedProduct.minPrice)))}
                     </strong>
                   </div>
                 </div>
