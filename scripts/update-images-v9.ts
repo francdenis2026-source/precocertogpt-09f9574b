@@ -10,20 +10,20 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const ASSETS_DIR = 'src/assets';
 
 const mappings = [
-  { pattern: /doce.*leite.*itambe/i, asset: 'doce-de-leite-itambe.png.asset.json' },
-  { pattern: /extrato.*tomate.*elefante/i, asset: 'extrato-tomate-elefante.png.asset.json' },
-  { pattern: /farinha.*mandioca.*agrovila/i, asset: 'farinha-mandioca-agrovila.png.asset.json' },
-  { pattern: /farinha.*mandioca.*cooper/i, asset: 'farinha-mandioca-cooper.png.asset.json' },
-  { pattern: /farinha.*milho.*sinha/i, asset: 'farinha-milho-sinha.png.asset.json' },
-  { pattern: /farinha.*trigo.*dona.*benta/i, asset: 'farinha-trigo-dona-benta.png.asset.json' },
-  { pattern: /farinha.*trigo.*finna/i, asset: 'farinha-trigo-finna.png.asset.json' },
-  { pattern: /farinha.*lactea.*nestle/i, asset: 'farinha-lactea-nestle.png.asset.json' },
-  { pattern: /feijao.*tio.*alemao/i, asset: 'feijao-tio-alemao.png.asset.json' },
-  { pattern: /feijao.*preto.*kumbuca/i, asset: 'feijao-preto-kumbuca.png.asset.json' }
+  { pattern: /frango.*inteiro/i, asset: 'frango-inteiro.png.asset.json' },
+  { pattern: /fuba.*milho.*sinha/i, asset: 'fuba-milho-sinha.png.asset.json' },
+  { pattern: /gelatina.*oetker/i, asset: 'gelatina-oetker.png.asset.json' },
+  { pattern: /gelatina.*royal/i, asset: 'gelatina-royal.png.asset.json' },
+  { pattern: /goiabada.*palmeiron/i, asset: 'goiabada-palmeiron.png.asset.json' },
+  { pattern: /hamburguer.*sadia/i, asset: 'hamburguer-sadia.png.asset.json' },
+  { pattern: /hamburguer.*seara/i, asset: 'hamburguer-seara.png.asset.json' },
+  { pattern: /iogurte.*danone/i, asset: 'iogurte-danone.png.asset.json' },
+  { pattern: /iogurte.*nestle/i, asset: 'iogurte-nestle.png.asset.json' },
+  { pattern: /iogurte.*itambe/i, asset: 'iogurte-itambe.png.asset.json' }
 ];
 
-async function updateBatch8() {
-  console.log('--- Iniciando Lote 8 de imagens (Mercearia) ---');
+async function updateBatch9() {
+  console.log('--- Iniciando Lote 9 de imagens (Mercearia e Frios) ---');
   const { data: products } = await supabase.from('products').select('id, name');
   if (!products) return;
 
@@ -40,7 +40,7 @@ async function updateBatch8() {
       }
     }
   }
-  console.log('--- Lote 8 Concluído ---');
+  console.log('--- Lote 9 Concluído ---');
 }
 
-updateBatch8();
+updateBatch9();
