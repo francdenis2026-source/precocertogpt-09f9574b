@@ -114,13 +114,21 @@ export function DorinhaAuthorStore() {
 
   const external = useMemo(() => {
     if (!profile) return [];
-    return (profile.merchant.external_stores || [])
+    const ordered = (profile.merchant.external_stores || [])
       .filter(s => s.label !== 'Apple Books')
       .sort((a, b) => {
         if (a.label.toLowerCase().includes('amazon')) return -1;
         if (b.label.toLowerCase().includes('amazon')) return 1;
         return a.label.localeCompare(b.label);
       });
+    const platforms = new Set<string>();
+    return ordered.filter(store => {
+      const label = store.label.trim().toLocaleLowerCase('pt-BR');
+      const key = label.includes('amazon') ? 'amazon' : label;
+      if (platforms.has(key)) return false;
+      platforms.add(key);
+      return true;
+    });
   }, [profile]);
 
   if (loading) return <main style={s.loading}><BookOpen size={36}/><strong>Preparando a biblioteca da autora…</strong></main>;
