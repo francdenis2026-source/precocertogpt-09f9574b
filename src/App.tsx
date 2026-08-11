@@ -23,6 +23,7 @@ import { PublicPagesUiUxAudit } from "./components/PublicPagesUiUxAudit";
 import { VisualRegressionGuard } from "./components/VisualRegressionGuard";
 import { GlobalPremiumExperience } from "./components/GlobalPremiumExperience";
 import { CorePublicPagesUiUx } from "./components/CorePublicPagesUiUx";
+import { ComparePageProMaxRebuild } from "./components/ComparePageProMaxRebuild";
 import { ScrollPerformanceGuard } from "./components/ScrollPerformanceGuard";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
@@ -58,6 +59,7 @@ export default function App() {
       <VisualRegressionGuard />
       <GlobalPremiumExperience />
       <CorePublicPagesUiUx />
+      <ComparePageProMaxRebuild />
       <ScrollPerformanceGuard />
       <MaxPriceStoreLabels />
       <SearchUxClarity />
