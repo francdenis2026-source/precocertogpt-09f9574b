@@ -315,8 +315,24 @@ export function DorinhaAuthorStore() {
 
     <section style={s.section} className="db-section">
       <div style={s.sectionHead}><div><span style={s.eyebrow}>TAMBÉM DISPONÍVEL ONLINE</span><h2 style={s.h2}>Prefere comprar em outra plataforma?</h2><p style={s.sectionText}>Sem problema. O PreçoCerto também ajuda você a encontrar os canais digitais onde a obra da autora está disponível.</p></div></div>
-      <div className="db-external-grid">
-        {external.map((store)=><a key={store.url} href={store.url} target="_blank" rel="noreferrer" style={s.externalCard} className="db-action"><span><ExternalLink size={17}/></span><div><strong>{store.label}</strong><small>Abrir loja externa</small></div><ArrowRight size={16}/></a>)}
+      <div className={external.length > 0 ? "db-external-grid" : ""}>
+        {external.length > 0 ? (
+          external.map((store) => (
+            <a key={store.url} href={store.url} target="_blank" rel="noreferrer" style={s.externalCard} className="db-action">
+              <span><ExternalLink size={17}/></span>
+              <div><strong>{store.label}</strong><small>Abrir loja externa</small></div>
+              <ArrowRight size={16}/>
+            </a>
+          ))
+        ) : (
+          <div className="db-external-empty">
+            <h3>Disponível em breve nas plataformas</h3>
+            <p>Atualmente, as obras estão disponíveis exclusivamente para compra direta. Fale com a autora para garantir seu exemplar.</p>
+            <a href={whatsappUrl(whatsapp)} target="_blank" rel="noreferrer" className="db-external-empty-cta">
+              <MessageCircle size={18} /> Falar com Dorinha
+            </a>
+          </div>
+        )}
       </div>
       <p style={s.sourceNote}>A disponibilidade, o formato e os valores praticados em lojas externas são definidos pelas próprias plataformas e podem mudar sem aviso.</p>
     </section>
