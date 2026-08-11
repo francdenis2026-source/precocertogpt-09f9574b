@@ -10,6 +10,7 @@ import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
 import { TrueHomepage } from "./components/TrueHomepage";
 import { HomepageSearchKeyboardProMax } from "./components/HomepageSearchKeyboardProMax";
+import { ProductMediaClippingProMax } from "./components/ProductMediaClippingProMax";
 import { FooterCompactUx } from "./components/FooterCompactUx";
 import { GlobalMobileCompactUx } from "./components/GlobalMobileCompactUx";
 import { UiUxProMaxFoundation } from "./components/UiUxProMaxFoundation";
@@ -61,6 +62,7 @@ export default function App() {
       <GlobalPremiumExperience />
       <DeveloperMarketplaceAbout />
       <HomepageSearchKeyboardProMax />
+      <ProductMediaClippingProMax />
       <CorePublicPagesUiUx />
       <ScrollPerformanceGuard />
       <MaxPriceStoreLabels />
