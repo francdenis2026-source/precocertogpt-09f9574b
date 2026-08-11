@@ -52,7 +52,7 @@ function mountDeveloperCredit() {
   if (!footer || footer.querySelector(".pc-dev-credit")) return;
   const credit = document.createElement("small");
   credit.className = "pc-dev-credit";
-  credit.textContent = "dev<Franc D'nis>, Feijó-AC";
+  credit.textContent = "dev<Franc D'nis>";
   const target = footer.querySelector(".th-footer__row") || footer.firstElementChild || footer;
   target.appendChild(credit);
 }
