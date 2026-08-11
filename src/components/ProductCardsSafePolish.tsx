@@ -72,7 +72,6 @@ function installStyles() {
       font-weight:850 !important;
     }
 
-    /* Favorite affordance: make selected state unmistakable without changing logic. */
     body.pc-product-polish :is(.favorite-button,.favorite-btn,.heart-button,[aria-label*='favorit' i])[aria-pressed='true'],
     body.pc-product-polish :is(.favorite-button,.favorite-btn,.heart-button).is-favorite,
     body.pc-product-polish :is(.favorite-button,.favorite-btn,.heart-button).active {
@@ -91,7 +90,6 @@ function installStyles() {
       transform: scale(1.08);
     }
 
-    /* Comparison table/card hierarchy. */
     body.pc-product-polish .price-table-card {
       border:1px solid var(--border) !important;
       box-shadow:0 10px 28px rgba(15,23,42,.06) !important;
@@ -164,7 +162,9 @@ export function ProductCardsSafePolish() {
   const location = useLocation();
   useEffect(() => {
     installStyles();
-    const eligible = location.pathname === "/" || location.pathname.startsWith("/buscar") || location.pathname.startsWith("/produto/") || location.pathname.startsWith("/melhores-precos");
+    // The rebuilt homepage owns its product-card geometry and typography.
+    // Keep this legacy polish on product/search flows only to avoid cross-layer collisions.
+    const eligible = location.pathname.startsWith("/buscar") || location.pathname.startsWith("/produto/") || location.pathname.startsWith("/melhores-precos");
     document.body.classList.toggle("pc-product-polish", eligible);
     return () => document.body.classList.remove("pc-product-polish");
   }, [location.pathname]);

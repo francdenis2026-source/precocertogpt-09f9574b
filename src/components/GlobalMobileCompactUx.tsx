@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const STYLE_ID = "pc-global-mobile-compact";
 
@@ -119,10 +120,16 @@ function installStyles() {
 }
 
 export function GlobalMobileCompactUx() {
+  const { pathname } = useLocation();
+
   useEffect(() => {
     installStyles();
-    document.body.classList.add("pc-global-mobile");
+    // The rebuilt homepage has its own mobile system. Do not let this older
+    // global compact layer override its typography, hero, buttons or spacing.
+    const eligible = pathname !== "/";
+    document.body.classList.toggle("pc-global-mobile", eligible);
     return () => document.body.classList.remove("pc-global-mobile");
-  }, []);
+  }, [pathname]);
+
   return null;
 }
