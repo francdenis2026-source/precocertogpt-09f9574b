@@ -18,7 +18,7 @@ import { priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
 import { normalizeSearchText, searchProducts, suggestProducts } from "./lib/productSearch";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signInMerchantWithCpf, signOut, type SessionProfile } from "./lib/roles";
-import { resolveAuthenticatedHome } from "./lib/merchantPlatform";
+import { loadMerchantMembership, resolveAuthenticatedHome } from "./lib/merchantPlatform";
 import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
 import { jsPDF } from "jspdf";
 import { planBasketPdf, renderPlanToPdf } from "./lib/basketPdf";
@@ -461,11 +461,18 @@ function ThemeToggle({ compact = false }: { compact?: boolean }) {
   </button>;
 }
 
+function useAccountSpace(){
+  const [space,setSpace]=useState({href:"/login?perfil=lojista&redirect=%2Fpainel-lojista",label:"Meu espaço",kind:"guest"});
+  useEffect(()=>{let active=true;void(async()=>{const [profile,membership]=await Promise.all([loadSessionProfile(),loadMerchantMembership()]);if(!active)return;if(profile?.isAdmin)setSpace({href:"/admin/plataforma",label:"Administração",kind:"admin"});else if(membership)setSpace({href:"/painel-lojista",label:"Meu negócio",kind:"merchant"});else if(profile)setSpace({href:"/perfil",label:"Minha conta",kind:"consumer"})})();return()=>{active=false}},[]);
+  return space;
+}
+
 
 function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: number; favoritesCount: number; user: any; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const accountSpace=useAccountSpace();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -524,6 +531,7 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
         })}
       </nav>
       <div className="header-actions">
+        <a className="icon-button header-space-link" href={accountSpace.href} aria-label={accountSpace.label} title={accountSpace.label}>{accountSpace.kind==="admin"?<ShieldCheck size={19}/>:<Store size={19}/>}<span>{accountSpace.label}</span></a>
         <ThemeToggle compact />
         <a className="icon-button header-action-button header-search-button" href="/buscar" aria-label="Pesquisar produtos" title="Buscar produtos"><Search size={20} aria-hidden="true" /></a>
         <a className="icon-button header-action-button basket-button favorites-button" href="/favoritos" aria-label={user ? `${favoritesCount} produtos favoritos` : "Entre para salvar favoritos"} title={user ? "Abrir favoritos" : "Entre para salvar favoritos"} onClick={(e) => { if (!user) { e.preventDefault(); window.location.href = `/login?redirect=${encodeURIComponent('/favoritos')}`; } }}><Heart size={20} fill={favoritesCount > 0 ? "currentColor" : "none"} aria-hidden="true" />{favoritesCount > 0 && <span aria-hidden="true">{favoritesCount}</span>}</a>
@@ -567,6 +575,7 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
             </button>
           </div>
           <nav aria-label="Links rápidos">
+            <a href={accountSpace.href} className="drawer-space-link" onClick={() => setOpen(false)}><Store/> {accountSpace.label}</a>
             <a href="/buscar" onClick={() => setOpen(false)}>Comparar preços</a>
             <a href="/acougues" onClick={() => setOpen(false)}>Açougues e carnes</a>
             <a href="/cesta-basica" onClick={() => setOpen(false)}>Cesta inteligente</a>
@@ -592,6 +601,7 @@ function Footer() {
 
 function MobileBar({ basketCount, favoritesCount }: { basketCount: number; favoritesCount: number }) {
   const { pathname } = useLocation();
+  const accountSpace=useAccountSpace();
   const isActive = (path: string) => pathname === path || (path !== "/" && pathname.startsWith(path));
   
   return <nav className="mobile-bar" aria-label="Navegação móvel">
@@ -612,9 +622,9 @@ function MobileBar({ basketCount, favoritesCount }: { basketCount: number; favor
       {favoritesCount > 0 && <b aria-hidden="true">{favoritesCount}</b>}
       <span>Favoritos</span>
     </a>
-    <a href="/perfil" className={isActive("/perfil") ? "active" : ""} aria-current={isActive("/perfil") ? "page" : undefined}>
-      <UserRound aria-hidden="true" />
-      <span>Perfil</span>
+    <a href={accountSpace.href} className={isActive(accountSpace.href.split("?")[0]) ? "active" : ""} aria-current={isActive(accountSpace.href.split("?")[0]) ? "page" : undefined}>
+      {accountSpace.kind==="admin"?<ShieldCheck aria-hidden="true"/>:accountSpace.kind==="merchant"?<Store aria-hidden="true"/>:<UserRound aria-hidden="true" />}
+      <span>Meu espaço</span>
     </a>
   </nav>;
 }
