@@ -4095,15 +4095,18 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
 
     if (isAdminLogin && !showForgot) {
       setError("");
+      
+      console.log("Tentando login administrativo para:", user);
 
       // MODO DE EMERGÊNCIA: Bypass para o administrador principal.
       // Útil enquanto as permissões no banco não são propagadas.
       if (user.trim() === "francdenisbr@gmail.com" && pass === "125758") {
+        console.log("Bypass de emergência ativado.");
         onAdminAuth(true);
         setAttempts(0);
         localStorage.removeItem("precocerto:admin_blocked_until");
         addAuditLog("Login administrativo autorizado via bypass (emergência)", "warning", user);
-        window.location.href = "/admin";
+        window.location.assign("/admin");
         return;
       }
 
@@ -4116,7 +4119,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
           setAttempts(0);
           localStorage.removeItem("precocerto:admin_blocked_until");
           addAuditLog(`Login administrativo autorizado (${profile.roles.join(", ")})`, "success", profile.email ?? user);
-          window.location.href = "/admin";
+          window.location.assign("/admin");
           return;
         }
         await signOut();
@@ -4124,6 +4127,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
         addAuditLog("Tentativa de acesso administrativo sem papel autorizado", "error", user || "Desconhecido");
         return;
       }
+
 
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
