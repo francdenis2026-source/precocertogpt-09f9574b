@@ -27,7 +27,6 @@ function installMobileStyles() {
         gap: 8px !important;
       }
       body.pc-home-mobile .header-location,
-      body.pc-home-mobile .header-actions,
       body.pc-home-mobile .desktop-nav {
         display: none !important;
       }
