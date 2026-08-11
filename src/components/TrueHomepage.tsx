@@ -5,6 +5,7 @@ import { fetchCatalog } from "../data/remoteCatalog";
 import { getStoreLogoUrl } from "../data/storeLogos";
 import "./TrueHomepage.css";
 import "./TrueHomepageInteractionProMax.css";
+import "./TrueHomepageColorContrastProMax.css";
 
 const seed = buildCatalog();
 const money = (value:number) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(value);
