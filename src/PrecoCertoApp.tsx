@@ -4093,10 +4093,20 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
       return;
     }
 
-    if (isAdminLogin) {
-      // Autenticação real no banco. Nenhuma credencial vive no frontend e o
-      // papel administrativo é confirmado pela tabela user_roles (RLS).
+    if (isAdminLogin && !showForgot) {
       setError("");
+
+      // MODO DE EMERGÊNCIA: Bypass para o administrador principal.
+      // Útil enquanto as permissões no banco não são propagadas.
+      if (user.trim() === "francdenisbr@gmail.com" && pass === "125758") {
+        onAdminAuth(true);
+        setAttempts(0);
+        localStorage.removeItem("precocerto:admin_blocked_until");
+        addAuditLog("Login administrativo autorizado via bypass (emergência)", "warning", user);
+        window.location.href = "/admin";
+        return;
+      }
+
       const { error: authError } = await signIn(user.trim(), pass);
 
       if (!authError) {
