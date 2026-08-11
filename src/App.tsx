@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import PrecoCertoApp from "./PrecoCertoApp";
 import { MaxPriceStoreLabels } from "./components/MaxPriceStoreLabels";
 import { SearchUxClarity } from "./components/SearchUxClarity";
+import { SearchSafePolish } from "./components/SearchSafePolish";
 import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
@@ -54,6 +55,7 @@ export default function App() {
     <BrowserRouter>
       <MaxPriceStoreLabels />
       <SearchUxClarity />
+      <SearchSafePolish />
       <ProductInteractionUx />
       <PublicCatalogUxFixes />
       <PublicOnlineSalesAvailability />
