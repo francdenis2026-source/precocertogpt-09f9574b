@@ -4172,9 +4172,10 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
             return;
           }
           await signOut();
-          setError("A credencial foi reconhecida, mas ainda não está vinculada a um estabelecimento ativo. Solicite a ativação ao administrador.");
+          setError("A credencial foi reconhecida, mas ainda não está vinculada a um estabelecimento ativo no sistema. Contate o suporte.");
           return;
-        } else if (!merchantAuth.error.includes("não encontrado")) {
+        } else {
+          // O erro 'non-2xx' agora é tratado na lib roles.ts e retorna uma mensagem amigável
           setError(merchantAuth.error);
           return;
         }
