@@ -22,6 +22,7 @@ import { InternalDashboardsDeepUiUx } from "./components/InternalDashboardsDeepU
 import { PublicPagesUiUxAudit } from "./components/PublicPagesUiUxAudit";
 import { VisualRegressionGuard } from "./components/VisualRegressionGuard";
 import { GlobalPremiumExperience } from "./components/GlobalPremiumExperience";
+import { CorePublicPagesUiUx } from "./components/CorePublicPagesUiUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
 import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
@@ -55,6 +56,7 @@ export default function App() {
     <BrowserRouter>
       <VisualRegressionGuard />
       <GlobalPremiumExperience />
+      <CorePublicPagesUiUx />
       <MaxPriceStoreLabels />
       <SearchUxClarity />
       <SearchSafePolish />
