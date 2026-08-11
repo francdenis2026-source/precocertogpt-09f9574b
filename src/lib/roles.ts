@@ -2,22 +2,8 @@
 // REGRA DE SEGURANÇA: a autorização real é verificada no backend (RLS + função
 // SECURITY DEFINER `has_role`). Nada em localStorage concede acesso administrativo.
 
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-
-export const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL ?? "https://kqueiohjadwzxafdrrxk.supabase.co";
-
-export const SUPABASE_PUBLISHABLE_KEY =
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
-  "sb_publishable_7EXe8ySDhRTgYHQfWv-nag_tNOserrG";
-
-export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
-
-export const supabase: SupabaseClient | null = isSupabaseConfigured
-  ? createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true },
-    })
-  : null;
+import { supabase } from "./supabase";
+export { supabase };
 
 
 export type AppRole =
