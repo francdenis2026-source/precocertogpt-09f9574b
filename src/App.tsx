@@ -22,6 +22,7 @@ import { EstablishmentsSafePolish } from "./components/EstablishmentsSafePolish"
 import { BasketFavoritesUserSafePolish } from "./components/BasketFavoritesUserSafePolish";
 import { PlansMerchantConversionSafePolish } from "./components/PlansMerchantConversionSafePolish";
 import { InternalDashboardsSafePolish } from "./components/InternalDashboardsSafePolish";
+import { VisualRegressionGuard } from "./components/VisualRegressionGuard";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
@@ -57,6 +58,7 @@ import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/Publi
 export default function App() {
   return (
     <BrowserRouter>
+      <VisualRegressionGuard />
       <MaxPriceStoreLabels />
       <SearchUxClarity />
       <SearchSafePolish />
