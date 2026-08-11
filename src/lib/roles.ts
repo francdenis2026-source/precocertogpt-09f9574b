@@ -87,6 +87,14 @@ export async function signIn(email: string, password: string) {
   return { error: error?.message ?? null };
 }
 
+export async function signInMerchantWithCpf(cpf:string,pin:string){
+  if(!supabase)return{error:"Autenticação indisponível: banco não configurado."};
+  const {data,error}=await supabase.functions.invoke("merchant-cpf-login",{body:{cpf,pin}});
+  if(error||!data?.access_token||!data?.refresh_token)return{error:data?.error??error?.message??"CPF ou PIN incorretos."};
+  const {error:sessionError}=await supabase.auth.setSession({access_token:data.access_token,refresh_token:data.refresh_token});
+  return{error:sessionError?.message??null};
+}
+
 export async function signUp(email: string, password: string, name: string) {
   if (!supabase) return { error: "Cadastro indisponível: banco não configurado." };
   const { error } = await supabase.auth.signUp({
