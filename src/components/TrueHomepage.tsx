@@ -1,17 +1,21 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ArrowRight, CheckCircle2, Heart, MapPin, Menu, PackageSearch, Search, ShieldCheck, ShoppingBasket, Sparkles, Store, TrendingDown, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, Heart, ImageOff, MapPin, Menu, Search, ShieldCheck, ShoppingBasket, Sparkles, Store, TrendingDown, X } from "lucide-react";
 import { buildCatalog, type Product, type StoreRow } from "../data/catalog";
 import { fetchCatalog } from "../data/remoteCatalog";
 import { getStoreLogoUrl } from "../data/storeLogos";
 import "./TrueHomepage.css";
 import "./TrueHomepageInteractionProMax.css";
 import "./TrueHomepageColorContrastProMax.css";
+import "./TrueHomepageDensityProMax.css";
 
 const seed = buildCatalog();
 const money = (value:number) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(value);
 const number = (value:number) => new Intl.NumberFormat("pt-BR").format(value);
 
-function ProductImage({product}:{product:Product}) { return <div className="th-product__media">{product.image_url?<img src={product.image_url} alt={product.name} loading="lazy"/>:<PackageSearch aria-hidden="true"/>}</div>; }
+function ProductImage({product}:{product:Product}) {
+ const category=(product.category||"Produto").trim();
+ return <div className="th-product__media">{product.image_url?<img src={product.image_url} alt={product.name} loading="lazy"/>:<div className="th-product__placeholder" aria-label={`Imagem indisponível para ${product.name}`}><span><ImageOff aria-hidden="true"/></span><strong>{category}</strong><small>Imagem em atualização</small></div>}</div>;
+}
 
 export function TrueHomepage(){
  const [products,setProducts]=useState<Product[]>(seed.products); const [stores,setStores]=useState<StoreRow[]>(seed.stores); const [metrics,setMetrics]=useState(seed.metrics); const [query,setQuery]=useState(""); const [menuOpen,setMenuOpen]=useState(false);
