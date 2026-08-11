@@ -67,7 +67,8 @@ function installFoundationStyles() {
     }
 
     .visual-price strong,
-    .search-result-item__price {
+    .search-result-item__price,
+    .price-row strong {
       font-variant-numeric: tabular-nums;
     }
 
@@ -83,6 +84,47 @@ function installFoundationStyles() {
       transition-duration: 180ms;
     }
 
+    /* Safe polish: improve hierarchy without replacing page geometry. */
+    .section-heading h2,
+    .hero h1 {
+      text-wrap: balance;
+    }
+
+    .section-heading p,
+    .hero-copy > p {
+      text-wrap: pretty;
+    }
+
+    .visual-product-card,
+    .store-card,
+    .price-table-card {
+      overflow: clip;
+    }
+
+    .visual-product-image img {
+      object-fit: contain;
+      max-width: 100%;
+    }
+
+    .visual-product-actions .button,
+    .hero-actions .button,
+    .search-combo__button {
+      font-weight: 800;
+    }
+
+    @media (max-width: 820px) {
+      .section-heading h2 {
+        line-height: 1.12;
+      }
+
+      .search-combo__input,
+      input,
+      select,
+      textarea {
+        font-size: 16px;
+      }
+    }
+
     @media (max-width: 560px) {
       body.pc-home-mobile .hero-live,
       body.pc-home-mobile .eyebrow--light {
@@ -94,11 +136,13 @@ function installFoundationStyles() {
       body.pc-home-mobile .basket-plan p,
       body.pc-home-mobile .final-cta p {
         font-size: 0.95rem !important;
+        line-height: 1.55 !important;
       }
 
       body.pc-home-mobile .search-result-item__name,
       body.pc-home-mobile .visual-product-name {
-        font-size: 0.95rem !important;
+        font-size: 1rem !important;
+        line-height: 1.4 !important;
       }
 
       body.pc-home-mobile .search-result-item__meta,
@@ -109,23 +153,24 @@ function installFoundationStyles() {
       body.pc-home-mobile .table-footer,
       body.pc-home-mobile .budget-chips a,
       body.pc-home-mobile .step-card p {
-        font-size: 0.8125rem !important;
-        line-height: 1.4 !important;
+        font-size: 0.875rem !important;
+        line-height: 1.45 !important;
       }
 
       body.pc-home-mobile .search-result-item__price {
-        font-size: 1rem !important;
-        font-weight: 800 !important;
+        font-size: 1.05rem !important;
+        font-weight: 850 !important;
       }
 
       body.pc-home-mobile .visual-price strong {
-        font-size: 1.5rem !important;
+        font-size: 1.55rem !important;
+        line-height: 1.1 !important;
       }
 
       body.pc-home-mobile .visual-product-actions .button,
       body.pc-home-mobile .suggestions-footer a,
       body.pc-home-mobile .section-heading .inline-link {
-        font-size: 0.875rem !important;
+        font-size: 0.9rem !important;
       }
 
       body.pc-home-mobile .category-rail a,
@@ -139,6 +184,13 @@ function installFoundationStyles() {
       body.pc-home-mobile .store-grid,
       body.pc-home-mobile .category-rail {
         overscroll-behavior-inline: contain;
+        scrollbar-width: none;
+      }
+
+      body.pc-home-mobile .visual-product-grid::-webkit-scrollbar,
+      body.pc-home-mobile .store-grid::-webkit-scrollbar,
+      body.pc-home-mobile .category-rail::-webkit-scrollbar {
+        display: none;
       }
     }
 
