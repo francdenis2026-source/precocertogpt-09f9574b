@@ -8,14 +8,12 @@ import { SearchSafePolish } from "./components/SearchSafePolish";
 import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
-import { HomeExperienceRefactor } from "./components/HomeExperienceRefactor";
-import { HomeMobilePolish } from "./components/HomeMobilePolish";
+import { HomepageUiUxProMaxRebuild } from "./components/HomepageUiUxProMaxRebuild";
 import { HomeSearchPortalPolish } from "./components/HomeSearchPortalPolish";
 import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { FooterCompactUx } from "./components/FooterCompactUx";
 import { GlobalMobileCompactUx } from "./components/GlobalMobileCompactUx";
 import { UiUxProMaxFoundation } from "./components/UiUxProMaxFoundation";
-import { HeroHeaderSafePolish } from "./components/HeroHeaderSafePolish";
 import { ProductCardsSafePolish } from "./components/ProductCardsSafePolish";
 import { ProductDetailSafePolish } from "./components/ProductDetailSafePolish";
 import { EstablishmentsSafePolish } from "./components/EstablishmentsSafePolish";
@@ -65,14 +63,11 @@ export default function App() {
       <ProductInteractionUx />
       <PublicCatalogUxFixes />
       <PublicOnlineSalesAvailability />
-      <HomeExperienceRefactor />
-      <HomeMobilePolish />
       <HomeSearchPortalPolish />
       <HomeSearchKeyboardUx />
       <FooterCompactUx />
       <GlobalMobileCompactUx />
       <UiUxProMaxFoundation />
-      <HeroHeaderSafePolish />
       <ProductCardsSafePolish />
       <ProductDetailSafePolish />
       <EstablishmentsSafePolish />
@@ -93,6 +88,7 @@ export default function App() {
       <AuthorMerchantDashboardWelcome />
       <DorinhaCommerceEnhancer />
       <DorinhaBookCoverPolish />
+      <HomepageUiUxProMaxRebuild />
       <Routes>
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/estabelecimento/:identifier" element={<PublicEstablishmentCatalog />} />
