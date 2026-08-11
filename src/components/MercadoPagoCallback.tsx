@@ -21,12 +21,18 @@ export function MercadoPagoCallback() {
     const code = params.get("code");
     const oauthState = params.get("state");
     const merchantId = sessionStorage.getItem("pc_mp_merchant_id");
+    const pk = params.get("public_key"); // Opcional, para validação
 
     if (!code || !oauthState || !merchantId) {
       setState("error");
-      setMessage("Dados da autorização incompletos. Inicie a conexão novamente no painel da loja.");
+      let missing = [];
+      if (!code) missing.push("Código de autorização");
+      if (!oauthState) missing.push("Estado da sessão");
+      if (!merchantId) missing.push("Identificador da loja");
+      setMessage(`Dados incompletos (${missing.join(", ")}). Inicie a conexão novamente no painel.`);
       return;
     }
+
 
     const requestId = Math.random().toString(36).substring(2, 15);
     setCorrelationId(requestId);
