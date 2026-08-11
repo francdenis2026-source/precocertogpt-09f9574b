@@ -1,3 +1,4 @@
+@import "./TrueHomepageSearchResultsProMax.css";
 /* UI UX Pro Max — assisted live search on homepage */
 .true-home .th-search-wrap{position:relative;max-width:700px;z-index:12}
 .true-home .th-search-wrap .th-search{max-width:none}
