@@ -9,6 +9,7 @@ import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
 import { TrueHomepage } from "./components/TrueHomepage";
+import { HomepageSearchKeyboardProMax } from "./components/HomepageSearchKeyboardProMax";
 import { FooterCompactUx } from "./components/FooterCompactUx";
 import { GlobalMobileCompactUx } from "./components/GlobalMobileCompactUx";
 import { UiUxProMaxFoundation } from "./components/UiUxProMaxFoundation";
@@ -59,6 +60,7 @@ export default function App() {
       <VisualRegressionGuard />
       <GlobalPremiumExperience />
       <DeveloperMarketplaceAbout />
+      <HomepageSearchKeyboardProMax />
       <CorePublicPagesUiUx />
       <ScrollPerformanceGuard />
       <MaxPriceStoreLabels />
