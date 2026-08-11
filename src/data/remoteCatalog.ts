@@ -48,11 +48,60 @@ const DATABASE_PAGE_SIZE = 1000;
 export const normalize = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
-// A unidade pode variar entre cadastros ("un", "pacote", "unidade") sem que
-// o produto seja diferente. Barcode é a identidade mais segura quando existe.
+const normalizeUnit = (value: string | null | undefined) => {
+  const unit = normalize(value || "").replace(/[^a-z]/g, "");
+  if (["un", "und", "unid", "unidade", "unidades"].includes(unit)) return "un";
+  if (["pct", "pacote", "pacotes"].includes(unit)) return "pacote";
+  if (["cx", "caixa", "caixas"].includes(unit)) return "caixa";
+  if (["garrafa", "garrafas"].includes(unit)) return "garrafa";
+  if (["frasco", "frascos"].includes(unit)) return "frasco";
+  if (["lata", "latas"].includes(unit)) return "lata";
+  if (["saco", "sacos"].includes(unit)) return "saco";
+  return unit || "un";
+};
+
+const measurementToken = (amount: number, unit: string) => {
+  const normalizedUnit = normalize(unit).replace(/[^a-z]/g, "");
+  if (["kg", "quilo", "quilos", "kilograma", "kilogramas"].includes(normalizedUnit)) return `mass:${Math.round(amount * 1000)}g`;
+  if (["g", "gr", "grama", "gramas"].includes(normalizedUnit)) return `mass:${Math.round(amount)}g`;
+  if (["l", "lt", "litro", "litros"].includes(normalizedUnit)) return `volume:${Math.round(amount * 1000)}ml`;
+  if (["ml", "mililitro", "mililitros"].includes(normalizedUnit)) return `volume:${Math.round(amount)}ml`;
+  if (["un", "und", "unid", "unidade", "unidades"].includes(normalizedUnit)) return `count:${Math.round(amount)}un`;
+  return `${amount}:${normalizedUnit}`;
+};
+
+const extractSpecification = (product: ProductRow) => {
+  const source = normalize(`${product.size || ""} ${product.name || ""}`).replace(/,/g, ".");
+  const unitPattern = "kg|quilo|quilos|kilograma|kilogramas|g|gr|grama|gramas|l|lt|litro|litros|ml|mililitro|mililitros|un|und|unid|unidade|unidades";
+  const pack = source.match(new RegExp(`\\b(\\d+)\\s*x\\s*(\\d+(?:\\.\\d+)?)\\s*(${unitPattern})\\b`, "i"));
+  if (pack) return `pack:${Number(pack[1])}x${measurementToken(Number(pack[2]), pack[3])}`;
+
+  const single = source.match(new RegExp(`\\b(\\d+(?:\\.\\d+)?)\\s*(${unitPattern})\\b`, "i"));
+  if (single) return measurementToken(Number(single[1]), single[2]);
+
+  const size = normalize(product.size || "").replace(/[^a-z0-9]+/g, "");
+  return size && size !== "-" ? `size:${size}` : `unit:${normalizeUnit(product.unit)}`;
+};
+
+const baseProductName = (value: string | null) => normalize(value || "")
+  .replace(/\b\d+\s*x\s*\d+(?:[.,]\d+)?\s*(?:kg|g|gr|l|lt|ml|un|und|unid|unidade|unidades)\b/g, " ")
+  .replace(/\b\d+(?:[.,]\d+)?\s*(?:kg|g|gr|grama|gramas|l|lt|litro|litros|ml|mililitro|mililitros|un|und|unid|unidade|unidades)\b/g, " ")
+  .replace(/[^a-z0-9]+/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+
+// Barcode é a identidade mais segura. Sem barcode, só agrupamos produtos que
+// compartilham nome-base, marca, categoria e a MESMA especificação física
+// (peso, volume, quantidade ou tamanho). Isso evita comparar, por exemplo,
+// 500 g com 1 kg ou 6 unidades com 12 unidades.
 const productIdentity = (product: ProductRow) => product.barcode
   ? `barcode:${normalize(product.barcode)}`
-  : [product.name, product.brand, product.size].map(value => normalize(value || "")).join("|");
+  : [
+      `name:${baseProductName(product.name)}`,
+      `brand:${normalize(product.brand || "")}`,
+      `category:${normalize(product.category || "")}`,
+      `spec:${extractSpecification(product)}`,
+    ].join("|");
 
 /**
  * O PostgREST limita o número de linhas devolvidas por requisição. Lemos em
@@ -101,50 +150,47 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
       Number.isFinite(toNumber(row.value)),
     );
 
-    // Sem dados suficientes para montar comparações: mantém o catálogo local.
     if (!storeRows.length || !productRows.length || !priceRows.length) {
       return { ...local, source: "local", error: "Banco conectado, porém sem dados de preços." };
     }
 
     const q = normalize(query);
-
-    // Agrupa preços por produto normalizado para tratar itens divergentes (duplicados com IDs diferentes)
     const productPriceMap = new Map<string, PriceRow[]>();
-    
+
     productRows.forEach(product => {
       const key = productIdentity(product);
       const rows = priceRows.filter(price => String(price.product_id) === String(product.id));
-      
-      if (!productPriceMap.has(key)) {
-        productPriceMap.set(key, []);
-      }
+      if (!productPriceMap.has(key)) productPriceMap.set(key, []);
       productPriceMap.get(key)!.push(...rows);
     });
 
-    // Mapeia os produtos usando a primeira ocorrência de cada produto normalizado e seus preços agregados
     const uniqueProductRows = Array.from(
-      productRows.reduce((map, p) => {
-        const key = productIdentity(p);
-        if (!map.has(key)) map.set(key, p);
+      productRows.reduce((map, product) => {
+        const key = productIdentity(product);
+        const current = map.get(key);
+        // Prefere a ocorrência que possui imagem; em seguida mantém a primeira.
+        if (!current || (!current.image_url && product.image_url)) map.set(key, product);
         return map;
-      }, new Map<string, ProductRow>()).values()
+      }, new Map<string, ProductRow>()).values(),
     );
 
     const mapped = uniqueProductRows
       .map((product): Product | null => {
         const key = productIdentity(product);
         const rows = productPriceMap.get(key) || [];
-        
         if (!rows.length) return null;
 
-        // Um produto pode ter histórico em várias lojas. Para a comparação
-        // atual usamos somente o registro mais recente de cada estabelecimento.
         const latestByStore = Array.from(rows.reduce((map, row) => {
           const current = map.get(String(row.establishment_id));
-          if (!current || Date.parse(row.captured_at || "") >= Date.parse(current.captured_at || "")) map.set(String(row.establishment_id), row);
+          const incomingTime = Date.parse(row.captured_at || "") || 0;
+          const currentTime = Date.parse(current?.captured_at || "") || 0;
+          if (!current || incomingTime >= currentTime) map.set(String(row.establishment_id), row);
           return map;
         }, new Map<string, PriceRow>()).values());
-        const values = latestByStore.map(row => toNumber(row.value));
+
+        const values = latestByStore.map(row => toNumber(row.value)).filter(Number.isFinite);
+        if (!values.length) return null;
+
         const best = latestByStore.reduce((lowest, row) =>
           toNumber(row.value) < toNumber(lowest.value) ? row : lowest,
         );
@@ -191,24 +237,17 @@ export async function fetchCatalog(query = ""): Promise<CatalogResult> {
             };
           }).sort((a, b) => a.value - b.value),
           price_history: rows
-            .map(r => ({ date: r.captured_at || new Date().toISOString(), value: toNumber(r.value) }))
-            .sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
+            .map(row => ({ date: row.captured_at || new Date().toISOString(), value: toNumber(row.value) }))
+            .filter(item => Number.isFinite(item.value))
+            .sort((a, b) => Date.parse(a.date) - Date.parse(b.date)),
         };
       })
       .filter((product): product is Product => product !== null)
-      .filter(
-        product => {
-          if (!q) return true;
-          const searchFields = [
-            product.name,
-            product.category,
-            product.brand,
-            product.barcode
-          ].filter(Boolean) as string[];
-          
-          return searchFields.some(field => normalize(field).includes(q));
-        }
-      )
+      .filter(product => {
+        if (!q) return true;
+        const searchFields = [product.name, product.category, product.brand, product.barcode, product.size].filter(Boolean) as string[];
+        return searchFields.some(field => normalize(field).includes(q));
+      })
       .sort((a, b) => a.minPrice - b.minPrice || a.name.localeCompare(b.name, "pt-BR"));
 
     const stores: StoreRow[] = storeRows.map(store => ({
