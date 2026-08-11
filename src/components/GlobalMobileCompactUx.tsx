@@ -46,12 +46,26 @@ function installStyles() {
 
     @media(max-width:620px){
       body.pc-global-mobile .shell{width:calc(100% - 24px)!important}
-      body.pc-global-mobile .site-header{height:58px!important;min-height:58px!important}
-      body.pc-global-mobile .header-inner{height:58px!important;gap:8px!important}
-      body.pc-global-mobile .site-header .brand__logo-img{max-height:48px!important;width:auto!important}
+      body.pc-global-mobile .site-header{height:68px!important;min-height:68px!important;background:color-mix(in srgb,var(--surface) 94%,transparent)!important;backdrop-filter:blur(18px) saturate(1.25)!important}
+      body.pc-global-mobile .site-header .shell{width:calc(100% - 16px)!important;padding:0!important}
+      body.pc-global-mobile .header-inner{height:68px!important;min-height:68px!important;gap:6px!important}
+      body.pc-global-mobile .header-brand-zone{min-width:0!important;flex:1 1 auto!important}
+      body.pc-global-mobile .header-logo-container{min-width:0!important}
+      body.pc-global-mobile .site-header .brand__logo-img{max-width:124px!important;max-height:42px!important;width:auto!important;object-fit:contain!important}
       body.pc-global-mobile .header-location,
       body.pc-global-mobile .desktop-nav,
-      body.pc-global-mobile .header-actions .text-link{display:none!important}
+      body.pc-global-mobile .header-actions .text-link,
+      body.pc-global-mobile .header-actions .button,
+      body.pc-global-mobile .header-actions .theme-toggle--compact{display:none!important}
+      body.pc-global-mobile .header-actions{display:flex!important;flex:0 0 auto!important;gap:5px!important;margin:0!important;padding:4px!important;border-radius:15px!important}
+      body.pc-global-mobile .header-actions .icon-button{display:grid!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;padding:0!important;border-radius:12px!important}
+      body.pc-global-mobile .header-actions .icon-button svg{width:21px!important;height:21px!important}
+      body.pc-global-mobile .mobile-menu-button{display:grid!important;flex:0 0 46px!important;width:46px!important;height:46px!important;border-radius:13px!important}
+      body.pc-global-mobile .mobile-menu-button svg{width:22px!important;height:22px!important}
+      body.pc-global-mobile .mobile-bar{height:auto!important;min-height:64px!important;padding:5px 6px calc(5px + env(safe-area-inset-bottom))!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important}
+      body.pc-global-mobile .mobile-bar a{min-width:0!important;min-height:52px!important;padding:5px 2px!important;border-radius:12px!important;gap:2px!important;font-size:10px!important}
+      body.pc-global-mobile .mobile-bar a svg{width:22px!important;height:22px!important}
+      body.pc-global-mobile .mobile-bar a.active{background:var(--green-soft)!important;color:var(--green)!important}
       body.pc-global-mobile .button{min-height:40px!important;padding-inline:13px!important;font-size:12px!important}
       body.pc-global-mobile .section{padding-block:1.55rem!important}
       body.pc-global-mobile .page-shell{padding-block:20px 44px!important}
@@ -82,6 +96,12 @@ function installStyles() {
 
     @media(max-width:380px){
       body.pc-global-mobile .shell{width:calc(100% - 18px)!important}
+      body.pc-global-mobile .site-header .shell{width:calc(100% - 12px)!important}
+      body.pc-global-mobile .site-header .brand__logo-img{max-width:108px!important;max-height:38px!important}
+      body.pc-global-mobile .header-actions{gap:3px!important;padding:3px!important}
+      body.pc-global-mobile .header-actions .icon-button{width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important}
+      body.pc-global-mobile .header-actions .header-search-button{display:none!important}
+      body.pc-global-mobile .mobile-menu-button{flex-basis:44px!important;width:44px!important;height:44px!important}
       body.pc-global-mobile .button{min-height:38px!important;padding-inline:10px!important;font-size:11px!important}
       body.pc-global-mobile h1{overflow-wrap:anywhere}
       body.pc-global-mobile .store-summary-grid{grid-template-columns:1fr!important}
