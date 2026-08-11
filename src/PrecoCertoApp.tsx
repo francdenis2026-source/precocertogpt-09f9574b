@@ -3,9 +3,8 @@ import {
   Activity, AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
   ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit, Flag,
   Heart, Home, LayoutDashboard, LineChart, ListChecks, Loader2, MapPin, Menu, Moon, PackageSearch,
-  Plus, Printer, QrCode, Receipt, RotateCcw, Save, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
+  Plus, Printer, Receipt, RotateCcw, Save, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Sun, Trash2, TrendingDown, TrendingUp, Upload, UserRound, Users, X,
-
 } from "lucide-react";
 
 
@@ -26,8 +25,6 @@ import { getPdfOrientation, setPdfOrientation as savePdfOrientation } from "./li
 import { AdminStoreCatalog } from "./components/AdminStoreCatalog";
 import { getStoreLogoUrl } from "./data/storeLogos";
 import { AdminUserManagement } from "./components/AdminUserManagement";
-import { PaymentTracking } from "./components/PaymentTracking";
-
 
 
 const initialCatalog = buildCatalog();
@@ -1032,8 +1029,6 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
   const [isSaving, setIsSaving] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [shareReadOnly, setShareReadOnly] = useState(true);
-  const [showPaymentTracking, setShowPaymentTracking] = useState<string | null>(null);
-
   const pdfUserKey = user?.email || user?.id || null;
   // Preferência de orientação salva por usuário e reaplicada nas próximas exportações.
   const [pdfOrientation, setPdfOrientationState] = useState<"portrait" | "landscape">(() =>
@@ -1433,18 +1428,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
 
   return (
     <div className="shell page-shell basket-page">
-      {showPaymentTracking && (
-        <PaymentTracking 
-          orderId={showPaymentTracking} 
-          onClose={() => setShowPaymentTracking(null)}
-          onSuccess={() => {
-            alert("Pagamento confirmado! Sua compra está sendo processada.");
-            setShowPaymentTracking(null);
-          }}
-        />
-      )}
       {showBudgetAlert && (
-
         <div className="modal-overlay" style={{ zIndex: 2000 }}>
           <div className="modal-content animate-slide-up" style={{ maxWidth: '400px', textAlign: 'center', padding: '2rem' }}>
             <div style={{ marginBottom: '1.5rem', color: 'var(--red)', display: 'flex', justifyContent: 'center' }}>
@@ -2008,38 +1992,6 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                       </div>
                     </div>
                     <button 
-                      className="button button--primary" 
-                      style={{ width: '100%', background: 'var(--blue)' }} 
-                      onClick={async () => {
-                        if (!user) {
-                          alert("Acesse sua conta para realizar pedidos e pagamentos.");
-                          return;
-                        }
-                        try {
-                          setIsSaving(true);
-                          // Criar pedido (placeholder - na vida real chamaria rpc "create_marketplace_order")
-                          const orderId = "order-" + Math.random().toString(36).substr(2, 9);
-                          // Simular persistência no smart_baskets antes de pagar
-                          await saveBasket(
-                            user.id,
-                            `Compra PIX - ${new Date().toLocaleDateString('pt-BR')}`,
-                            mode,
-                            budget,
-                            basketItems,
-                            optimizationResult
-                          );
-                          // Abrir modal de tracking/início de pagamento
-                          setShowPaymentTracking(orderId);
-                        } catch (err: any) {
-                          alert("Erro ao processar compra: " + err.message);
-                        } finally {
-                          setIsSaving(false);
-                        }
-                      }}
-                    >
-                      <QrCode size={18} /> Comprar via PIX
-                    </button>
-                    <button 
                       className="button button--outline" 
                       style={{ width: '100%', borderColor: 'var(--blue)', color: 'var(--blue)' }} 
                       disabled={isSaving}
@@ -2070,7 +2022,6 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                     >
                       <Database size={16} /> Salvar no Painel (Histórico)
                     </button>
-
                     <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
                     <button type="button" className="link-danger" style={{ width: '100%', justifyContent: 'center', marginTop: '.5rem' }} onClick={clearAll}><Trash2 size={14} /> Limpar cesta</button>
                   </div>

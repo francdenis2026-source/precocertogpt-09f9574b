@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { describeMercadoPagoError, validateCheckoutBody, validateCheckoutEnv } from "../_shared/mercadopagoValidation.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,9 +31,11 @@ Deno.serve(async (req) => {
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const encryptionKey = Deno.env.get("MERCADOPAGO_TOKEN_ENCRYPTION_KEY");
+  const publicKey = Deno.env.get("MERCADOPAGO_PUBLIC_KEY");
   const appBaseUrl = Deno.env.get("APP_BASE_URL");
   const webhookUrl = Deno.env.get("MERCADOPAGO_WEBHOOK_URL");
-  if (!encryptionKey) return json({ error: "Integração Mercado Pago não configurada" }, 503);
+  const envCheck = validateCheckoutEnv({ publicKey, encryptionKey });
+  if (!envCheck.ok) return json({ error: envCheck.error }, envCheck.status);
 
   const authHeader = req.headers.get("Authorization") || "";
   const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
@@ -41,8 +45,10 @@ Deno.serve(async (req) => {
   if (!user) return json({ error: "Faça login para pagar" }, 401);
 
   const body = await req.json().catch(() => ({}));
-  const orderId = String(body.orderId || "");
-  if (!orderId) return json({ error: "orderId obrigatório" }, 400);
+  const bodyCheck = validateCheckoutBody(body);
+  if (!bodyCheck.ok) return json({ error: bodyCheck.error }, bodyCheck.status);
+  const orderId = String(body.orderId);
+
 
   const { data: order, error: orderError } = await userClient
     .from("orders")
@@ -57,7 +63,7 @@ Deno.serve(async (req) => {
   if (!connection || connection.status !== "connected" || !connection.access_token_encrypted) return json({ error: "O estabelecimento ainda não conectou o Mercado Pago" }, 409);
 
   let sellerToken: string;
-  try { sellerToken = await decryptToken(connection.access_token_encrypted, encryptionKey); }
+  try { sellerToken = await decryptToken(connection.access_token_encrypted, encryptionKey!); }
   catch { return json({ error: "A conta Mercado Pago do estabelecimento precisa ser reconectada" }, 409); }
 
   const items = (order.order_items || []).map((item: any) => ({
@@ -78,37 +84,39 @@ Deno.serve(async (req) => {
     statement_descriptor: "PRECO CERTO",
     payer: { email: order.customer_email || user.email },
     metadata: { order_id: order.id, order_number: order.order_number, merchant_id: order.merchant_id },
-    payment_methods: {
-      excluded_payment_types: [{ id: "ticket" }], // Excluir boleto se preferir apenas PIX/Cartão
-      installments: 1
-    }
   };
-
-  // Se o pedido permitir PIX (geralmente via API de Pagamentos, mas Preferências podem sugerir)
-  // Nota: Para PIX nativo com QR Code imediato, usamos a API /v1/payments.
-  // Aqui criamos a preferência para Checkout Pro.
-  
   if (webhookUrl) preference.notification_url = webhookUrl;
-  
+  if (appBaseUrl) {
+    preference.back_urls = {
+      success: `${appBaseUrl.replace(/\/$/, "")}/meus-pedidos?pagamento=aprovado`,
+      pending: `${appBaseUrl.replace(/\/$/, "")}/meus-pedidos?pagamento=pendente`,
+      failure: `${appBaseUrl.replace(/\/$/, "")}/meus-pedidos?pagamento=falhou`,
+    };
+    preference.auto_return = "approved";
+  }
+
   const mpResponse = await fetch("https://api.mercadopago.com/checkout/preferences", {
     method: "POST",
     headers: { Authorization: `Bearer ${sellerToken}`, "Content-Type": "application/json", Accept: "application/json", "X-Idempotency-Key": `pc-${order.id}` },
     body: JSON.stringify(preference),
   });
-  
-  const result = await mpResponse.json();
-  if (!mpResponse.ok || !result?.id) return json({ error: "Não foi possível iniciar o pagamento", detail: result?.message || result?.error }, 502);
+  const result = await mpResponse.json().catch(() => ({}));
+  if (!mpResponse.ok || !result?.id) {
+    const message = describeMercadoPagoError(mpResponse.status, result);
+    console.error(`[MP-CHECKOUT-ERROR] order=${order.id} status=${mpResponse.status} ${message}`);
+    return json({ error: message, detail: result?.message || result?.error || null }, mpResponse.status >= 500 ? 502 : 400);
+  }
 
-  // LOG de auditoria de tentativa
-  await admin.from("payment_logs").insert({
-    order_id: order.id,
-    event_type: "checkout_initiated",
-    status: "pending",
-    payload: { preference_id: result.id, timestamp: new Date().toISOString() }
-  });
 
   await admin.from("orders").update({ payment_provider: "mercadopago", updated_at: new Date().toISOString() }).eq("id", order.id);
-  
-  return json({ preferenceId: result.id, checkoutUrl: result.init_point });
+  await admin.from("order_events").insert({
+    order_id: order.id,
+    event_type: "checkout_created",
+    actor_user_id: user.id,
+    actor_type: "customer",
+    message: "Checkout Mercado Pago iniciado",
+    metadata: { preference_id: result.id },
+  });
 
+  return json({ preferenceId: result.id, checkoutUrl: result.init_point, sandboxUrl: result.sandbox_init_point || null });
 });

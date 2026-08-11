@@ -4,6 +4,8 @@ import "@fontsource-variable/inter";
 import "@fontsource-variable/manrope";
 import "./index.css";
 import App from "./App";
+import { startPaymentNotifications } from "./lib/paymentNotifications";
+
 
 const savedTheme = localStorage.getItem("theme");
 const initialTheme = savedTheme === "light" || savedTheme === "dark"
@@ -11,6 +13,8 @@ const initialTheme = savedTheme === "light" || savedTheme === "dark"
   : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 document.documentElement.dataset.theme = initialTheme;
 document.documentElement.style.colorScheme = initialTheme;
+
+startPaymentNotifications();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
