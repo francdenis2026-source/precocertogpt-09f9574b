@@ -32,9 +32,7 @@ import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgr
 import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
 import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
 import { PublicEstablishmentCatalog } from "./components/PublicEstablishmentCatalog";
-import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
-import { DorinhaCommerceEnhancer } from "./components/DorinhaCommerceEnhancer";
-import { DorinhaBookCoverPolish } from "./components/DorinhaBookCoverPolish";
+import { DorinhaAuthorStoreProMax } from "./components/DorinhaAuthorStoreProMax";
 import { FremixProductionsPage } from "./components/FremixProductionsPage";
 import { FremixDirectoryBridge } from "./components/FremixDirectoryBridge";
 import { FremixCuratedVideos } from "./components/FremixCuratedVideos";
@@ -92,16 +90,14 @@ export default function App() {
       <FremixCuratedVideos />
       <BasketSessionFlow />
       <AuthorMerchantDashboardWelcome />
-      <DorinhaCommerceEnhancer />
-      <DorinhaBookCoverPolish />
       <Routes>
         <Route path="/" element={<TrueHomepage />} />
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/estabelecimento/:identifier" element={<PublicEstablishmentCatalog />} />
         <Route path="/cultura/fremix-producoes" element={<FremixProductionsPage />} />
         <Route path="/fremix-producoes" element={<FremixProductionsPage />} />
-        <Route path="/autora/dorinha-barroso" element={<DorinhaAuthorStore />} />
-        <Route path="/dorinha-barroso" element={<DorinhaAuthorStore />} />
+        <Route path="/autora/dorinha-barroso" element={<DorinhaAuthorStoreProMax />} />
+        <Route path="/dorinha-barroso" element={<DorinhaAuthorStoreProMax />} />
         <Route path="/lojista" element={<MerchantOnboardingPage />} />
         <Route path="/loja/:merchantId" element={<MerchantOnlineStoreRoute />} />
         <Route path="/painel-lojista" element={<MerchantDashboard />} />
