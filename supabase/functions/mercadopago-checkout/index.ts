@@ -100,8 +100,13 @@ Deno.serve(async (req) => {
     headers: { Authorization: `Bearer ${sellerToken}`, "Content-Type": "application/json", Accept: "application/json", "X-Idempotency-Key": `pc-${order.id}` },
     body: JSON.stringify(preference),
   });
-  const result = await mpResponse.json();
-  if (!mpResponse.ok || !result?.id) return json({ error: "Não foi possível iniciar o pagamento", detail: result?.message || result?.error }, 502);
+  const result = await mpResponse.json().catch(() => ({}));
+  if (!mpResponse.ok || !result?.id) {
+    const message = describeMercadoPagoError(mpResponse.status, result);
+    console.error(`[MP-CHECKOUT-ERROR] order=${order.id} status=${mpResponse.status} ${message}`);
+    return json({ error: message, detail: result?.message || result?.error || null }, mpResponse.status >= 500 ? 502 : 400);
+  }
+
 
   await admin.from("orders").update({ payment_provider: "mercadopago", updated_at: new Date().toISOString() }).eq("id", order.id);
   await admin.from("order_events").insert({
