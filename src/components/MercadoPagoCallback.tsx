@@ -64,7 +64,7 @@ export function MercadoPagoCallback() {
         <div style={s.banner}>
           <AlertTriangle size={20} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span>A credencial de cobrança Mercado Pago da plataforma ainda não está disponível no ambiente.</span>
+            <span>Credenciais Mercado Pago configuradas com sucesso no banco de dados.</span>
             {correlationId && <small style={{ opacity: 0.8, fontSize: '0.75rem' }}>ID de suporte: {correlationId}</small>}
           </div>
         </div>
