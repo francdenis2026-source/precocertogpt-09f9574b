@@ -115,7 +115,16 @@ export function DorinhaAuthorStore() {
   if (loading) return <main style={s.loading}><BookOpen size={36}/><strong>Preparando a biblioteca da autora…</strong></main>;
   if (!profile) return <main style={s.loading}><BookOpen size={36}/><h1>Loja da autora indisponível</h1><a href="/estabelecimentos">Voltar aos estabelecimentos</a></main>;
 
-  const external = (profile.merchant.external_stores || []).filter(s => s.label !== 'Apple Books');
+  const external = useMemo(() => {
+    return (profile.merchant.external_stores || [])
+      .filter(s => s.label !== 'Apple Books')
+      .sort((a, b) => {
+        // Prioritize Amazon, but could be expanded if availability data existed
+        if (a.label.toLowerCase().includes('amazon')) return -1;
+        if (b.label.toLowerCase().includes('amazon')) return 1;
+        return a.label.localeCompare(b.label);
+      });
+  }, [profile.merchant.external_stores]);
 
   return <main style={s.page} className="db-author-page">
     <style>{`
@@ -169,7 +178,12 @@ export function DorinhaAuthorStore() {
       #contato .db-contact-grid h2{font-size:clamp(1.75rem,3.2vw,2.45rem);max-width:620px}
       #contato .db-contact-grid h2{color:#fffafc}
       #contato .db-contact-grid small{color:#f0e8f2;font-size:12px;line-height:1.55}
-      .db-external-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:900px}
+      .db-external-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;width:100%}
+      .db-external-empty{padding:48px 24px;border:2px dashed rgba(64,44,77,.2);border-radius:18px;text-align:center;background:rgba(255,255,255,.42);backdrop-filter:blur(8px);grid-column:1/-1}
+      .db-external-empty h3{font-family:var(--db-display);font-size:22px;color:#35243d;margin-bottom:8px}
+      .db-external-empty p{color:#6a5f6e;font-size:15px;max-width:440px;margin:0 auto 18px}
+      .db-external-empty-cta{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;background:#35243d;color:white;text-decoration:none;border-radius:9px;font-weight:750;font-size:14px;transition:transform .2s ease}
+      .db-external-empty-cta:hover{transform:translateY(-2px)}
       .db-external-grid strong{font-size:14px}.db-external-grid small{font-size:12px;color:#6a5f6e}
       .db-book p{hyphens:auto}.db-book h3,.db-book p{overflow-wrap:anywhere}
       .db-book-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
@@ -303,7 +317,23 @@ export function DorinhaAuthorStore() {
     <section style={s.section} className="db-section">
       <div style={s.sectionHead}><div><span style={s.eyebrow}>TAMBÉM DISPONÍVEL ONLINE</span><h2 style={s.h2}>Prefere comprar em outra plataforma?</h2><p style={s.sectionText}>Sem problema. O PreçoCerto também ajuda você a encontrar os canais digitais onde a obra da autora está disponível.</p></div></div>
       <div className="db-external-grid">
-        {external.map((store)=><a key={store.url} href={store.url} target="_blank" rel="noreferrer" style={s.externalCard} className="db-action"><span><ExternalLink size={17}/></span><div><strong>{store.label}</strong><small>Abrir loja externa</small></div><ArrowRight size={16}/></a>)}
+        {external.length > 0 ? (
+          external.map((store) => (
+            <a key={store.url} href={store.url} target="_blank" rel="noreferrer" style={s.externalCard} className="db-action">
+              <span><ExternalLink size={17}/></span>
+              <div><strong>{store.label}</strong><small>Abrir loja externa</small></div>
+              <ArrowRight size={16}/>
+            </a>
+          ))
+        ) : (
+          <div className="db-external-empty">
+            <h3>Disponível em breve nas plataformas</h3>
+            <p>No momento, as obras estão disponíveis para aquisição imediata via venda direta com a autora.</p>
+            <a href={whatsappUrl(whatsapp)} target="_blank" rel="noreferrer" className="db-external-empty-cta">
+              <MessageCircle size={18} /> Falar com Dorinha no WhatsApp
+            </a>
+          </div>
+        )}
       </div>
       <p style={s.sourceNote}>A disponibilidade, o formato e os valores praticados em lojas externas são definidos pelas próprias plataformas e podem mudar sem aviso.</p>
     </section>
