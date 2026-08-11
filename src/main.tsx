@@ -14,6 +14,8 @@ const initialTheme = savedTheme === "light" || savedTheme === "dark"
 document.documentElement.dataset.theme = initialTheme;
 document.documentElement.style.colorScheme = initialTheme;
 
+startPaymentNotifications();
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
