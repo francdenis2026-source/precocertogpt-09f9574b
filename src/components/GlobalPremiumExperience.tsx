@@ -1,6 +1,7 @@
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import "./GlobalPremiumOverrides.css";
 
 const STYLE_ID = "pc-global-premium-experience";
 const STORAGE_KEY = "precocerto-theme";
