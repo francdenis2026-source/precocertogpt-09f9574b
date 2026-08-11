@@ -31,9 +31,11 @@ Deno.serve(async (req) => {
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const encryptionKey = Deno.env.get("MERCADOPAGO_TOKEN_ENCRYPTION_KEY");
+  const publicKey = Deno.env.get("MERCADOPAGO_PUBLIC_KEY");
   const appBaseUrl = Deno.env.get("APP_BASE_URL");
   const webhookUrl = Deno.env.get("MERCADOPAGO_WEBHOOK_URL");
-  if (!encryptionKey) return json({ error: "Integração Mercado Pago não configurada" }, 503);
+  const envCheck = validateCheckoutEnv({ publicKey, encryptionKey });
+  if (!envCheck.ok) return json({ error: envCheck.error }, envCheck.status);
 
   const authHeader = req.headers.get("Authorization") || "";
   const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
@@ -43,8 +45,10 @@ Deno.serve(async (req) => {
   if (!user) return json({ error: "Faça login para pagar" }, 401);
 
   const body = await req.json().catch(() => ({}));
-  const orderId = String(body.orderId || "");
-  if (!orderId) return json({ error: "orderId obrigatório" }, 400);
+  const bodyCheck = validateCheckoutBody(body);
+  if (!bodyCheck.ok) return json({ error: bodyCheck.error }, bodyCheck.status);
+  const orderId = String(body.orderId);
+
 
   const { data: order, error: orderError } = await userClient
     .from("orders")
