@@ -9,6 +9,7 @@ import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
 import { TrueHomepage } from "./components/TrueHomepage";
+import { SmartCompareSearchProMax } from "./components/SmartCompareSearchProMax";
 import { HomepageSearchKeyboardProMax } from "./components/HomepageSearchKeyboardProMax";
 import { ProductMediaClippingProMax } from "./components/ProductMediaClippingProMax";
 import { HomeProductModalProMaxEnhancer } from "./components/HomeProductModalProMaxEnhancer";
@@ -92,6 +93,7 @@ export default function App() {
       <AuthorMerchantDashboardWelcome />
       <Routes>
         <Route path="/" element={<TrueHomepage />} />
+        <Route path="/buscar" element={<SmartCompareSearchProMax />} />
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/estabelecimento/:identifier" element={<PublicEstablishmentCatalog />} />
         <Route path="/cultura/fremix-producoes" element={<FremixProductionsPage />} />
