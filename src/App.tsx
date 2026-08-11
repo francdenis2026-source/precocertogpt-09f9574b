@@ -11,6 +11,7 @@ import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAva
 import { TrueHomepage } from "./components/TrueHomepage";
 import { HomepageSearchKeyboardProMax } from "./components/HomepageSearchKeyboardProMax";
 import { ProductMediaClippingProMax } from "./components/ProductMediaClippingProMax";
+import { HomeProductModalProMaxEnhancer } from "./components/HomeProductModalProMaxEnhancer";
 import { FooterCompactUx } from "./components/FooterCompactUx";
 import { GlobalMobileCompactUx } from "./components/GlobalMobileCompactUx";
 import { UiUxProMaxFoundation } from "./components/UiUxProMaxFoundation";
@@ -63,6 +64,7 @@ export default function App() {
       <DeveloperMarketplaceAbout />
       <HomepageSearchKeyboardProMax />
       <ProductMediaClippingProMax />
+      <HomeProductModalProMaxEnhancer />
       <CorePublicPagesUiUx />
       <ScrollPerformanceGuard />
       <MaxPriceStoreLabels />
