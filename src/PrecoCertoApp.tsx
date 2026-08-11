@@ -815,18 +815,61 @@ function useRandomFeatured(products: Product[]) {
 }
 
 function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction, favorites, toggleFavorite, syncStatus }: PageProps & { syncStatus?: string }) {
-<div style="padding: 2rem; background: var(--surface-2); border-radius: 1rem; margin-bottom: 2rem; border: 2px dashed var(--blue);"><h2>Redesign Técnico e Profissional da Homepage</h2><p style="white-space: pre-line;">Objetivo: Realizar um redesign completo da homepage, otimizando o layout, a configuração e a utilização do espaço de forma técnica e profissional, sem comprometer o estilo e a estética visual.
-
-Funcionalidades e Melhorias:
-* Análise e Otimização de Layout: Explorar e propor novos layouts que maximizem o aproveitamento de cada espaço disponível. Identificar e eliminar desperdícios de espaço ou elementos redundantes.
-* Revisão e Modificação de Cards: Analisar a estrutura e o conteúdo dos cards atuais. Propor e implementar modificações nos cards para melhorar a clareza, o apelo visual e a funcionalidade.
-* Configuração e Estrutura: Definir uma nova configuração geral para a homepage que aprimore a experiência do usuário (UX) e a navegação. Garantir uma estrutura técnica robusta e escalável para o novo design.
-* Manutenção de Estilo e Beleza: Assegurar que todas as alterações técnicas e de layout estejam alinhadas com a identidade visual e o estilo da marca. Priorizar a beleza e o apelo estético em todas as decisões de design.
-
-Requisitos Técnicos:
-* A implementação deve ser realizada seguindo as melhores práticas de desenvolvimento web.
-* Considerar a responsividade para diferentes dispositivos (desktop, tablet, mobile).
-* Otimizar o desempenho da página (tempo de carregamento, etc.).</p></div>
+    <div className="homepage-hero-v2" style={{ 
+      padding: '4rem 2rem', 
+      background: 'linear-gradient(135deg, var(--blue-900) 0%, var(--indigo-900) 100%)', 
+      borderRadius: '2rem', 
+      marginBottom: '3rem', 
+      color: 'white',
+      position: 'relative',
+      overflow: 'hidden',
+      border: '1px solid rgba(255,255,255,0.1)',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+    }}>
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px' }}>
+        <span style={{ 
+          background: 'rgba(255,255,255,0.1)', 
+          padding: '0.5rem 1rem', 
+          borderRadius: '2rem', 
+          fontSize: '0.875rem', 
+          fontWeight: 600,
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          display: 'inline-block',
+          marginBottom: '1.5rem'
+        }}>
+          🚀 Homepage - Nova Versão
+        </span>
+        <h2 style={{ fontSize: '3rem', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>
+          Design moderno para uma <span style={{ color: 'var(--blue-400)' }}>economia real.</span>
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', marginTop: '3rem' }}>
+          <div>
+            <h4 style={{ color: 'var(--blue-300)', marginBottom: '0.5rem', fontWeight: 700 }}>Design & Layout</h4>
+            <p style={{ opacity: 0.8, fontSize: '0.95rem', lineHeight: 1.6 }}>Nova estrutura focada em legibilidade e fluidez de navegação entre categorias.</p>
+          </div>
+          <div>
+            <h4 style={{ color: 'var(--blue-300)', marginBottom: '0.5rem', fontWeight: 700 }}>Responsividade</h4>
+            <p style={{ opacity: 0.8, fontSize: '0.95rem', lineHeight: 1.6 }}>Interface adaptada dinamicamente para Desktop, Tablet e Mobile com precisão.</p>
+          </div>
+          <div>
+            <h4 style={{ color: 'var(--blue-300)', marginBottom: '0.5rem', fontWeight: 700 }}>Performance</h4>
+            <p style={{ opacity: 0.8, fontSize: '0.95rem', lineHeight: 1.6 }}>Assets otimizados e carregamento progressivo para uma experiência sem atrasos.</p>
+          </div>
+        </div>
+      </div>
+      <div style={{ 
+        position: 'absolute', 
+        right: '-10%', 
+        top: '-10%', 
+        width: '40%', 
+        height: '120%', 
+        background: 'radial-gradient(circle, var(--blue-500) 0%, transparent 70%)', 
+        opacity: 0.2, 
+        filter: 'blur(60px)',
+        pointerEvents: 'none'
+      }} />
+    </div>
   const randomFeatured = useRandomFeatured(products);
   const opportunityProducts = [...products]
     .sort((a, b) => ((b.previousPrice ?? b.maxPrice) - b.minPrice) - ((a.previousPrice ?? a.maxPrice) - a.minPrice))
