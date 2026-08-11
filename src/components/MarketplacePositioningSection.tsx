@@ -20,34 +20,34 @@ function installStyles() {
   const style = document.createElement("style");
   style.id = STYLE_ID;
   style.textContent = `
-    #${SECTION_ID}{background:linear-gradient(180deg,#f8fbf9 0%,#eef6f1 100%);color:#112019;border-top:1px solid rgba(15,23,42,.07);border-bottom:1px solid rgba(15,23,42,.07);padding:76px 20px}
+    #${SECTION_ID}{background:linear-gradient(180deg,#f8fbf9 0%,#eef6f1 100%);color:#112019;border-top:1px solid rgba(15,23,42,.07);border-bottom:1px solid rgba(15,23,42,.07);padding:30px 20px}
     #${SECTION_ID} *{box-sizing:border-box}
     #${SECTION_ID} .pc-mp-wrap{max-width:1240px;margin:0 auto}
-    #${SECTION_ID} .pc-mp-intro{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:36px;align-items:end;margin-bottom:28px}
+    #${SECTION_ID} .pc-mp-intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,1fr);gap:24px;align-items:center;margin-bottom:14px}
     #${SECTION_ID} .pc-mp-brand{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;background:#dff5e6;color:#14532d;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
     #${SECTION_ID} .pc-mp-brand i{width:7px;height:7px;border-radius:50%;background:#16a34a;box-shadow:0 0 0 5px rgba(22,163,74,.11)}
-    #${SECTION_ID} h2{font-size:clamp(2.35rem,4vw,4.2rem);line-height:.98;letter-spacing:-.05em;margin:0;color:#10271a;max-width:780px}
+    #${SECTION_ID} h2{font-size:clamp(1.65rem,2.7vw,2.55rem);line-height:1.02;letter-spacing:-.045em;margin:0;color:#10271a;max-width:680px}
     #${SECTION_ID} h2 strong{color:#168343;font-weight:900}
-    #${SECTION_ID} .pc-mp-lead{font-size:1.02rem;line-height:1.65;color:#536259;margin:0;max-width:520px}
-    #${SECTION_ID} .pc-mp-slogan{margin-top:16px;font-weight:850;color:#173b27;font-size:1.05rem}
-    #${SECTION_ID} .pc-mp-flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding:14px;border-radius:18px;background:#10271a;color:white;margin:30px 0 18px}
-    #${SECTION_ID} .pc-mp-flow div{min-height:82px;padding:14px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.075);display:flex;flex-direction:column;justify-content:space-between;gap:8px}
+    #${SECTION_ID} .pc-mp-lead{font-size:.82rem;line-height:1.5;color:#536259;margin:0;max-width:560px}
+    #${SECTION_ID} .pc-mp-slogan{margin-top:7px;font-weight:850;color:#173b27;font-size:.82rem}
+    #${SECTION_ID} .pc-mp-flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px;border-radius:14px;background:#10271a;color:white;margin:12px 0 10px}
+    #${SECTION_ID} .pc-mp-flow div{min-height:56px;padding:9px;border-radius:9px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.075);display:flex;align-items:center;gap:7px}
     #${SECTION_ID} .pc-mp-flow b{font-size:12px;color:#86efac}
     #${SECTION_ID} .pc-mp-flow span{font-size:13px;line-height:1.3;color:#edf7f0;font-weight:750}
-    #${SECTION_ID} .pc-mp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0 22px}
-    #${SECTION_ID} .pc-mp-card{padding:17px;border-radius:14px;background:#fff;border:1px solid #dfe8e2;min-height:125px;box-shadow:0 8px 24px rgba(15,35,23,.035)}
+    #${SECTION_ID} .pc-mp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:9px 0}
+    #${SECTION_ID} .pc-mp-card{padding:11px;border-radius:11px;background:#fff;border:1px solid #dfe8e2;min-height:84px;box-shadow:0 5px 16px rgba(15,35,23,.03)}
     #${SECTION_ID} .pc-mp-card strong{display:block;font-size:15px;margin-bottom:7px;color:#163a26}
-    #${SECTION_ID} .pc-mp-card p{margin:0;color:#68756d;font-size:12px;line-height:1.48}
-    #${SECTION_ID} .pc-mp-sides{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    #${SECTION_ID} .pc-mp-side{padding:24px;border-radius:16px;border:1px solid #dce7df;background:white}
+    #${SECTION_ID} .pc-mp-card p{margin:0;color:#68756d;font-size:10px;line-height:1.35}
+    #${SECTION_ID} .pc-mp-sides{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+    #${SECTION_ID} .pc-mp-side{padding:14px;border-radius:12px;border:1px solid #dce7df;background:white}
     #${SECTION_ID} .pc-mp-side--seller{background:#10271a;color:white;border-color:#10271a}
     #${SECTION_ID} .pc-mp-kicker{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#168343}
     #${SECTION_ID} .pc-mp-side--seller .pc-mp-kicker{color:#86efac}
-    #${SECTION_ID} h3{font-size:1.45rem;letter-spacing:-.025em;margin:8px 0 9px}
-    #${SECTION_ID} .pc-mp-side p{font-size:13px;line-height:1.58;color:#647168;margin:0 0 16px}
+    #${SECTION_ID} h3{font-size:1.05rem;letter-spacing:-.025em;margin:4px 0 5px}
+    #${SECTION_ID} .pc-mp-side p{font-size:10.5px;line-height:1.4;color:#647168;margin:0 0 9px}
     #${SECTION_ID} .pc-mp-side--seller p{color:#c7d6cd}
     #${SECTION_ID} .pc-mp-actions{display:flex;flex-wrap:wrap;gap:8px}
-    #${SECTION_ID} .pc-mp-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:850;border:1px solid #183d2b}
+    #${SECTION_ID} .pc-mp-btn{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 11px;border-radius:8px;text-decoration:none;font-size:10.5px;font-weight:850;border:1px solid #183d2b}
     #${SECTION_ID} .pc-mp-btn--primary{background:#183d2b;color:white}
     #${SECTION_ID} .pc-mp-btn--light{background:#22c55e;color:#082d17;border-color:#22c55e}
     #${SECTION_ID} .pc-mp-btn--ghost{background:transparent;color:#183d2b}

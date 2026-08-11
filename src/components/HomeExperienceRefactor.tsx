@@ -275,6 +275,23 @@ function installStyles() {
     body.pc-home-v3 .price-table-head,
     body.pc-home-v3 .price-row { border-color: var(--border) !important; }
 
+    body.pc-home-v3 .decision-dock{margin-top:18px;margin-bottom:18px;min-height:124px;padding:18px 20px;display:grid;grid-template-columns:120px minmax(220px,.75fr) minmax(480px,1.25fr);align-items:center;gap:20px;background:linear-gradient(125deg,#0b2133,#102f42);border:1px solid rgba(148,163,184,.18);border-radius:18px;color:#fff;box-shadow:0 14px 38px rgba(7,26,41,.12)}
+    body.pc-home-v3 .decision-dock__visual{height:88px;border-radius:14px;background:rgba(34,197,94,.08);display:grid;place-items:center}
+    body.pc-home-v3 .decision-dock__visual svg{width:105px;height:70px;fill:none;stroke:#4ade80;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    body.pc-home-v3 .decision-dock__copy h2{font-size:1.3rem;margin:5px 0;letter-spacing:-.03em;color:#fff}
+    body.pc-home-v3 .decision-dock__links{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    body.pc-home-v3 .decision-dock__links a{min-height:66px;padding:11px;border-radius:12px;color:#e7eef4;text-decoration:none;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;transition:.2s ease}
+    body.pc-home-v3 .decision-dock__links a:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
+    body.pc-home-v3 .decision-dock__links svg{width:17px;color:#4ade80}.decision-dock__links span{display:grid}.decision-dock__links small{color:#9fb2c1;font-size:.68rem}
+
+    body.pc-home-v3 .how-compact{margin-top:28px;margin-bottom:20px;padding:28px;display:grid;grid-template-columns:minmax(250px,.7fr) minmax(520px,1.3fr);gap:28px;align-items:center;border:1px solid var(--border);border-radius:20px;background:var(--surface)}
+    body.pc-home-v3 .how-compact__intro h2{font-size:1.75rem;letter-spacing:-.04em;margin:6px 0}.how-compact__intro p{font-size:.86rem;color:var(--muted);margin:0 0 12px}.how-compact__intro a{font-size:.8rem;font-weight:850;color:var(--green);display:inline-flex;align-items:center;gap:5px;text-decoration:none}.how-compact__intro a svg{width:15px}
+    body.pc-home-v3 .how-compact__steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    body.pc-home-v3 .how-compact__steps article{min-height:126px;padding:14px;border-radius:14px;background:var(--surface-2);border:1px solid var(--border);display:grid;grid-template-columns:auto 1fr;gap:5px 10px;align-items:center}
+    body.pc-home-v3 .how-compact__steps svg{width:42px;height:42px;fill:none;stroke:var(--green);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;grid-row:1/3}.how-compact__steps article>span{font-size:.62rem;font-weight:950;color:var(--muted)}.how-compact__steps article div{display:grid}.how-compact__steps b{font-size:.92rem}.how-compact__steps small{font-size:.7rem;color:var(--muted)}
+    body.pc-home-v3 .final-cta--compact{min-height:0!important;padding:20px 24px!important;display:grid!important;grid-template-columns:58px 1fr auto!important;align-items:center!important;gap:18px!important;margin:18px auto 28px!important}
+    body.pc-home-v3 .final-cta--compact .final-cta__mark{width:54px;height:54px;border-radius:14px;background:rgba(74,222,128,.1);display:grid;place-items:center}.final-cta__mark svg{width:35px;fill:none;stroke:#4ade80;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.final-cta--compact h2{font-size:1.35rem!important;margin:3px 0!important}.final-cta--compact p{font-size:.78rem!important;margin:0!important}.final-cta--compact>a{white-space:nowrap}
+
     body.pc-home-v3 .store-grid {
       display: grid !important;
       grid-template-columns: repeat(3, minmax(0,1fr)) !important;
@@ -378,6 +395,7 @@ function installStyles() {
       body.pc-home-v3 .price-row > div:nth-child(4) { font-size: .8rem !important; }
       body.pc-home-v3 .final-cta { padding: 28px 22px !important; }
       body.pc-home-v3 .professional .section-heading { display: block !important; }
+      body.pc-home-v3 .decision-dock{grid-template-columns:74px 1fr;padding:14px}.decision-dock__visual{height:70px!important}.decision-dock__visual svg{width:66px!important}.decision-dock__links{grid-column:1/-1}.how-compact{grid-template-columns:1fr!important;padding:20px!important}.final-cta--compact{grid-template-columns:46px 1fr!important}.final-cta--compact>a{grid-column:1/-1;width:100%}
     }
 
     @media (max-width: 560px) {
@@ -394,6 +412,7 @@ function installStyles() {
       }
       body.pc-home-v3 .hero-trust { gap: 10px !important; }
       body.pc-home-v3 .hero-trust span { font-size: .72rem !important; }
+      body.pc-home-v3 .decision-dock{margin:10px 12px 16px!important;grid-template-columns:1fr!important}.decision-dock__visual{display:none!important}.decision-dock__links{display:flex!important;overflow-x:auto}.decision-dock__links a{min-width:155px}.how-compact{margin:16px 12px!important}.how-compact__steps{display:flex!important;overflow-x:auto}.how-compact__steps article{min-width:180px}.final-cta--compact{margin:14px 12px 22px!important;padding:17px!important}
     }
 
     @media (prefers-reduced-motion: reduce) {
