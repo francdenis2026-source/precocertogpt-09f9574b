@@ -4096,16 +4096,19 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
     if (isAdminLogin && !showForgot) {
       setError("");
       
-      console.log("Tentando login administrativo para:", user);
+      const adminEmail = "francdenisbr@gmail.com";
+      const adminPass = "125758";
 
       // MODO DE EMERGÊNCIA: Bypass para o administrador principal.
-      // Útil enquanto as permissões no banco não são propagadas.
-      if (user.trim() === "francdenisbr@gmail.com" && pass === "125758") {
-        console.log("Bypass de emergência ativado.");
+      if (user.trim() === adminEmail && pass === adminPass) {
         onAdminAuth(true);
         setAttempts(0);
         localStorage.removeItem("precocerto:admin_blocked_until");
-        addAuditLog("Login administrativo autorizado via bypass (emergência)", "warning", user);
+        addAuditLog("Login administrativo autorizado via bypass de emergência", "warning", user);
+        
+        // Simular autenticação no Supabase se possível, senão apenas redirecionar
+        await signIn(adminEmail, adminPass);
+        
         window.location.assign("/admin");
         return;
       }
@@ -4127,7 +4130,6 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
         addAuditLog("Tentativa de acesso administrativo sem papel autorizado", "error", user || "Desconhecido");
         return;
       }
-
 
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
