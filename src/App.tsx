@@ -14,6 +14,7 @@ import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { FooterCompactUx } from "./components/FooterCompactUx";
 import { GlobalMobileCompactUx } from "./components/GlobalMobileCompactUx";
 import { UiUxProMaxFoundation } from "./components/UiUxProMaxFoundation";
+import { HeroHeaderSafePolish } from "./components/HeroHeaderSafePolish";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
@@ -61,6 +62,7 @@ export default function App() {
       <FooterCompactUx />
       <GlobalMobileCompactUx />
       <UiUxProMaxFoundation />
+      <HeroHeaderSafePolish />
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
       <MarketplacePositioningSection />
