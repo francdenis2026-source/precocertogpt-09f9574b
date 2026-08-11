@@ -45,6 +45,7 @@ import { AdminMerchantManagement } from "./components/AdminMerchantManagement";
 import { CustomerOrders } from "./components/CustomerOrders";
 import { MercadoPagoCallback } from "./components/MercadoPagoCallback";
 import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/PublicFooterServicePages";
+import { PremiumVisualSystem } from "./components/PremiumVisualSystem";
 
 export default function App() {
   return (
@@ -61,6 +62,7 @@ export default function App() {
       <HomeSearchKeyboardUx />
       <FooterCompactUx />
       <GlobalMobileCompactUx />
+      <PremiumVisualSystem />
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
       <MarketplacePositioningSection />
