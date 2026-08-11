@@ -134,7 +134,7 @@ const dorinhaSocialOverlay = Buffer.from(`
   </svg>
 `);
 
-await sharp("public/dorinha-hero-art-v2.webp")
+await sharp("public/dorinha-hero-editorial-v3.png")
   .resize(1200, 630, { fit: "cover", position: "center" })
   .modulate({ brightness: 0.72, saturation: 0.86 })
   .composite([
