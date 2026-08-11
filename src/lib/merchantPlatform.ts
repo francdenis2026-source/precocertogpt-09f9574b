@@ -30,6 +30,12 @@ export async function loadMerchantMembership(){
   if(typeof window!=="undefined"&&selected?.merchant_id)localStorage.setItem("pc:active_merchant_id",selected.merchant_id);
   return selected;
 }
+export async function resolveAuthenticatedHome(requestedPath?:string|null){
+  const memberships=await loadMerchantMemberships();
+  const requested=requestedPath?.startsWith("/")&&!requestedPath.startsWith("//")?requestedPath:null;
+  if(memberships.length)return requested?.startsWith("/painel-lojista")?requested:"/painel-lojista";
+  return requested??"/";
+}
 export async function loadMerchantOrders(merchantId:string,limit=80):Promise<MerchantOrder[]>{if(!supabase)return[];const {data,error}=await supabase.from("orders").select("*, order_items(*)").eq("merchant_id",merchantId).order("created_at",{ascending:false}).limit(limit);if(error||!data)return[];return data.map((r:any)=>({...r,subtotal:money(r.subtotal),delivery_fee:money(r.delivery_fee),discount:money(r.discount),platform_fee:money(r.platform_fee),total:money(r.total),items:(r.order_items??[]).map((i:any)=>({...i,quantity:money(i.quantity),unit_price:money(i.unit_price),total_price:money(i.total_price)}))})) as MerchantOrder[];}
 export async function updateOrderStatus(orderId:string,status:OrderStatus){if(!supabase)return{error:"Supabase indisponível"};const {error}=await supabase.from("orders").update({status,updated_at:new Date().toISOString()}).eq("id",orderId);return{error:error?.message??null};}
 export function subscribeMerchantOrders(merchantId:string,onChange:()=>void){if(!supabase)return()=>undefined;const channel=supabase.channel(`merchant-orders-${merchantId}`).on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:`merchant_id=eq.${merchantId}`},onChange).subscribe();return()=>{void supabase?.removeChannel(channel)};}
