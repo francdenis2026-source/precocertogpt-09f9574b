@@ -462,7 +462,7 @@ function ThemeToggle({ compact = false }: { compact?: boolean }) {
 }
 
 function useAccountSpace(){
-  const [space,setSpace]=useState({href:"/login?perfil=lojista&redirect=%2Fpainel-lojista",label:"Meu espaço",kind:"guest"});
+  const [space,setSpace]=useState({href:"/login?redirect=%2Fpainel-lojista",label:"Meu espaço",kind:"guest"});
   useEffect(()=>{let active=true;void(async()=>{const [profile,membership]=await Promise.all([loadSessionProfile(),loadMerchantMembership()]);if(!active)return;if(profile?.isAdmin)setSpace({href:"/admin/plataforma",label:"Administração",kind:"admin"});else if(membership)setSpace({href:"/painel-lojista",label:"Meu negócio",kind:"merchant"});else if(profile)setSpace({href:"/perfil",label:"Minha conta",kind:"consumer"})})();return()=>{active=false}},[]);
   return space;
 }
