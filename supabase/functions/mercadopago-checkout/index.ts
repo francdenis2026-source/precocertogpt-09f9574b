@@ -78,34 +78,37 @@ Deno.serve(async (req) => {
     statement_descriptor: "PRECO CERTO",
     payer: { email: order.customer_email || user.email },
     metadata: { order_id: order.id, order_number: order.order_number, merchant_id: order.merchant_id },
+    payment_methods: {
+      excluded_payment_types: [{ id: "ticket" }], // Excluir boleto se preferir apenas PIX/Cartão
+      installments: 1
+    }
   };
-  if (webhookUrl) preference.notification_url = webhookUrl;
-  if (appBaseUrl) {
-    preference.back_urls = {
-      success: `${appBaseUrl.replace(/\/$/, "")}/meus-pedidos?pagamento=aprovado`,
-      pending: `${appBaseUrl.replace(/\/$/, "")}/meus-pedidos?pagamento=pendente`,
-      failure: `${appBaseUrl.replace(/\/$/, "")}/meus-pedidos?pagamento=falhou`,
-    };
-    preference.auto_return = "approved";
-  }
 
+  // Se o pedido permitir PIX (geralmente via API de Pagamentos, mas Preferências podem sugerir)
+  // Nota: Para PIX nativo com QR Code imediato, usamos a API /v1/payments.
+  // Aqui criamos a preferência para Checkout Pro.
+  
+  if (webhookUrl) preference.notification_url = webhookUrl;
+  
   const mpResponse = await fetch("https://api.mercadopago.com/checkout/preferences", {
     method: "POST",
     headers: { Authorization: `Bearer ${sellerToken}`, "Content-Type": "application/json", Accept: "application/json", "X-Idempotency-Key": `pc-${order.id}` },
     body: JSON.stringify(preference),
   });
+  
   const result = await mpResponse.json();
   if (!mpResponse.ok || !result?.id) return json({ error: "Não foi possível iniciar o pagamento", detail: result?.message || result?.error }, 502);
 
-  await admin.from("orders").update({ payment_provider: "mercadopago", updated_at: new Date().toISOString() }).eq("id", order.id);
-  await admin.from("order_events").insert({
+  // LOG de auditoria de tentativa
+  await admin.from("payment_logs").insert({
     order_id: order.id,
-    event_type: "checkout_created",
-    actor_user_id: user.id,
-    actor_type: "customer",
-    message: "Checkout Mercado Pago iniciado",
-    metadata: { preference_id: result.id },
+    event_type: "checkout_initiated",
+    status: "pending",
+    payload: { preference_id: result.id, timestamp: new Date().toISOString() }
   });
 
-  return json({ preferenceId: result.id, checkoutUrl: result.init_point, sandboxUrl: result.sandbox_init_point || null });
+  await admin.from("orders").update({ payment_provider: "mercadopago", updated_at: new Date().toISOString() }).eq("id", order.id);
+  
+  return json({ preferenceId: result.id, checkoutUrl: result.init_point });
+
 });
