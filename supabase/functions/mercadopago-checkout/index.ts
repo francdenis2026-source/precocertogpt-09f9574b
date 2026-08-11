@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
   if (!connection || connection.status !== "connected" || !connection.access_token_encrypted) return json({ error: "O estabelecimento ainda não conectou o Mercado Pago" }, 409);
 
   let sellerToken: string;
-  try { sellerToken = await decryptToken(connection.access_token_encrypted, encryptionKey); }
+  try { sellerToken = await decryptToken(connection.access_token_encrypted, encryptionKey!); }
   catch { return json({ error: "A conta Mercado Pago do estabelecimento precisa ser reconectada" }, 409); }
 
   const items = (order.order_items || []).map((item: any) => ({
