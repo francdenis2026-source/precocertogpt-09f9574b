@@ -87,12 +87,36 @@ export async function signIn(email: string, password: string) {
   return { error: error?.message ?? null };
 }
 
-export async function signInMerchantWithCpf(cpf:string,pin:string){
-  if(!supabase)return{error:"Autenticação indisponível: banco não configurado."};
-  const {data,error}=await supabase.functions.invoke("merchant-cpf-login",{body:{cpf,pin}});
-  if(error||!data?.access_token||!data?.refresh_token)return{error:data?.error??error?.message??"CPF ou PIN incorretos."};
-  const {error:sessionError}=await supabase.auth.setSession({access_token:data.access_token,refresh_token:data.refresh_token});
-  return{error:sessionError?.message??null};
+export async function signInMerchantWithCpf(cpf: string, pin: string) {
+  if (!supabase) return { error: "Autenticação indisponível: banco não configurado." };
+  try {
+    const { data, error } = await supabase.functions.invoke("merchant-cpf-login", {
+      body: { cpf, pin }
+    });
+    
+    if (error) {
+      console.error("Erro ao invocar Edge Function merchant-cpf-login:", error);
+      return { error: error.message || "Erro de conexão com o servidor de autenticação." };
+    }
+    
+    if (!data || data.error) {
+      return { error: data?.error || "CPF ou PIN incorretos." };
+    }
+
+    if (!data.access_token || !data.refresh_token) {
+      return { error: "Resposta de autenticação inválida." };
+    }
+
+    const { error: sessionError } = await supabase.auth.setSession({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token
+    });
+
+    return { error: sessionError?.message ?? null };
+  } catch (err: any) {
+    console.error("Erro inesperado no login por CPF:", err);
+    return { error: "Ocorreu um erro inesperado ao tentar fazer login." };
+  }
 }
 
 export async function signUp(email: string, password: string, name: string) {
