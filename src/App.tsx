@@ -20,6 +20,7 @@ import { EstablishmentsSafePolish } from "./components/EstablishmentsSafePolish"
 import { BasketFavoritesUserSafePolish } from "./components/BasketFavoritesUserSafePolish";
 import { PlansMerchantConversionSafePolish } from "./components/PlansMerchantConversionSafePolish";
 import { InternalDashboardsSafePolish } from "./components/InternalDashboardsSafePolish";
+import { InternalDashboardsDeepUiUx } from "./components/InternalDashboardsDeepUiUx";
 import { PublicPagesUiUxAudit } from "./components/PublicPagesUiUxAudit";
 import { VisualRegressionGuard } from "./components/VisualRegressionGuard";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
@@ -75,6 +76,7 @@ export default function App() {
       <BasketFavoritesUserSafePolish />
       <PlansMerchantConversionSafePolish />
       <InternalDashboardsSafePolish />
+      <InternalDashboardsDeepUiUx />
       <PublicPagesUiUxAudit />
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
