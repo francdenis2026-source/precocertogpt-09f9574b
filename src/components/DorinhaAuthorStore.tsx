@@ -196,15 +196,28 @@ export function DorinhaAuthorStore() {
       @media(max-width:1050px){.db-hero-grid{grid-template-columns:minmax(0,1fr) minmax(330px,.82fr);gap:18px}.db-cover-stage{transform:scale(.85)}.db-book-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.db-about-grid,.db-contact-grid{grid-template-columns:1fr}.db-author-portrait-card{min-height:470px}.db-external-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
       @media(max-width:760px){.db-video-grid{grid-template-columns:1fr;gap:16px}.db-video-copy{padding-left:54px}.db-video-copy p{max-width:none}.db-video-mark{width:40px;height:40px}.db-video-frame{max-width:560px;justify-self:center}.db-video-link{width:100%;justify-content:center;box-sizing:border-box}.db-external-head{grid-template-columns:1fr}.db-platform-illustration{display:none}}
       @media(max-width:790px){.db-hero-grid{grid-template-columns:1fr}.db-hero-art{min-height:320px;margin-top:-24px}.db-cover-stage{height:330px;transform:scale(.78)}.db-stage-note{display:none}.db-hero-copy{text-align:center;padding-left:0}.db-hero-copy:before{display:none}.db-hero-copy .db-hero-actions,.db-hero-copy [data-hero-badges],.db-hero-copy [data-hero-foot]{justify-content:center}}
-      @media(max-width:640px){.db-author-page{font-size:16px}.db-book-grid,.db-external-grid{grid-template-columns:1fr}.db-real-cover-shell{height:188px}.db-real-cover-image{height:162px;max-width:72%}.db-hero-title{font-size:clamp(2.75rem,14vw,3.75rem);line-height:.96}.db-top-label,.db-icon-label{display:none}.db-hero-actions{display:grid!important}.db-hero-actions>*{width:100%;justify-content:center}.db-section{padding-left:18px!important;padding-right:18px!important}.db-contact-actions{display:grid!important}.db-contact-actions>*{width:100%;justify-content:center}.db-hero-art{min-height:245px;margin-top:-36px}.db-cover-stage{height:275px;transform:scale(.62)}.db-about-facts{grid-template-columns:1fr!important}.db-author-portrait-card{min-height:390px}.db-section-head{align-items:flex-start!important}.db-catalog-count{display:none!important}}
+      @media(max-width:640px){
+        .db-author-page{font-size:15px;overflow-x:hidden}
+        .db-topbar{height:64px!important;padding:6px 10px!important;gap:7px!important;background:linear-gradient(180deg,rgba(255,253,249,.99),rgba(247,241,246,.98))!important;border:0!important;box-shadow:inset 0 0 0 1px rgba(101,70,109,.22),inset 0 -3px 0 rgba(218,180,105,.72),0 9px 24px rgba(35,18,43,.13)!important}
+        .db-brand{min-width:0;flex:1 1 auto;gap:7px!important}.db-brand>span:last-child{display:grid;min-width:0}.db-brand b{font-size:14px;line-height:1.1;white-space:nowrap}.db-brand small{display:none}.db-brand-mark{width:40px!important;height:40px!important;border-radius:12px!important;box-shadow:0 6px 14px rgba(38,21,47,.2)}
+        .db-top-label,.db-icon-label,.db-top-whats span{display:none!important}
+        .db-top-actions{flex:0 0 auto;gap:6px!important}.db-share-button,.db-top-whats{width:44px!important;height:44px!important;min-width:44px!important;padding:0!important;display:grid!important;place-items:center!important;border-radius:12px!important;box-sizing:border-box}.db-share-button{border-color:#cdbfcf!important}.db-top-whats{border:1px solid #4f3459!important;box-shadow:0 7px 15px rgba(45,25,54,.17)}
+        .db-section{padding:34px 16px!important}.db-section-head{display:block!important;margin-bottom:16px!important}.db-catalog-count{display:none!important}.db-section-head h2{font-size:clamp(1.75rem,8.6vw,2.25rem)!important;margin-bottom:8px!important}.db-section-head p{font-size:14px!important;line-height:1.58!important;margin:0!important}
+        .db-hero-grid{display:flex!important;flex-direction:column;gap:0!important;padding-top:28px!important;padding-bottom:16px!important}.db-hero-copy{width:100%;text-align:left!important}.db-hero-copy [data-hero-badges],.db-hero-copy [data-hero-foot]{justify-content:flex-start!important}.db-hero-title{font-size:clamp(2.65rem,13vw,3.4rem);line-height:.91;margin:10px 0 12px}.db-hero-copy p{max-width:none!important}.db-hero-copy p:nth-of-type(1){font-size:1.18rem!important;line-height:1.34!important}.db-hero-copy p:nth-of-type(2){font-size:14px!important;line-height:1.52!important;margin-bottom:0!important}.db-hero-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:7px!important;margin-top:15px!important}.db-hero-actions>*{width:auto!important;min-height:46px;justify-content:center;padding:9px!important;font-size:12px!important;text-align:center}.db-hero-actions svg:last-child{display:none}.db-hero-art{width:100%;min-height:205px;margin:-8px 0 -18px}.db-cover-stage{height:250px;transform:scale(.61)}.db-hero-copy [data-hero-foot]{gap:10px!important;margin-top:13px!important;font-size:11px!important}
+        .db-book-grid,.db-external-grid{grid-template-columns:1fr}.db-book{display:grid!important;grid-template-columns:112px minmax(0,1fr);min-height:205px}.db-real-cover-shell{height:auto!important;min-height:205px;padding:8px!important}.db-real-cover-image{width:92%!important;max-width:92%!important;height:auto!important;max-height:180px!important}.db-real-cover-badge{display:none}.db-book .db-book-description{-webkit-line-clamp:3;font-size:12px!important;line-height:1.45!important}.db-book h3{font-size:17px!important;margin-top:7px!important}.db-book [style*="Venda direta"]{font-size:11px}.db-book:hover{transform:none}
+        .db-about-grid{gap:20px!important}.db-about-grid h2{font-size:clamp(1.75rem,8vw,2.2rem)!important}.db-about-grid p{font-size:14px!important;line-height:1.65!important}.db-about-facts{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;margin-top:18px!important}.db-about-facts span{padding:9px 7px!important;text-align:center}.db-about-facts b{font-size:14px!important}.db-about-facts small{font-size:10px!important}.db-author-portrait-card{min-height:335px;border-radius:15px}.db-author-portrait-card figcaption{padding:10px 12px!important}.db-author-portrait-card figcaption span{font-size:9px!important}
+        .db-video-grid{gap:14px!important}.db-video-copy{padding-left:48px}.db-video-copy h2{font-size:1.7rem!important}.db-video-copy p{font-size:13px!important;line-height:1.55!important}.db-video-mark{width:37px;height:37px}.db-video-link{min-height:44px;margin-top:12px}.db-video-frame{border-radius:12px}.db-external-head{margin-bottom:12px}.db-external-head h2{font-size:1.7rem!important}.db-external-head p{font-size:13px!important}.db-external-grid{gap:8px!important}.db-external-empty{padding:16px!important}.db-external-empty h3{font-size:19px!important}.db-external-empty p{font-size:13px!important}.db-external-empty-cta{width:100%;justify-content:center;box-sizing:border-box;min-height:46px}
+        #contato .db-contact-grid{padding-top:30px!important;padding-bottom:30px!important}.db-contact-grid h2{font-size:1.85rem!important}.db-contact-grid p{font-size:14px!important;line-height:1.6!important}.db-contact-actions{display:grid!important;grid-template-columns:1fr 46px;gap:7px!important}.db-contact-actions>*{min-height:46px;justify-content:center;padding:9px!important;box-sizing:border-box}.db-contact-actions button{font-size:0!important}.db-contact-actions button svg{width:18px;height:18px}.db-contact-card{padding:15px!important}.db-footer{grid-template-columns:1fr!important;text-align:center!important;gap:10px!important;padding:18px 16px calc(18px + env(safe-area-inset-bottom))!important}.db-footer>div{justify-content:center!important;flex-wrap:wrap}.db-footer small{line-height:1.5}
+      }
+      @media(max-width:380px){.db-hero-actions{grid-template-columns:1fr}.db-book{grid-template-columns:98px minmax(0,1fr)}.db-real-cover-shell{min-height:190px}.db-about-facts{grid-template-columns:1fr!important}.db-about-facts span{text-align:left}.db-hero-copy [data-hero-foot] span:last-child{display:none}}
     `}</style>
 
-    <header style={s.topbar}>
-      <a href="/" style={s.brand}><span style={s.brandMark}>P</span><span><b>PreçoCerto</b><small>Marketplace Local</small></span></a>
+    <header style={s.topbar} className="db-topbar">
+      <a href="/" style={s.brand} className="db-brand"><span style={s.brandMark} className="db-brand-mark">P</span><span><b>PreçoCerto</b><small>Marketplace Local</small></span></a>
       <nav className="db-top-label" style={s.topNav} aria-label="Navegação da autora"><a href="#livros">Livros</a><a href="#autora">A autora</a><a href="#contato">Contato</a></nav>
-      <div style={s.topActions}>
-        <button onClick={sharePage} style={s.iconButton} aria-label="Compartilhar página">{copied?<Check size={17}/>:<Share2 size={17}/>}<span className="db-icon-label">{copied?"Link copiado":"Compartilhar"}</span></button>
-        <a href={whatsappUrl(whatsapp)} target="_blank" rel="noreferrer" style={s.topWhats}><MessageCircle size={17}/> Falar com a autora</a>
+      <div style={s.topActions} className="db-top-actions">
+        <button onClick={sharePage} style={s.iconButton} className="db-share-button" aria-label="Compartilhar página">{copied?<Check size={19}/>:<Share2 size={19}/>}<span className="db-icon-label">{copied?"Link copiado":"Compartilhar"}</span></button>
+        <a href={whatsappUrl(whatsapp)} target="_blank" rel="noreferrer" style={s.topWhats} className="db-top-whats" aria-label="Falar com Dorinha no WhatsApp"><MessageCircle size={19}/><span>Falar com a autora</span></a>
       </div>
     </header>
 
@@ -218,7 +231,7 @@ export function DorinhaAuthorStore() {
           </div>
           <h1 className="db-hero-title">Dorinha<br/><em>Barroso</em></h1>
           <p style={s.heroLead}>{profile.merchant.hero_title || "Histórias que nascem no Acre e encontram leitores em todo o Brasil."}</p>
-          <p style={s.heroText}>Escritora, professora e educadora de Feijó. Conheça suas obras e compre diretamente com a autora.</p>
+          <p style={s.heroText}>Escritora acreana, historiadora e pedagoga. Conheça sua trajetória, descubra suas obras e compre diretamente com a autora.</p>
           <div style={s.heroActions} className="db-hero-actions">
             <a href="#livros" style={s.heroPrimary} className="db-action"><BookOpen size={18}/> Explorar as obras <ArrowRight size={17}/></a>
             <a href={whatsappUrl(whatsapp)} target="_blank" rel="noreferrer" style={s.heroSecondary} className="db-action"><MessageCircle size={18}/> Falar com Dorinha</a>
@@ -292,13 +305,13 @@ export function DorinhaAuthorStore() {
         <article style={s.aboutMain}>
           <span style={s.eyebrowGold}>A AUTORA</span>
           <h2 style={{...s.h2,color:"white",maxWidth:760}}>Da infância em Feijó a uma vida dedicada à leitura, à educação e à escrita.</h2>
-          <p style={s.aboutText}>Maria das Dores Fernandes Barroso, conhecida como <strong>Dorinha Barroso</strong>, nasceu em Feijó, no Acre. Alfabetizada ainda criança por sua irmã, desenvolveu muito cedo uma relação intensa com os livros. Formou-se em História pela Universidade Federal do Acre (UFAC), licenciou-se em Pedagogia e realizou pós-graduação em Psicopedagogia e Gestão Pública.</p>
-          <p style={s.aboutText}>Como professora das redes municipal e estadual, levou para a sala de aula o gosto pela leitura e pela produção de textos, poesias, contos e peças. Essa ligação entre educação, memória, imaginação e experiência de vida atravessa sua presença como escritora.</p>
-          <div style={s.aboutFacts} className="db-about-facts"><span><b>Feijó</b><small>raízes acreanas</small></span><span><b>Educação</b><small>professora e pedagoga</small></span><span><b>Literatura</b><small>obras publicadas</small></span></div>
+          <p style={s.aboutText}>Maria das Dores Fernandes Barroso, conhecida como <strong>Dorinha Barroso</strong>, construiu uma trajetória em que literatura, formação acadêmica e compromisso com sua comunidade se encontram. Nascida em Feijó, no Acre, foi alfabetizada ainda criança por sua irmã e desenvolveu desde cedo uma relação profunda com os livros. É formada em História pela Universidade Federal do Acre (UFAC), licenciada em Pedagogia e pós-graduada em Psicopedagogia e Gestão Pública.</p>
+          <p style={s.aboutText}>Sua experiência nas redes municipal e estadual aproximou leitura, memória e criação. Ao incentivar textos, poesias, contos e peças, Dorinha transformou vivências do cotidiano acreano em matéria literária. Suas obras combinam imaginação, sensibilidade e experiência humana, preservando raízes locais enquanto dialogam com leitores de diferentes lugares.</p>
+          <div style={s.aboutFacts} className="db-about-facts"><span><b>Feijó</b><small>origem e identidade acreana</small></span><span><b>Formação</b><small>História, Pedagogia e Psicopedagogia</small></span><span><b>Literatura</b><small>memória, imaginação e experiência</small></span></div>
         </article>
         <figure className="db-author-portrait-card">
           <img src="/dorinha-author-portrait-v2.webp" width={1024} height={1536} loading="lazy" decoding="async" sizes="(max-width: 640px) calc(100vw - 36px), (max-width: 1050px) calc(100vw - 48px), 360px" alt="Dorinha Barroso segurando dois de seus livros"/>
-          <figcaption><strong>Dorinha Barroso</strong><span>ESCRITORA · EDUCADORA · ACREANA</span></figcaption>
+          <figcaption><strong>Dorinha Barroso</strong><span>ESCRITORA · HISTORIADORA · ACREANA</span></figcaption>
         </figure>
       </div>
     </section>
@@ -351,7 +364,7 @@ export function DorinhaAuthorStore() {
           <span style={s.eyebrowGold}>COMPRA DIRETA</span><h2 style={{...s.h2,color:"white"}}>Quer um exemplar? Fale diretamente com Dorinha.</h2><p style={s.contactText}>A venda direta aproxima o leitor da autora. Confirme edição, disponibilidade, valor, retirada ou forma de entrega antes de concluir o pedido.</p>
           <div style={s.contactActions} className="db-contact-actions"><a href={whatsappUrl(whatsapp)} target="_blank" rel="noreferrer" style={s.contactPrimary}><MessageCircle size={19}/> Iniciar conversa no WhatsApp</a><button onClick={sharePage} style={s.contactSecondary}>{copied?<Check size={18}/>:<Copy size={18}/>} {copied?"Link copiado":"Compartilhar loja"}</button></div>
         </div>
-        <aside style={s.contactCard}>
+        <aside style={s.contactCard} className="db-contact-card">
           <span style={s.contactLabel}>ATENDIMENTO DA AUTORA</span><strong style={s.phone}>{profile.merchant.phone}</strong>
           <div style={s.contactLine}><MapPin size={18}/><span><b>Endereço para referência</b><small>{address}</small></span></div>
           <div style={s.contactLine}><Truck size={18}/><span><b>Entrega e retirada</b><small>Condições combinadas diretamente no atendimento.</small></span></div>
@@ -360,7 +373,7 @@ export function DorinhaAuthorStore() {
       </div>
     </section>
 
-    <footer style={s.footer}><div><a href="/" style={s.footerBrand}>PreçoCerto</a><span>Marketplace Local</span></div><div><a href="/estabelecimentos">Estabelecimentos</a><a href="/">Comparar preços</a><a href="/lojista">Para negócios locais</a></div><small>© 2026 PreçoCerto · Espaço literário de Dorinha Barroso.</small></footer>
+    <footer style={s.footer} className="db-footer"><div><a href="/" style={s.footerBrand}>PreçoCerto</a><span>Marketplace Local</span></div><div><a href="/estabelecimentos">Estabelecimentos</a><a href="/">Comparar preços</a><a href="/lojista">Para negócios locais</a></div><small>© 2026 PreçoCerto · Espaço literário de Dorinha Barroso.</small></footer>
   </main>;
 }
 
