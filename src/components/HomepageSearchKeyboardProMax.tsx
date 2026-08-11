@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
-import { createRoot, Root } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import "./HomepageSearchKeyboardProMax.css";
 
 const nativeValueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
@@ -39,6 +39,13 @@ export function HomepageSearchKeyboardProMax() {
       getOptions().forEach((option, index) => {
         option.id = `th-home-search-option-${index}`;
         option.setAttribute("aria-selected", index === activeIndex ? "true" : "false");
+        const image = option.querySelector<HTMLImageElement>(".th-search-result__thumb img");
+        option.classList.toggle("has-product-image", Boolean(image));
+        if (image) {
+          image.loading = "eager";
+          image.decoding = "async";
+          image.fetchPriority = "high";
+        }
       });
     };
 
