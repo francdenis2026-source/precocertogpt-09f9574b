@@ -815,6 +815,18 @@ function useRandomFeatured(products: Product[]) {
 }
 
 function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveAction, favorites, toggleFavorite, syncStatus }: PageProps & { syncStatus?: string }) {
+<div style="padding: 2rem; background: var(--surface-2); border-radius: 1rem; margin-bottom: 2rem; border: 2px dashed var(--blue);"><h2>Redesign Técnico e Profissional da Homepage</h2><p style="white-space: pre-line;">Objetivo: Realizar um redesign completo da homepage, otimizando o layout, a configuração e a utilização do espaço de forma técnica e profissional, sem comprometer o estilo e a estética visual.
+
+Funcionalidades e Melhorias:
+* Análise e Otimização de Layout: Explorar e propor novos layouts que maximizem o aproveitamento de cada espaço disponível. Identificar e eliminar desperdícios de espaço ou elementos redundantes.
+* Revisão e Modificação de Cards: Analisar a estrutura e o conteúdo dos cards atuais. Propor e implementar modificações nos cards para melhorar a clareza, o apelo visual e a funcionalidade.
+* Configuração e Estrutura: Definir uma nova configuração geral para a homepage que aprimore a experiência do usuário (UX) e a navegação. Garantir uma estrutura técnica robusta e escalável para o novo design.
+* Manutenção de Estilo e Beleza: Assegurar que todas as alterações técnicas e de layout estejam alinhadas com a identidade visual e o estilo da marca. Priorizar a beleza e o apelo estético em todas as decisões de design.
+
+Requisitos Técnicos:
+* A implementação deve ser realizada seguindo as melhores práticas de desenvolvimento web.
+* Considerar a responsividade para diferentes dispositivos (desktop, tablet, mobile).
+* Otimizar o desempenho da página (tempo de carregamento, etc.).</p></div>
   const randomFeatured = useRandomFeatured(products);
   const opportunityProducts = [...products]
     .sort((a, b) => ((b.previousPrice ?? b.maxPrice) - b.minPrice) - ((a.previousPrice ?? a.maxPrice) - a.minPrice))
