@@ -9,8 +9,6 @@ import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
 import { TrueHomepage } from "./components/TrueHomepage";
-import { HomeSearchPortalPolish } from "./components/HomeSearchPortalPolish";
-import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { FooterCompactUx } from "./components/FooterCompactUx";
 import { GlobalMobileCompactUx } from "./components/GlobalMobileCompactUx";
 import { UiUxProMaxFoundation } from "./components/UiUxProMaxFoundation";
@@ -23,17 +21,13 @@ import { InternalDashboardsSafePolish } from "./components/InternalDashboardsSaf
 import { InternalDashboardsDeepUiUx } from "./components/InternalDashboardsDeepUiUx";
 import { PublicPagesUiUxAudit } from "./components/PublicPagesUiUxAudit";
 import { VisualRegressionGuard } from "./components/VisualRegressionGuard";
-import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
-import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
 import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
 import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
 import { PublicEstablishmentCatalog } from "./components/PublicEstablishmentCatalog";
 import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
 import { DorinhaCommerceEnhancer } from "./components/DorinhaCommerceEnhancer";
 import { DorinhaBookCoverPolish } from "./components/DorinhaBookCoverPolish";
-import { PremiumMarketplaceSpotlight } from "./components/PremiumMarketplaceSpotlight";
-import { LocalCultureSpotlight } from "./components/LocalCultureSpotlight";
 import { FremixProductionsPage } from "./components/FremixProductionsPage";
 import { FremixDirectoryBridge } from "./components/FremixDirectoryBridge";
 import { FremixCuratedVideos } from "./components/FremixCuratedVideos";
@@ -65,8 +59,6 @@ export default function App() {
       <ProductInteractionUx />
       <PublicCatalogUxFixes />
       <PublicOnlineSalesAvailability />
-      <HomeSearchPortalPolish />
-      <HomeSearchKeyboardUx />
       <FooterCompactUx />
       <GlobalMobileCompactUx />
       <UiUxProMaxFoundation />
@@ -78,11 +70,7 @@ export default function App() {
       <InternalDashboardsSafePolish />
       <InternalDashboardsDeepUiUx />
       <PublicPagesUiUxAudit />
-      <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
-      <MarketplacePositioningSection />
-      <PremiumMarketplaceSpotlight />
-      <LocalCultureSpotlight />
       <MerchantBusinessSetupShortcut />
       <MerchantDemoSwitcher />
       <EstablishmentsNavBridge />
