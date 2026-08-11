@@ -18,6 +18,7 @@ import { priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
 import { normalizeSearchText, searchProducts, suggestProducts } from "./lib/productSearch";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
+import { resolveAuthenticatedHome } from "./lib/merchantPlatform";
 import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
 import { jsPDF } from "jspdf";
 import { planBasketPdf, renderPlanToPdf } from "./lib/basketPdf";
@@ -4090,6 +4091,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
   const [attempts, setAttempts] = useState(0);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [merchantLogin, setMerchantLogin] = useState(() => new URLSearchParams(window.location.search).get("perfil") === "lojista");
 
   useEffect(() => {
     const blocked = localStorage.getItem("precocerto:admin_blocked_until");
@@ -4140,6 +4142,25 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
       } else {
         setError(`Credenciais incorretas. Tentativa ${newAttempts} de 5.`);
       }
+    } else if (merchantLogin) {
+      setError("");
+      const email = user.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setError("Informe o e-mail cadastrado para administrar o estabelecimento.");
+        return;
+      }
+      const { error: authError } = await signIn(email, pass);
+      if (authError) {
+        setError("E-mail ou senha incorretos. Se o acesso ainda não foi ativado, solicite um convite ao administrador.");
+        return;
+      }
+      const destination = await resolveAuthenticatedHome(new URLSearchParams(window.location.search).get("redirect"));
+      if (destination === "/") {
+        await signOut();
+        setError("Esta conta ainda não está vinculada a um estabelecimento ativo.");
+        return;
+      }
+      window.location.assign(destination);
     } else {
       const form = e.currentTarget as HTMLFormElement;
       const formData = new FormData(form);
@@ -4154,7 +4175,8 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
         referencePoint: ""
       };
       if (onLogin) onLogin(userData);
-      window.location.href = "/";
+      const requested = new URLSearchParams(window.location.search).get("redirect");
+      window.location.href = requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/";
     }
   }
 
@@ -4213,7 +4235,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
       <form className="auth-form" onSubmit={showForgot ? handleRecovery : submit}>
         <span className="eyebrow">{isAdminLogin ? (showForgot ? "Recuperação" : "Segurança") : register?"Crie sua conta":"Acesse sua conta"}</span>
         <h2>{isAdminLogin ? (showForgot ? "Redefinir Senha" : "Login Administrativo") : register?"Comece grátis":"Entrar no PreçoCerto"}</h2>
-        <p>{isAdminLogin ? (showForgot ? "Siga os passos para recuperar o acesso." : "Insira suas chaves de acesso para continuar.") : register?"Leva menos de dois minutos.":"Use seu CPF e PIN de 6 dígitos."}</p>
+        <p>{isAdminLogin ? (showForgot ? "Siga os passos para recuperar o acesso." : "Insira suas chaves de acesso para continuar.") : merchantLogin ? "Use o e-mail e a senha vinculados ao seu estabelecimento." : register?"Leva menos de dois minutos.":"Use seu CPF e PIN de 6 dígitos."}</p>
         
         {error && <div style={{ background: '#fee2e2', color: '#dc2626', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><AlertTriangle size={16}/> {error}</div>}
 
@@ -4242,6 +4264,11 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
               <label>Senha Secreta<input required value={pass} onChange={e=>setPass(e.target.value)} type="password" placeholder="franc2015"/></label>
             </>
           )
+        ) : merchantLogin ? (
+          <>
+            <label>E-mail do responsável<input required type="email" value={user} onChange={e=>setUser(e.target.value)} placeholder="seu@email.com" autoComplete="username"/></label>
+            <label>Senha<input required value={pass} onChange={e=>setPass(e.target.value)} type="password" autoComplete="current-password"/></label>
+          </>
         ) : (
           <>
             {register&&<label>Nome completo<input name="name" required minLength={3} placeholder="Seu nome e sobrenome"/></label>}
@@ -4251,8 +4278,8 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
           </>
         )}
 
-        <button className="button button--primary button--full" type="submit" disabled={isAdminLogin ? (showForgot ? (recoveryStep === 1 ? (!recoveryUser || isSendingEmail) : true) : (!user || !pass)) : (pin.length!==6||cpf.length!==11)}>
-          {isAdminLogin ? (showForgot ? (recoveryStep === 1 ? (isSendingEmail ? "Enviando..." : "Enviar link de redefinição") : "Link enviado") : "Autenticar Acesso") : register?"Criar minha conta":"Entrar com segurança"}
+        <button className="button button--primary button--full" type="submit" disabled={(isAdminLogin || merchantLogin) ? (showForgot ? (recoveryStep === 1 ? (!recoveryUser || isSendingEmail) : true) : (!user || !pass)) : (pin.length!==6||cpf.length!==11)}>
+          {isAdminLogin ? (showForgot ? (recoveryStep === 1 ? (isSendingEmail ? "Enviando..." : "Enviar link de redefinição") : "Link enviado") : "Autenticar Acesso") : merchantLogin ? "Entrar no painel do negócio" : register?"Criar minha conta":"Entrar com segurança"}
           <ArrowRight/>
         </button>
 
@@ -4260,6 +4287,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
         {isAdminLogin && showForgot && <button type="button" onClick={() => { setShowForgot(false); setRecoveryStep(1); setError(""); }} className="center-link" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', marginTop: '1rem' }}>Voltar ao login admin</button>}
         
         {!register && !isAdminLogin && <a href="/resgatar" className="center-link">Esqueci meu PIN</a>}
+        {!register && !isAdminLogin && <button type="button" onClick={() => { setMerchantLogin(value => !value); setError(""); }} className="center-link" style={{background:"none",border:0,cursor:"pointer",width:"100%"}}>{merchantLogin ? "Entrar como consumidor" : "Sou comerciante ou autora"}</button>}
 
         <div className="auth-switch">
           {isAdminLogin ? <a href="/login">Voltar para login comum</a> : (register?"Já possui conta? ":"Ainda não tem conta? ")}
