@@ -17,7 +17,7 @@ import { isEnabled } from "./config/features";
 import { priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
 import { normalizeSearchText, searchProducts, suggestProducts } from "./lib/productSearch";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
-import { loadSessionProfile, requestPasswordReset, signIn, signOut, type SessionProfile } from "./lib/roles";
+import { loadSessionProfile, requestPasswordReset, signIn, signInMerchantWithCpf, signOut, type SessionProfile } from "./lib/roles";
 import { resolveAuthenticatedHome } from "./lib/merchantPlatform";
 import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
 import { jsPDF } from "jspdf";
@@ -4162,6 +4162,23 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
       }
       window.location.assign(destination);
     } else {
+      if (!register) {
+        setError("");
+        const merchantAuth = await signInMerchantWithCpf(cpf, pin);
+        if (!merchantAuth.error) {
+          const destination = await resolveAuthenticatedHome(new URLSearchParams(window.location.search).get("redirect"));
+          if (destination !== "/") {
+            window.location.assign(destination);
+            return;
+          }
+          await signOut();
+          setError("A credencial foi reconhecida, mas ainda não está vinculada a um estabelecimento ativo. Solicite a ativação ao administrador.");
+          return;
+        } else if (!merchantAuth.error.includes("não encontrado")) {
+          setError(merchantAuth.error);
+          return;
+        }
+      }
       const form = e.currentTarget as HTMLFormElement;
       const formData = new FormData(form);
       const name = formData.get("name") as string;
