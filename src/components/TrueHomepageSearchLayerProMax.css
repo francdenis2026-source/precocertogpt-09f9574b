@@ -1,0 +1,30 @@
+/* UI UX Pro Max — search dropdown layering and readability fix */
+.true-home .th-hero{overflow:visible}
+.true-home .th-hero__image{transform:none}
+.true-home .th-hero:hover .th-hero__image{transform:none}
+.true-home .th-search-wrap{position:relative;z-index:220}
+.true-home .th-search-results{z-index:240;max-height:min(430px,58vh);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;background:#fff;border:1px solid #cbdbe2;box-shadow:0 24px 64px rgba(2,18,29,.34),0 0 0 1px rgba(255,255,255,.72)}
+.true-home .th-search-results::before{content:"Produtos encontrados";position:sticky;top:0;z-index:2;display:block;padding:8px 12px;background:#f7fbf9;border-bottom:1px solid #e1ebe7;color:#52677a;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.true-home .th-search-result{background:#fff}
+.true-home .th-search-result:focus-visible{position:relative;z-index:3;outline:3px solid rgba(16,185,129,.42);outline-offset:-3px}
+.true-home .th-search-result__copy strong{color:#102033}
+.true-home .th-search-result__copy small{color:#52677a}
+.true-home .th-search-results__all{position:sticky;bottom:0;z-index:2;box-shadow:0 -8px 18px rgba(15,23,42,.06)}
+.true-home .th-quick{z-index:3}
+
+html[data-theme="dark"] .true-home .th-search-results{background:#0e222c;border-color:#41606c;box-shadow:0 26px 68px rgba(0,0,0,.62),0 0 0 1px rgba(126,231,190,.07)}
+html[data-theme="dark"] .true-home .th-search-results::before{background:#102832;border-bottom-color:#31505c;color:#c1d2d8}
+html[data-theme="dark"] .true-home .th-search-result{background:#0e222c}
+html[data-theme="dark"] .true-home .th-search-result__copy strong{color:#f4faf7}
+html[data-theme="dark"] .true-home .th-search-result__copy small{color:#c0d0d6}
+html[data-theme="dark"] .true-home .th-search-results__all{box-shadow:0 -8px 18px rgba(0,0,0,.2)}
+
+@media(max-width:640px){
+ .true-home .th-hero{overflow:visible}
+ .true-home .th-search-wrap{z-index:260}
+ .true-home .th-search-results{left:-2px;right:-2px;max-height:min(52dvh,390px);border-radius:14px;box-shadow:0 20px 48px rgba(2,18,29,.42)}
+ .true-home .th-search-results::before{padding:7px 10px;font-size:9px}
+ .true-home .th-search-result{min-height:64px}
+ .true-home .th-search-results__all{min-height:50px}
+}
+@media(prefers-reduced-motion:reduce){.true-home .th-search-results,.true-home .th-search-result{scroll-behavior:auto!important}}
