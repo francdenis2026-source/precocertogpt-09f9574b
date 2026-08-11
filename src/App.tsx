@@ -95,6 +95,7 @@ export default function App() {
         <Route path="/" element={<TrueHomepage />} />
         <Route path="/buscar" element={<SmartCompareSearchProMax />} />
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
+        <Route path="/estabelecimento/dorinha-barroso-livros" element={<DorinhaAuthorStoreProMax />} />
         <Route path="/estabelecimento/:identifier" element={<PublicEstablishmentCatalog />} />
         <Route path="/cultura/fremix-producoes" element={<FremixProductionsPage />} />
         <Route path="/fremix-producoes" element={<FremixProductionsPage />} />
