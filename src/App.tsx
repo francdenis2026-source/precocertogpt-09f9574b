@@ -7,16 +7,24 @@ import { SearchUxClarity } from "./components/SearchUxClarity";
 import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
+import { HomeExperienceRefactor } from "./components/HomeExperienceRefactor";
+import { HomeMobilePolish } from "./components/HomeMobilePolish";
+import { HomeSearchPortalPolish } from "./components/HomeSearchPortalPolish";
 import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
-import { RebuiltVisualSystem } from "./components/RebuiltVisualSystem";
-import { RebuiltInternalUx } from "./components/RebuiltInternalUx";
+import { FooterCompactUx } from "./components/FooterCompactUx";
+import { GlobalMobileCompactUx } from "./components/GlobalMobileCompactUx";
+import { UiUxProMaxFoundation } from "./components/UiUxProMaxFoundation";
+import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
+import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
 import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
 import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
 import { PublicEstablishmentCatalog } from "./components/PublicEstablishmentCatalog";
 import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
 import { DorinhaCommerceEnhancer } from "./components/DorinhaCommerceEnhancer";
 import { DorinhaBookCoverPolish } from "./components/DorinhaBookCoverPolish";
+import { PremiumMarketplaceSpotlight } from "./components/PremiumMarketplaceSpotlight";
+import { LocalCultureSpotlight } from "./components/LocalCultureSpotlight";
 import { FremixProductionsPage } from "./components/FremixProductionsPage";
 import { FremixDirectoryBridge } from "./components/FremixDirectoryBridge";
 import { FremixCuratedVideos } from "./components/FremixCuratedVideos";
@@ -41,15 +49,23 @@ import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/Publi
 export default function App() {
   return (
     <BrowserRouter>
-      <RebuiltVisualSystem />
-      <RebuiltInternalUx />
       <MaxPriceStoreLabels />
       <SearchUxClarity />
       <ProductInteractionUx />
       <PublicCatalogUxFixes />
       <PublicOnlineSalesAvailability />
+      <HomeExperienceRefactor />
+      <HomeMobilePolish />
+      <HomeSearchPortalPolish />
       <HomeSearchKeyboardUx />
+      <FooterCompactUx />
+      <GlobalMobileCompactUx />
+      <UiUxProMaxFoundation />
+      <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
+      <MarketplacePositioningSection />
+      <PremiumMarketplaceSpotlight />
+      <LocalCultureSpotlight />
       <MerchantBusinessSetupShortcut />
       <MerchantDemoSwitcher />
       <EstablishmentsNavBridge />
