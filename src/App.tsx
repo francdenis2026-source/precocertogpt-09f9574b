@@ -16,6 +16,7 @@ import { GlobalMobileCompactUx } from "./components/GlobalMobileCompactUx";
 import { UiUxProMaxFoundation } from "./components/UiUxProMaxFoundation";
 import { HeroHeaderSafePolish } from "./components/HeroHeaderSafePolish";
 import { ProductCardsSafePolish } from "./components/ProductCardsSafePolish";
+import { EstablishmentsSafePolish } from "./components/EstablishmentsSafePolish";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
@@ -65,6 +66,7 @@ export default function App() {
       <UiUxProMaxFoundation />
       <HeroHeaderSafePolish />
       <ProductCardsSafePolish />
+      <EstablishmentsSafePolish />
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
       <MarketplacePositioningSection />
