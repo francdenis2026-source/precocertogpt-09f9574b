@@ -7,13 +7,13 @@ import { SearchUxClarity } from "./components/SearchUxClarity";
 import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
-import { HeaderStickyUx } from "./components/HeaderStickyUx";
 import { HomeExperienceRefactor } from "./components/HomeExperienceRefactor";
 import { HomeMobilePolish } from "./components/HomeMobilePolish";
 import { HomeSearchPortalPolish } from "./components/HomeSearchPortalPolish";
 import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { FooterCompactUx } from "./components/FooterCompactUx";
 import { GlobalMobileCompactUx } from "./components/GlobalMobileCompactUx";
+import { UiUxProMaxFoundation } from "./components/UiUxProMaxFoundation";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
@@ -45,7 +45,6 @@ import { AdminMerchantManagement } from "./components/AdminMerchantManagement";
 import { CustomerOrders } from "./components/CustomerOrders";
 import { MercadoPagoCallback } from "./components/MercadoPagoCallback";
 import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/PublicFooterServicePages";
-import { PremiumVisualSystem } from "./components/PremiumVisualSystem";
 
 export default function App() {
   return (
@@ -55,14 +54,13 @@ export default function App() {
       <ProductInteractionUx />
       <PublicCatalogUxFixes />
       <PublicOnlineSalesAvailability />
-      <HeaderStickyUx />
       <HomeExperienceRefactor />
       <HomeMobilePolish />
       <HomeSearchPortalPolish />
       <HomeSearchKeyboardUx />
       <FooterCompactUx />
       <GlobalMobileCompactUx />
-      <PremiumVisualSystem />
+      <UiUxProMaxFoundation />
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
       <MarketplacePositioningSection />
