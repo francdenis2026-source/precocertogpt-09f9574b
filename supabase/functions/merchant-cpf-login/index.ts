@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type"};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,"Content-Type":"application/json"}});
-async function alias(cpf:string){const bytes=new TextEncoder().encode(`precocerto-owner:${cpf}`),hash=await crypto.subtle.digest("SHA-256",bytes);return `u-${Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,"0")).join("")}@login.precocerto.internal`}
+async function alias(cpf:string){const bytes=new TextEncoder().encode(`precocerto-owner:${cpf}`),hash=await crypto.subtle.digest("SHA-256",bytes);return `u-${Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,"0")).join("")}@login.precocerto.com.br`}
 
 Deno.serve(async(req)=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
