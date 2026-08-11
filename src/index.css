@@ -1827,6 +1827,12 @@ iframe[src*="lovable.dev/badge"] {
   to { transform: rotate(360deg); }
 }
 
+.header-space-link{width:auto!important;min-width:44px!important;padding:0 12px!important;gap:7px!important;border:1px solid color-mix(in srgb,var(--green) 35%,var(--border))!important;background:color-mix(in srgb,var(--green) 9%,var(--surface))!important;color:var(--text-main)!important;text-decoration:none!important;font-size:.75rem!important;font-weight:850!important;white-space:nowrap}
+.header-space-link svg{color:var(--green)}
+.drawer-space-link{display:flex!important;align-items:center!important;gap:9px!important;margin-bottom:8px!important;background:color-mix(in srgb,var(--green) 12%,var(--surface-2))!important;border:1px solid color-mix(in srgb,var(--green) 30%,var(--border))!important;color:var(--text-main)!important;font-weight:900!important}
+.drawer-space-link svg{width:18px;color:var(--green)}
+@media(max-width:900px){.header-space-link{width:44px!important;padding:0!important}.header-space-link span{display:none}}
+
 .card-metrics {
   display: flex;
   flex-wrap: wrap;
