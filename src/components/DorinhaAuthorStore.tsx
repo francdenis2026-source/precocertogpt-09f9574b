@@ -178,7 +178,11 @@ export function DorinhaAuthorStore() {
       #contato .db-contact-grid h2{font-size:clamp(1.75rem,3.2vw,2.45rem);max-width:620px}
       #contato .db-contact-grid h2{color:#fffafc}
       #contato .db-contact-grid small{color:#f0e8f2;font-size:12px;line-height:1.55}
-      .db-external-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:900px}
+      .db-external-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;width:100%}
+      .db-external-empty{padding:48px 24px;border:2px dashed #d9cfd9;border-radius:18px;text-align:center;background:rgba(255,255,255,.3)}
+      .db-external-empty h3{font-family:var(--db-display);font-size:22px;color:#35243d;margin-bottom:8px}
+      .db-external-empty p{color:#6a5f6e;font-size:15px;max-width:440px;margin:0 auto 18px}
+      .db-external-empty-cta{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;background:#35243d;color:white;text-decoration:none;border-radius:9px;font-weight:750;font-size:14px}
       .db-external-grid strong{font-size:14px}.db-external-grid small{font-size:12px;color:#6a5f6e}
       .db-book p{hyphens:auto}.db-book h3,.db-book p{overflow-wrap:anywhere}
       .db-book-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
