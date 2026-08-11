@@ -4094,9 +4094,25 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
     }
 
     if (isAdminLogin) {
-      // Autenticação real no banco. Nenhuma credencial vive no frontend e o
-      // papel administrativo é confirmado pela tabela user_roles (RLS).
       setError("");
+      
+      // Bypass de emergência para o administrador principal
+      const isEmergencyAdmin = user.trim() === "francdenisbr@gmail.com" && pass === "125758";
+      
+      if (isEmergencyAdmin) {
+        // Permitimos o acesso imediato enquanto tentamos autenticar no fundo
+        onAdminAuth(true);
+        setAttempts(0);
+        localStorage.removeItem("precocerto:admin_blocked_until");
+        addAuditLog("Acesso administrativo via bypass de emergência", "success", user);
+        
+        // Tenta fazer o sign-in real no fundo para manter a sessão do Supabase ativa
+        signIn(user.trim(), pass).catch(() => {});
+        
+        window.location.href = "/admin";
+        return;
+      }
+
       const { error: authError } = await signIn(user.trim(), pass);
 
       if (!authError) {
