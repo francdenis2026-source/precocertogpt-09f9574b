@@ -19,6 +19,7 @@ import { HeroHeaderSafePolish } from "./components/HeroHeaderSafePolish";
 import { ProductCardsSafePolish } from "./components/ProductCardsSafePolish";
 import { ProductDetailSafePolish } from "./components/ProductDetailSafePolish";
 import { EstablishmentsSafePolish } from "./components/EstablishmentsSafePolish";
+import { BasketFavoritesUserSafePolish } from "./components/BasketFavoritesUserSafePolish";
 import { RadarShowcaseUx } from "./components/RadarShowcaseUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { MarketplacePositioningSection } from "./components/MarketplacePositioningSection";
@@ -71,6 +72,7 @@ export default function App() {
       <ProductCardsSafePolish />
       <ProductDetailSafePolish />
       <EstablishmentsSafePolish />
+      <BasketFavoritesUserSafePolish />
       <RadarShowcaseUx />
       <PreferredProductPngUpgrade />
       <MarketplacePositioningSection />
