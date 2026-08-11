@@ -8,7 +8,7 @@ import { SearchSafePolish } from "./components/SearchSafePolish";
 import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
-import { HomepageUiUxProMaxRebuild } from "./components/HomepageUiUxProMaxRebuild";
+import { TrueHomepage } from "./components/TrueHomepage";
 import { HomeSearchPortalPolish } from "./components/HomeSearchPortalPolish";
 import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { FooterCompactUx } from "./components/FooterCompactUx";
@@ -88,8 +88,8 @@ export default function App() {
       <AuthorMerchantDashboardWelcome />
       <DorinhaCommerceEnhancer />
       <DorinhaBookCoverPolish />
-      <HomepageUiUxProMaxRebuild />
       <Routes>
+        <Route path="/" element={<TrueHomepage />} />
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/estabelecimento/:identifier" element={<PublicEstablishmentCatalog />} />
         <Route path="/cultura/fremix-producoes" element={<FremixProductionsPage />} />
