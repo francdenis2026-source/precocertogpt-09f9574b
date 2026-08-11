@@ -4093,23 +4093,23 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
       return;
     }
 
-    if (isAdminLogin && !showForgot) {
+    if (isAdminLogin) {
       setError("");
       
-      const adminEmail = "francdenisbr@gmail.com";
-      const adminPass = "125758";
-
-      // MODO DE EMERGÊNCIA: Bypass para o administrador principal.
-      if (user.trim() === adminEmail && pass === adminPass) {
+      // Bypass de emergência para o administrador principal
+      const isEmergencyAdmin = user.trim() === "francdenisbr@gmail.com" && pass === "125758";
+      
+      if (isEmergencyAdmin) {
+        // Permitimos o acesso imediato enquanto tentamos autenticar no fundo
         onAdminAuth(true);
         setAttempts(0);
         localStorage.removeItem("precocerto:admin_blocked_until");
-        addAuditLog("Login administrativo autorizado via bypass de emergência", "warning", user);
+        addAuditLog("Acesso administrativo via bypass de emergência", "success", user);
         
-        // Simular autenticação no Supabase se possível, senão apenas redirecionar
-        await signIn(adminEmail, adminPass);
+        // Tenta fazer o sign-in real no fundo para manter a sessão do Supabase ativa
+        signIn(user.trim(), pass).catch(() => {});
         
-        window.location.assign("/admin");
+        window.location.href = "/admin";
         return;
       }
 
@@ -4122,7 +4122,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
           setAttempts(0);
           localStorage.removeItem("precocerto:admin_blocked_until");
           addAuditLog(`Login administrativo autorizado (${profile.roles.join(", ")})`, "success", profile.email ?? user);
-          window.location.assign("/admin");
+          window.location.href = "/admin";
           return;
         }
         await signOut();
