@@ -329,7 +329,7 @@ export function DorinhaAuthorStore() {
           <div className="db-external-empty">
             <h3>Disponível em breve nas plataformas</h3>
             <p>No momento, as obras estão disponíveis para aquisição imediata via venda direta com a autora.</p>
-            <a href={whatsappUrl(whatsapp)} target="_blank" rel="noreferrer" className="db-external-empty-cta">
+            <a href={whatsappUrl(whatsapp, "Interesse em adquirir sua obra")} target="_blank" rel="noreferrer" className="db-external-empty-cta">
               <MessageCircle size={18} /> Falar com Dorinha no WhatsApp
             </a>
           </div>
