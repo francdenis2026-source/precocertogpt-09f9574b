@@ -9,6 +9,7 @@ import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
 import { HomeSearchKeyboardUx } from "./components/HomeSearchKeyboardUx";
 import { RebuiltVisualSystem } from "./components/RebuiltVisualSystem";
+import { RebuiltInternalUx } from "./components/RebuiltInternalUx";
 import { PreferredProductPngUpgrade } from "./components/PreferredProductPngUpgrade";
 import { EstablishmentsMarketplacePage } from "./components/EstablishmentsMarketplacePage";
 import { EstablishmentsNavBridge } from "./components/EstablishmentsNavBridge";
@@ -41,6 +42,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <RebuiltVisualSystem />
+      <RebuiltInternalUx />
       <MaxPriceStoreLabels />
       <SearchUxClarity />
       <ProductInteractionUx />
