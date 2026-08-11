@@ -115,7 +115,16 @@ export function DorinhaAuthorStore() {
   if (loading) return <main style={s.loading}><BookOpen size={36}/><strong>Preparando a biblioteca da autora…</strong></main>;
   if (!profile) return <main style={s.loading}><BookOpen size={36}/><h1>Loja da autora indisponível</h1><a href="/estabelecimentos">Voltar aos estabelecimentos</a></main>;
 
-  const external = (profile.merchant.external_stores || []).filter(s => s.label !== 'Apple Books');
+  const external = useMemo(() => {
+    return (profile.merchant.external_stores || [])
+      .filter(s => s.label !== 'Apple Books')
+      .sort((a, b) => {
+        // Prioritize Amazon, but could be expanded if availability data existed
+        if (a.label.toLowerCase().includes('amazon')) return -1;
+        if (b.label.toLowerCase().includes('amazon')) return 1;
+        return a.label.localeCompare(b.label);
+      });
+  }, [profile.merchant.external_stores]);
 
   return <main style={s.page} className="db-author-page">
     <style>{`
