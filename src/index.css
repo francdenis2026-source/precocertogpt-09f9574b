@@ -517,20 +517,11 @@ body {
 }
 
 .site-header--absolute {
-  position: sticky; /* Always fixed/sticky for better navigation */
-  top: 0;
-  left: 0;
-  right: 0;
-  background: transparent;
-  backdrop-filter: none;
-  border-bottom: none;
+  /* Removed sticky/transparent overrides to keep persistent bar */
 }
 
 .site-header--absolute.site-header--scrolled {
-  position: fixed;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  /* No special transparent behavior on scroll needed anymore */
 }
 
 [data-theme='dark'] .site-header {
