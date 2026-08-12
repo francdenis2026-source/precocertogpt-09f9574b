@@ -5760,77 +5760,20 @@ export default function PrecoCertoApp() {
                             <strong style={{ fontSize: '1rem' }}>{money(record.value)}</strong>
                             {index > 0 && <em style={{ fontSize: '0.75rem', fontWeight: 700, color: variation <= 0 ? 'var(--green)' : 'var(--red)', fontStyle: 'normal', display: 'flex', alignItems: 'center', gap: '2px' }}>{variation <= 0 ? <TrendingDown size={12}/> : <TrendingUp size={12}/>}{Math.abs(variation).toFixed(1)}%</em>}
                           </div>
-                        </div>;
-                      })}
-                    </div>
-                  ) : (
-                    <div className="history-unavailable" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem', background: 'var(--surface-2)', borderRadius: '12px', color: 'var(--muted)' }}><LineChart/><span><b>Histórico ainda insuficiente</b><br/><small>Exibiremos a evolução assim que houver pelo menos duas coletas verificadas.</small></span></div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-          
-          {!modalLoading && selectedProduct && !modalError && (
-            <div className="admin-modal-footer" style={{ borderTop: '1px solid var(--border)', padding: '1.5rem', display: 'flex', gap: '1rem', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-                <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct!); setSelectedProduct(null); }}>
-                  <Plus size={20} style={{ marginRight: '8px' }} /> Adicionar à Cesta
-                </button>
-                <button className="button button--outline" style={{ height: '54px', padding: '0 1.5rem' }} onClick={() => { 
-                  if (!user) {
-                    setToast("Acesse sua conta para favoritar este produto.");
-                    return;
-                  }
-                  toggleFavorite(String(selectedProduct!.id));
-                }} aria-label={favorites.includes(String(selectedProduct!.id)) ? "Remover dos favoritos" : "Adicionar aos favoritos"}>
-                  <Heart size={20} fill={favorites.includes(String(selectedProduct!.id)) ? "currentColor" : "none"} />
-                </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="history-unavailable" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem', background: 'var(--surface-2)', borderRadius: '12px', color: 'var(--muted)' }}><LineChart/><span><b>Histórico ainda insuficiente</b><br/><small>Exibiremos a evolução assim que houver pelo menos duas coletas verificadas.</small></span></div>
+                )}
               </div>
-              
-              {/* Opção de Venda Online / Checkout Direto */}
-              {selectedProduct!.establishmentSlug === "reboucas" && (
-                <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
-                  <a 
-                    href={`/checkout?product=${selectedProduct!.id}`}
-                    className="button button--gold"
-                    style={{ flex: 1, height: '54px', textDecoration: 'none', justifyContent: 'center' }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      addBasket(selectedProduct!);
-                      window.location.href = "/cesta";
-                    }}
-                  >
-                    <ShoppingBasket size={20} style={{ marginRight: '8px' }} /> Comprar Agora
-                  </a>
-                  <a 
-                    href="https://www.supermercadosreboucas.com.br" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="button button--outline"
-                    style={{ height: '54px', width: '54px', padding: 0, justifyContent: 'center' }}
-                    title="Ver no site da loja"
-                  >
-                    <ExternalLink size={20} />
-                  </a>
-                </div>
-              )}
-              
-              <button className="button button--ghost" style={{ width: '100%', marginTop: '0.5rem' }} onClick={() => { 
-                if (!user) {
-                  setToast("Acesse sua conta para configurar alertas de preço.");
-                  return;
-                }
-                saveAction("alert", "product", String(selectedProduct!.id)); 
-                setSelectedProduct(null); 
-              }}>
-                <Bell size={18} style={{ marginRight: '8px' }} /> Criar Alerta de Preço
-              </button>
-            </div>
+            </>
           )}
         </div>
       </div>
     )}
+
 
   </div>;
 }
