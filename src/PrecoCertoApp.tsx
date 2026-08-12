@@ -1561,8 +1561,10 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
         <div className="basket-steps">
           <div className={`step-pill ${step === 1 ? 'active' : step > 1 ? 'done' : ''}`}>1. Modo</div>
           <div className={`step-pill ${step === 2 ? 'active' : step > 2 ? 'done' : ''}`}>2. Itens</div>
-          <div className={`step-pill ${step === 3 ? 'active' : ''}`}>3. Otimização</div>
+          <div className={`step-pill ${step === 3 ? 'active' : step > 3 ? 'done' : ''}`}>3. Otimização</div>
+          <div className={`step-pill ${step === 4 ? 'active' : ''}`}>4. Checkout</div>
         </div>
+
       </header>
 
       <div className="basket-content-layout">
