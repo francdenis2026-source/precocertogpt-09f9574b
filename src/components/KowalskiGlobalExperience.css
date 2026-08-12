@@ -1,3 +1,4 @@
+@import "./DorinhaAuthorStoreKowalski.css";
 /* Cross-page design-engineering pass based on Emil Kowalski principles. */
 :root{--kw-ease-out:cubic-bezier(.23,1,.32,1);--kw-ease-in-out:cubic-bezier(.77,0,.175,1);--kw-press:140ms;--kw-ui:190ms}
 
