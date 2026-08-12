@@ -58,6 +58,7 @@ import "./components/TrueHomepageKowalski.css";
 import "./components/KowalskiGlobalExperience.css";
 import "./components/KowalskiLegacyDeep.css";
 import "./components/ImpeccableFullSitePolish.css";
+import "./components/ImpeccableStructuralLegacy.css";
 
 export default function App() {
   return (

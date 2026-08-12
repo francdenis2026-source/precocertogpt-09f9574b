@@ -905,7 +905,7 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
     <section className="section shell featured-products">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">Destaques de hoje em Feijó</span>
+          
           <h2>Ofertas em destaque</h2>
           <p>Preços verificados e oportunidades reais nos estabelecimentos locais.</p>
         </div>
@@ -986,12 +986,12 @@ function HomePage({ products, stores, metrics, query, setQuery, addBasket, saveA
         ))}
       </div>}
     </section>
-    <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Economia pronta para você</span><h2>Cestas otimizadas</h2><p>Combinações que aproveitam o melhor preço de cada mercado de Feijó.</p></div><a className="inline-link" href="/cesta-basica">Ver todas as cestas <ArrowRight /></a></div><div className="basket-grid"><article className="basket-feature"><div className="basket-top"><span className="basket-icon"><ShoppingBasket /></span><PriceBadge product={products[0]} /></div><p>Cesta essencial da semana</p><h3>12 itens em 2 mercados</h3><div className="basket-total"><span>Valor otimizado</span><strong>{money(87.34)}</strong><small>economia estimada de {money(18.62)}</small></div><div className="store-route"><span><b style={{background: stores[0]?.color}}>CS</b> Central Super · 8 itens</span><span><b style={{background: stores[1]?.color}}>MR</b> Rebouças · 4 itens</span></div><a href="/cesta-basica" className="button button--dark">Abrir cesta otimizada <ArrowRight /></a></article><article className="basket-plan"><span className="eyebrow">Planejamento inteligente</span><h3>Quanto você quer gastar?</h3><p>Informe seu orçamento e montamos a melhor cesta possível, explicando cada escolha.</p><div className="budget-chips"><a href="/cesta-basica?orcamento=80">R$ 80</a><a href="/cesta-basica?orcamento=100">R$ 100</a><a href="/cesta-basica?orcamento=150">R$ 150</a><a href="/cesta-basica?orcamento=200">R$ 200</a></div><a href="/cesta-basica" className="inline-link">Montar minha cesta <ArrowRight /></a></article></div></section>
-    <section className="shell decision-dock" aria-label="Atalhos para economizar"><div className="decision-dock__visual"><svg viewBox="0 0 160 96" role="img" aria-label="Comparação inteligente de preços"><path d="M18 73h124"/><rect x="25" y="42" width="25" height="25" rx="6"/><rect x="67" y="24" width="25" height="43" rx="6"/><rect x="109" y="34" width="25" height="33" rx="6"/><path d="m31 32 18-12 22 5 24-16 31 8"/><circle cx="126" cy="17" r="4"/></svg></div><div className="decision-dock__copy"><span className="eyebrow">DECIDA EM MENOS TEMPO</span><h2>Três caminhos, uma compra mais inteligente.</h2></div><div className="decision-dock__links"><a href="/buscar"><Search/><span><b>Buscar</b><small>um produto</small></span><ArrowRight/></a><a href="/melhores-precos"><TrendingDown/><span><b>Comparar</b><small>melhores preços</small></span><ArrowRight/></a><a href="/cesta-basica"><ShoppingBasket/><span><b>Planejar</b><small>uma cesta</small></span><ArrowRight/></a></div></section>
-    <section className="section shell"><div className="section-heading"><div><span className="eyebrow">Rede local</span><h2>Estabelecimentos monitorados</h2><p>Preço e disponibilidade perto de você, bairro por bairro.</p></div><a className="inline-link" href="/estabelecimentos">Ver diretório <ArrowRight /></a></div><div className="store-grid">{stores.map(store => <a className="store-card" href={`/estabelecimento/${store.slug}`} key={store.id}><StoreMark store={store} /><span><strong>{store.name}</strong><small><MapPin /> {store.neighborhood}</small></span><ChevronRight /></a>)}</div></section>
-    <section className="shell how-compact" id="como-funciona"><div className="how-compact__intro"><span className="eyebrow">COMO FUNCIONA</span><h2>Da busca à melhor escolha.</h2><p>Informação local organizada para você decidir com clareza.</p><a href="/buscar">Começar uma comparação <ArrowRight/></a></div><div className="how-compact__steps"><article><svg viewBox="0 0 64 64"><circle cx="28" cy="28" r="17"/><path d="m41 41 13 13M22 28h12M28 22v12"/></svg><span>01</span><div><b>Pesquise</b><small>Encontre o item.</small></div></article><article><svg viewBox="0 0 64 64"><path d="M10 50h44M16 43V28h10v15M28 43V14h10v29M40 43V22h10v21"/></svg><span>02</span><div><b>Compare</b><small>Veja lojas e preços.</small></div></article><article><svg viewBox="0 0 64 64"><path d="M12 20h7l5 25h25l5-17H22M29 52h1M45 52h1"/><path d="m31 32 5 5 10-11"/></svg><span>03</span><div><b>Economize</b><small>Escolha ou monte a cesta.</small></div></article></div></section>
+    <section className="section shell"><div className="section-heading"><div><h2>Cestas otimizadas</h2><p>Combinações que aproveitam o melhor preço de cada mercado de Feijó.</p></div><a className="inline-link" href="/cesta-basica">Ver todas as cestas <ArrowRight /></a></div><div className="basket-grid"><article className="basket-feature"><div className="basket-top"><span className="basket-icon"><ShoppingBasket /></span><PriceBadge product={products[0]} /></div><p>Cesta essencial da semana</p><h3>12 itens em 2 mercados</h3><div className="basket-total"><span>Valor otimizado</span><strong>{money(87.34)}</strong><small>economia estimada de {money(18.62)}</small></div><div className="store-route"><span><b style={{background: stores[0]?.color}}>CS</b> Central Super · 8 itens</span><span><b style={{background: stores[1]?.color}}>MR</b> Rebouças · 4 itens</span></div><a href="/cesta-basica" className="button button--dark">Abrir cesta otimizada <ArrowRight /></a></article><article className="basket-plan"><h3>Quanto você quer gastar?</h3><p>Informe seu orçamento e montamos a melhor cesta possível, explicando cada escolha.</p><div className="budget-chips"><a href="/cesta-basica?orcamento=80">R$ 80</a><a href="/cesta-basica?orcamento=100">R$ 100</a><a href="/cesta-basica?orcamento=150">R$ 150</a><a href="/cesta-basica?orcamento=200">R$ 200</a></div><a href="/cesta-basica" className="inline-link">Montar minha cesta <ArrowRight /></a></article></div></section>
+    <section className="shell decision-dock" aria-label="Atalhos para economizar"><div className="decision-dock__visual"><svg viewBox="0 0 160 96" role="img" aria-label="Comparação inteligente de preços"><path d="M18 73h124"/><rect x="25" y="42" width="25" height="25" rx="6"/><rect x="67" y="24" width="25" height="43" rx="6"/><rect x="109" y="34" width="25" height="33" rx="6"/><path d="m31 32 18-12 22 5 24-16 31 8"/><circle cx="126" cy="17" r="4"/></svg></div><div className="decision-dock__copy"><h2>Três caminhos, uma compra mais inteligente.</h2></div><div className="decision-dock__links"><a href="/buscar"><Search/><span><b>Buscar</b><small>um produto</small></span><ArrowRight/></a><a href="/melhores-precos"><TrendingDown/><span><b>Comparar</b><small>melhores preços</small></span><ArrowRight/></a><a href="/cesta-basica"><ShoppingBasket/><span><b>Planejar</b><small>uma cesta</small></span><ArrowRight/></a></div></section>
+    <section className="section shell"><div className="section-heading"><div><h2>Estabelecimentos monitorados</h2><p>Preço e disponibilidade perto de você, bairro por bairro.</p></div><a className="inline-link" href="/estabelecimentos">Ver diretório <ArrowRight /></a></div><div className="store-grid">{stores.map(store => <a className="store-card" href={`/estabelecimento/${store.slug}`} key={store.id}><StoreMark store={store} /><span><strong>{store.name}</strong><small><MapPin /> {store.neighborhood}</small></span><ChevronRight /></a>)}</div></section>
+    <section className="shell how-compact" id="como-funciona"><div className="how-compact__intro"><h2>Da busca à melhor escolha.</h2><p>Informação local organizada para você decidir com clareza.</p><a href="/buscar">Começar uma comparação <ArrowRight/></a></div><div className="how-compact__steps"><article><svg viewBox="0 0 64 64"><circle cx="28" cy="28" r="17"/><path d="m41 41 13 13M22 28h12M28 22v12"/></svg><span>01</span><div><b>Pesquise</b><small>Encontre o item.</small></div></article><article><svg viewBox="0 0 64 64"><path d="M10 50h44M16 43V28h10v15M28 43V14h10v29M40 43V22h10v21"/></svg><span>02</span><div><b>Compare</b><small>Veja lojas e preços.</small></div></article><article><svg viewBox="0 0 64 64"><path d="M12 20h7l5 25h25l5-17H22M29 52h1M45 52h1"/><path d="m31 32 5 5 10-11"/></svg><span>03</span><div><b>Economize</b><small>Escolha ou monte a cesta.</small></div></article></div></section>
     <section className="shell final-cta final-cta--compact"><div className="final-cta__mark"><svg viewBox="0 0 64 64"><path d="M9 42 24 27l10 9 21-22"/><path d="M42 14h13v13"/><path d="M12 53h40"/></svg></div><div><span className="eyebrow eyebrow--gold">PRONTO PARA COMPARAR?</span><h2>Compre com informação, não no impulso.</h2><p>Pesquise preços locais e escolha com segurança.</p></div><a className="button button--gold" href="/buscar">Pesquisar agora <ArrowRight /></a></section>
-    <section className="section shell professional"><div className="section-heading"><div><span className="eyebrow">Para o comércio local</span><h2>Painel de inteligência de mercado</h2><p>Acompanhe cobertura, competitividade e oportunidades sem perder o contexto local.</p></div><a href="/lojista" className="button button--outline">Conhecer painel lojista</a></div><div className="dashboard-preview"><div className="preview-sidebar"><Brand compact /><span className="active"><LayoutDashboard />Visão geral</span><span><Store />Lojas</span><span><PackageSearch />Produtos</span><span><LineChart />Tendências</span><span><Settings />Configurações</span></div><div className="preview-main"><div className="preview-title"><div><small>Monitoramento</small><h3>Estabelecimentos</h3></div><button><Plus /> Adicionar loja</button></div><div className="mini-kpis"><span><small>Lojas ativas</small><b>{stores.length}</b></span><span><small>Produtos cobertos</small><b>82%</b></span><span><small>Atualizações hoje</small><b>214</b></span></div>{stores.slice(0,3).map((s,i)=><div className="sync-row" key={s.id}><StoreMark store={s} small /><span><b>{s.name}</b><small>Última sincronização há {i*9+4} min</small></span><em>Ativo</em><span className="insight">{i===0 ? "12 preços líderes" : i===1 ? "Cobertura em alta" : "3 itens para revisar"}</span><button aria-label={`Abrir ${s.name}`}><ChevronRight /></button></div>)}</div></div></section>
+    <section className="section shell professional"><div className="section-heading"><div><h2>Painel de inteligência de mercado</h2><p>Acompanhe cobertura, competitividade e oportunidades sem perder o contexto local.</p></div><a href="/lojista" className="button button--outline">Conhecer painel lojista</a></div><div className="dashboard-preview"><div className="preview-sidebar"><Brand compact /><span className="active"><LayoutDashboard />Visão geral</span><span><Store />Lojas</span><span><PackageSearch />Produtos</span><span><LineChart />Tendências</span><span><Settings />Configurações</span></div><div className="preview-main"><div className="preview-title"><div><small>Monitoramento</small><h3>Estabelecimentos</h3></div><button><Plus /> Adicionar loja</button></div><div className="mini-kpis"><span><small>Lojas ativas</small><b>{stores.length}</b></span><span><small>Produtos cobertos</small><b>82%</b></span><span><small>Atualizações hoje</small><b>214</b></span></div>{stores.slice(0,3).map((s,i)=><div className="sync-row" key={s.id}><StoreMark store={s} small /><span><b>{s.name}</b><small>Última sincronização há {i*9+4} min</small></span><em>Ativo</em><span className="insight">{i===0 ? "12 preços líderes" : i===1 ? "Cobertura em alta" : "3 itens para revisar"}</span><button aria-label={`Abrir ${s.name}`}><ChevronRight /></button></div>)}</div></div></section>
   </>;
 }
 
@@ -1573,7 +1573,7 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
 
       <header className="page-title">
         <div>
-          <span className="eyebrow">Planejador de Compras Inteligente</span>
+          
           <h1>Planejador de Compras</h1>
           <p>Cálculo matemático para encontrar o menor preço real em Feijó.</p>
         </div>
@@ -2713,7 +2713,7 @@ function SnapshotPage({ products }: PageProps) {
     <div className="shell page-shell basket-page">
       <header className="page-title">
         <div>
-          <span className="eyebrow">Snapshot de Cesta Otimizada</span>
+          
           <h1>{snapshot.name}</h1>
           <p>Visualização de preços capturados em {new Date(snapshot.created_at).toLocaleDateString('pt-BR')}.</p>
         </div>
@@ -2812,17 +2812,17 @@ function PlansPage() {
 
     <main className="shell plans-content" id="escolher-plano">
       <section className="ai-agent-showcase" id="certo-ia">
-        <div className="ai-agent-copy"><span className="eyebrow">Exclusivo para acesso pago</span><h2>Certo IA, seu assistente pessoal de economia</h2><p>Em vez de entregar uma lista genérica, o Certo IA será conectado ao catálogo do PreçoCerto para transformar preços locais em uma recomendação prática e fácil de entender.</p><div className="ai-agent-benefits"><article><ShoppingBasket/><div><b>Compra dentro do orçamento</b><span>Informe sua lista e quanto pode gastar.</span></div></article><article><TrendingDown/><div><b>Trocas que reduzem o total</b><span>Compare marcas, tamanhos e estabelecimentos.</span></div></article><article><MapPin/><div><b>Rota de compra organizada</b><span>Veja onde encontrar cada item sem complicação.</span></div></article><article><ShieldCheck/><div><b>Respostas com preços reais</b><span>O cálculo vem do catálogo, não de valores inventados.</span></div></article></div><div className="ai-agent-access"><CheckCircle2/><span><b>Acesso protegido:</b> assinatura ativa ou passe avulso, com limite de consultas visível para o usuário.</span></div></div>
+        <div className="ai-agent-copy"><h2>Certo IA, seu assistente pessoal de economia</h2><p>Em vez de entregar uma lista genérica, o Certo IA será conectado ao catálogo do PreçoCerto para transformar preços locais em uma recomendação prática e fácil de entender.</p><div className="ai-agent-benefits"><article><ShoppingBasket/><div><b>Compra dentro do orçamento</b><span>Informe sua lista e quanto pode gastar.</span></div></article><article><TrendingDown/><div><b>Trocas que reduzem o total</b><span>Compare marcas, tamanhos e estabelecimentos.</span></div></article><article><MapPin/><div><b>Rota de compra organizada</b><span>Veja onde encontrar cada item sem complicação.</span></div></article><article><ShieldCheck/><div><b>Respostas com preços reais</b><span>O cálculo vem do catálogo, não de valores inventados.</span></div></article></div><div className="ai-agent-access"><CheckCircle2/><span><b>Acesso protegido:</b> assinatura ativa ou passe avulso, com limite de consultas visível para o usuário.</span></div></div>
         <aside className="ai-agent-preview" aria-label="Exemplo de conversa com o Certo IA"><header><span><Sparkles/></span><div><b>Certo IA</b><small><i/> Assistente do PreçoCerto</small></div><em>Prévia</em></header><div className="ai-message ai-message--user">Tenho R$ 120 para arroz, feijão, carne e itens de café. Como economizo?</div><div className="ai-message ai-message--assistant"><b>Encontrei uma combinação para o seu orçamento.</b><p>Posso organizar os itens pelos menores preços disponíveis e sugerir substituições antes de fechar sua cesta.</p><div><span>Orçamento respeitado</span><strong>Economia estimada*</strong></div></div><small className="ai-preview-note">*A estimativa final dependerá dos preços disponíveis e da validade de cada oferta.</small></aside>
       </section>
 
-      <header className="plans-heading"><div><span className="eyebrow">Escolha seu objetivo</span><h2>Um modelo justo para cada público</h2><p>Alterne entre consumidor, comércio local e patrocínio institucional.</p></div><div className="plans-audience" role="tablist" aria-label="Tipo de plano"><button role="tab" aria-selected={audience==="consumer"} className={audience==="consumer"?"active":""} onClick={()=>setAudience("consumer")}><UserRound/> Para consumidores</button><button role="tab" aria-selected={audience==="merchant"} className={audience==="merchant"?"active":""} onClick={()=>setAudience("merchant")}><Store/> Para estabelecimentos</button><button role="tab" aria-selected={audience==="sponsor"} className={audience==="sponsor"?"active":""} onClick={()=>setAudience("sponsor")}><Sparkles/> Patrocínios</button></div></header>
+      <header className="plans-heading"><div><h2>Um modelo justo para cada público</h2><p>Alterne entre consumidor, comércio local e patrocínio institucional.</p></div><div className="plans-audience" role="tablist" aria-label="Tipo de plano"><button role="tab" aria-selected={audience==="consumer"} className={audience==="consumer"?"active":""} onClick={()=>setAudience("consumer")}><UserRound/> Para consumidores</button><button role="tab" aria-selected={audience==="merchant"} className={audience==="merchant"?"active":""} onClick={()=>setAudience("merchant")}><Store/> Para estabelecimentos</button><button role="tab" aria-selected={audience==="sponsor"} className={audience==="sponsor"?"active":""} onClick={()=>setAudience("sponsor")}><Sparkles/> Patrocínios</button></div></header>
 
       <div className={`professional-plan-grid professional-plan-grid--${plans.length}`}>{plans.map(plan=><article className={`professional-plan-card ${plan.featured?"featured":""}`} key={plan.name}>{plan.featured&&<span className="recommended"><Sparkles/> Melhor escolha</span>}<span className="plan-eyebrow">{plan.eyebrow}</span><h3>{plan.name}</h3><p>{plan.description}</p><div className="professional-plan-price">{plan.price===null?<strong>Personalizado</strong>:<><small>A partir de</small><strong>{money(plan.price)}</strong></>}<span>{plan.period}</span></div><a className={`button button--full ${plan.featured?"button--primary":"button--outline"}`} href={plan.href}>{plan.cta}<ArrowRight/></a><div className="plan-divider"/><b>O que está incluído</b><ul>{plan.features.map(feature=><li key={feature}><CheckCircle2/> {feature}</li>)}</ul></article>)}</div>
 
-      <section className="plans-principles"><div><span className="eyebrow">Compromissos da plataforma</span><h2>Receita sustentável, confiança preservada</h2><p className="principles-intro">Assinaturas, consultas avulsas e serviços para o comércio financiam a operação sem vender a posição no ranking.</p></div><div className="principle-grid"><article><TrendingDown/><h3>Ranking independente</h3><p>O menor preço continua sendo definido pelos dados, nunca por pagamento.</p></article><article><Receipt/><h3>Uso avulso</h3><p>Quem não quiser assinatura poderá comprar apenas uma consulta do Certo IA.</p></article><article><Store/><h3>Comércio valorizado</h3><p>Planos profissionais geram receita com gestão, presença e métricas úteis.</p></article><article><ShieldCheck/><h3>Publicidade identificada</h3><p>Patrocínios ampliam a receita, mas aparecem sempre com sinalização clara.</p></article></div></section>
+      <section className="plans-principles"><div><h2>Receita sustentável, confiança preservada</h2><p className="principles-intro">Assinaturas, consultas avulsas e serviços para o comércio financiam a operação sem vender a posição no ranking.</p></div><div className="principle-grid"><article><TrendingDown/><h3>Ranking independente</h3><p>O menor preço continua sendo definido pelos dados, nunca por pagamento.</p></article><article><Receipt/><h3>Uso avulso</h3><p>Quem não quiser assinatura poderá comprar apenas uma consulta do Certo IA.</p></article><article><Store/><h3>Comércio valorizado</h3><p>Planos profissionais geram receita com gestão, presença e métricas úteis.</p></article><article><ShieldCheck/><h3>Publicidade identificada</h3><p>Patrocínios ampliam a receita, mas aparecem sempre com sinalização clara.</p></article></div></section>
 
-      <section className="plans-faq"><div><span className="eyebrow">Dúvidas frequentes</span><h2>Antes de escolher</h2><p>Respostas diretas sobre acesso, cobrança e transparência.</p></div><div>{faqs.map(([question,answer],index)=><article className={openFaq===index?"open":""} key={question}><button onClick={()=>setOpenFaq(openFaq===index?null:index)} aria-expanded={openFaq===index}><span>{question}</span><ChevronDown/></button>{openFaq===index&&<p>{answer}</p>}</article>)}</div></section>
+      <section className="plans-faq"><div><h2>Antes de escolher</h2><p>Respostas diretas sobre acesso, cobrança e transparência.</p></div><div>{faqs.map(([question,answer],index)=><article className={openFaq===index?"open":""} key={question}><button onClick={()=>setOpenFaq(openFaq===index?null:index)} aria-expanded={openFaq===index}><span>{question}</span><ChevronDown/></button>{openFaq===index&&<p>{answer}</p>}</article>)}</div></section>
 
       <section className="plans-cta"><div><span className="eyebrow eyebrow--light">Ainda não sabe qual escolher?</span><h2>Conte o que você precisa.</h2><p>Vamos indicar o formato adequado sem compromisso e sem cobrança automática.</p></div><a className="button button--primary" href="/fale-conosco">Falar com o PreçoCerto <ArrowRight/></a></section>
     </main>
@@ -3638,7 +3638,7 @@ function EstablishmentPage({ store, products, addBasket }: { store?: StoreRow; p
     <section className="shell store-catalog-section">
       <div className="store-catalog-heading">
         <div style={{ flex: 1 }}>
-          <span className="eyebrow">Catálogo da loja</span>
+          
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2>Encontre um produto rapidamente</h2>
@@ -3723,12 +3723,12 @@ function ButchersPage({ products, stores, addBasket }: PageProps) {
 
     <div className="shell butcher-content">
       <section className="butcher-stores">
-        <div className="section-heading compact"><div><span className="eyebrow">Onde comprar</span><h2>Açougues e setores de carnes</h2><p>Abra o estabelecimento para consultar os produtos monitorados.</p></div></div>
+        <div className="section-heading compact"><div><h2>Açougues e setores de carnes</h2><p>Abra o estabelecimento para consultar os produtos monitorados.</p></div></div>
         <div className="butcher-store-list">{butcherStores.map(store => <a href={`/estabelecimento/${store.slug}`} key={store.id}><span className="store-logo" style={{background:store.color}}>{store.name.split(/\s+/).slice(0,2).map(word => word[0]).join("")}</span><span><b>{store.name}</b><small>{store.neighborhood} · {store.products} produtos cadastrados</small></span><ArrowRight/></a>)}</div>
       </section>
 
       <section className="butcher-catalog">
-        <div className="butcher-catalog__head"><div><span className="eyebrow">Comparação de preços</span><h2>Carnes disponíveis</h2><p>{visibleProducts.length} resultados organizados pelo menor preço.</p></div><label><Search/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar picanha, frango, costela…" aria-label="Buscar carnes"/>{search && <button onClick={() => setSearch("")} aria-label="Limpar busca"><X/></button>}</label></div>
+        <div className="butcher-catalog__head"><div><h2>Carnes disponíveis</h2><p>{visibleProducts.length} resultados organizados pelo menor preço.</p></div><label><Search/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar picanha, frango, costela…" aria-label="Buscar carnes"/>{search && <button onClick={() => setSearch("")} aria-label="Limpar busca"><X/></button>}</label></div>
         {visibleProducts.length ? <div className="butcher-product-grid">{visibleProducts.map(product => <article key={product.id}>
           <a className="butcher-product-image" href={`/produto/${product.slug}`}><ProductImage product={product}/><span className="verified-chip"><ShieldCheck/> Verificado</span></a>
           <div className="butcher-product-body"><span className="category-tag">{product.category} · {product.size}</span><a href={`/produto/${product.slug}`}><h3>{product.name}</h3></a><a className="butcher-product-store" href={`/estabelecimento/${product.establishmentSlug}`}><Store/><span><b>{product.establishment}</b><small>{product.neighborhood}</small></span></a><div className="butcher-product-price"><span><small>Menor preço</small><strong>{money(product.minPrice)}</strong></span><span><small>Média local</small><b>{money(product.avgPrice)}</b></span></div><div className="butcher-product-actions"><button className="button button--primary" onClick={() => addBasket(product)}><Plus/> Adicionar</button><a className="button button--outline" href={`/produto/${product.slug}`}>Comparar</a></div></div>
@@ -3827,7 +3827,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
 
 
   if (path === "/perfil" || path === "/favoritos") {
-    if (!user) return <div className="shell page-shell generic-page"><section className="favorites-login-gate"><Heart/><span className="eyebrow">Favoritos protegidos</span><h1>Entre para salvar seus produtos</h1><p>Seus favoritos ficam disponíveis somente na sua área de cliente.</p><a className="button button--primary" href={`/login?redirect=${encodeURIComponent(path)}`}>Entrar na minha conta <ArrowRight/></a></section></div>;
+    if (!user) return <div className="shell page-shell generic-page"><section className="favorites-login-gate"><Heart/><h1>Entre para salvar seus produtos</h1><p>Seus favoritos ficam disponíveis somente na sua área de cliente.</p><a className="button button--primary" href={`/login?redirect=${encodeURIComponent(path)}`}>Entrar na minha conta <ArrowRight/></a></section></div>;
     
     // Tratamento de carregamento e erro para dados que dependem da renderização
 
@@ -3958,7 +3958,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
                 </button>
               </div>
               <div style={{ flex: 1, minWidth: '240px' }}>
-                <span className="eyebrow">Minha Conta</span>
+                
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   <h1>{(user as any)?.name || "Usuário PreçoCerto"}</h1>
                   <span style={{ 
@@ -4179,7 +4179,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
           </section>
 
           <aside className="generic-aside">
-            <span className="eyebrow">Preferências</span>
+            
             <h2>Configurações</h2>
             
             <div className="aside-stat" style={{ cursor: 'pointer' }} onClick={() => window.location.href = "/alertas"}>
@@ -4228,7 +4228,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
         <section className="generic-hero">
           <span className="generic-icon"><Bell /></span>
           <div>
-            <span className="eyebrow">Monitoramento Ativo</span>
+            
             <h1>Lista de Acompanhamento</h1>
             <p>Receba alertas automáticos quando houver quedas de preço ou quando os dados precisarem de nova verificação em Feijó.</p>
           </div>
@@ -4296,7 +4296,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
             )}
           </section>
           <aside className="generic-aside">
-            <span className="eyebrow">Configurações</span>
+            
             <h2>Preferências de Alerta</h2>
             <div className="section-heading compact" style={{ marginTop: '2rem' }}>
               <h3>Central de Notificações</h3>
@@ -4361,7 +4361,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
       <section className="generic-hero">
         <span className="generic-icon">{info[2]}</span>
         <div>
-          <span className="eyebrow">{info[0]}</span>
+          
           <h1>{info[1]}</h1>
           <p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p>
         </div>
@@ -4398,7 +4398,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
           ))}
         </section>
         <aside className="generic-aside">
-          <span className="eyebrow">Visão local</span>
+          
           <h2>Feijó economiza junto</h2>
           <div className="aside-stat">
             <span>Produtos acompanhados</span>
@@ -4611,7 +4611,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
         {!register && !isAdminLogin && <a href="/admin" style={{ fontSize: '0.75rem', color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }} onMouseOver={e => e.currentTarget.style.color = '#94a3b8'} onMouseOut={e => e.currentTarget.style.color = '#cbd5e1'}>Acesso Restrito</a>}
       </div>
       <form className="auth-form" onSubmit={showForgot ? handleRecovery : submit}>
-        <span className="eyebrow">{isAdminLogin ? (showForgot ? "Recuperação" : "Segurança") : register?"Crie sua conta":"Acesse sua conta"}</span>
+        
         <h2>{isAdminLogin ? (showForgot ? "Redefinir Senha" : "Login Administrativo") : register?"Comece grátis":"Entrar no PreçoCerto"}</h2>
         <p>{isAdminLogin ? (showForgot ? "Siga os passos para recuperar o acesso." : "Insira suas chaves de acesso para continuar.") : merchantLogin ? "Use o e-mail e a senha vinculados ao seu estabelecimento." : register?"Leva menos de dois minutos.":"Use seu CPF e PIN de 6 dígitos."}</p>
         
@@ -4948,7 +4948,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
       <section className="search-command">
         <div className="search-command__intro">
           <div>
-            <span className="eyebrow">Pesquisa inteligente em Feijó</span>
+            
             <h1>{pathname === "/melhores-precos" ? "Ofertas que realmente valem a pena" : "Compare antes de comprar"}</h1>
             <p>{pathname === "/melhores-precos" ? "Produtos ordenados pela queda real de preço e data de verificação." : `Pesquise em ${metrics.products.toLocaleString("pt-BR")} produtos de ${stores.length} estabelecimentos locais.`}</p>
           </div>
