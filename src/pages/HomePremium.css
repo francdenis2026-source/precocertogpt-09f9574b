@@ -740,11 +740,23 @@
   .pc-category-icon { width: 33px; height: 33px; }
   .pc-category > svg { display: none; }
   .pc-category small { display: none; }
-  .pc-product-grid { display: flex; gap: 9px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-inline: contain; padding-bottom: 5px; margin-right: -14px; padding-right: 14px; scrollbar-width: none; }
-  .pc-product-grid::-webkit-scrollbar { display: none; }
-  .pc-product-card { flex: 0 0 min(66vw, 225px); scroll-snap-align: start; }
-  .pc-product-media { height: 116px; padding: 8px; }
-  .pc-product-media img { max-height: 98px; max-width: 140px; }
+  .pc-product-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 12px; 
+    overflow-x: visible; 
+    scroll-snap-type: none; 
+    padding-bottom: 0; 
+    margin-right: 0; 
+    padding-right: 0; 
+  }
+  .pc-product-card {
+    min-width: 0;
+    width: 100%;
+    scroll-snap-align: none;
+  }
+  .pc-product-media { height: 130px; padding: 12px; }
+  .pc-product-media img { max-height: 110px; max-width: 100%; }
   .pc-compare-layout { padding-block: 43px; }
   .pc-compare-product { padding: 9px; }
   .pc-offer-row { grid-template-columns: 27px minmax(0,1fr) auto; }
@@ -759,10 +771,10 @@
   .pc-commercial::after { background: linear-gradient(180deg, rgba(18,47,43,.965), rgba(18,47,43,.91)); }
   .pc-commercial-layout { min-height: 0; padding-block: 43px; }
   .pc-commercial-copy h2 { font-size: clamp(1.9rem, 8.7vw, 2.65rem); }
-  .pc-dialog { grid-template-columns: 1fr; }
-  .pc-dialog-media { min-height: 205px; max-height: 240px; padding: 25px 18px; }
-  .pc-dialog-media img { max-height: 180px; }
-  .pc-dialog-content { padding: 23px 18px 18px; }
+  .pc-dialog { grid-template-columns: 1fr; max-height: 92dvh; }
+  .pc-dialog-media { min-height: 200px; max-height: 260px; padding: 25px; }
+  .pc-dialog-media img { max-height: 200px; }
+  .pc-dialog-content { padding: 24px 20px 20px; }
   .pc-dialog-actions { grid-template-columns: 1fr; }
   .pc-footer-inner { min-height: 0; display: grid; gap: 14px; padding-block: 20px 15px; }
   .pc-footer-brand { display: grid; gap: 7px; }
