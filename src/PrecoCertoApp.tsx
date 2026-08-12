@@ -5294,6 +5294,8 @@ export default function PrecoCertoApp() {
   const [undoAction, setUndoAction] = useState<(() => void) | null>(null);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   useEffect(() => {
     const handler = (e: any) => {
