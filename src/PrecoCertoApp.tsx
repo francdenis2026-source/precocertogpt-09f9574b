@@ -539,10 +539,34 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
         <a className="icon-button header-space-link" href={accountSpace.href} aria-label={accountSpace.label} title={accountSpace.label}>{accountSpace.kind==="admin"?<ShieldCheck size={19}/>:<Store size={19}/>}<span>{accountSpace.label}</span></a>
         <ThemeToggle compact />
         <a className="icon-button header-action-button header-search-button" href="/buscar" aria-label="Pesquisar produtos" title="Buscar produtos"><Search size={20} aria-hidden="true" /></a>
-        <a className="icon-button header-action-button favorites-button" href="/favoritos" aria-label={user ? `${favoritesCount} produtos favoritos` : "Entre para ver favoritos"} title={user ? "Meus Favoritos" : "Entre para ver favoritos"} onClick={(e) => { if (!user) { e.preventDefault(); window.location.href = `/login?redirect=${encodeURIComponent('/favoritos')}`; } }}>
-          <Heart size={20} fill={favoritesCount > 0 ? "currentColor" : "none"} aria-hidden="true" />
-          {favoritesCount > 0 && <span className="badge" aria-hidden="true">{favoritesCount}</span>}
-        </a>
+        <div className="favorites-dropdown-container" style={{ position: 'relative' }}>
+          <a className="icon-button header-action-button favorites-button" href="/favoritos" aria-label={user ? `${favoritesCount} produtos favoritos` : "Entre para ver favoritos"} title={user ? "Meus Favoritos" : "Entre para ver favoritos"} onClick={(e) => { 
+            if (!user) { e.preventDefault(); window.location.href = `/login?redirect=${encodeURIComponent('/favoritos')}`; } 
+          }}>
+            <Heart size={20} fill={favoritesCount > 0 ? "currentColor" : "none"} aria-hidden="true" />
+            {favoritesCount > 0 && <span className="badge" aria-hidden="true">{favoritesCount}</span>}
+          </a>
+          {favoritesCount > 0 && (
+            <div className="favorites-dropdown-menu">
+              <div className="favorites-dropdown-head">
+                <strong>Favoritos ({favoritesCount})</strong>
+                <a href="/favoritos">Ver todos</a>
+              </div>
+              <div className="favorites-dropdown-list">
+                {products.filter(p => favorites.includes(String(p.id))).slice(0, 5).map(p => (
+                  <div key={p.id} className="fav-menu-item">
+                    <ProductImage product={p} size="compact" />
+                    <div className="fav-menu-info">
+                      <span className="name">{p.name}</span>
+                      <span className="price">{money(p.minPrice)}</span>
+                    </div>
+                    <button className="add-mini" onClick={() => addBasket(p)} title="Adicionar à cesta"><Plus size={14}/></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         <a className="icon-button header-action-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`} title="Minha Cesta Inteligente">
           <ShoppingBasket size={20} aria-hidden="true" />
           {basketCount > 0 && <span className="badge" key={basketCount} aria-hidden="true">{basketCount}</span>}

@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   BookOpen,
   Check,
+  ChevronRight,
   Copy,
   ExternalLink,
   MapPin,
@@ -85,7 +86,38 @@ export function DorinhaAuthorStore() {
   const [loadedCovers,setLoadedCovers]=useState<Set<string>>(()=>new Set());
 
   useEffect(() => {
-    document.title = "Dorinha Barroso · Livros | PreçoCerto Marketplace Local";
+    // SEO e Open Graph
+    const title = "Dorinha Barroso · Livros Acreanos | PreçoCerto Marketplace";
+    const desc = "Descubra as obras de Dorinha Barroso, escritora acreana, historiadora e pedagoga. Compre livros diretamente com a autora.";
+    const url = window.location.href;
+    const image = "https://precocertogpt.lovable.app/dorinha-hero-editorial-v3.png";
+
+    document.title = title;
+    
+    // Helper to update meta tags
+    const updateMeta = (name: string, content: string, attr = "name") => {
+      let el = document.querySelector(`meta[${attr}="${name}"]`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    };
+
+    updateMeta("description", desc);
+    updateMeta("og:title", title, "property");
+    updateMeta("og:description", desc, "property");
+    updateMeta("og:url", url, "property");
+    updateMeta("og:image", image, "property");
+    updateMeta("twitter:card", "summary_large_image");
+    updateMeta("twitter:title", title);
+    updateMeta("twitter:description", desc);
+    updateMeta("twitter:image", image);
+
+    // Track origin for return logic
+    localStorage.setItem("precocerto:last_writer_store", "/dorinha");
+
     void (async () => {
       if (!supabase) { setLoading(false); return; }
       const { data } = await supabase.rpc("author_store_public_profile", { _slug: "dorinha-barroso-livros" });
@@ -135,6 +167,11 @@ export function DorinhaAuthorStore() {
   if (!profile) return <main style={s.loading}><BookOpen size={36}/><h1>Loja da autora indisponível</h1><a href="/estabelecimentos">Voltar aos estabelecimentos</a></main>;
 
   return <main style={s.page} className="db-author-page">
+    <nav className="shell db-breadcrumbs" style={{ padding: '1rem 2rem', fontSize: '0.85rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <a href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Início</a>
+      <ChevronRight size={14} />
+      <span style={{ fontWeight: 600, color: '#35233f' }}>Dorinha Barroso</span>
+    </nav>
     <style>{`
       .db-author-page{--db-display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;--db-body:"Inter Variable",Inter,system-ui,-apple-system,"Segoe UI",sans-serif;padding-top:0!important;font-family:var(--db-body);font-size:16px;line-height:1.65;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
       .db-author-page h1,.db-author-page h2,.db-author-page h3{font-family:var(--db-display);font-weight:700;text-wrap:balance}
