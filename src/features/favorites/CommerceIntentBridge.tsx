@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart } from "lucide-react";
 import { buildCatalog, type Product } from "../../data/catalog";
 import { fetchCatalog } from "../../data/remoteCatalog";
 import { useFavorites } from "./FavoritesProvider";
@@ -8,6 +8,7 @@ import "./commerce-intents.css";
 
 const normalize = (value:string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").replace(/\s+/g," ").trim();
 const roots = new WeakMap<Element, Root>();
+const LEGACY_FAVORITE_SELECTOR = '[aria-label*="favorit" i]:not(.pc-favorite-action):not(.scpm-favorite)';
 
 function FavoriteControl({ product, compact=false }:{product:Product;compact?:boolean}){
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -57,7 +58,7 @@ export function CommerceIntentBridge(){
       }
       document.querySelectorAll(".storefront-pro__checkout-head > div:first-child > span").forEach(node=>{if(/finalizar compra|seu pedido/i.test(node.textContent||""))node.textContent="CARRINHO DA LOJA"});
 
-      document.querySelectorAll<HTMLElement>('[aria-label*="favorit" i]:not(.pc-favorite-action)').forEach(button=>{
+      document.querySelectorAll<HTMLElement>(LEGACY_FAVORITE_SELECTOR).forEach(button=>{
         const host=button.closest("article,.compact-product,.professional-result-card")||button.parentElement;
         const p=host?findProduct(host):undefined;if(!p)return;
         button.setAttribute("aria-pressed",String(isFavorite(p.id)));button.dataset.pcFavoriteProduct=String(p.id);
@@ -67,7 +68,7 @@ export function CommerceIntentBridge(){
 
     const capture=(event:Event)=>{
       const element=event.target as Element|null;
-      const legacy=element?.closest<HTMLElement>('[aria-label*="favorit" i]:not(.pc-favorite-action)');
+      const legacy=element?.closest<HTMLElement>(LEGACY_FAVORITE_SELECTOR);
       if(!legacy)return;
       const host=legacy.closest("article,.compact-product,.professional-result-card")||legacy.parentElement;
       const product=host?findProduct(host):undefined;if(!product)return;
