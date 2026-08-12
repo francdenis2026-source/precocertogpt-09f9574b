@@ -18,8 +18,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 24
       - name: Apply structural cleanup
         shell: python
         run: |
@@ -89,13 +88,12 @@ jobs:
           if 'ImpeccableStructuralLegacy.css' not in text:
               text = text.replace(marker, addon)
           app.write_text(text)
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies without touching lockfile
+        run: npm install --package-lock=false --no-audit --no-fund
       - name: Build
         run: npm run build
       - name: Run Impeccable detector
-        run: |
-          node .agents/skills/impeccable/scripts/hook.mjs </dev/null || true
+        run: node .agents/skills/impeccable/scripts/hook.mjs </dev/null || true
       - name: Commit structural refinement
         run: |
           git config user.name "github-actions[bot]"
