@@ -1103,10 +1103,17 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
     }
   }, []);
 
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+
   const optimizationResult = useMemo(() => {
     if (basketItems.length === 0) return null;
-    return optimizeBasket(products, basketItems, mode, budget);
-  }, [products, basketItems, mode, budget]);
+    const result = optimizeBasket(products, basketItems, mode, budget);
+    if (couponDiscount > 0) {
+      result.total = Math.max(0, result.total - couponDiscount);
+    }
+    return result;
+  }, [products, basketItems, mode, budget, couponDiscount]);
 
   // Handler para carregar snapshot da URL se presente
   useEffect(() => {
@@ -1141,6 +1148,11 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
           if (isExpired) {
             window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Este link de compartilhamento expirou (5 min).", type: "warning" } }));
             return;
+          }
+
+          if (data.coupon_code) {
+             setCouponCode(data.coupon_code);
+             setCouponDiscount(data.discount || 0);
           }
 
           if (data.items) {
