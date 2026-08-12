@@ -5358,13 +5358,16 @@ export default function PrecoCertoApp() {
                 .limit(20);
 
               if (history) {
-                setSelectedProduct(prev => prev ? {
-                  ...prev,
-                  price_history: history.map((h: any) => ({
-                    date: h.captured_at,
-                    value: Number(h.value)
-                  }))
-                } : null);
+                setSelectedProduct(prev => {
+                  if (!prev) return null;
+                  return {
+                    ...prev,
+                    price_history: history.map((h: any) => ({
+                      date: h.captured_at,
+                      value: Number(h.value)
+                    }))
+                  } as Product;
+                });
               }
             } catch (err) {
               console.error("Erro ao carregar detalhes do produto:", err);
