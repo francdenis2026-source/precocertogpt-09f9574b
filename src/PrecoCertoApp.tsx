@@ -659,44 +659,49 @@ function Footer({ user }: { user?: any }) {
   return (
     <footer className="site-footer">
       <div className="shell footer-grid">
-        <div>
+        <div className="footer-brand-section">
           <Brand inverse />
-          <p>Compare preços reais em Feijó e transforme cada compra em economia inteligente.</p>
-          <span className="footer-place"><MapPin size={15} /> Feijó • Acre</span>
+          <p className="footer-tagline">Economia inteligente e preços reais em Feijó. Compare e economize todos os dias.</p>
+          <div className="footer-location-chip">
+            <MapPin size={16} />
+            <span>Feijó, Acre</span>
+          </div>
         </div>
-        <div>
-          <h3>Explorar</h3>
-          <nav aria-label="Links de exploração">
-            <a href="/buscar">Comparar preços</a>
-            <a href="/acougues">Açougues</a>
-            <a href="/cesta">Cesta inteligente</a>
-            <a href="/estabelecimentos">Lojas</a>
-          </nav>
-        </div>
-        <div>
-          <h3>Suporte</h3>
-          <nav aria-label="Links de suporte">
-            <a href="/lojista">Para empresas</a>
-            <a href="/fale-conosco">Fale conosco</a>
-            <a href="/admin">Administração</a>
-          </nav>
-        </div>
-        <div>
-          <h3>Sua Conta</h3>
-          <nav aria-label="Links da conta">
-            {user ? (
-              <>
-                <a href="/meus-pedidos">Meus pedidos</a>
-                <a href="/perfil">Meu perfil</a>
-              </>
-            ) : (
-              <>
-                <a href="/login">Entrar</a>
-                <a href="/cadastro">Criar conta</a>
-              </>
-            )}
-            <a href="/planos">Planos</a>
-          </nav>
+        <div className="footer-links-group">
+          <div className="footer-column">
+            <h3>Explorar</h3>
+            <nav aria-label="Links de exploração">
+              <a href="/buscar">Comparar preços</a>
+              <a href="/acougues">Açougues</a>
+              <a href="/cesta">Cesta inteligente</a>
+              <a href="/estabelecimentos">Lojas locais</a>
+            </nav>
+          </div>
+          <div className="footer-column">
+            <h3>Suporte</h3>
+            <nav aria-label="Links de suporte">
+              <a href="/lojista">Para empresas</a>
+              <a href="/fale-conosco">Fale conosco</a>
+              <a href="/admin">Painel Administrativo</a>
+            </nav>
+          </div>
+          <div className="footer-column">
+            <h3>Sua Conta</h3>
+            <nav aria-label="Links da conta">
+              {user ? (
+                <>
+                  <a href="/meus-pedidos">Meus pedidos</a>
+                  <a href="/perfil">Meu perfil</a>
+                </>
+              ) : (
+                <>
+                  <a href="/login">Entrar</a>
+                  <a href="/cadastro">Criar conta</a>
+                </>
+              )}
+              <a href="/planos">Nossos Planos</a>
+            </nav>
+          </div>
         </div>
       </div>
       <div className="shell footer-bottom">
