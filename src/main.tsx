@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/manrope";
 import "./index.css";
+import "./pages/HomePremiumTasteRefinement.css";
 import App from "./App";
 import { startPaymentNotifications } from "./lib/paymentNotifications";
 
