@@ -60,6 +60,7 @@ import "./components/KowalskiGlobalExperience.css";
 import "./components/KowalskiLegacyDeep.css";
 import "./components/ImpeccableFullSitePolish.css";
 import "./components/ImpeccableStructuralLegacy.css";
+import "./pages/HomeV2Premium.css";
 
 export default function App() {
   return (
