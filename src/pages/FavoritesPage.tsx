@@ -121,6 +121,12 @@ export default function FavoritesPage({
     setToast("Backup dos favoritos exportado com sucesso.");
   };
 
+  const shareWhatsApp = () => {
+    const text = `Confira minha lista de favoritos no PreçoCerto Feijó:\n\n${favoriteProducts.map(p => `- ${p.name}: ${money(p.minPrice)}`).join('\n')}\n\nEconomize você também em: www.precocerto.live`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+
   const exportFavoritesPDF = () => {
     try {
       const doc = new jsPDF();
