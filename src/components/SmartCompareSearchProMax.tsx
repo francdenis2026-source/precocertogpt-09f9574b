@@ -1,11 +1,12 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ArrowRight, BadgeCheck, BrainCircuit, CheckCircle2, ChevronRight, PackageSearch, Scale, Search, Sparkles, Store, TrendingDown } from "lucide-react";
+import { ArrowRight, BadgeCheck, BrainCircuit, CheckCircle2, ChevronRight, Heart, PackageSearch, Scale, Search, Sparkles, Store, TrendingDown } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { buildCatalog, type Product } from "../data/catalog";
 import { fetchCatalog, normalize } from "../data/remoteCatalog";
 import { resolveProductImage } from "../data/productImageResolver";
 import { parseMeasure, unitPrice } from "../lib/pricing";
 import { searchProducts } from "../lib/productSearch";
+import { useFavorites } from "../features/favorites/FavoritesProvider";
 import "./SmartCompareSearchProMax.css";
 
 const money=(v:number)=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(v);
@@ -51,6 +52,7 @@ function ProductThumb({product}:{product:Product}){
 
 export function SmartCompareSearchProMax(){
  const [params,setParams]=useSearchParams();
+ const {isFavorite,toggleFavorite}=useFavorites();
  const initial=params.get("q")||"";
  const [query,setQuery]=useState(initial);
  const [products,setProducts]=useState<Product[]>(seed.products);
@@ -79,7 +81,7 @@ export function SmartCompareSearchProMax(){
    {loading?<div className="scpm-loading"><BrainCircuit/><span>Analisando produtos e apresentações…</span></div>:<>
     {insight&&<section className="scpm-insight" aria-label="Recomendação de melhor custo-benefício"><header><div><span><Sparkles/> Recomendação inteligente</span><h2>Esta apresentação entrega mais pelo seu dinheiro.</h2><p>Comparamos o preço proporcional das embalagens encontradas, não apenas o valor que aparece na etiqueta.</p></div><div className="scpm-insight__score"><TrendingDown/><strong>{insight.savingPct.toFixed(1).replace(".",",")}%</strong><span>melhor custo por {baseLabel(insight.best.base)}</span></div></header><div className="scpm-variants">{insight.variants.slice(0,4).map((variant,index)=>{const best=index===0;return <article className={`scpm-variant${best?" is-best":""}`} key={`${variant.product.id}-${variant.quantity}`}><div className="scpm-variant__top">{best?<span className="scpm-best"><BadgeCheck/> Melhor custo-benefício</span>:<span className="scpm-alt">Outra apresentação</span>}<ProductThumb product={variant.product}/></div><h3>{variant.product.name}</h3><p>{variant.product.size} · {variant.product.establishment}</p><div className="scpm-price-row"><strong>{money(variant.product.minPrice)}</strong><span>{money(variant.unitValue)} / {baseLabel(variant.base)}</span></div>{best&&<small><CheckCircle2/> Recomendada pela relação preço × quantidade</small>}</article>})}</div><footer><Scale/><p><strong>Como calculamos:</strong> convertemos embalagens compatíveis para a mesma base (kg, litro ou unidade) e comparamos o menor preço proporcional. Uma embalagem maior só recebe destaque se realmente tiver custo unitário menor.</p></footer></section>}
 
-    <section className="scpm-results"><div className="scpm-heading"><div><span>Resultados</span><h2>{params.get("q")?`Produtos para “${params.get("q")}”`:"Produtos para comparar"}</h2><p>{results.length} opções encontradas. O preço unitário aparece sempre que a embalagem pode ser convertida com segurança.</p></div></div><div className="scpm-grid">{results.map(product=>{const per=unitPrice(product.minPrice,product.size,product.unit);return <a className="scpm-card" href={`/produto/${product.slug||product.id}`} key={String(product.id)}><ProductThumb product={product}/><div className="scpm-card__body"><span className="scpm-category">{product.category||"Produto"}</span><h3>{product.name}</h3><p className="scpm-store"><Store/> {product.establishment}</p><div className="scpm-card__prices"><strong>{money(product.minPrice)}</strong>{per&&<span>{money(per.value)} / {baseLabel(per.base)}</span>}</div><small>{product.size||product.unit}</small><div className="scpm-card__action">Ver detalhes <ChevronRight/></div></div></a>})}</div>{!results.length&&<div className="scpm-empty"><Search/><h3>Nenhum produto encontrado</h3><p>Tente pesquisar por outro nome, marca ou categoria.</p></div>}</section>
+    <section className="scpm-results"><div className="scpm-heading"><div><span>Resultados</span><h2>{params.get("q")?`Produtos para “${params.get("q")}”`:"Produtos para comparar"}</h2><p>{results.length} opções encontradas. O preço unitário aparece sempre que a embalagem pode ser convertida com segurança.</p></div></div><div className="scpm-grid">{results.map(product=>{const per=unitPrice(product.minPrice,product.size,product.unit);const saved=isFavorite(product.id);return <article className="scpm-card" key={String(product.id)}><a className="scpm-card__link" href={`/produto/${product.slug||product.id}`}><ProductThumb product={product}/><div className="scpm-card__body"><span className="scpm-category">{product.category||"Produto"}</span><h3>{product.name}</h3><p className="scpm-store"><Store/> {product.establishment}</p><div className="scpm-card__prices"><strong>{money(product.minPrice)}</strong>{per&&<span>{money(per.value)} / {baseLabel(per.base)}</span>}</div><small>{product.size||product.unit}</small><div className="scpm-card__action">Ver detalhes <ChevronRight/></div></div></a><button type="button" className={`scpm-favorite${saved?" is-saved":""}`} aria-pressed={saved} aria-label={saved?`Remover ${product.name} dos favoritos`:`Favoritar ${product.name}`} onClick={()=>void toggleFavorite(product.id)}><Heart fill={saved?"currentColor":"none"}/></button></article>})}</div>{!results.length&&<div className="scpm-empty"><Search/><h3>Nenhum produto encontrado</h3><p>Tente pesquisar por outro nome, marca ou categoria.</p></div>}</section>
    </>}
   </div>
  </main>;
