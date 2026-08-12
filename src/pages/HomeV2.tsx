@@ -350,13 +350,9 @@ export function HomeV2() {
             </div>
             <Link to="/lojista" className="home-v2-marketplace-cta">Quero vender online <ArrowRight aria-hidden="true" /></Link>
           </div>
-          <div className="home-v2-marketplace-art" aria-label="Exemplo de uma loja virtual no PreçoCerto">
-            <div className="home-v2-marketplace-window">
-              <div className="home-v2-marketplace-window-top"><i /><i /><i /><span>precocerto · loja local</span></div>
-              <div className="home-v2-marketplace-store-head"><span><Store aria-hidden="true" /></span><div><strong>Minha Loja</strong><small>Feijó, Acre · aberta agora</small></div><BadgeCheck aria-hidden="true" /></div>
-              <div className="home-v2-marketplace-products" aria-hidden="true"><i /><i /><i /></div>
-              <div className="home-v2-marketplace-order"><ShoppingBag aria-hidden="true" /><span><small>Novo pedido</small><strong>Recebido com sucesso</strong></span><Check aria-hidden="true" /></div>
-            </div>
+          <div className="home-v2-marketplace-art">
+            <img src="/marketplace-local-profissional-v2.webp" alt="Comerciante local usando um tablet para administrar sua loja virtual" loading="lazy" width="1200" height="751" />
+            <div className="home-v2-marketplace-proof"><BadgeCheck aria-hidden="true" /><span><small>Venda online</small><strong>Sua loja aberta para toda a cidade</strong></span></div>
           </div>
         </section>
 

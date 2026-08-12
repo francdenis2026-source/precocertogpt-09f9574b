@@ -23,7 +23,21 @@ const localAssets = Object.entries(assetModules)
   })
   .filter((item): item is { url: string; key: string } => Boolean(item?.url && item.key));
 
+const publicFallbacks = [
+  { terms: ["arroz", "tiojoao"], url: "/products/arroz-tio-joao-5kg.png" },
+  { terms: ["arroz", "bernardo"], url: "/products/arroz-branco-bernardo-1kg.jpg" },
+  { terms: ["cafe", "3coracoes"], url: "/products/cafe-3-coracoes-500g.jpg" },
+  { terms: ["leite", "italac"], url: "/products/leite-italac-1l.jpg" },
+  { terms: ["feijao", "kicaldo"], url: "/products/feijao-kicaldo-1kg.jpg" },
+  { terms: ["feijao", "bernardo"], url: "/products/feijao-carioca-bernardo-1kg.jpg" },
+  { terms: ["acucar", "uniao"], url: "/products/acucar-uniao-1kg.jpg" },
+  { terms: ["detergente", "ype"], url: "/products/detergente-ypx-neutro-500ml.jpg" },
+] as const;
+
 export function resolveProductImage(product: Product): string | undefined {
+  const identity = normalize([product.name, product.brand, product.size].filter(Boolean).join(" "));
+  const publicFallback = publicFallbacks.find(item => item.terms.every(term => identity.includes(term)));
+  if (publicFallback) return publicFallback.url;
   if (product.image_url) return product.image_url;
 
   const candidates = [
