@@ -1,12 +1,5 @@
 import { optimizeBasket } from '../lib/smartBasket';
-
-const describe = (name, fn) => { console.log(`Running test suite: ${name}`); fn(); };
-const test = (name, fn) => { console.log(`Running test: ${name}`); fn(); };
-const expect = (actual) => ({
-  toBe: (expected) => {
-    if (actual !== expected) throw new Error(`Expected ${expected}, but got ${actual}`);
-  }
-});
+import { describe, expect, test } from 'vitest';
 
 describe('Smart Basket Coupons', () => {
   const mockCatalog = [
