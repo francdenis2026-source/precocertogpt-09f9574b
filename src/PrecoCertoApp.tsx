@@ -4913,7 +4913,7 @@ export default function PrecoCertoApp() {
   // Validação de autenticação para adicionar itens
   function addBasket(p: Product) {
     if (!user) {
-      setToast("Você precisa estar logado para gerenciar sua cesta.");
+      setToast("Acesse sua conta para montar e salvar sua cesta.");
       return;
     }
     setCart(current => {
@@ -5229,11 +5229,36 @@ export default function PrecoCertoApp() {
             </div>
           </div>
           
-          <div className="admin-modal-footer" style={{ borderTop: '1px solid var(--border)', padding: '1.5rem', display: 'flex', gap: '1rem' }}>
-            <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
-              Adicionar à Cesta
-            </button>
-            <button className="button button--outline" style={{ height: '54px' }} onClick={() => { 
+          <div className="admin-modal-footer" style={{ borderTop: '1px solid var(--border)', padding: '1.5rem', display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+              <button className="button button--primary" style={{ flex: 1, height: '54px', fontSize: '1rem' }} onClick={() => { addBasket(selectedProduct); setSelectedProduct(null); }}>
+                <Plus size={20} style={{ marginRight: '8px' }} /> Adicionar à Cesta
+              </button>
+              <button className="button button--outline" style={{ height: '54px', padding: '0 1.5rem' }} onClick={() => { 
+                if (!user) {
+                  setToast("Acesse sua conta para favoritar este produto.");
+                  return;
+                }
+                toggleFavorite(String(selectedProduct.id));
+              }} aria-label={favorites.includes(String(selectedProduct.id)) ? "Remover dos favoritos" : "Adicionar aos favoritos"}>
+                <Heart size={20} fill={favorites.includes(String(selectedProduct.id)) ? "currentColor" : "none"} />
+              </button>
+            </div>
+            
+            {/* Opção de Venda Online / Link Externo quando disponível no estabelecimento */}
+            {selectedProduct.establishmentSlug === "reboucas" && (
+              <a 
+                href="https://www.supermercadosreboucas.com.br" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="button button--gold button--full"
+                style={{ height: '54px', textDecoration: 'none', justifyContent: 'center' }}
+              >
+                <ShoppingBasket size={20} style={{ marginRight: '8px' }} /> Comprar Online
+              </a>
+            )}
+            
+            <button className="button button--ghost" style={{ width: '100%', marginTop: '0.5rem' }} onClick={() => { 
               if (!user) {
                 setToast("Acesse sua conta para configurar alertas de preço.");
                 return;
@@ -5241,7 +5266,7 @@ export default function PrecoCertoApp() {
               saveAction("alert", "product", String(selectedProduct.id)); 
               setSelectedProduct(null); 
             }}>
-              <Bell size={18} /> Alertar
+              <Bell size={18} style={{ marginRight: '8px' }} /> Criar Alerta de Preço
             </button>
           </div>
         </div>
