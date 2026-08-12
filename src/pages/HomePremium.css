@@ -309,10 +309,10 @@
   box-shadow: var(--pc-shadow-md), 0 0 0 1px rgba(255,255,255,0.05); 
   backdrop-filter: blur(16px);
   transition: 
-    transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), 
     opacity 1s ease-in-out,
     filter 1s ease-in-out,
-    box-shadow var(--pc-fast) ease;
+    box-shadow var(--pc-fast) ease,
+    border-color var(--pc-fast) ease;
   min-height: 420px;
   display: flex;
   flex-direction: column;
