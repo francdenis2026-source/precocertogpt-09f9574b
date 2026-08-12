@@ -5306,10 +5306,65 @@ export default function PrecoCertoApp() {
         setModalLoading(true);
         
         // Simula carregamento para exibir skeleton (ou faz fetch real se necessário no futuro)
-        setTimeout(() => {
+        setTimeout(async () => {
           setSelectedProduct(e.detail);
           setModalLoading(false);
           
+          // Se tivermos Supabase, buscar histórico e ofertas reais
+          if (supabase && e.detail.id) {
+            try {
+              const { data: offers } = await supabase
+                .from('prices')
+                .select(`
+                  value,
+                  captured_at,
+                  establishments (
+                    name,
+                    neighborhood
+                  )
+                `)
+                .eq('product_id', e.detail.id)
+                .order('value', { ascending: true });
+
+              if (offers) {
+                const formattedOffers = offers.map((o: any) => ({
+                  establishment: o.establishments?.name || 'Desconhecido',
+                  neighborhood: o.establishments?.neighborhood || '',
+                  value: Number(o.value),
+                  capturedAt: o.captured_at
+                }));
+                
+                setSelectedProduct(prev => prev ? {
+                  ...prev,
+                  offers: formattedOffers,
+                  storeCount: formattedOffers.length,
+                  minPrice: Math.min(...formattedOffers.map(o => o.value)),
+                  maxPrice: Math.max(...formattedOffers.map(o => o.value)),
+                  avgPrice: formattedOffers.reduce((a, b) => a + b.value, 0) / formattedOffers.length
+                } : null);
+              }
+
+              const { data: history } = await supabase
+                .from('prices')
+                .select('value, captured_at')
+                .eq('product_id', e.detail.id)
+                .order('captured_at', { ascending: true })
+                .limit(20);
+
+              if (history) {
+                setSelectedProduct(prev => prev ? {
+                  ...prev,
+                  price_history: history.map((h: any) => ({
+                    date: h.captured_at,
+                    value: Number(h.value)
+                  }))
+                } : null);
+              }
+            } catch (err) {
+              console.error("Erro ao carregar detalhes do produto:", err);
+            }
+          }
+
           // Simulação de erro caso o produto não tenha preço mínimo válido
           if (!Number.isFinite(e.detail.minPrice)) {
             setModalError("Dados de preço indisponíveis para este produto.");
