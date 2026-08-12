@@ -316,22 +316,35 @@
 }
 .pc-compare-product-image { 
   position: relative;
-  width: 140px; 
-  height: 140px; 
+  width: 154px; 
+  height: 154px; 
   display: flex; 
   align-items: center;
   justify-content: center;
-  border-radius: 20px; 
+  border-radius: 24px; 
   background: #fff;
   border: 1px solid #f0ede8;
-  box-shadow: 0 8px 24px rgba(0,0,0,.06);
-  padding: 12px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.08);
+  padding: 16px;
+  margin-inline: auto; /* Ensure horizontal centering */
 }
 .pc-compare-product-image img { 
   width: 100%; 
   height: 100%; 
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
-  transition: transform 0.8s ease;
+  transition: transform 0.8s ease, filter 0.4s ease;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08));
+}
+.pc-compare-product-image.is-transparent {
+  background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.4) 100%);
+  border-color: rgba(0,0,0,0.03);
+  box-shadow: none;
+}
+.pc-compare-product-image.is-transparent img {
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12)) drop-shadow(0 0 1px rgba(0,0,0,0.2));
+  transform: scale(1.1);
 }
 .pc-compare-badge {
   position: absolute;
