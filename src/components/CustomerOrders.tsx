@@ -36,15 +36,42 @@ export function CustomerOrders() {
 
   useEffect(() => {
     if (!supabase) { setLoading(false); return; }
-    let channel: any;
+    let ordersChannel: any;
+    
     void (async () => {
       await load();
       const { data: session } = await supabase!.auth.getSession();
       const userId = session.session?.user?.id;
       if (!userId) return;
-      channel = supabase!.channel(`customer-orders-${userId}`).on("postgres_changes", { event:"*", schema:"public", table:"orders", filter:`customer_id=eq.${userId}` }, () => void load()).subscribe();
+      
+      ordersChannel = supabase!.channel(`customer-orders-${userId}`)
+        .on("postgres_changes", { 
+          event: "*", 
+          schema: "public", 
+          table: "orders", 
+          filter: `customer_id=eq.${userId}` 
+        }, (payload) => {
+          if (payload.eventType === 'UPDATE') {
+             setOrders(prev => prev.map(o => o.id === payload.new.id ? { ...o, ...payload.new } : o));
+             // Mostrar um alerta visual se o status mudou
+             if (payload.old.status !== payload.new.status) {
+                const step = steps.find(s => s.status === payload.new.status);
+                if (step) {
+                   window.dispatchEvent(new CustomEvent('pc:set-toast', { 
+                     detail: { message: `Pedido #${payload.new.order_number}: ${step.label}`, type: "success" } 
+                   }));
+                }
+             }
+          } else {
+             void load();
+          }
+        })
+        .subscribe();
     })();
-    return () => { if (channel && supabase) void supabase.removeChannel(channel); };
+    
+    return () => { 
+      if (ordersChannel && supabase) void supabase.removeChannel(ordersChannel); 
+    };
   }, []);
 
   const order = useMemo(() => orders.find(row => row.id === selected) ?? orders[0], [orders, selected]);
