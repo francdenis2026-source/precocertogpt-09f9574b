@@ -27,7 +27,7 @@ export default function FavoritesPage({
   user
 }: FavoritesPageProps) {
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"name" | "brand" | "price">("name");
+  const [sortBy, setSortBy] = useState<"name" | "brand" | "price" | "newest">("newest");
   const [viewMode, setViewMode] = useState<"grid" | "brand">("grid");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [priceAlerts, setPriceAlerts] = useState<Record<string, boolean>>(() => {
