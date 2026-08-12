@@ -404,12 +404,14 @@ function FavoriteCard({
     <div className={`favorite-card ${isSelected ? 'selected' : ''}`} style={{ 
       position: 'relative', 
       background: 'var(--surface)', 
-      borderRadius: '20px', 
+      borderRadius: '24px', 
       padding: '1.25rem',
       border: isSelected ? '2px solid var(--blue)' : '1px solid var(--border)',
-      transition: 'all 0.2s ease',
-      cursor: 'pointer'
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      cursor: 'pointer',
+      boxShadow: isSelected ? '0 10px 25px var(--blue-glass)' : 'var(--shadow-sm)'
     }} onClick={onSelect}>
+
 
       <div style={{ position: 'absolute', top: '12px', left: '12px', zIndex: 2 }}>
         <div style={{ 
