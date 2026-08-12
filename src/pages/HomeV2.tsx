@@ -21,7 +21,7 @@ import "./HomeV2.css";
 const popularSearches = ["Arroz", "Café", "Leite", "Carne", "Material de limpeza"];
 
 const categories = [
-  { name: "Mercado", description: "Alimentos e itens do dia a dia", icon: ShoppingBasket, query: "mercado" },
+  { name: "Mercados", description: "Alimentos e itens do dia a dia", icon: ShoppingBasket, query: "mercado" },
   { name: "Açougue", description: "Carnes e cortes em lojas locais", icon: Tag, query: "carne" },
   { name: "Farmácias", description: "Saúde, higiene e cuidados", icon: HeartPulse, href: "/farmacias" },
   { name: "Livros", description: "Autores e cultura de Feijó", icon: BookOpen, href: "/dorinha-barroso" },
@@ -195,7 +195,7 @@ export function HomeV2() {
         </section>
 
         <section className="home-v2-local" aria-labelledby="local-title">
-          <div className="home-v2-local-image"><img src="/supermercado-hero.jpg" alt="Prateleiras de supermercado abastecidas" loading="lazy" /></div>
+          <div className="home-v2-local-image"><img src="/comerciante-local-feijo.webp" alt="Comerciante local organizando produtos frescos em seu estabelecimento" loading="lazy" width="1440" height="960" /></div>
           <div className="home-v2-local-copy">
             <h2 id="local-title">Valorize quem movimenta Feijó.</h2>
             <p>Conheça os estabelecimentos cadastrados, explore seus catálogos e encontre novas opções perto de você.</p>
