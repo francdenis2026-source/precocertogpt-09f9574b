@@ -1007,12 +1007,14 @@ const modeLabels: Record<OptimizationMode, string> = {
   within_budget: "Dentro do orcamento",
 };
 
-function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clearBasket, user, syncStatus }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void; clearBasket:()=>void; user: any; syncStatus: string }) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clearBasket, user, syncStatus, stores }: PageProps & { cart: Product[]; removeBasket:(id:number|string)=>void; clearBasket:()=>void; user: any; syncStatus: string; stores: StoreRow[] }) {
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [mode, setMode] = useState<OptimizationMode>("cheapest_multi");
   const [budget, setBudget] = useState(250);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [shareLink, setShareLink] = useState<string | null>(null);
+
   const [shareReadOnly, setShareReadOnly] = useState(true);
   const pdfUserKey = user?.email || user?.id || null;
   // Preferência de orientação salva por usuário e reaplicada nas próximas exportações.
@@ -1404,12 +1406,105 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
   };
 
   const [showBudgetAlert, setShowBudgetAlert] = useState<{ total: number, budget: number, item: string } | null>(null);
+  const [deliveryType, setDeliveryType] = useState<"delivery" | "pickup">("delivery");
+  const [selectedZones, setSelectedZones] = useState<Record<string, string>>({});
+  const [zonesMap, setZonesMap] = useState<Record<string, DeliveryZone[]>>({});
+  const [orderNotice, setOrderNotice] = useState("");
 
   useEffect(() => {
     const handler = (e: any) => setShowBudgetAlert(e.detail);
     window.addEventListener('pc:budget-exceeded', handler);
     return () => window.removeEventListener('pc:budget-exceeded', handler);
   }, []);
+
+  useEffect(() => {
+    async function loadZones() {
+      if (!optimizationResult) return;
+      const stores = Object.keys(optimizationResult.storeBreakdown);
+      const newZonesMap: Record<string, DeliveryZone[]> = {};
+      
+      for (const storeName of stores) {
+        const store = products.find(p => p.establishment === storeName);
+        if (store?.establishmentId) {
+          const z = await loadDeliveryZones(String(store.establishmentId));
+          newZonesMap[storeName] = z.filter(x => x.active);
+        }
+      }
+      setZonesMap(newZonesMap);
+    }
+    if (step === 4) loadZones();
+  }, [step, optimizationResult]);
+
+  const handleCheckout = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!user) {
+      setOrderNotice("Entre na sua conta para finalizar a compra.");
+      return;
+    }
+    if (!optimizationResult || optimizationResult.items.length === 0) return;
+
+    setIsSubmittingOrder(true);
+    setOrderNotice("");
+
+    const fd = new FormData(e.currentTarget);
+    const customerName = String(fd.get("name") || "").trim();
+    const customerPhone = String(fd.get("phone") || "").trim();
+    const street = String(fd.get("street") || "");
+    const number = String(fd.get("number") || "");
+    const complement = String(fd.get("complement") || "").trim();
+
+    try {
+      // Cria pedidos individuais por loja
+      const storeNames = Object.keys(optimizationResult.storeBreakdown);
+      const orderResults = [];
+
+      for (const storeName of storeNames) {
+        const storeProducts = optimizationResult.items.filter(i => i.establishment === storeName);
+        const storeInfo = products.find(p => p.establishment === storeName);
+        const zoneId = selectedZones[storeName];
+        const zone = zonesMap[storeName]?.find(z => z.id === zoneId);
+
+        const result = await createMarketplaceOrder({
+          merchantId: String(storeInfo?.establishmentId || ""),
+          deliveryType,
+          deliveryZoneId: deliveryType === "delivery" ? zoneId : null,
+          deliveryAddress: deliveryType === "delivery" ? {
+            street,
+            number,
+            neighborhood: zone?.neighborhood || zone?.name || "",
+            complement,
+            reference: complement
+          } : null,
+          customerName,
+          customerPhone,
+          customerEmail: user.email || "",
+          items: storeProducts.map(i => ({
+            merchant_product_id: String(i.product.id), // No PrecoCertoApp, product.id é o ID da oferta do lojista
+            quantity: i.quantity
+          }))
+        });
+
+        if (result.error) throw new Error(`${storeName}: ${result.error}`);
+        orderResults.push(result.data);
+      }
+
+      // Se apenas um pedido foi gerado, tentamos o checkout MP
+      if (orderResults.length === 1 && orderResults[0]?.order_id) {
+        const pay = await startMercadoPagoCheckout(String(orderResults[0].order_id));
+        if (pay.url) {
+          window.location.assign(pay.url);
+          return;
+        }
+      }
+
+      setToast("Pedidos criados com sucesso! Redirecionando para acompanhamento...");
+      setTimeout(() => window.location.assign("/meus-pedidos"), 2000);
+    } catch (err: any) {
+      setOrderNotice("Erro ao processar checkout: " + err.message);
+      setIsSubmittingOrder(false);
+    }
+  };
+
 
   return (
     <div className="shell page-shell basket-page">
@@ -2007,8 +2102,16 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                     >
                       <Database size={16} /> Salvar no Painel (Histórico)
                     </button>
+                    <button 
+                      className="button button--primary button--full" 
+                      style={{ marginTop: '0.5rem', background: 'var(--gold)', color: 'var(--foreground-gold)', fontWeight: 800 }} 
+                      onClick={() => setStep(4)}
+                    >
+                      Finalizar Compra <ArrowRight />
+                    </button>
                     <button className="button button--ghost" style={{ width: '100%', color: 'var(--muted)' }} onClick={() => setStep(2)}><ArrowLeft /> Ajustar itens</button>
                     <button type="button" className="link-danger" style={{ width: '100%', justifyContent: 'center', marginTop: '.5rem' }} onClick={clearAll}><Trash2 size={14} /> Limpar cesta</button>
+
                   </div>
                 </aside>
               </div>
