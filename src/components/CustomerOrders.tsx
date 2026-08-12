@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, Circle, Clock3, CreditCard, MapPin, PackageCheck, ShoppingBag, Truck, XCircle } from "lucide-react";
 import { supabase } from "../lib/roles";
 import { startMercadoPagoCheckout, updateOrderStatus, type MerchantOrder, type OrderStatus } from "../lib/merchantPlatform";
+import { notifyStatusUpdate } from "../lib/paymentNotifications";
 
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const dateTime = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" });
@@ -60,6 +61,8 @@ export function CustomerOrders() {
                    window.dispatchEvent(new CustomEvent('pc:set-toast', { 
                      detail: { message: `Pedido #${payload.new.order_number}: ${step.label}`, type: "success" } 
                    }));
+                   // Trigger persistent notifications (Push/Email)
+                   void notifyStatusUpdate(payload.new as any);
                 }
              }
           } else {
