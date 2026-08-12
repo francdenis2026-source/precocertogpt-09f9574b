@@ -7,6 +7,7 @@ import "./pages/HomePremiumTasteRefinement.css";
 import "./styles/ImpeccableFinalPolish.css";
 import "./styles/KowalskiInteractionRefinement.css";
 import "./pages/HomePremiumLightSurface.css";
+import "./pages/HomeFeaturedStability.css";
 import App from "./App";
 import { startPaymentNotifications } from "./lib/paymentNotifications";
 
