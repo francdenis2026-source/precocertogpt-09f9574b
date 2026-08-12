@@ -226,14 +226,18 @@ export default function FavoritesPage({
             <p style={{ color: 'var(--muted)' }}>{favoriteProducts.length} itens salvos na sua lista pessoal</p>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="button button--outline" onClick={exportFavorites} title="Exportar backup">
-              <Download size={18} /> <span className="hide-mobile">Backup</span>
+            <button className="button button--outline" onClick={exportFavoritesPDF} title="Exportar para PDF">
+              <FileText size={18} /> <span className="hide-mobile">PDF</span>
+            </button>
+            <button className="button button--outline" onClick={exportFavorites} title="Exportar backup CSV">
+              <Download size={18} /> <span className="hide-mobile">CSV</span>
             </button>
             <label className="button button--outline" style={{ cursor: 'pointer' }} title="Importar backup">
               <Upload size={18} /> <span className="hide-mobile">Restaurar</span>
               <input type="file" accept=".csv" onChange={importFavorites} style={{ display: 'none' }} />
             </label>
           </div>
+
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', background: 'var(--surface)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
