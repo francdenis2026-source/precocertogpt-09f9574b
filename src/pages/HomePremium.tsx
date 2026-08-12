@@ -132,7 +132,7 @@ export function HomePremium() {
   const opportunities = useMemo(() => catalog.products
     .filter((product) => product.minPrice > 0)
     .sort((a, b) => (b.maxPrice - b.minPrice) - (a.maxPrice - a.minPrice))
-    .slice(0, 8), [catalog.products]);
+    .slice(0, 10), [catalog.products]);
 
   const [comparisonIndex, setComparisonIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
