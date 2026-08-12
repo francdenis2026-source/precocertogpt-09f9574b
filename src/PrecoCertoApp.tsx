@@ -5258,6 +5258,24 @@ export default function PrecoCertoApp() {
     localStorage.setItem("precocerto:basket", JSON.stringify(cart));
   }, [cart]);
 
+  // Carrega favoritos remotos ao logar e sincroniza favoritos locais ao banco
+  useEffect(() => {
+    if (user) {
+      import("./lib/roles").then(async m => {
+        const remoteFavs = await m.loadRemoteFavorites();
+        const localFavs = JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]");
+        
+        // Merge: local + remoto
+        const mergedFavs = Array.from(new Set([...localFavs, ...remoteFavs]));
+        setFavorites(mergedFavs);
+        localStorage.setItem("precocerto:favorites", JSON.stringify(mergedFavs));
+        
+        // Garante que o banco tem tudo
+        await m.syncFavorites(mergedFavs);
+      });
+    }
+  }, [user]);
+
   const [toastExit, setToastExit] = useState(false);
   useEffect(() => {
     if (!toast) return;
@@ -5269,6 +5287,7 @@ export default function PrecoCertoApp() {
       clearTimeout(clearTimer);
     };
   }, [toast]);
+
 
   
   const [undoAction, setUndoAction] = useState<(() => void) | null>(null);
@@ -5379,14 +5398,15 @@ export default function PrecoCertoApp() {
   }
 
   function toggleFavorite(productId: string) {
-    if (!user) {
-      setToast("Entre na sua conta para salvar favoritos.");
-      return;
-    }
     setFavorites(current => {
       const removing = current.includes(productId);
       const next = removing ? current.filter(id => id !== productId) : [...current, productId];
       localStorage.setItem("precocerto:favorites", JSON.stringify(next));
+      
+      // Sincronização com Supabase em segundo plano se logado
+      if (user) {
+        import("./lib/roles").then(m => m.syncFavorites(next)).catch(err => console.error("Erro sync favoritos:", err));
+      }
       
       // Se adicionar aos favoritos, também adiciona à cesta se for um produto do catálogo
       if (!removing) {
@@ -5410,6 +5430,7 @@ export default function PrecoCertoApp() {
       return next;
     });
   }
+
 
   const setUserAndUpdateStorage = (newUser: any) => {
     setUser(newUser);
