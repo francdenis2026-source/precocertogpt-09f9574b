@@ -97,8 +97,8 @@ export function HomeV2() {
           <div className="home-v2-hero-inner">
             <div className="home-v2-copy">
               <span className="home-v2-eyebrow"><MapPin aria-hidden="true" /> Feijó, Acre</span>
-              <h1 id="home-v2-title">O preço certo está mais perto do que você imagina.</h1>
-              <p className="home-v2-lead">Compare produtos de lojas locais e escolha onde sua compra vale mais.</p>
+              <h1 id="home-v2-title">Compare preços locais. Compre melhor em Feijó.</h1>
+              <p className="home-v2-lead">Encontre produtos, compare lojas e planeje sua compra em poucos passos.</p>
 
               <form className="home-v2-search" onSubmit={handleSubmit} role="search">
                 <Search aria-hidden="true" />
@@ -152,7 +152,7 @@ export function HomeV2() {
 
         <section className="home-v2-featured" aria-labelledby="featured-title">
           <div className="home-v2-section home-v2-featured-inner">
-            <div className="home-v2-section-heading">
+            <div className="home-v2-section-heading home-v2-section-heading-light">
               <h2 id="featured-title">Itens para comparar agora</h2>
               <p>Atalhos para produtos presentes na rotina das famílias.</p>
             </div>
@@ -165,7 +165,7 @@ export function HomeV2() {
                 </button>
               ))}
             </div>
-            <Link className="home-v2-text-link" to="/buscar">Ver todos os produtos <ArrowRight aria-hidden="true" /></Link>
+            <Link className="home-v2-text-link" to="/buscar">Explorar produtos <ArrowRight aria-hidden="true" /></Link>
           </div>
         </section>
 
