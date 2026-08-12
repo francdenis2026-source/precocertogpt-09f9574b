@@ -6,6 +6,7 @@ import { supabase } from "../lib/roles";
 import "./MerchantStorefrontProMax.css";
 import "./DorinhaCheckoutTasteV2.css";
 import "./DorinhaTripleSkill.css";
+import "./DorinhaEditorialCompact.css";
 
 const brl=new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"});
 type Merchant={id:string;name:string;phone:string|null;address:any;delivery_enabled:boolean;pickup_enabled:boolean;min_order:number;opening_hours:any;status:string;service_settings?:{demo_mode?:boolean;allow_demo_payment?:boolean}};

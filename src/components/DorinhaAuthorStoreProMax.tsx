@@ -10,6 +10,7 @@ import "./DorinhaAuthorStoreProMaxV4.css";
 import "./DorinhaCheckoutProMax.css";
 import "./DorinhaTasteV2.css";
 import "./DorinhaTripleSkill.css";
+import "./DorinhaEditorialCompact.css";
 
 type AssetMeta={url:string};
 type ExternalStore={label:string;url:string};
