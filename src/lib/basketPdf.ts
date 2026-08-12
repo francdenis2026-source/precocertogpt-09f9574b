@@ -127,8 +127,11 @@ export function planBasketPdf(
 
   const summary: PdfBlock[] = [
     { type: "divider", height: 6 },
-    { type: "summary", label: "Total dos produtos", value: result.total, height: 7 },
+    { type: "summary", label: "Subtotal dos produtos", value: result.total + (result.couponDiscount || 0), height: 7 },
   ];
+  if (result.couponDiscount) {
+    summary.push({ type: "summary", label: "Desconto Aplicado", value: -result.couponDiscount, height: 7 });
+  }
   if (mode === "best_value") {
     summary.push({
       type: "summary",
@@ -144,7 +147,8 @@ export function planBasketPdf(
       height: 9,
     });
   } else {
-    summary.push({ type: "summary", label: "Economia estimada", value: result.savings, emphasis: true, height: 9 });
+    summary.push({ type: "summary", label: "Total da Cesta", value: result.total, emphasis: true, height: 9 });
+    summary.push({ type: "summary", label: "Economia estimada", value: result.savings, emphasis: false, height: 7 });
   }
   push(summary);
 
