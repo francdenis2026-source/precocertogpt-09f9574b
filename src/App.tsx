@@ -129,6 +129,18 @@ export default function App() {
             )} 
           />
         } />
+        <Route path="/alertas" element={
+          <PrecoCertoApp 
+            renderContent={(props: any) => (
+              <FavoritesPage 
+                favorites={props.favorites} 
+                products={props.products} 
+                onToggleFavorite={props.toggleFavorite} 
+                onAddToBasket={props.addBasket} 
+              />
+            )} 
+          />
+        } />
         <Route path="/admin/plataforma" element={<PlatformAdminDashboard />} />
         <Route path="/admin/comercios" element={<AdminMerchantManagement />} />
         <Route path="/colaborar" element={<CollaboratePage />} />
