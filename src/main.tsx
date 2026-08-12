@@ -14,6 +14,7 @@ import "./pages/HomeComparisonSpotlight.css";
 import "./pages/HomeSearchResultsContrast.css";
 import "./styles/GlobalScrollbarRefinement.css";
 import App from "./App";
+import { HourlyHomeProductRotation } from "./components/HourlyHomeProductRotation";
 import { startPaymentNotifications } from "./lib/paymentNotifications";
 
 
@@ -29,5 +30,6 @@ startPaymentNotifications();
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
+    <HourlyHomeProductRotation />
   </StrictMode>,
 );
