@@ -1,7 +1,7 @@
 
 import {
   Activity, AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
-  ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit, Flag,
+  ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit, ExternalLink, Flag,
   Heart, Home, LayoutDashboard, LineChart, ListChecks, Loader2, MapPin, Menu, Moon, PackageSearch,
   Plus, Printer, Receipt, RotateCcw, Save, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Sun, Trash2, TrendingDown, TrendingUp, Upload, UserRound, Users, X,
@@ -4937,7 +4937,7 @@ export default function PrecoCertoApp() {
       await saveBasket(
         (user as any).id,
         "Cesta Ativa",
-        "cheapest",
+        "within_budget",
         200,
         itemsConfig,
         { total: 0, savings: 0, items: [], storeBreakdown: {} }
