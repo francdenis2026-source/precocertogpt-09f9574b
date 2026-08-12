@@ -1,13 +1,15 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  BadgeCheck,
   BookOpen,
   Check,
   ChevronRight,
   HeartPulse,
   MapPin,
   Menu,
+  PackageSearch,
   Search,
   ShieldCheck,
   ShoppingBasket,
@@ -16,6 +18,10 @@ import {
   Tag,
   X,
 } from "lucide-react";
+import { buildCatalog, type Product } from "../data/catalog";
+import { fetchCatalog } from "../data/remoteCatalog";
+import { resolveProductImage } from "../data/productImageResolver";
+import { suggestProducts } from "../lib/productSearch";
 import "./HomeV2.css";
 
 const popularSearches = ["Arroz", "Café", "Leite", "Carne", "Material de limpeza"];
@@ -34,10 +40,65 @@ const featuredProducts = [
   { name: "Feijão", detail: "Veja os preços disponíveis", image: "/products/feijao-carioca-bernardo-1kg.jpg", query: "feijao" },
 ];
 
+const initialCatalog = buildCatalog();
+const money = (value: number) => new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+}).format(value);
+
+function bestOffer(product: Product) {
+  const offers = [...(product.offers ?? [])]
+    .filter((offer) => Number.isFinite(offer.value) && offer.value > 0)
+    .sort((a, b) => a.value - b.value);
+
+  return offers[0] ?? {
+    establishmentId: product.establishmentId,
+    establishmentSlug: product.establishmentSlug,
+    establishment: product.establishment,
+    neighborhood: product.neighborhood,
+    storeColor: product.storeColor,
+    value: product.minPrice,
+    capturedAt: product.capturedAt,
+  };
+}
+
 export function HomeV2() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>(initialCatalog.products);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [activeResult, setActiveResult] = useState(-1);
+  const searchAreaRef = useRef<HTMLDivElement>(null);
+
+  const suggestions = useMemo(() => {
+    if (query.trim().length < 2) return [];
+    return suggestProducts(products, query, 5).filter((product) => product.minPrice > 0);
+  }, [products, query]);
+
+  useEffect(() => {
+    let active = true;
+    fetchCatalog()
+      .then((result) => {
+        if (active) setProducts(result.products);
+      })
+      .finally(() => {
+        if (active) setCatalogLoading(false);
+      });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!searchAreaRef.current?.contains(event.target as Node)) {
+        setSearchOpen(false);
+        setActiveResult(-1);
+      }
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
+  }, []);
 
   const search = (term: string) => {
     const normalized = term.trim();
@@ -46,7 +107,32 @@ export function HomeV2() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (activeResult >= 0 && suggestions[activeResult]) {
+      navigate(`/produto/${suggestions[activeResult].slug || suggestions[activeResult].id}`);
+      return;
+    }
     search(query);
+  };
+
+  const openProduct = (product: Product) => {
+    setSearchOpen(false);
+    navigate(`/produto/${product.slug || product.id}`);
+  };
+
+  const handleSearchKeys = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      setSearchOpen(false);
+      setActiveResult(-1);
+      return;
+    }
+    if (!searchOpen || !suggestions.length) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveResult((current) => (current + 1) % suggestions.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveResult((current) => (current <= 0 ? suggestions.length - 1 : current - 1));
+    }
   };
 
   return (
@@ -101,18 +187,90 @@ export function HomeV2() {
               <h1 id="home-v2-title">Sua compra começa com o <em>preço certo.</em></h1>
               <p className="home-v2-lead">Compare produtos e estabelecimentos locais em segundos. Mais clareza para escolher, mais dinheiro sobrando no fim do mês.</p>
 
-              <form className="home-v2-search" onSubmit={handleSubmit} role="search">
-                <Search aria-hidden="true" />
-                <label className="sr-only" htmlFor="home-product-search">Qual produto você procura?</label>
-                <input
-                  id="home-product-search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Busque arroz, café, carne..."
-                  autoComplete="off"
-                />
-                <button type="submit">Comparar <ArrowRight aria-hidden="true" /></button>
-              </form>
+              <div className="home-v2-search-area" ref={searchAreaRef}>
+                <form className="home-v2-search" onSubmit={handleSubmit} role="search">
+                  <Search aria-hidden="true" />
+                  <label className="sr-only" htmlFor="home-product-search">Qual produto você procura?</label>
+                  <input
+                    id="home-product-search"
+                    value={query}
+                    onChange={(event) => {
+                      setQuery(event.target.value);
+                      setSearchOpen(true);
+                      setActiveResult(-1);
+                    }}
+                    onFocus={() => setSearchOpen(true)}
+                    onKeyDown={handleSearchKeys}
+                    placeholder="Busque arroz, café, carne..."
+                    autoComplete="off"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded={searchOpen && query.trim().length >= 2}
+                    aria-controls="home-product-results"
+                    aria-activedescendant={activeResult >= 0 ? `home-product-result-${activeResult}` : undefined}
+                  />
+                  <button type="submit">Comparar <ArrowRight aria-hidden="true" /></button>
+                </form>
+
+                {searchOpen && query.trim().length >= 2 && (
+                  <div className="home-v2-results" id="home-product-results" role="listbox" aria-label="Produtos encontrados">
+                    <div className="home-v2-results-head">
+                      <span>Resultados rápidos</span>
+                      {suggestions.length > 0 && <small>{suggestions.length} produtos</small>}
+                    </div>
+
+                    {catalogLoading && !suggestions.length ? (
+                      <div className="home-v2-results-state" role="status">
+                        <PackageSearch aria-hidden="true" />
+                        <span><strong>Buscando produtos…</strong><small>Comparando preços nos estabelecimentos.</small></span>
+                      </div>
+                    ) : suggestions.length > 0 ? (
+                      <div className="home-v2-results-list">
+                        {suggestions.map((product, index) => {
+                          const offer = bestOffer(product);
+                          const image = resolveProductImage(product);
+                          return (
+                            <button
+                              id={`home-product-result-${index}`}
+                              key={String(product.id)}
+                              className={`home-v2-result${activeResult === index ? " is-active" : ""}`}
+                              type="button"
+                              role="option"
+                              aria-selected={activeResult === index}
+                              onMouseEnter={() => setActiveResult(index)}
+                              onClick={() => openProduct(product)}
+                            >
+                              <span className="home-v2-result-image">
+                                {image ? <img src={image} alt="" /> : <PackageSearch aria-hidden="true" />}
+                              </span>
+                              <span className="home-v2-result-copy">
+                                <strong>{product.name}</strong>
+                                <small>{[product.brand, product.size].filter(Boolean).join(" · ")}</small>
+                                <span className="home-v2-result-store"><Store aria-hidden="true" /> {offer.establishment}</span>
+                              </span>
+                              <span className="home-v2-result-price">
+                                <small><BadgeCheck aria-hidden="true" /> Menor preço</small>
+                                <strong>{money(offer.value)}</strong>
+                                <em>{product.storeCount} {product.storeCount === 1 ? "estabelecimento" : "estabelecimentos"}</em>
+                              </span>
+                              <ChevronRight aria-hidden="true" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="home-v2-results-state" role="status">
+                        <PackageSearch aria-hidden="true" />
+                        <span><strong>Nenhum produto encontrado</strong><small>Tente outro nome, marca ou categoria.</small></span>
+                      </div>
+                    )}
+
+                    <button className="home-v2-results-all" type="button" onClick={() => search(query)}>
+                      Ver comparação completa <ArrowRight aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <div className="home-v2-popular" aria-label="Buscas populares">
                 <span>Mais buscados:</span>
