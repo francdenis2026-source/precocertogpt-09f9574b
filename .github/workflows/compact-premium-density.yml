@@ -1,0 +1,112 @@
+name: Compact premium density
+on:
+  push:
+    branches: [feat/compact-premium-density]
+jobs:
+  compact:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Compact homepage and Dorinha systems
+        shell: python
+        run: |
+          from pathlib import Path
+
+          home = Path('src/components/TrueHomepageTripleSkill.css')
+          s = home.read_text()
+          reps = {
+            'height:68px':'height:60px',
+            'width:136px':'width:126px',
+            'width:40px;height:40px':'width:38px;height:38px',
+            'height:40px;padding:0 14px':'height:38px;padding:0 13px',
+            'min-height:720px':'min-height:560px',
+            'padding:144px 0 70px':'padding:112px 0 48px',
+            'gap:80px':'gap:56px',
+            'font-size:clamp(3.7rem,7vw,6.7rem)':'font-size:clamp(3.1rem,5.5vw,4.9rem)',
+            'margin:20px 0 22px':'margin:16px 0 18px',
+            'font-size:18px;line-height:1.68':'font-size:16.5px;line-height:1.6',
+            'margin:0 0 30px':'margin:0 0 22px',
+            'height:54px':'height:48px',
+            'padding:8px 8px 8px 18px':'padding:6px 6px 6px 16px',
+            'border-radius:18px':'border-radius:14px',
+            'min-height:94px':'min-height:76px',
+            'padding:18px 20px':'padding:13px 16px',
+            'padding:98px 0':'padding:66px 0',
+            'margin-bottom:38px':'margin-bottom:26px',
+            'font-size:clamp(2.2rem,4vw,4rem)':'font-size:clamp(1.9rem,3.2vw,3rem)',
+            'height:245px':'height:205px',
+            'height:188px':'height:160px',
+            'padding:16px':'padding:13px',
+            'font-size:24px':'font-size:21px',
+            'margin:16px 0 13px':'margin:12px 0 10px',
+            'padding:92px 0':'padding:64px 0',
+            'gap:90px':'gap:56px',
+            'min-height:106px':'min-height:82px',
+            'padding:18px 0':'padding:13px 0',
+            'min-height:104px':'min-height:82px',
+          }
+          for a,b in reps.items(): s=s.replace(a,b)
+          s += '\n/* compact premium density */\n@media(max-width:1000px){.pcx-hero,.pcx-hero__grid{min-height:500px}.pcx-hero__grid{padding:98px 0 40px;gap:30px}.pcx-section{padding:56px 0}.pcx-explain{padding:54px 0}.pcx-section-head{margin-bottom:22px}.pcx-products{gap:10px}.pcx-store{min-height:76px}.pcx-footer{padding-top:34px!important;padding-bottom:28px!important}}\n@media(max-width:640px){.pcx-header{top:8px;width:calc(100% - 16px);border-radius:12px}.pcx-header__inner{height:54px;padding:0 10px}.pcx-brand img{width:112px}.pcx-hero,.pcx-hero__grid{min-height:auto}.pcx-hero__grid{padding:86px 0 34px}.pcx-hero h1{font-size:clamp(2.45rem,11vw,3.25rem);line-height:.94;margin:12px 0 14px}.pcx-hero__copy>p{font-size:15px;line-height:1.55;margin-bottom:18px}.pcx-search{padding:5px 5px 5px 13px;border-radius:12px}.pcx-search input,.pcx-search button{height:44px}.pcx-hero__proof{margin-top:12px;gap:10px}.pcx-utilities{margin-top:-16px}.pcx-utilities__inner>a{min-height:64px;padding:10px 12px}.pcx-section{padding:44px 0}.pcx-section-head h2,.pcx-explain h2,.pcx-basket h2,.pcx-merchant h2{font-size:clamp(1.75rem,8vw,2.35rem)}.pcx-product:first-child .pcx-product__media,.pcx-product__media{height:128px}.pcx-product__body{padding:10px}.pcx-product h3{font-size:14px;min-height:36px}.pcx-product__price strong{font-size:18px}.pcx-explain{padding:44px 0}.pcx-steps li{min-height:68px;padding:10px 0}.pcx-store{min-height:68px}.pcx-footer{padding-top:28px!important;padding-bottom:24px!important}}\n'
+          home.write_text(s)
+
+          dor = Path('src/components/DorinhaTripleSkill.css')
+          d = dor.read_text()
+          reps2 = {
+            'height:72px':'height:60px',
+            'min-height:40px':'min-height:36px',
+            'min-height:680px':'min-height:520px',
+            'padding:100px max(44px,calc((100vw - 1200px)/2)) 88px':'padding:72px max(36px,calc((100vw - 1160px)/2)) 58px',
+            'font-size:clamp(3.8rem,6.5vw,6.8rem)':'font-size:clamp(3.1rem,5vw,4.9rem)',
+            'margin:18px 0 24px':'margin:14px 0 18px',
+            'font-size:17px!important;line-height:1.7':'font-size:15.5px!important;line-height:1.6',
+            'min-height:48px':'min-height:44px',
+            'padding:100px 0 58px':'padding:68px 0 42px',
+            'gap:80px':'gap:52px',
+            'font-size:clamp(2.7rem,4.5vw,4.6rem)':'font-size:clamp(2.2rem,3.5vw,3.4rem)',
+            'padding:64px 0 110px':'padding:48px 0 74px',
+            'gap:18px':'gap:14px',
+            'font-size:25px':'font-size:21px',
+            'padding:22px':'padding:17px',
+            'margin:0 auto 96px':'margin:0 auto 64px',
+            'gap:64px':'gap:42px',
+            'margin-bottom:90px':'margin-bottom:58px',
+            'padding:28px 30px':'padding:20px 22px',
+            'padding-top:76px':'padding-top:50px',
+            'padding-bottom:76px':'padding-bottom:50px',
+            'min-height:110px':'min-height:84px',
+            'padding-top:32px':'padding-top:24px',
+            'padding-bottom:32px':'padding-bottom:24px',
+            'min-height:570px':'min-height:440px',
+            'padding:82px max(44px,calc((100vw - 1200px)/2)) 70px':'padding:58px max(36px,calc((100vw - 1160px)/2)) 48px',
+            'font-size:clamp(4rem,6.5vw,6.6rem)':'font-size:clamp(3rem,5vw,4.7rem)',
+            'gap:42px':'gap:30px',
+            'padding:80px 0 110px':'padding:56px 0 76px',
+            'min-height:46px':'min-height:42px',
+            'min-height:54px':'min-height:48px',
+          }
+          for a,b in reps2.items(): d=d.replace(a,b)
+          d += '\n/* compact premium density */\n@media(max-width:1000px){.dorinha-pro__hero--v4{min-height:470px!important}.dorinha-pro__hero-portrait{min-height:470px!important}.dorinha-pro__intro{padding-top:54px!important;padding-bottom:36px!important}.dorinha-pro__catalog{padding-top:42px!important;padding-bottom:58px!important}.dorinha-pro__author{margin-bottom:50px!important}.storefront-pro--author .storefront-pro__hero{min-height:410px!important}.storefront-pro--author .storefront-pro__hero-art{min-height:410px!important}.storefront-pro--author .storefront-pro__layout{padding-top:44px!important;padding-bottom:62px!important}}\n@media(max-width:640px){.dorinha-pro__top,.storefront-pro--author .storefront-pro__top{height:54px!important}.dorinha-pro__brand{font-size:17px!important}.dorinha-pro__hero-copy,.storefront-pro--author .storefront-pro__hero-copy{padding:42px 18px 30px!important}.dorinha-pro__hero--v4 h1,.storefront-pro--author .storefront-pro__hero h1{font-size:clamp(2.55rem,12vw,3.35rem)!important;line-height:.95!important}.dorinha-pro__hero-copy>p,.storefront-pro--author .storefront-pro__hero-copy>p{font-size:14.5px!important;line-height:1.55!important}.dorinha-pro__hero-portrait{min-height:330px!important}.dorinha-pro__intro{padding:44px 16px 30px!important}.dorinha-pro__intro h2,.dorinha-pro__section-head h2{font-size:clamp(1.95rem,9vw,2.65rem)!important}.dorinha-pro__catalog{padding:34px 16px 52px!important}.dorinha-pro__book,.dorinha-pro__book:first-child,.dorinha-pro__book:nth-child(2){flex-basis:min(78vw,300px)!important}.dorinha-pro__cover,.dorinha-pro__book:first-child .dorinha-pro__cover,.dorinha-pro__book:nth-child(2) .dorinha-pro__cover{min-height:250px!important}.dorinha-pro__book-body{padding:14px!important}.dorinha-pro__book h3{font-size:19px!important}.dorinha-pro__author{margin:0 10px 42px!important}.dorinha-pro__author-photo{min-height:330px!important}.dorinha-pro__pix{margin:0 10px 42px!important;padding:16px!important}.dorinha-pro__market{padding:38px 16px!important}.storefront-pro--author .storefront-pro__hero{min-height:auto!important}.storefront-pro--author .storefront-pro__hero-art{min-height:320px!important}.storefront-pro--author .storefront-pro__layout{padding:34px 12px 52px!important}.storefront-pro--author .storefront-pro__image{min-height:240px!important}.storefront-pro--author .storefront-pro__product{flex-basis:min(78vw,300px)!important}.storefront-pro--author .storefront-pro__checkout-card{padding:15px!important}.storefront-pro--author form input,.storefront-pro--author form select{min-height:40px!important}.storefront-pro--author .storefront-pro__pay{min-height:46px!important}}\n'
+          dor.write_text(d)
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Build
+        run: npm run build
+      - name: Verify design skills
+        run: |
+          test -f .agents/skills/design-taste-frontend/SKILL.md
+          test -f .agents/skills/impeccable/SKILL.md
+          test -d .agents/skills/emil-design-eng
+      - name: Commit compact pass and remove workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- src/components/TrueHomepageTripleSkill.css src/components/DorinhaTripleSkill.css
+          git commit -m "feat: compact premium density for homepage and Dorinha"
+          git rm .github/workflows/compact-premium-density.yml
+          git commit -m "chore: remove temporary compact density workflow"
+          git push origin HEAD:feat/compact-premium-density
