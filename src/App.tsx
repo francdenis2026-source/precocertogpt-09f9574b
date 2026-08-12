@@ -57,6 +57,7 @@ import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/Publi
 import "./components/TrueHomepageKowalski.css";
 import "./components/KowalskiGlobalExperience.css";
 import "./components/KowalskiLegacyDeep.css";
+import "./components/ImpeccableFullSitePolish.css";
 
 export default function App() {
   return (
