@@ -1872,7 +1872,18 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                 <button 
                   className="button button--primary button--full"
                   disabled={basketItems.length === 0}
-                  onClick={() => setStep(3)}
+                  onClick={() => {
+                    const onlineStores = Object.keys(optimizationResult.storeBreakdown).filter(storeName => {
+                      const storeInfo = products.find(p => p.establishment === storeName);
+                      return storeInfo?.establishmentSlug === "reboucas"; // Simulação: apenas Rebouças tem venda online ativa agora
+                    });
+                    if (onlineStores.length > 0) {
+                      setStep(3); // Se tem venda online, vai para otimização para depois ir ao checkout
+                    } else {
+                      setStep(3);
+                    }
+                  }}
+
                 >
                   Ver Otimização <Sparkles />
                 </button>
