@@ -4,6 +4,7 @@ import "@fontsource-variable/inter";
 import "@fontsource-variable/manrope";
 import "./index.css";
 import "./pages/HomePremiumTasteRefinement.css";
+import "./styles/ImpeccableFinalPolish.css";
 import App from "./App";
 import { startPaymentNotifications } from "./lib/paymentNotifications";
 
