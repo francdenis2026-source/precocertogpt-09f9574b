@@ -1,160 +1,425 @@
-import { useState, useMemo } from "react";
-import { Heart, Trash2, ShoppingBasket, ArrowLeft, Plus, Search, PackageSearch, Sparkles } from "lucide-react";
-import { Product } from "../data/catalog";
+import { useState, useMemo, useEffect } from "react";
+import { 
+  Heart, ShoppingBasket, Search, Trash2, ArrowRight, Download, Upload, 
+  Bell, Filter, SlidersHorizontal, Package, Check, ChevronRight, X, AlertCircle
+} from "lucide-react";
+import { type Product } from "../data/catalog";
 import { money } from "../lib/pricing";
 
 interface FavoritesPageProps {
-  favorites: string[];
   products: Product[];
-  onToggleFavorite: (productId: string) => void;
-  onAddToBasket: (product: Product) => void;
+  favorites: string[];
+  toggleFavorite: (id: string) => void;
+  addBasket: (product: Product) => void;
+  setToast: (msg: string) => void;
+  user: any;
 }
 
-export function FavoritesPage({ favorites, products, onToggleFavorite, onAddToBasket }: FavoritesPageProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+export default function FavoritesPage({ 
+  products, 
+  favorites, 
+  toggleFavorite, 
+  addBasket,
+  setToast,
+  user
+}: FavoritesPageProps) {
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"name" | "brand" | "price">("name");
+  const [viewMode, setViewMode] = useState<"grid" | "brand">("grid");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [priceAlerts, setPriceAlerts] = useState<Record<string, boolean>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("precocerto:price_alerts") ?? "{}");
+    } catch {
+      return {};
+    }
+  });
 
   const favoriteProducts = useMemo(() => {
-    const favSet = new Set(favorites);
-    return products.filter(p => favSet.has(String(p.id)));
-  }, [favorites, products]);
+    return products.filter(p => favorites.includes(String(p.id)));
+  }, [products, favorites]);
 
-  const filteredFavorites = useMemo(() => {
-    if (!searchQuery.trim()) return favoriteProducts;
-    const q = searchQuery.toLowerCase();
-    return favoriteProducts.filter(p => 
-      p.name.toLowerCase().includes(q) || 
-      p.brand.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q)
+  const filteredProducts = useMemo(() => {
+    let result = favoriteProducts.filter(p => 
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.brand.toLowerCase().includes(search.toLowerCase())
     );
-  }, [favoriteProducts, searchQuery]);
+
+    result.sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "brand") return a.brand.localeCompare(b.brand);
+      if (sortBy === "price") return a.minPrice - b.minPrice;
+      return 0;
+    });
+
+    return result;
+  }, [favoriteProducts, search, sortBy]);
+
+  const productsByBrand = useMemo(() => {
+    const grouped: Record<string, Product[]> = {};
+    filteredProducts.forEach(p => {
+      if (!grouped[p.brand]) grouped[p.brand] = [];
+      grouped[p.brand].push(p);
+    });
+    return grouped;
+  }, [filteredProducts]);
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const removeSelected = () => {
+    selectedIds.forEach(id => toggleFavorite(id));
+    setSelectedIds([]);
+    setToast(`${selectedIds.length} itens removidos dos favoritos.`);
+  };
+
+  const addSelectedToBasket = () => {
+    selectedIds.forEach(id => {
+      const p = products.find(prod => String(prod.id) === id);
+      if (p) addBasket(p);
+    });
+    setSelectedIds([]);
+    setToast(`${selectedIds.length} itens adicionados à cesta.`);
+  };
+
+  const togglePriceAlert = (id: string) => {
+    const next = { ...priceAlerts, [id]: !priceAlerts[id] };
+    setPriceAlerts(next);
+    localStorage.setItem("precocerto:price_alerts", JSON.stringify(next));
+    setToast(next[id] ? "Alerta de preço ativado!" : "Alerta de preço desativado.");
+  };
+
+  const exportFavorites = () => {
+    const csvContent = [
+      ["ID", "Nome", "Marca", "Preço Mínimo", "Estabelecimento"],
+      ...favoriteProducts.map(p => [p.id, p.name, p.brand, p.minPrice, p.establishment])
+    ].map(e => e.join(",")).join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `favoritos-precocerto-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setToast("Backup dos favoritos exportado com sucesso.");
+  };
+
+  const importFavorites = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const lines = text.split("\n").slice(1);
+        const ids = lines.map(line => line.split(",")[0]).filter(id => id && products.some(p => String(p.id) === id));
+        
+        const newFavs = Array.from(new Set([...favorites, ...ids]));
+        localStorage.setItem("precocerto:favorites", JSON.stringify(newFavs));
+        setToast(`${ids.length} favoritos importados com sucesso.`);
+        window.location.reload();
+      } catch (err) {
+        setToast("Erro ao importar arquivo CSV.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  if (favorites.length === 0) {
+    return (
+      <div className="favorites-page" style={{ padding: '2rem 1rem', textAlign: 'center' }}>
+        <div className="empty-state" style={{ maxWidth: '400px', margin: '4rem auto' }}>
+          <div style={{ background: 'var(--surface-2)', width: '80px', height: '80px', borderRadius: '99px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+            <Heart size={40} color="var(--muted)" />
+          </div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>Sua lista está vazia</h2>
+          <p style={{ color: 'var(--muted)', marginBottom: '2rem' }}>Favorite os produtos que você mais compra para acompanhar preços e economizar.</p>
+          <a href="/buscar" className="button button--primary" style={{ textDecoration: 'none' }}>Explorar Produtos</a>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <main className="favorites-page shell py-12">
-      <header className="mb-10">
-        <div className="flex items-center gap-2 text-muted mb-4">
-          <a href="/" className="hover:text-main flex items-center gap-1 transition-colors">
-            <ArrowLeft size={16} /> Voltar ao início
-          </a>
-        </div>
-        
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="favorites-page" style={{ padding: '2rem 1rem' }}>
+      <header style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h1 className="text-4xl font-black mb-2 flex items-center gap-3">
-              <Heart className="text-red-500 fill-current" size={32} />
-              Meus Favoritos
-            </h1>
-            <p className="text-lg text-muted">
-              {favoriteProducts.length === 0 
-                ? "Você ainda não salvou nenhum produto." 
-                : `Você tem ${favoriteProducts.length} ${favoriteProducts.length === 1 ? 'produto salvo' : 'produtos salvos'} para acompanhar.`}
-            </p>
+            <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '0.25rem' }}>Meus Favoritos</h1>
+            <p style={{ color: 'var(--muted)' }}>{favoriteProducts.length} itens salvos na sua lista pessoal</p>
           </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="button button--outline" onClick={exportFavorites} title="Exportar backup">
+              <Download size={18} /> <span className="hide-mobile">Backup</span>
+            </button>
+            <label className="button button--outline" style={{ cursor: 'pointer' }} title="Importar backup">
+              <Upload size={18} /> <span className="hide-mobile">Restaurar</span>
+              <input type="file" accept=".csv" onChange={importFavorites} style={{ display: 'none' }} />
+            </label>
+          </div>
+        </div>
 
-          {favoriteProducts.length > 0 && (
-            <div className="relative max-w-sm w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
-              <input 
-                type="text"
-                placeholder="Filtrar favoritos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-xl border border-border bg-surface focus:border-green outline-none transition-all"
-              />
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', background: 'var(--surface)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
+          <div style={{ flex: 1, minWidth: '240px', position: 'relative' }}>
+            <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} size={18} />
+            <input 
+              type="text" 
+              placeholder="Buscar nos favoritos..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ width: '100%', paddingLeft: '40px', background: 'var(--surface-2)', border: 'none', borderRadius: '12px', height: '44px' }}
+            />
+          </div>
+          
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ position: 'relative' }}>
+              <select 
+                value={sortBy} 
+                onChange={e => setSortBy(e.target.value as any)}
+                className="button button--outline"
+                style={{ appearance: 'none', paddingRight: '2.5rem', height: '44px' }}
+              >
+                <option value="name">Nome</option>
+                <option value="brand">Marca</option>
+                <option value="price">Menor Preço</option>
+              </select>
+              <Filter size={16} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--muted)' }} />
             </div>
-          )}
+
+            <div style={{ display: 'flex', background: 'var(--surface-2)', borderRadius: '12px', padding: '4px' }}>
+              <button 
+                onClick={() => setViewMode("grid")}
+                style={{ padding: '8px', borderRadius: '8px', background: viewMode === "grid" ? 'var(--surface)' : 'transparent', border: 'none', color: viewMode === "grid" ? 'var(--text-main)' : 'var(--muted)' }}
+              >
+                <SlidersHorizontal size={18} />
+              </button>
+              <button 
+                onClick={() => setViewMode("brand")}
+                style={{ padding: '8px', borderRadius: '8px', background: viewMode === "brand" ? 'var(--surface)' : 'transparent', border: 'none', color: viewMode === "brand" ? 'var(--text-main)' : 'var(--muted)' }}
+              >
+                <Package size={18} />
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
-      {favoriteProducts.length === 0 ? (
-        <div className="favorites-empty flex flex-col items-center justify-center py-20 px-6 border-2 border-dashed border-border rounded-3xl bg-surface/50">
-          <div className="w-20 h-20 rounded-full bg-surface-2 flex items-center justify-center mb-6 text-muted">
-            <Heart size={40} />
+      {selectedIds.length > 0 && (
+        <div style={{ 
+          position: 'sticky', 
+          top: '80px', 
+          zIndex: 10, 
+          background: 'var(--blue)', 
+          color: 'white', 
+          padding: '1rem', 
+          borderRadius: '12px', 
+          marginBottom: '2rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: '0 8px 20px rgba(59, 130, 246, 0.3)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button onClick={() => setSelectedIds([])} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <X size={16} />
+            </button>
+            <strong style={{ fontSize: '1rem' }}>{selectedIds.length} selecionados</strong>
           </div>
-          <h2 className="text-2xl font-bold mb-3 text-center">Sua lista está vazia</h2>
-          <p className="text-muted text-center max-w-md mb-8">
-            Adicione produtos aos seus favoritos para acompanhar variações de preço e encontrá-los rapidamente quando precisar montar sua cesta.
-          </p>
-          <a href="/buscar" className="button button--primary px-8">
-            Explorar produtos <Sparkles size={18} className="ml-2" />
-          </a>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="button" style={{ background: 'white', color: 'var(--blue)', border: 'none' }} onClick={addSelectedToBasket}>
+              Adicionar à Cesta
+            </button>
+            <button className="button" style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none' }} onClick={removeSelected}>
+              Remover
+            </button>
+          </div>
         </div>
-      ) : filteredFavorites.length === 0 ? (
-        <div className="py-20 text-center bg-surface rounded-2xl border border-border">
-          <PackageSearch size={48} className="mx-auto text-muted mb-4 opacity-20" />
-          <p className="text-lg font-medium text-muted">Nenhum favorito encontrado para "{searchQuery}"</p>
-          <button onClick={() => setSearchQuery("")} className="text-green font-bold mt-2 hover:underline">
-            Limpar filtros
-          </button>
+      )}
+
+      {viewMode === "grid" ? (
+        <div className="favorites-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+          {filteredProducts.map(product => (
+            <FavoriteCard 
+              key={product.id}
+              product={product}
+              isSelected={selectedIds.includes(String(product.id))}
+              onSelect={() => toggleSelection(String(product.id))}
+              onToggleFavorite={() => toggleFavorite(String(product.id))}
+              onAddBasket={() => addBasket(product)}
+              hasAlert={!!priceAlerts[product.id]}
+              onToggleAlert={() => togglePriceAlert(String(product.id))}
+            />
+          ))}
         </div>
       ) : (
-        <div className="favorites-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFavorites.map(product => (
-            <div key={product.id} className="favorite-card group relative overflow-hidden flex flex-col p-5 bg-surface border border-border rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="flex gap-4 mb-4">
-                <div className="w-24 h-24 bg-surface-2 rounded-xl overflow-hidden flex-shrink-0 border border-border/50 group-hover:scale-105 transition-transform">
-                  <img 
-                    src={product.image_url || "/placeholder-product.png"} 
-                    alt={product.name}
-                    className="w-full h-full object-contain p-2"
+        <div className="favorites-brand-groups">
+          {Object.entries(productsByBrand).map(([brand, brandProducts]) => (
+            <section key={brand} style={{ marginBottom: '3rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{brand}</h2>
+                <span style={{ height: '1px', flex: 1, background: 'var(--border-soft)' }}></span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--muted)', background: 'var(--surface-2)', padding: '2px 8px', borderRadius: '6px' }}>{brandProducts.length} itens</span>
+              </div>
+              <div className="favorites-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                {brandProducts.map(product => (
+                  <FavoriteCard 
+                    key={product.id}
+                    product={product}
+                    isSelected={selectedIds.includes(String(product.id))}
+                    onSelect={() => toggleSelection(String(product.id))}
+                    onToggleFavorite={() => toggleFavorite(String(product.id))}
+                    onAddBasket={() => addBasket(product)}
+                    hasAlert={!!priceAlerts[product.id]}
+                    onToggleAlert={() => togglePriceAlert(String(product.id))}
                   />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-muted opacity-80">{product.brand}</span>
-                    <button 
-                      onClick={() => onToggleFavorite(String(product.id))}
-                      className="text-red-500/30 hover:text-red-500 transition-colors p-1"
-                      title="Remover dos favoritos"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                  <h3 className="font-bold text-lg leading-tight mb-1 truncate group-hover:text-green transition-colors">{product.name}</h3>
-                  <p className="text-sm text-muted mb-2">{product.size} • {product.category}</p>
-                  
-                  <div className="flex items-baseline gap-2">
-                    <strong className="text-2xl font-black text-main">{money(product.minPrice)}</strong>
-                    <span className="text-xs text-muted">em {product.establishment}</span>
-                  </div>
-                </div>
+                ))}
               </div>
-
-              <div className="mt-auto pt-4 flex gap-3 border-t border-border/50">
-                <button 
-                  onClick={() => onAddToBasket(product)}
-                  className="flex-1 button button--primary py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm"
-                >
-                  <Plus size={16} /> Adicionar à cesta
-                </button>
-                <a 
-                  href={`/buscar?q=${encodeURIComponent(product.name)}`}
-                  className="button button--ghost py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm px-4"
-                >
-                  Comparar
-                </a>
-              </div>
-            </div>
+            </section>
           ))}
         </div>
       )}
 
-      {favoriteProducts.length > 0 && (
-        <section className="mt-20 p-8 rounded-3xl bg-gradient-to-br from-green/5 to-blue/5 border border-green/10 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div>
-            <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
-              <ShoppingBasket className="text-green" />
-              Pronto para economizar?
-            </h3>
-            <p className="text-muted max-w-md">
-              Use seus produtos favoritos para criar uma cesta inteligente e encontrar o menor preço total no comércio de Feijó.
-            </p>
-          </div>
-          <a href="/cesta-basica" className="button button--primary px-10 py-4 text-lg shadow-lg shadow-green/20">
-            Ir para Cesta Inteligente
-          </a>
-        </section>
+      {filteredProducts.length === 0 && search && (
+        <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--muted)' }}>
+          <AlertCircle size={40} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+          <p>Nenhum favorito encontrado para "{search}"</p>
+        </div>
       )}
-    </main>
+    </div>
+  );
+}
+
+function FavoriteCard({ 
+  product, 
+  isSelected, 
+  onSelect, 
+  onToggleFavorite, 
+  onAddBasket,
+  hasAlert,
+  onToggleAlert
+}: { 
+  product: Product; 
+  isSelected: boolean; 
+  onSelect: () => void; 
+  onToggleFavorite: () => void;
+  onAddBasket: () => void;
+  hasAlert: boolean;
+  onToggleAlert: () => void;
+}) {
+  return (
+    <div className={`favorite-card ${isSelected ? 'selected' : ''}`} style={{ 
+      position: 'relative', 
+      background: 'var(--surface)', 
+      borderRadius: '20px', 
+      padding: '1.25rem',
+      border: isSelected ? '2px solid var(--blue)' : '1px solid var(--border)',
+      transition: 'all 0.2s ease',
+      cursor: 'pointer'
+    }} onClick={onSelect}>
+      <div style={{ position: 'absolute', top: '12px', left: '12px', zIndex: 2 }}>
+        <div style={{ 
+          width: '24px', 
+          height: '24px', 
+          borderRadius: '6px', 
+          border: '2px solid var(--border)', 
+          background: isSelected ? 'var(--blue)' : 'white',
+          borderColor: isSelected ? 'var(--blue)' : 'var(--border)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white'
+        }}>
+          {isSelected && <Check size={16} />}
+        </div>
+      </div>
+
+      <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2, display: 'flex', gap: '0.5rem' }}>
+        <button 
+          className={`icon-button ${hasAlert ? 'active' : ''}`} 
+          onClick={(e) => { e.stopPropagation(); onToggleAlert(); }}
+          style={{ 
+            background: hasAlert ? 'var(--gold-soft)' : 'var(--surface-2)', 
+            color: hasAlert ? 'var(--gold)' : 'var(--muted)',
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
+          title={hasAlert ? "Alerta ativo" : "Criar alerta de preço"}
+        >
+          <Bell size={18} fill={hasAlert ? "currentColor" : "none"} />
+        </button>
+        <button 
+          className="icon-button" 
+          onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+          style={{ 
+            background: 'var(--red-soft)', 
+            color: 'var(--red)', 
+            width: '36px', 
+            height: '36px', 
+            borderRadius: '10px',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
+          title="Remover dos favoritos"
+        >
+          <Trash2 size={18} />
+        </button>
+      </div>
+
+      <div style={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', background: 'var(--surface-2)', borderRadius: '12px', padding: '1rem' }}>
+        <img src={product.image_url || "/products/arroz-tio-joao-5kg.png"} alt={product.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+      </div>
+
+      <div style={{ marginBottom: '1.25rem' }}>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>{product.brand}</span>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0.25rem 0', minHeight: '2.6em', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.name}</h3>
+        <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{product.size} • {product.establishment}</p>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.25rem' }}>
+        <div>
+          <span style={{ fontSize: '0.7rem', color: 'var(--muted)', display: 'block' }}>Menor preço em Feijó</span>
+          <strong style={{ fontSize: '1.5rem', color: 'var(--green)', fontWeight: 900 }}>{money(product.minPrice)}</strong>
+        </div>
+        {product.previousPrice && product.previousPrice > product.minPrice && (
+          <span style={{ color: 'var(--green)', fontSize: '0.8rem', fontWeight: 850, background: 'var(--green-soft)', padding: '2px 6px', borderRadius: '4px', marginBottom: '4px' }}>
+            -{Math.round((1 - product.minPrice / product.previousPrice) * 100)}%
+          </span>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <button 
+          className="button button--primary" 
+          style={{ flex: 1, height: '44px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+          onClick={(e) => { e.stopPropagation(); onAddBasket(); }}
+        >
+          <ShoppingBasket size={18} /> <span className="hide-mobile">Cesta</span>
+        </button>
+        <button 
+          className="button button--outline" 
+          style={{ width: '44px', height: '44px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={(e) => { e.stopPropagation(); window.location.href = `/buscar?q=${encodeURIComponent(product.name)}`; }}
+          title="Comparar preços"
+        >
+          <ArrowRight size={18} />
+        </button>
+      </div>
+    </div>
   );
 }

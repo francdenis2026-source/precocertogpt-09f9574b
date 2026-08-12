@@ -30,6 +30,7 @@ import { AdminStoreCatalog } from "./components/AdminStoreCatalog";
 import { getStoreLogoUrl } from "./data/storeLogos";
 import { AdminUserManagement } from "./components/AdminUserManagement";
 import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
+import FavoritesPage from "./pages/FavoritesPage";
 
 
 const initialCatalog = buildCatalog();
@@ -5152,7 +5153,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
 
 
-export default function PrecoCertoApp({ renderContent }: { renderContent?: (props: any) => ReactNode }) {
+export default function PrecoCertoApp() {
   const pathname = useLocation().pathname || "/";
   const [products,setProducts]=useState<Product[]>(initialProducts);
   const [stores,setStores]=useState<StoreRow[]>(initialStores);
@@ -5501,15 +5502,14 @@ export default function PrecoCertoApp({ renderContent }: { renderContent?: (prop
     return null;
   }
 
-  if (renderContent) return <>{renderContent(props)}</>;
-
   let page:ReactNode;
   if(pathname==="/") page=<HomePage {...props}/>;
   else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
   else if(pathname==="/acougues"||pathname==="/categoria/acougue") page=<ButchersPage {...props}/>;
   else if(pathname==="/planos" && isEnabled("consumerPlans")) page=<PlansPage/>;
   else if(pathname==="/meus-pedidos"||pathname==="/historico-pedidos") page=<CustomerOrders/>;
-  else if(pathname==="/alertas"||pathname==="/perfil"||pathname==="/favoritos") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user} setUser={setUserAndUpdateStorage}/>;
+  else if(pathname==="/perfil") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user} setUser={setUserAndUpdateStorage}/>;
+  else if(pathname==="/alertas"||pathname==="/favoritos") page=<FavoritesPage {...props} user={user} />;
   else if(pathname==="/cesta"||pathname==="/cesta-basica"||pathname==="/checkout") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user} syncStatus={syncStatus} stores={stores} setToast={setToast}/>;
   else if(pathname==="/dorinha"||pathname==="/escritora") page=<DorinhaAuthorStore />;
 
@@ -5517,7 +5517,6 @@ export default function PrecoCertoApp({ renderContent }: { renderContent?: (prop
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
   else page=<GenericPage {...props} metrics={metrics} path={pathname} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
-
 
   // Expondo o toast globalmente para o useEffect da BasketPage poder disparar erros de rede
   useEffect(() => {
