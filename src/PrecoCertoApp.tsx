@@ -5653,9 +5653,6 @@ export default function PrecoCertoApp() {
                     </div>
                   </div>
                 )}
-                    </strong>
-                  </div>
-                </div>
 
                 <div style={{ marginTop: '1.25rem' }}>
                   <a 
