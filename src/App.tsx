@@ -1,6 +1,5 @@
 import "./performance/disableClientImageProcessing";
 import "./performance/tolerantDomMutations";
-import "./components/TrueHomepageKowalski.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import PrecoCertoApp from "./PrecoCertoApp";
 import { MaxPriceStoreLabels } from "./components/MaxPriceStoreLabels";
@@ -55,6 +54,7 @@ import { AdminMerchantManagement } from "./components/AdminMerchantManagement";
 import { CustomerOrders } from "./components/CustomerOrders";
 import { MercadoPagoCallback } from "./components/MercadoPagoCallback";
 import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/PublicFooterServicePages";
+import "./components/TrueHomepageKowalski.css";
 
 export default function App() {
   return (
