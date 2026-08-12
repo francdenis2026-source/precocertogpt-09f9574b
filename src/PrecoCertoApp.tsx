@@ -659,56 +659,49 @@ function Footer({ user }: { user?: any }) {
   return (
     <footer className="site-footer">
       <div className="shell footer-grid">
-        <div className="footer-brand-column">
+        <div>
           <Brand inverse />
-          <p className="footer-description">
-            Compare preços reais no comércio de Feijó e transforme cada compra em economia.
-          </p>
-          <div className="footer-meta">
-            <span className="footer-place"><MapPin size={14} /> Feijó • Acre • Brasil</span>
-          </div>
+          <p>Compare preços reais em Feijó e transforme cada compra em economia inteligente.</p>
+          <span className="footer-place"><MapPin size={15} /> Feijó • Acre</span>
         </div>
-        
-        <div className="footer-links-column">
-          <h3>Descobrir</h3>
-          <nav>
+        <div>
+          <h3>Explorar</h3>
+          <nav aria-label="Links de exploração">
             <a href="/buscar">Comparar preços</a>
-            <a href="/acougues">Açougues e carnes</a>
+            <a href="/acougues">Açougues</a>
             <a href="/cesta">Cesta inteligente</a>
-            <a href="/estabelecimentos">Estabelecimentos</a>
-            <a href="/farmacias">Farmácias de plantão</a>
+            <a href="/estabelecimentos">Lojas</a>
           </nav>
         </div>
-        
-        <div className="footer-links-column">
-          <h3>Empresa</h3>
-          <nav>
-            <a href="/#como-funciona">Como funciona</a>
+        <div>
+          <h3>Suporte</h3>
+          <nav aria-label="Links de suporte">
             <a href="/lojista">Para empresas</a>
-            <a href="/colaborar">Colaborar</a>
             <a href="/fale-conosco">Fale conosco</a>
+            <a href="/admin">Administração</a>
           </nav>
         </div>
-        
-        <div className="footer-links-column">
-          <h3>Conta</h3>
-          <nav>
-            {user && <a href="/meus-pedidos">Meus pedidos</a>}
-            <a href="/login">Entrar</a>
-            <a href="/cadastro">Criar conta</a>
+        <div>
+          <h3>Sua Conta</h3>
+          <nav aria-label="Links da conta">
+            {user ? (
+              <>
+                <a href="/meus-pedidos">Meus pedidos</a>
+                <a href="/perfil">Meu perfil</a>
+              </>
+            ) : (
+              <>
+                <a href="/login">Entrar</a>
+                <a href="/cadastro">Criar conta</a>
+              </>
+            )}
             <a href="/planos">Planos</a>
-            <a href="/admin">Administrativo</a>
           </nav>
         </div>
       </div>
-      
       <div className="shell footer-bottom">
-        <div className="footer-credits">
-          <span>SKAES NET TECHNOLOGY • FRANC D’NIS</span>
-        </div>
-        <div className="footer-copyright">
-          <span>© 2026 PreçoCerto. Todos os direitos reservados.</span>
-        </div>
+        <span>SKAES NET TECHNOLOGY • FRANC D’NIS</span>
+        <span>© 2026 PreçoCerto. Todos os direitos reservados.</span>
       </div>
     </footer>
   );
