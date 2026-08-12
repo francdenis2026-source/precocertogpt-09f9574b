@@ -561,8 +561,9 @@ function Header({ basketCount, favoritesCount, user, onLogout, products, favorit
       </nav>
       <div className="header-actions">
         <a className="icon-button header-space-link" href={accountSpace.href} aria-label={accountSpace.label} title={accountSpace.label}>{accountSpace.kind==="admin"?<ShieldCheck size={19}/>:<Store size={19}/>}<span>{accountSpace.label}</span></a>
-        <ThemeToggle compact />
+        
         <a className="icon-button header-action-button header-search-button" href="/buscar" aria-label="Pesquisar produtos" title="Buscar produtos"><Search size={20} aria-hidden="true" /></a>
+        
         <div className="favorites-dropdown-container" style={{ position: 'relative' }}>
           <a className="icon-button header-action-button favorites-button" href="/favoritos" aria-label={user ? `${favoritesCount} produtos favoritos` : "Entre para ver favoritos"} title={user ? "Meus Favoritos" : "Entre para ver favoritos"} onClick={(e) => { 
             if (!user) { e.preventDefault(); window.location.href = `/login?redirect=${encodeURIComponent('/favoritos')}`; } 
@@ -591,10 +592,12 @@ function Header({ basketCount, favoritesCount, user, onLogout, products, favorit
             </div>
           )}
         </div>
+
         <a className="icon-button header-action-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`} title="Minha Cesta Inteligente">
           <ShoppingBasket size={20} aria-hidden="true" />
           {basketCount > 0 && <span className="badge" key={basketCount} aria-hidden="true">{basketCount}</span>}
         </a>
+
 
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -629,6 +632,7 @@ function Header({ basketCount, favoritesCount, user, onLogout, products, favorit
         <div className="drawer-panel">
           <div className="drawer-head">
             <ThemeToggle/>
+
             <button className="icon-button" onClick={() => setOpen(false)} aria-label="Fechar menu de navegação">
               <X aria-hidden="true" />
             </button>

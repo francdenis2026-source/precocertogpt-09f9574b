@@ -366,7 +366,9 @@ body {
   color: var(--text-main);
   font-weight: 600;
   font-size: 0.85rem;
+  box-shadow: var(--shadow-sm);
 }
+
 
 .theme-toggle:hover {
   background: var(--blue-soft);
