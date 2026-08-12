@@ -1,5 +1,14 @@
-import { optimizeBasket, type BasketItemConfig, type OptimizationMode } from '../lib/smartBasket';
+import { optimizeBasket, type BasketItemConfig } from '../lib/smartBasket';
 import { type Product } from '../data/catalog';
+
+// Mocking vitest globals for the sandbox
+const describe = (name: string, fn: () => void) => { console.log(`Running test suite: ${name}`); fn(); };
+const test = (name: string, fn: () => void) => { console.log(`Running test: ${name}`); fn(); };
+const expect = (actual: any) => ({
+  toBe: (expected: any) => {
+    if (actual !== expected) throw new Error(`Expected ${expected}, but got ${actual}`);
+  }
+});
 
 describe('Smart Basket Coupons', () => {
   const mockCatalog: Product[] = [
@@ -16,7 +25,5 @@ describe('Smart Basket Coupons', () => {
     const result = optimizeBasket(mockCatalog, items, 'cheapest_multi');
     expect(result.total).toBe(40); // 20*1 + 10*2
   });
-
-  // Note: Coupon logic currently resides in PrecoCertoApp.tsx component state
-  // This test file serves as a foundation for future library-side coupon logic
 });
+

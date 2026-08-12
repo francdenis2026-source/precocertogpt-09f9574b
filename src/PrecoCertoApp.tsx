@@ -1941,26 +1941,46 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                   style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface-1)' }}
                 />
               </div>
-              <button 
-                className="button button--secondary" 
-                onClick={() => {
-                  const code = couponCode.toUpperCase().trim();
-                  if (code === 'FEIJO2026') {
-                     setCouponDiscount(15);
-                     window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cupom aplicado: R$ 15,00 de desconto!", type: "success" } }));
-                  } else if (code === 'BEMVINDO') {
-                     setCouponDiscount(5);
-                     window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cupom aplicado: R$ 5,00 de desconto!", type: "success" } }));
-                  } else if (code === "") {
-                     setCouponDiscount(0);
-                  } else {
-                     setCouponDiscount(0);
-                     window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cupom inválido ou expirado.", type: "error" } }));
-                  }
-                }}
-              >
-                Aplicar
-              </button>
+              {couponDiscount > 0 ? (
+                <button 
+                  className="button button--outline" 
+                  style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
+                  onClick={() => {
+                    setCouponCode("");
+                    setCouponDiscount(0);
+                    window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cupom removido.", type: "info" } }));
+                  }}
+                >
+                  Remover
+                </button>
+              ) : (
+                <button 
+                  className="button button--secondary" 
+                  onClick={() => {
+                    const code = couponCode.toUpperCase().trim();
+                    if (code === 'FEIJO2026') {
+                       setCouponDiscount(15);
+                       window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cupom aplicado: R$ 15,00 de desconto!", type: "success" } }));
+                    } else if (code === 'BEMVINDO') {
+                       setCouponDiscount(5);
+                       window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cupom aplicado: R$ 5,00 de desconto!", type: "success" } }));
+                    } else if (code === "") {
+                       setCouponDiscount(0);
+                    } else {
+                       setCouponDiscount(0);
+                       let reason = "Código inexistente.";
+                       if (code === "EXPIRADO") reason = "Este cupom expirou em 2025.";
+                       else if (code.length < 4) reason = "Código muito curto.";
+                       
+                       window.dispatchEvent(new CustomEvent('pc:set-toast', { 
+                         detail: { message: `Cupom inválido: ${reason}`, type: "error" } 
+                       }));
+                    }
+                  }}
+                >
+                  Aplicar
+                </button>
+              )}
               {couponDiscount > 0 && (
                 <div style={{ color: 'var(--green)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} /> -{money(couponDiscount)}
