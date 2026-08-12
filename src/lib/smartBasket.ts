@@ -23,6 +23,7 @@ export interface BasketResult {
   savings: number;
   travelCost?: number;
   couponDiscount?: number;
+  couponError?: string;
   items: Array<{
     product: Product;
     quantity: number;
