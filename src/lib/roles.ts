@@ -126,3 +126,60 @@ export async function requestPasswordReset(email: string) {
 export async function signOut() {
   if (supabase) await supabase.auth.signOut();
 }
+
+/**
+ * Sincroniza os favoritos do usuário com o Supabase.
+ */
+export async function syncFavorites(productIds: string[]): Promise<void> {
+  if (!supabase) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return;
+
+  const userId = session.user.id;
+
+  // Obter favoritos atuais no banco para comparar
+  const { data: remoteFavs } = await supabase
+    .from('user_favorites')
+    .select('product_id')
+    .eq('user_id', userId);
+
+  const remoteIds = new Set(remoteFavs?.map(f => f.product_id) || []);
+  const localIds = new Set(productIds);
+
+  // Identificar o que inserir
+  const toInsert = productIds
+    .filter(id => !remoteIds.has(id))
+    .map(id => ({ user_id: userId, product_id: id }));
+
+  // Identificar o que remover
+  const toRemove = Array.from(remoteIds).filter(id => !localIds.has(id));
+
+  if (toInsert.length > 0) {
+    await supabase.from('user_favorites').insert(toInsert);
+  }
+
+  if (toRemove.length > 0) {
+    await supabase.from('user_favorites').delete().in('product_id', toRemove).eq('user_id', userId);
+  }
+}
+
+/**
+ * Carrega os favoritos do usuário do Supabase.
+ */
+export async function loadRemoteFavorites(): Promise<string[]> {
+  if (!supabase) return [];
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return [];
+
+  const { data, error } = await supabase
+    .from('user_favorites')
+    .select('product_id')
+    .eq('user_id', session.user.id);
+
+  if (error) {
+    console.error("Erro ao carregar favoritos remotos:", error);
+    return [];
+  }
+
+  return data.map(f => f.product_id);
+}
