@@ -258,14 +258,16 @@ export default function FavoritesPage({
                 value={sortBy} 
                 onChange={e => setSortBy(e.target.value as any)}
                 className="button button--outline"
-                style={{ appearance: 'none', paddingRight: '2.5rem', height: '44px' }}
+                style={{ appearance: 'none', paddingRight: '2.5rem', height: '44px', fontWeight: 600 }}
               >
-                <option value="name">Nome</option>
+                <option value="name">Nome (A-Z)</option>
                 <option value="brand">Marca</option>
                 <option value="price">Menor Preço</option>
+                <option value="newest">Mais Recentes</option>
               </select>
               <Filter size={16} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--muted)' }} />
             </div>
+
 
             <div style={{ display: 'flex', background: 'var(--surface-2)', borderRadius: '12px', padding: '4px' }}>
               <button 
