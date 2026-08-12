@@ -115,6 +115,63 @@ export default function FavoritesPage({
     setToast("Backup dos favoritos exportado com sucesso.");
   };
 
+  const exportFavoritesPDF = () => {
+    try {
+      const doc = new jsPDF();
+      
+      // Header do PDF
+      doc.setFillColor(5, 38, 74); // Navy
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.text("PreçoCerto Feijó", 15, 20);
+      doc.setFontSize(10);
+      doc.text(`Minha Lista de Favoritos - ${new Date().toLocaleDateString('pt-BR')}`, 15, 30);
+      
+      // Tabela de produtos
+      const tableData = favoriteProducts.map(p => [
+        p.name,
+        p.brand,
+        p.establishment,
+        money(p.minPrice)
+      ]);
+
+      autoTable(doc, {
+        startY: 50,
+        head: [["Produto", "Marca", "Loja", "Preço Mínimo"]],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [49, 181, 34], textColor: [255, 255, 255] }, // Green
+        styles: { fontSize: 9 },
+        columnStyles: {
+          3: { halign: 'right', fontStyle: 'bold' }
+        }
+      });
+
+      // Rodapé
+      const pageCount = (doc as any).internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(
+          "Economize em Feijó com PreçoCerto - www.precocerto.live", 
+          105, 
+          285, 
+          { align: 'center' }
+        );
+      }
+
+      doc.save(`favoritos-precocerto-${new Date().toISOString().split('T')[0]}.pdf`);
+      setToast("Lista em PDF gerada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      setToast("Erro ao gerar PDF de favoritos.");
+    }
+  };
+
+
   const importFavorites = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
