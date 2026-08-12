@@ -2,7 +2,7 @@
 import {
   Activity, AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
   ChevronDown, ChevronRight, CircleDollarSign, Clock3, CreditCard, Database, Download, Edit, ExternalLink, Flag,
-  Heart, Home, LayoutDashboard, LineChart, ListChecks, Loader2, LockKeyhole, MapPin, Menu, Moon, PackageSearch,
+  Heart, Home, Info, LayoutDashboard, LineChart, ListChecks, Loader2, LockKeyhole, MapPin, Menu, Moon, PackageSearch,
   Plus, Printer, Receipt, RotateCcw, Save, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Sun, Trash2, TrendingDown, TrendingUp, Truck, Upload, UserRound, Users, X,
 } from "lucide-react";
@@ -5629,30 +5629,46 @@ export default function PrecoCertoApp() {
                   </div>
                 </div>
 
-                {(selectedProduct.storeCount > 1 || (selectedProduct.offers && selectedProduct.offers.length > 1)) && (
-                  <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--surface-3)', borderRadius: '12px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', border: '1px solid var(--border-soft)' }}>
-                    <div style={{ textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mínimo</span>
-                      <strong style={{ fontSize: '0.9rem', color: 'var(--green)' }}>{money(selectedProduct.minPrice)}</strong>
+                <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--surface-3)', borderRadius: '12px', border: '1px solid var(--border-soft)' }}>
+                  {(selectedProduct.storeCount > 1 || (selectedProduct.offers && selectedProduct.offers.length > 1)) ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mínimo</span>
+                        <strong style={{ fontSize: '0.9rem', color: 'var(--green)' }}>
+                          {Number.isFinite(selectedProduct.minPrice) ? money(selectedProduct.minPrice) : '---'}
+                        </strong>
+                      </div>
+                      <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border-soft)', borderRight: '1px solid var(--border-soft)' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Médio</span>
+                        <strong style={{ fontSize: '0.9rem', color: 'var(--blue)' }}>
+                          {(() => {
+                            const avg = selectedProduct.avgPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
+                              ? selectedProduct.price_history.reduce((a: number, b: any) => a + b.value, 0) / selectedProduct.price_history.length
+                              : selectedProduct.minPrice);
+                            return Number.isFinite(avg) ? money(avg) : '---';
+                          })()}
+                        </strong>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Máximo</span>
+                        <strong style={{ fontSize: '0.9rem', color: 'var(--red)' }}>
+                          {(() => {
+                            const max = selectedProduct.maxPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
+                              ? Math.max(...selectedProduct.price_history.map((h: any) => h.value))
+                              : (selectedProduct.previousPrice || selectedProduct.minPrice));
+                            return Number.isFinite(max) ? money(max) : '---';
+                          })()}
+                        </strong>
+                      </div>
                     </div>
-                    <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border-soft)', borderRight: '1px solid var(--border-soft)' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Médio</span>
-                      <strong style={{ fontSize: '0.9rem', color: 'var(--blue)' }}>
-                        {money(selectedProduct.avgPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
-                          ? selectedProduct.price_history.reduce((a: number, b: any) => a + b.value, 0) / selectedProduct.price_history.length
-                          : selectedProduct.minPrice))}
-                      </strong>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '4px 0' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                        <Info size={14} /> Oferta exclusiva neste estabelecimento em Feijó
+                      </span>
                     </div>
-                    <div style={{ textAlign: 'center' }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Máximo</span>
-                      <strong style={{ fontSize: '0.9rem', color: 'var(--red)' }}>
-                        {money(selectedProduct.maxPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
-                          ? Math.max(...selectedProduct.price_history.map((h: any) => h.value))
-                          : (selectedProduct.previousPrice || selectedProduct.minPrice)))}
-                      </strong>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 <div style={{ marginTop: '1.25rem' }}>
                   <a 
