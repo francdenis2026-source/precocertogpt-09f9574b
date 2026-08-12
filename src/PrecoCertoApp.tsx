@@ -370,6 +370,8 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
     removeBackground(src).then(setProcessedSrc);
   }, [src]);
 
+  const priceDisplay = product.minPrice ? money(Number(product.minPrice)) : '---';
+
   return (
     <div className={`product-photo product-photo--${size}`}>
       <img 
@@ -386,6 +388,26 @@ function ProductImage({ product, size = "default", eager = false }: { product: P
         }} 
       />
       <div className="product-photo-overlay" aria-hidden="true" />
+      
+      {/* Padronização visual do preço no card se em modo compacto/default */}
+      {(size === "default" || size === "compact") && product.minPrice > 0 && (
+        <div className="card-price-overlay" style={{
+          position: 'absolute',
+          bottom: '8px',
+          right: '8px',
+          background: 'rgba(255,255,255,0.9)',
+          backdropFilter: 'blur(4px)',
+          padding: '2px 8px',
+          borderRadius: '20px',
+          fontSize: '0.85rem',
+          fontWeight: 700,
+          color: 'var(--green)',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          zIndex: 2
+        }}>
+          {priceDisplay}
+        </div>
+      )}
     </div>
   );
 }
