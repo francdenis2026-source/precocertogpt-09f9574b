@@ -1,0 +1,8 @@
+[mcp_servers.shadcn_ui]
+command = "npx"
+args = ["-y", "@jpisnice/shadcn-ui-mcp-server", "--framework", "react", "--ui-library", "radix"]
+env_vars = ["GITHUB_PERSONAL_ACCESS_TOKEN"]
+startup_timeout_sec = 30
+tool_timeout_sec = 60
+enabled = true
+default_tools_approval_mode = "prompt"
