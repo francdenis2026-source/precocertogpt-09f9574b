@@ -10,7 +10,6 @@ import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
 import { TrueHomepage } from "./components/TrueHomepage";
 import { HomeV2 } from "./pages/HomeV2";
-import "./pages/HomeV2Premium.css";
 import { SmartCompareSearchProMax } from "./components/SmartCompareSearchProMax";
 import { HomepageSearchKeyboardProMax } from "./components/HomepageSearchKeyboardProMax";
 import { ProductMediaClippingProMax } from "./components/ProductMediaClippingProMax";
@@ -61,6 +60,7 @@ import "./components/KowalskiGlobalExperience.css";
 import "./components/KowalskiLegacyDeep.css";
 import "./components/ImpeccableFullSitePolish.css";
 import "./components/ImpeccableStructuralLegacy.css";
+import "./pages/HomeV2Premium.css";
 
 export default function App() {
   return (
