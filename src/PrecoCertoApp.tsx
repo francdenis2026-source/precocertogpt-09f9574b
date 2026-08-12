@@ -1,7 +1,7 @@
 
 import {
   Activity, AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
-  ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit, Flag,
+  ChevronDown, ChevronRight, CircleDollarSign, Clock3, Database, Download, Edit, ExternalLink, Flag,
   Heart, Home, LayoutDashboard, LineChart, ListChecks, Loader2, MapPin, Menu, Moon, PackageSearch,
   Plus, Printer, Receipt, RotateCcw, Save, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Sun, Trash2, TrendingDown, TrendingUp, Upload, UserRound, Users, X,
@@ -4911,16 +4911,41 @@ export default function PrecoCertoApp() {
   }, [selectedProduct]);
 
   // Validação de autenticação para adicionar itens
-  function addBasket(p: Product) {
+  async function addBasket(p: Product) {
+    const nextCart = [...cart];
+    if (!nextCart.some(i => i.id === p.id)) {
+      nextCart.push(p);
+      setCart(nextCart);
+      localStorage.setItem("precocerto:basket", JSON.stringify(nextCart));
+    }
+
     if (!user) {
-      setToast("Acesse sua conta para montar e salvar sua cesta.");
+      setToast(`${p.name} na cesta (local). Acesse para sincronizar.`);
       return;
     }
-    setCart(current => {
-      if (current.some(i => i.id === p.id)) return current;
-      return [...current, p];
-    });
-    setToast(`${p.name} adicionado à cesta.`);
+
+    try {
+      // Sincronização imediata com o cloud se logado
+      const itemsConfig = nextCart.map(item => ({
+        productName: item.name,
+        category: item.category,
+        quantity: 1,
+        unit: (item.unit as any) || "un",
+        isEssential: true
+      }));
+
+      await saveBasket(
+        (user as any).id,
+        "Cesta Ativa",
+        "within_budget",
+        200,
+        itemsConfig,
+        { total: 0, savings: 0, items: [], storeBreakdown: {} }
+      );
+      setToast(`${p.name} adicionado e sincronizado.`);
+    } catch (err) {
+      setToast(`${p.name} salvo localmente.`);
+    }
     setUndoAction(null);
   }
 
@@ -4975,6 +5000,16 @@ export default function PrecoCertoApp() {
       const removing = current.includes(productId);
       const next = removing ? current.filter(id => id !== productId) : [...current, productId];
       localStorage.setItem("precocerto:favorites", JSON.stringify(next));
+      
+      // Se adicionar aos favoritos, também adiciona à cesta se for um produto do catálogo
+      if (!removing) {
+        const p = products.find(prod => String(prod.id) === productId);
+        if (p) {
+          // Pequeno timeout para não conflitar com o estado de favorites
+          setTimeout(() => addBasket(p), 100);
+        }
+      }
+
       if (removing) {
         const actions = JSON.parse(localStorage.getItem("precocerto:actions") ?? "[]");
         localStorage.setItem("precocerto:actions", JSON.stringify(actions.filter((item: any) => !(item.action === "favorite" && item.id === productId))));
@@ -5064,7 +5099,7 @@ export default function PrecoCertoApp() {
   else if(pathname==="/acougues"||pathname==="/categoria/acougue") page=<ButchersPage {...props}/>;
   else if(pathname==="/planos" && isEnabled("consumerPlans")) page=<PlansPage/>;
   else if(pathname==="/alertas"||pathname==="/perfil"||pathname==="/favoritos") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user} setUser={setUserAndUpdateStorage}/>;
-  else if(pathname==="/cesta"||pathname==="/cesta-basica") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user} syncStatus={syncStatus}/>;
+  else if(pathname==="/cesta"||pathname==="/cesta-basica"||pathname==="/checkout") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user} syncStatus={syncStatus}/>;
   else if(pathname.startsWith("/cesta/snapshot/")) page=<SnapshotPage {...props}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
@@ -5245,17 +5280,32 @@ export default function PrecoCertoApp() {
               </button>
             </div>
             
-            {/* Opção de Venda Online / Link Externo quando disponível no estabelecimento */}
+            {/* Opção de Venda Online / Checkout Direto */}
             {selectedProduct.establishmentSlug === "reboucas" && (
-              <a 
-                href="https://www.supermercadosreboucas.com.br" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="button button--gold button--full"
-                style={{ height: '54px', textDecoration: 'none', justifyContent: 'center' }}
-              >
-                <ShoppingBasket size={20} style={{ marginRight: '8px' }} /> Comprar Online
-              </a>
+              <div style={{ display: 'flex', gap: '1rem', width: '100%' }}>
+                <a 
+                  href={`/checkout?product=${selectedProduct.id}`}
+                  className="button button--gold"
+                  style={{ flex: 1, height: '54px', textDecoration: 'none', justifyContent: 'center' }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    addBasket(selectedProduct);
+                    window.location.href = "/cesta";
+                  }}
+                >
+                  <ShoppingBasket size={20} style={{ marginRight: '8px' }} /> Comprar Agora
+                </a>
+                <a 
+                  href="https://www.supermercadosreboucas.com.br" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="button button--outline"
+                  style={{ height: '54px', width: '54px', padding: 0, justifyContent: 'center' }}
+                  title="Ver no site da loja"
+                >
+                  <ExternalLink size={20} />
+                </a>
+              </div>
             )}
             
             <button className="button button--ghost" style={{ width: '100%', marginTop: '0.5rem' }} onClick={() => { 
