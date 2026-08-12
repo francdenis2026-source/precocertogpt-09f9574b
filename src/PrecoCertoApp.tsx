@@ -5355,14 +5355,15 @@ export default function PrecoCertoApp() {
   }
 
   function toggleFavorite(productId: string) {
-    if (!user) {
-      setToast("Entre na sua conta para salvar favoritos.");
-      return;
-    }
     setFavorites(current => {
       const removing = current.includes(productId);
       const next = removing ? current.filter(id => id !== productId) : [...current, productId];
       localStorage.setItem("precocerto:favorites", JSON.stringify(next));
+      
+      // Sincronização com Supabase em segundo plano se logado
+      if (user) {
+        import("./lib/roles").then(m => m.syncFavorites(next)).catch(err => console.error("Erro sync favoritos:", err));
+      }
       
       // Se adicionar aos favoritos, também adiciona à cesta se for um produto do catálogo
       if (!removing) {
@@ -5386,6 +5387,7 @@ export default function PrecoCertoApp() {
       return next;
     });
   }
+
 
   const setUserAndUpdateStorage = (newUser: any) => {
     setUser(newUser);
