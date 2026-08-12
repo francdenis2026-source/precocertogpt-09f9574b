@@ -1,0 +1,50 @@
+name: Install Emil Kowalski skills
+
+on:
+  push:
+    branches:
+      - chore/install-emilkowalski-skills
+    paths:
+      - .github/workflows/install-emilkowalski-skills.yml
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout install branch
+        uses: actions/checkout@v4
+        with:
+          ref: chore/install-emilkowalski-skills
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Emil Kowalski skills for Codex
+        env:
+          DISABLE_TELEMETRY: '1'
+        run: npx skills@latest add emilkowalski/skills --skill '*' --agent codex --yes --copy
+
+      - name: Verify installed skills
+        env:
+          DISABLE_TELEMETRY: '1'
+        run: npx skills@latest ls --agent codex
+
+      - name: Commit installed skills and remove temporary workflow
+        run: |
+          rm .github/workflows/install-emilkowalski-skills.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- .agents/skills
+          git add -u -- .github/workflows/install-emilkowalski-skills.yml
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: install Emil Kowalski design skills"
+          git push origin HEAD:chore/install-emilkowalski-skills
