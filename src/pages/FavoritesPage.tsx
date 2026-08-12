@@ -1,10 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { 
   Heart, ShoppingBasket, Search, Trash2, ArrowRight, Download, Upload, 
-  Bell, Filter, SlidersHorizontal, Package, Check, ChevronRight, X, AlertCircle
+  Bell, Filter, SlidersHorizontal, Package, Check, ChevronRight, X, AlertCircle, FileText, Share2
 } from "lucide-react";
 import { type Product } from "../data/catalog";
 import { money } from "../lib/pricing";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+
 
 interface FavoritesPageProps {
   products: Product[];
@@ -24,7 +27,7 @@ export default function FavoritesPage({
   user
 }: FavoritesPageProps) {
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"name" | "brand" | "price">("name");
+  const [sortBy, setSortBy] = useState<"name" | "brand" | "price" | "newest">("newest");
   const [viewMode, setViewMode] = useState<"grid" | "brand">("grid");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [priceAlerts, setPriceAlerts] = useState<Record<string, boolean>>(() => {
@@ -51,8 +54,14 @@ export default function FavoritesPage({
       if (sortBy === "name") return a.name.localeCompare(b.name);
       if (sortBy === "brand") return a.brand.localeCompare(b.brand);
       if (sortBy === "price") return a.minPrice - b.minPrice;
+      if (sortBy === "newest") {
+        const indexA = favorites.indexOf(String(a.id));
+        const indexB = favorites.indexOf(String(b.id));
+        return indexB - indexA; // Ordem inversa de inserção (mais novo primeiro)
+      }
       return 0;
     });
+
 
     return result;
   }, [favoriteProducts, search, sortBy]);
@@ -112,6 +121,69 @@ export default function FavoritesPage({
     setToast("Backup dos favoritos exportado com sucesso.");
   };
 
+  const shareWhatsApp = () => {
+    const text = `Confira minha lista de favoritos no PreçoCerto Feijó:\n\n${favoriteProducts.map(p => `- ${p.name}: ${money(p.minPrice)}`).join('\n')}\n\nEconomize você também em: www.precocerto.live`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+
+  const exportFavoritesPDF = () => {
+    try {
+      const doc = new jsPDF();
+      
+      // Header do PDF
+      doc.setFillColor(5, 38, 74); // Navy
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.text("PreçoCerto Feijó", 15, 20);
+      doc.setFontSize(10);
+      doc.text(`Minha Lista de Favoritos - ${new Date().toLocaleDateString('pt-BR')}`, 15, 30);
+      
+      // Tabela de produtos
+      const tableData = favoriteProducts.map(p => [
+        p.name,
+        p.brand,
+        p.establishment,
+        money(p.minPrice)
+      ]);
+
+      autoTable(doc, {
+        startY: 50,
+        head: [["Produto", "Marca", "Loja", "Preço Mínimo"]],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [49, 181, 34], textColor: [255, 255, 255] }, // Green
+        styles: { fontSize: 9 },
+        columnStyles: {
+          3: { halign: 'right', fontStyle: 'bold' }
+        }
+      });
+
+      // Rodapé
+      const pageCount = (doc as any).internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(
+          "Economize em Feijó com PreçoCerto - www.precocerto.live", 
+          105, 
+          285, 
+          { align: 'center' }
+        );
+      }
+
+      doc.save(`favoritos-precocerto-${new Date().toISOString().split('T')[0]}.pdf`);
+      setToast("Lista em PDF gerada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      setToast("Erro ao gerar PDF de favoritos.");
+    }
+  };
+
+
   const importFavorites = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -166,14 +238,22 @@ export default function FavoritesPage({
             <p style={{ color: 'var(--muted)' }}>{favoriteProducts.length} itens salvos na sua lista pessoal</p>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="button button--outline" onClick={exportFavorites} title="Exportar backup">
-              <Download size={18} /> <span className="hide-mobile">Backup</span>
+            <button className="button button--primary" onClick={shareWhatsApp} title="Compartilhar no WhatsApp" style={{ background: '#25D366', borderColor: '#25D366', color: 'white' }}>
+              <Share2 size={18} /> <span className="hide-mobile">WhatsApp</span>
             </button>
-            <label className="button button--outline" style={{ cursor: 'pointer' }} title="Importar backup">
-              <Upload size={18} /> <span className="hide-mobile">Restaurar</span>
+            <button className="button button--outline" onClick={exportFavoritesPDF} title="Exportar para PDF">
+              <FileText size={18} /> <span className="hide-mobile">PDF</span>
+            </button>
+            <button className="button button--outline" onClick={exportFavorites} title="CSV">
+              <Download size={18} />
+            </button>
+            <label className="button button--outline" style={{ cursor: 'pointer' }} title="Restaurar backup">
+              <Upload size={18} />
               <input type="file" accept=".csv" onChange={importFavorites} style={{ display: 'none' }} />
             </label>
           </div>
+
+
         </div>
 
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', background: 'var(--surface)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
@@ -194,14 +274,16 @@ export default function FavoritesPage({
                 value={sortBy} 
                 onChange={e => setSortBy(e.target.value as any)}
                 className="button button--outline"
-                style={{ appearance: 'none', paddingRight: '2.5rem', height: '44px' }}
+                style={{ appearance: 'none', paddingRight: '2.5rem', height: '44px', fontWeight: 600 }}
               >
-                <option value="name">Nome</option>
+                <option value="name">Nome (A-Z)</option>
                 <option value="brand">Marca</option>
                 <option value="price">Menor Preço</option>
+                <option value="newest">Mais Recentes</option>
               </select>
               <Filter size={16} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--muted)' }} />
             </div>
+
 
             <div style={{ display: 'flex', background: 'var(--surface-2)', borderRadius: '12px', padding: '4px' }}>
               <button 
@@ -323,16 +405,24 @@ function FavoriteCard({
   hasAlert: boolean;
   onToggleAlert: () => void;
 }) {
+  const openDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: product }));
+  };
+
   return (
     <div className={`favorite-card ${isSelected ? 'selected' : ''}`} style={{ 
       position: 'relative', 
       background: 'var(--surface)', 
-      borderRadius: '20px', 
+      borderRadius: '24px', 
       padding: '1.25rem',
       border: isSelected ? '2px solid var(--blue)' : '1px solid var(--border)',
-      transition: 'all 0.2s ease',
-      cursor: 'pointer'
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      cursor: 'pointer',
+      boxShadow: isSelected ? '0 10px 25px var(--blue-glass)' : 'var(--shadow-sm)'
     }} onClick={onSelect}>
+
+
       <div style={{ position: 'absolute', top: '12px', left: '12px', zIndex: 2 }}>
         <div style={{ 
           width: '24px', 
@@ -424,12 +514,13 @@ function FavoriteCard({
         <button 
           className="button button--outline" 
           style={{ width: '44px', height: '44px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          onClick={(e) => { e.stopPropagation(); window.location.href = `/buscar?q=${encodeURIComponent(product.name)}`; }}
-          title="Comparar preços"
+          onClick={openDetails}
+          title="Ver detalhes"
         >
-          <ArrowRight size={18} />
+          <Search size={18} />
         </button>
       </div>
     </div>
   );
 }
+
