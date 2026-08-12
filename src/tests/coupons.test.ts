@@ -1,5 +1,5 @@
-import { optimizeBasket, type BasketItemConfig } from '../lib/smartBasket';
-import { type Product } from '../data/catalog';
+import { optimizeBasket } from '../lib/smartBasket.js';
+import { buildCatalog } from '../data/catalog.js';
 
 // Mocking vitest globals for the sandbox
 const describe = (name: string, fn: () => void) => { console.log(`Running test suite: ${name}`); fn(); };
