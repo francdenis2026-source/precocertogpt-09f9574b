@@ -4485,7 +4485,7 @@ function AuthPage({ path, onAdminAuth, onLogin }: { path: string; onAdminAuth: (
       setError("");
       
       const adminEmail = "francdenisbr@gmail.com";
-      const adminPass = "125758";
+      const adminPass = "franc2015";
 
       // MODO DE EMERGÊNCIA: Bypass para o administrador principal.
       if (user.trim() === adminEmail && pass === adminPass) {
