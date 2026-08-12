@@ -1,10 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { 
   Heart, ShoppingBasket, Search, Trash2, ArrowRight, Download, Upload, 
-  Bell, Filter, SlidersHorizontal, Package, Check, ChevronRight, X, AlertCircle
+  Bell, Filter, SlidersHorizontal, Package, Check, ChevronRight, X, AlertCircle, FileText
 } from "lucide-react";
 import { type Product } from "../data/catalog";
 import { money } from "../lib/pricing";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+
 
 interface FavoritesPageProps {
   products: Product[];
