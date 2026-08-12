@@ -5584,106 +5584,158 @@ export default function PrecoCertoApp() {
       </div>
     )}
 
-    {selectedProduct && (
-      <div className="admin-modal-overlay" onClick={() => setSelectedProduct(null)} role="dialog" aria-modal="true" aria-labelledby="modal-title" style={{ zIndex: 9999 }}>
+    {(selectedProduct || modalLoading) && (
+      <div className="admin-modal-overlay" onClick={() => { setSelectedProduct(null); setModalLoading(false); }} role="dialog" aria-modal="true" aria-labelledby="modal-title" style={{ zIndex: 9999 }}>
         <div className="admin-modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()} tabIndex={-1}>
           <div className="admin-modal-head">
-            <h3 id="modal-title">Detalhes do Produto</h3>
+            <h3 id="modal-title">{modalLoading ? "Carregando..." : "Detalhes do Produto"}</h3>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button 
-                className="icon-button" 
-                title="Compartilhar este produto"
-                onClick={() => {
-                  const text = `Confira ${selectedProduct.name} no PreçoCerto Feijó: ${window.location.origin}/produto/${selectedProduct.slug}`;
-                  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-                }}
-              >
-                <Share2 size={18} />
-              </button>
-              <button className="icon-button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X/></button>
+              {!modalLoading && selectedProduct && (
+                <button 
+                  className="icon-button" 
+                  title="Compartilhar este produto"
+                  onClick={() => {
+                    const text = `Confira ${selectedProduct.name} no PreçoCerto Feijó: ${window.location.origin}/produto/${selectedProduct.slug}`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                  }}
+                >
+                  <Share2 size={18} />
+                </button>
+              )}
+              <button className="icon-button" onClick={() => { setSelectedProduct(null); setModalLoading(false); }} aria-label="Fechar detalhes"><X/></button>
             </div>
           </div>
           <div className="admin-modal-body">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-              <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ProductImage product={selectedProduct} size="default" eager />
+            {modalLoading ? (
+              <div className="skeleton-modal-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', padding: '1rem' }}>
+                <div className="skeleton-image" style={{ height: '250px', background: 'var(--surface-2)', borderRadius: '12px', animation: 'pulse 1.5s infinite' }}></div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div className="skeleton-line" style={{ height: '24px', width: '40%', background: 'var(--surface-2)', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+                  <div className="skeleton-line" style={{ height: '40px', width: '90%', background: 'var(--surface-2)', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+                  <div className="skeleton-line" style={{ height: '20px', width: '60%', background: 'var(--surface-2)', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+                  <div className="skeleton-line" style={{ height: '80px', width: '100%', background: 'var(--surface-2)', borderRadius: '12px', animation: 'pulse 1.5s infinite' }}></div>
+                </div>
               </div>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <span className="category-tag">{selectedProduct.category}</span>
-                  {selectedProduct.previousPrice && selectedProduct.minPrice < selectedProduct.previousPrice && (
-                    <div style={{ background: 'var(--green-soft)', color: 'var(--green)', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                      -{Math.round((1 - selectedProduct.minPrice / selectedProduct.previousPrice) * 100)}% de desconto
+            ) : modalError ? (
+              <div style={{ padding: '3rem 1rem', textAlign: 'center' }}>
+                <AlertTriangle size={48} color="var(--red)" style={{ marginBottom: '1rem', opacity: 0.5 }} />
+                <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Ops! Algo deu errado</h4>
+                <p style={{ color: 'var(--muted)' }}>{modalError}</p>
+                <button className="button button--primary" style={{ marginTop: '1.5rem' }} onClick={() => { setSelectedProduct(null); setModalError(null); }}>
+                  Voltar para a busca
+                </button>
+              </div>
+            ) : selectedProduct && (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                  <div style={{ background: 'var(--surface-2)', borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ProductImage product={selectedProduct} size="default" eager />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <span className="category-tag">{selectedProduct.category}</span>
+                      {selectedProduct.previousPrice && selectedProduct.minPrice < selectedProduct.previousPrice && (
+                        <div style={{ background: 'var(--green-soft)', color: 'var(--green)', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                          -{Math.round((1 - selectedProduct.minPrice / selectedProduct.previousPrice) * 100)}% de desconto
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <h2 style={{ fontSize: '1.75rem', margin: '0.5rem 0', fontWeight: 800 }}>{selectedProduct.name}</h2>
-                <p style={{ color: 'var(--muted)', marginBottom: '1rem', fontSize: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
-                
-                <div className="visual-price" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
-                  <strong style={{ fontSize: '2.25rem', color: 'var(--green)' }}>{money(selectedProduct.minPrice)}</strong>
-                  {selectedProduct.previousPrice && selectedProduct.previousPrice > selectedProduct.minPrice && (
-                    <span className="old-price" style={{ color: 'var(--muted)', textDecoration: 'line-through', fontSize: '1.1rem' }}>{money(selectedProduct.previousPrice)}</span>
-                  )}
-                </div>
+                    <h2 style={{ fontSize: '1.75rem', margin: '0.5rem 0', fontWeight: 800 }}>{selectedProduct.name}</h2>
+                    <p style={{ color: 'var(--muted)', marginBottom: '1rem', fontSize: '1rem' }}>{selectedProduct.brand} • {selectedProduct.size}</p>
+                    
+                    <div className="visual-price" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '0.75rem' }}>
+                      <strong style={{ fontSize: '2.25rem', color: 'var(--green)' }}>{money(selectedProduct.minPrice)}</strong>
+                      {selectedProduct.previousPrice && selectedProduct.previousPrice > selectedProduct.minPrice && (
+                        <span className="old-price" style={{ color: 'var(--muted)', textDecoration: 'line-through', fontSize: '1.1rem' }}>{money(selectedProduct.previousPrice)}</span>
+                      )}
+                    </div>
 
-                <div className="verified-details" style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px' }}>
-                  <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Store size={16} color="var(--blue)" />
-                    <strong style={{ fontSize: '0.95rem' }}>{selectedProduct.establishment}</strong>
-                  </div>
-                  <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                    <MapPin size={16} color="var(--muted)" />
-                    <span>{selectedProduct.neighborhood}, Feijó</span>
-                  </div>
-                  <div className="detail-item" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
-                    <Clock3 size={16} />
-                    <span>Verificado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
-                  </div>
-                </div>
-
-                <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--surface-3)', borderRadius: '12px', border: '1px solid var(--border-soft)' }}>
-                  {(selectedProduct.storeCount > 1 || (selectedProduct.offers && selectedProduct.offers.length > 1)) ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                      <div style={{ textAlign: 'center' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mínimo</span>
-                        <strong style={{ fontSize: '0.9rem', color: 'var(--green)' }}>
-                          {Number.isFinite(selectedProduct.minPrice) ? money(selectedProduct.minPrice) : '---'}
-                        </strong>
+                    <div className="verified-details" style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: '12px' }}>
+                      <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Store size={16} color="var(--blue)" />
+                        <strong style={{ fontSize: '0.95rem' }}>{selectedProduct.establishment}</strong>
                       </div>
-                      <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border-soft)', borderRight: '1px solid var(--border-soft)' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Médio</span>
-                        <strong style={{ fontSize: '0.9rem', color: 'var(--blue)' }}>
-                          {(() => {
-                            const avg = selectedProduct.avgPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
-                              ? selectedProduct.price_history.reduce((a: number, b: any) => a + b.value, 0) / selectedProduct.price_history.length
-                              : selectedProduct.minPrice);
-                            return Number.isFinite(avg) ? money(avg) : '---';
-                          })()}
-                        </strong>
+                      <div className="detail-item" style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                        <MapPin size={16} color="var(--muted)" />
+                        <span>{selectedProduct.neighborhood}, Feijó</span>
                       </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Máximo</span>
-                        <strong style={{ fontSize: '0.9rem', color: 'var(--red)' }}>
-                          {(() => {
-                            const max = selectedProduct.maxPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
-                              ? Math.max(...selectedProduct.price_history.map((h: any) => h.value))
-                              : (selectedProduct.previousPrice || selectedProduct.minPrice));
-                            return Number.isFinite(max) ? money(max) : '---';
-                          })()}
-                        </strong>
+                      <div className="detail-item" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                        <Clock3 size={16} />
+                        <span>Verificado em: {new Date(selectedProduct.capturedAt).toLocaleString('pt-BR')}</span>
                       </div>
                     </div>
-                  ) : (
-                    <div style={{ textAlign: 'center', padding: '4px 0' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                        <Info size={14} /> Oferta exclusiva neste estabelecimento em Feijó
-                      </span>
+
+                    <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--surface-3)', borderRadius: '12px', border: '1px solid var(--border-soft)' }}>
+                      {(selectedProduct.storeCount > 1 || (selectedProduct.offers && selectedProduct.offers.length > 1)) ? (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+                          <div style={{ textAlign: 'center' }}>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mínimo</span>
+                            <strong style={{ fontSize: '0.9rem', color: 'var(--green)' }}>
+                              {Number.isFinite(selectedProduct.minPrice) ? money(selectedProduct.minPrice) : '---'}
+                            </strong>
+                          </div>
+                          <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border-soft)', borderRight: '1px solid var(--border-soft)' }}>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Médio</span>
+                            <strong style={{ fontSize: '0.9rem', color: 'var(--blue)' }}>
+                              {(() => {
+                                const avg = selectedProduct.avgPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
+                                  ? selectedProduct.price_history.reduce((a: number, b: any) => a + b.value, 0) / selectedProduct.price_history.length
+                                  : selectedProduct.minPrice);
+                                return Number.isFinite(avg) ? money(avg) : '---';
+                              })()}
+                            </strong>
+                          </div>
+                          <div style={{ textAlign: 'center' }}>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Máximo</span>
+                            <strong style={{ fontSize: '0.9rem', color: 'var(--red)' }}>
+                              {(() => {
+                                const max = selectedProduct.maxPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
+                                  ? Math.max(...selectedProduct.price_history.map((h: any) => h.value))
+                                  : (selectedProduct.previousPrice || selectedProduct.minPrice));
+                                return Number.isFinite(max) ? money(max) : '---';
+                              })()}
+                            </strong>
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '4px 0' }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                            <Info size={14} /> Oferta exclusiva neste estabelecimento em Feijó
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
 
-                <div style={{ marginTop: '1.25rem' }}>
+                {/* Comparação detalhada por estabelecimento */}
+                {(selectedProduct.offers && selectedProduct.offers.length > 1) && (
+                  <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+                    <h4 style={{ marginBottom: '1rem', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Store size={18} /> Comparação entre estabelecimentos
+                    </h4>
+                    <div className="price-table-card" style={{ background: 'var(--surface-2)', borderRadius: '12px', overflow: 'hidden' }}>
+                      {selectedProduct.offers.sort((a, b) => a.price - b.price).map((offer, idx) => (
+                        <div key={idx} className="price-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1rem', borderBottom: idx < selectedProduct.offers!.length - 1 ? '1px solid var(--border-soft)' : 'none' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{offer.establishment}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{offer.neighborhood}</span>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <strong style={{ fontSize: '1rem', color: offer.price === selectedProduct.minPrice ? 'var(--green)' : 'var(--foreground)' }}>
+                              {money(offer.price)}
+                            </strong>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>
+                              Verificado há {Math.floor((Date.now() - new Date(offer.capturedAt).getTime()) / 86400000)} dias
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ marginTop: '1.5rem' }}>
                   <a 
                     href={`/estabelecimento/${selectedProduct.establishmentSlug}`} 
                     className="button button--primary button--full"
@@ -5692,8 +5744,8 @@ export default function PrecoCertoApp() {
                     Ir para a loja <ArrowRight size={18} style={{ marginLeft: '8px' }} />
                   </a>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
 
             <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
               <h4 style={{ marginBottom: '1rem', fontWeight: 700 }}>Histórico de Variação</h4>
