@@ -5501,6 +5501,8 @@ export default function PrecoCertoApp({ renderContent }: { renderContent?: (prop
     return null;
   }
 
+  if (renderContent) return <>{renderContent(props)}</>;
+
   let page:ReactNode;
   if(pathname==="/") page=<HomePage {...props}/>;
   else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
@@ -5515,6 +5517,7 @@ export default function PrecoCertoApp({ renderContent }: { renderContent?: (prop
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
   else page=<GenericPage {...props} metrics={metrics} path={pathname} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user}/>;
+
 
   // Expondo o toast globalmente para o useEffect da BasketPage poder disparar erros de rede
   useEffect(() => {
