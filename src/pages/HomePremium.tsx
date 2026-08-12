@@ -355,13 +355,21 @@ export function HomePremium() {
                 <p>Compare o mesmo produto em diferentes estabelecimentos sem precisar abrir várias telas.</p>
                 <button type="button" onClick={() => setSelectedProduct(comparisonProduct)}>Abrir comparação completa <ArrowRight aria-hidden="true" /></button>
               </div>
-              <div className={`pc-compare-product${isTransitioning ? " is-exiting" : " is-entering"}`}>
+              <button 
+                type="button"
+                className={`pc-compare-product${isTransitioning ? " is-exiting" : " is-entering"}`}
+                onClick={() => setSelectedProduct(comparisonProduct)}
+                aria-label={`Ver detalhes de ${comparisonProduct.name}`}
+              >
                 <div className="pc-compare-product-head">
                   <span className={`pc-compare-product-image ${resolveProductImage(comparisonProduct)?.endsWith('.png') ? 'is-transparent' : ''}`}>
                     {resolveProductImage(comparisonProduct) ? (
                       <img src={resolveProductImage(comparisonProduct)} alt={comparisonProduct.name} loading="lazy" />
                     ) : (
-                      <PackageSearch aria-hidden="true" />
+                      <div className="pc-no-image">
+                        <PackageSearch aria-hidden="true" />
+                        <strong>{comparisonProduct.name}</strong>
+                      </div>
                     )}
                     <span className="pc-compare-badge"><Sparkles size={10} /> Em destaque</span>
                   </span>
@@ -391,7 +399,7 @@ export function HomePremium() {
                     <div key={`empty-${i}`} className="pc-offer-row pc-offer-row-placeholder" />
                   ))}
                 </div>
-              </div>
+              </button>
             </div>
           </section>
         )}
