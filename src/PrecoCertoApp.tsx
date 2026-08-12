@@ -18,7 +18,9 @@ import { priceFreshness, unitPrice, type FreshnessState } from "./lib/pricing";
 import { normalizeSearchText, searchProducts, suggestProducts } from "./lib/productSearch";
 import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signInMerchantWithCpf, signOut, type SessionProfile } from "./lib/roles";
-import { loadMerchantMembership, resolveAuthenticatedHome } from "./lib/merchantPlatform";
+import { loadMerchantMembership, resolveAuthenticatedHome, loadDeliveryZones, createMarketplaceOrder, startMercadoPagoCheckout, type DeliveryZone } from "./lib/merchantPlatform";
+import { CustomerOrders } from "./components/CustomerOrders";
+
 import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
 import { jsPDF } from "jspdf";
 import { planBasketPdf, renderPlanToPdf } from "./lib/basketPdf";
@@ -5132,7 +5134,7 @@ export default function PrecoCertoApp() {
     localStorage.setItem("precocerto:user", JSON.stringify(newUser));
   };
 
-  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user,setUser: setUserAndUpdateStorage}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites]);
+  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user,setUser: setUserAndUpdateStorage,setToast}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites]);
 
   // Toast global listener
   useEffect(() => {
