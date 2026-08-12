@@ -54,8 +54,14 @@ export default function FavoritesPage({
       if (sortBy === "name") return a.name.localeCompare(b.name);
       if (sortBy === "brand") return a.brand.localeCompare(b.brand);
       if (sortBy === "price") return a.minPrice - b.minPrice;
+      if (sortBy === "newest") {
+        const indexA = favorites.indexOf(String(a.id));
+        const indexB = favorites.indexOf(String(b.id));
+        return indexB - indexA; // Ordem inversa de inserção (mais novo primeiro)
+      }
       return 0;
     });
+
 
     return result;
   }, [favoriteProducts, search, sortBy]);
