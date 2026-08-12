@@ -1815,6 +1815,43 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
 
         {step === 3 && optimizationResult && (
           <section className="basket-step-view animate-fade-in">
+            {/* Suporte a cupons de desconto */}
+            <div className="coupon-bar" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--surface-2)', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <input 
+                  placeholder="Tem um cupom de desconto?" 
+                  value={couponCode} 
+                  onChange={e => setCouponCode(e.target.value)}
+                  style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface-1)' }}
+                />
+              </div>
+              <button 
+                className="button button--secondary" 
+                onClick={() => {
+                  const code = couponCode.toUpperCase().trim();
+                  if (code === 'FEIJO2026') {
+                     setCouponDiscount(15);
+                     window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cupom aplicado: R$ 15,00 de desconto!", type: "success" } }));
+                  } else if (code === 'BEMVINDO') {
+                     setCouponDiscount(5);
+                     window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cupom aplicado: R$ 5,00 de desconto!", type: "success" } }));
+                  } else if (code === "") {
+                     setCouponDiscount(0);
+                  } else {
+                     setCouponDiscount(0);
+                     window.dispatchEvent(new CustomEvent('pc:set-toast', { detail: { message: "Cupom inválido ou expirado.", type: "error" } }));
+                  }
+                }}
+              >
+                Aplicar
+              </button>
+              {couponDiscount > 0 && (
+                <div style={{ color: 'var(--green)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <CheckCircle2 size={16} /> -{money(couponDiscount)}
+                </div>
+              )}
+            </div>
+
             <div className="optimization-dashboard">
               <div className="result-kpis">
                 <div className="kpi-card highlight">
