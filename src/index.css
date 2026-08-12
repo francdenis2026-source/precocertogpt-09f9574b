@@ -1166,7 +1166,108 @@ h1,h2,h3,.brand__word b,.brand__word strong{font-family:"Manrope Variable",Manro
 .generic-hero{border-radius:7px;padding:54px;background:linear-gradient(125deg,#041827,#0b3757);position:relative;overflow:hidden}.generic-hero:after{content:"";position:absolute;width:360px;height:360px;border:1px solid rgba(255,255,255,.1);border-radius:50%;right:-160px;top:-170px;box-shadow:0 0 0 48px rgba(255,255,255,.02)}.generic-icon{border-radius:5px;position:relative;z-index:1}.generic-hero>div,.generic-hero>.button{position:relative;z-index:1}.generic-hero h1{font-size:46px}.generic-grid{gap:14px}.generic-main,.generic-aside{padding:30px}.compact-product{transition:.18s ease}.compact-product:hover{background:#f8faf9;margin-inline:-10px;padding-inline:10px}.generic-aside{background:#0a2a43;color:#d6e0e7}.generic-aside h2,.generic-aside strong{color:#fff}.generic-aside .eyebrow{color:#d7b76f}.generic-aside .aside-stat{border-color:rgba(255,255,255,.12)}
 .auth-page{background:#f7f6f2}.auth-brand-panel{background:linear-gradient(150deg,#031523,#0b3656);padding-inline:clamp(42px,7vw,108px)}.auth-brand-panel:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 50%,rgba(203,166,87,.08));pointer-events:none}.auth-form-wrap{background:#fbfbf9}.auth-form{max-width:440px}.auth-form h2{font-size:38px}.auth-form input{border-radius:4px;background:#fff}.auth-form input:focus{box-shadow:0 0 0 3px rgba(23,93,220,.11)}
 .admin-shell{background:#eef1f2}.admin-sidebar{background:#041827;width:252px;padding:28px 18px}.admin-main{grid-column:2;padding-inline:34px}.admin-main>header{height:82px}.admin-main>header h1{font-size:26px}.admin-kpis{gap:9px}.admin-kpis article{border-radius:5px;padding:20px}.admin-kpis strong{font-family:"Manrope Variable";font-size:29px}.admin-card{border-color:#d2dade}.admin-user{border-radius:4px}.admin-filters label,.admin-filters>button{border-radius:4px}.admin-tr{min-height:48px}.admin-tr:hover:not(.admin-th){background:#f7f9f9}
-.site-footer{background:#041725;border-top:1px solid #21415a;padding-top:78px}.footer-grid{gap:70px}.footer-grid h3{font-size:11px;text-transform:uppercase;letter-spacing:1.4px}.footer-grid a{font-size:11px;transition:.18s ease}.footer-grid a:hover{color:#efcf87;transform:translateX(2px)}
+.site-footer {
+  background: #041725;
+  border-top: 1px solid rgba(33, 65, 90, 0.6);
+  padding: 80px 0 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(3, 1fr);
+  gap: 60px;
+  margin-bottom: 60px;
+}
+
+@media (max-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+.footer-brand-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.footer-description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 320px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer-meta {
+  margin-top: auto;
+}
+
+.footer-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.footer-links-column h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.footer-links-column nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-links-column a {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.footer-links-column a:hover {
+  color: #efcf87;
+  transform: translateX(4px);
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 30px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 640px) {
+  .footer-bottom {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+}
+
+.footer-credits span {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
 .toast{border-radius:5px;background:#075d3c;box-shadow:0 22px 60px rgba(7,28,46,.25)}
 
 @keyframes live-pulse{0%,100%{box-shadow:0 0 0 4px rgba(71,210,145,.08)}50%{box-shadow:0 0 0 8px rgba(71,210,145,.15)}}
