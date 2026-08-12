@@ -93,6 +93,11 @@ function installStyles() {
       body.pc-global-mobile .pc-service-topbar{min-height:56px!important}
       body.pc-global-mobile main>footer:last-child{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;text-align:center!important;padding:11px 14px!important;line-height:1.3!important}
       body.pc-global-mobile main>footer:last-child>div{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:8px!important}
+      body.pc-global-mobile :is(.est-footer,.dorinha-pro__footer,.th-footer,.sf-footer,.storefront-footer){min-height:0!important;padding:10px 12px!important}
+      body.pc-global-mobile :is(.est-footer__inner,.dorinha-pro__footer,.th-footer__inner,.sf-footer__inner){min-height:0!important;display:flex!important;align-items:center!important;justify-content:space-between!important;flex-direction:row!important;flex-wrap:wrap!important;gap:6px 12px!important}
+      body.pc-global-mobile :is(.est-footer,.dorinha-pro__footer,.th-footer,.sf-footer) p{display:none!important}
+      body.pc-global-mobile :is(.est-footer,.dorinha-pro__footer,.th-footer,.sf-footer) :is(a,span,small){font-size:10px!important;line-height:1.3!important}
+      body.pc-global-mobile :is(.est-footer,.dorinha-pro__footer,.th-footer,.sf-footer) img{max-width:92px!important;max-height:25px!important}
 
       /* Search and comparison */
       body.pc-global-mobile .scpm-shell{width:calc(100% - 20px)!important}

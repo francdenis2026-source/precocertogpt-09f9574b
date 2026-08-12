@@ -10,14 +10,17 @@ import {
   HeartPulse,
   MapPin,
   Menu,
+  Moon,
   PackageSearch,
   ReceiptText,
   Search,
   ShieldCheck,
   ShoppingBasket,
   ShoppingBag,
+  ShoppingCart,
   Sparkles,
   Store,
+  Sun,
   Tag,
   X,
 } from "lucide-react";
@@ -44,6 +47,13 @@ const featuredProducts = [
 ];
 
 const initialCatalog = buildCatalog();
+type Theme = "light" | "dark";
+const readTheme = (): Theme => {
+  if (typeof window === "undefined") return "light";
+  const saved = window.localStorage.getItem("theme");
+  if (saved === "light" || saved === "dark") return saved;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+};
 const money = (value: number) => new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
@@ -74,9 +84,16 @@ export function HomeV2() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeResult, setActiveResult] = useState(-1);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [theme, setTheme] = useState<Theme>(readTheme);
   const searchAreaRef = useRef<HTMLDivElement>(null);
   const modalCloseRef = useRef<HTMLButtonElement>(null);
   const modalDialogRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    window.localStorage.setItem("theme", theme);
+  }, [theme]);
 
   const suggestions = useMemo(() => {
     if (query.trim().length < 2) return [];
@@ -200,6 +217,13 @@ export function HomeV2() {
           <Link className="home-v2-merchant-link" to="/lojista">
             Sou comerciante <ArrowRight aria-hidden="true" />
           </Link>
+
+          <div className="home-v2-mobile-tools" aria-label="Ações rápidas">
+            <Link to="/cesta-basica" aria-label="Abrir minha cesta"><ShoppingCart aria-hidden="true" /></Link>
+            <button type="button" onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}>
+              {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
+            </button>
+          </div>
 
           <button
             className="home-v2-menu-button"
