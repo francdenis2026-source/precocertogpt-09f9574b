@@ -54,6 +54,9 @@ import { CustomerOrders } from "./components/CustomerOrders";
 import { MercadoPagoCallback } from "./components/MercadoPagoCallback";
 import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/PublicFooterServicePages";
 import { HomePremium } from "./pages/HomePremium";
+import { FavoritesProvider } from "./features/favorites/FavoritesProvider";
+import { SavedFavoritesPage } from "./features/favorites/SavedFavoritesPage";
+import { CommerceIntentBridge } from "./features/favorites/CommerceIntentBridge";
 import "./components/TrueHomepageKowalski.css";
 import "./components/KowalskiGlobalExperience.css";
 import "./components/KowalskiLegacyDeep.css";
@@ -64,66 +67,70 @@ import "./components/DorinhaEditorialCompactV6.css";
 export default function App() {
   return (
     <BrowserRouter>
-      <VisualRegressionGuard />
-      <GlobalPremiumExperience />
-      <DeveloperMarketplaceAbout />
-      <HomepageSearchKeyboardProMax />
-      <ProductMediaClippingProMax />
-      <HomeProductModalProMaxEnhancer />
-      <CorePublicPagesUiUx />
-      <ScrollPerformanceGuard />
-      <MaxPriceStoreLabels />
-      <SearchUxClarity />
-      <SearchSafePolish />
-      <ProductInteractionUx />
-      <PublicCatalogUxFixes />
-      <PublicOnlineSalesAvailability />
-      <FooterCompactUx />
-      <GlobalMobileCompactUx />
-      <UiUxProMaxFoundation />
-      <ProductCardsSafePolish />
-      <ProductDetailSafePolish />
-      <EstablishmentsSafePolish />
-      <BasketFavoritesUserSafePolish />
-      <PlansMerchantConversionSafePolish />
-      <InternalDashboardsSafePolish />
-      <InternalDashboardsDeepUiUx />
-      <PublicPagesUiUxAudit />
-      <PreferredProductPngUpgrade />
-      <MerchantBusinessSetupShortcut />
-      <MerchantDemoSwitcher />
-      <EstablishmentsNavBridge />
-      <FremixDirectoryBridge />
-      <FremixCuratedVideos />
-      <BasketSessionFlow />
-      <AuthorMerchantDashboardWelcome />
-      <Routes>
-        <Route path="/" element={<HomePremium />} />
-        <Route path="/buscar" element={<SmartCompareSearchProMax />} />
-        <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
-        <Route path="/estabelecimento/dorinha-barroso-livros" element={<DorinhaAuthorStoreProMax />} />
-        <Route path="/estabelecimento/:identifier" element={<PublicEstablishmentCatalog />} />
-        <Route path="/cultura/fremix-producoes" element={<FremixProductionsPage />} />
-        <Route path="/fremix-producoes" element={<FremixProductionsPage />} />
-        <Route path="/autora/dorinha-barroso" element={<DorinhaAuthorStoreProMax />} />
-        <Route path="/dorinha-barroso" element={<DorinhaAuthorStoreProMax />} />
-        <Route path="/lojista" element={<MerchantOnboardingPage />} />
-        <Route path="/loja/:merchantId" element={<MerchantOnlineStoreRoute />} />
-        <Route path="/painel-lojista" element={<MerchantDashboard />} />
-        <Route path="/painel-lojista/autora" element={<AuthorCatalogEditor />} />
-        <Route path="/painel-lojista/gestao" element={<MerchantManagementCenter />} />
-        <Route path="/painel-lojista/catalogo" element={<MerchantCatalogStudio />} />
-        <Route path="/painel-lojista/configurar-negocio" element={<MerchantBusinessSetup />} />
-        <Route path="/painel-lojista/vendas-online" element={<MerchantOnlineSalesControl />} />
-        <Route path="/meus-pedidos" element={<CustomerOrders />} />
-        <Route path="/integracoes/mercadopago/callback" element={<MercadoPagoCallback />} />
-        <Route path="/admin/plataforma" element={<PlatformAdminDashboard />} />
-        <Route path="/admin/comercios" element={<AdminMerchantManagement />} />
-        <Route path="/colaborar" element={<CollaboratePage />} />
-        <Route path="/fale-conosco" element={<ContactPage />} />
-        <Route path="/farmacias" element={<PharmaciesPage />} />
-        <Route path="*" element={<PrecoCertoApp />} />
-      </Routes>
+      <FavoritesProvider>
+        <CommerceIntentBridge />
+        <VisualRegressionGuard />
+        <GlobalPremiumExperience />
+        <DeveloperMarketplaceAbout />
+        <HomepageSearchKeyboardProMax />
+        <ProductMediaClippingProMax />
+        <HomeProductModalProMaxEnhancer />
+        <CorePublicPagesUiUx />
+        <ScrollPerformanceGuard />
+        <MaxPriceStoreLabels />
+        <SearchUxClarity />
+        <SearchSafePolish />
+        <ProductInteractionUx />
+        <PublicCatalogUxFixes />
+        <PublicOnlineSalesAvailability />
+        <FooterCompactUx />
+        <GlobalMobileCompactUx />
+        <UiUxProMaxFoundation />
+        <ProductCardsSafePolish />
+        <ProductDetailSafePolish />
+        <EstablishmentsSafePolish />
+        <BasketFavoritesUserSafePolish />
+        <PlansMerchantConversionSafePolish />
+        <InternalDashboardsSafePolish />
+        <InternalDashboardsDeepUiUx />
+        <PublicPagesUiUxAudit />
+        <PreferredProductPngUpgrade />
+        <MerchantBusinessSetupShortcut />
+        <MerchantDemoSwitcher />
+        <EstablishmentsNavBridge />
+        <FremixDirectoryBridge />
+        <FremixCuratedVideos />
+        <BasketSessionFlow />
+        <AuthorMerchantDashboardWelcome />
+        <Routes>
+          <Route path="/" element={<HomePremium />} />
+          <Route path="/buscar" element={<SmartCompareSearchProMax />} />
+          <Route path="/favoritos" element={<SavedFavoritesPage />} />
+          <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
+          <Route path="/estabelecimento/dorinha-barroso-livros" element={<DorinhaAuthorStoreProMax />} />
+          <Route path="/estabelecimento/:identifier" element={<PublicEstablishmentCatalog />} />
+          <Route path="/cultura/fremix-producoes" element={<FremixProductionsPage />} />
+          <Route path="/fremix-producoes" element={<FremixProductionsPage />} />
+          <Route path="/autora/dorinha-barroso" element={<DorinhaAuthorStoreProMax />} />
+          <Route path="/dorinha-barroso" element={<DorinhaAuthorStoreProMax />} />
+          <Route path="/lojista" element={<MerchantOnboardingPage />} />
+          <Route path="/loja/:merchantId" element={<MerchantOnlineStoreRoute />} />
+          <Route path="/painel-lojista" element={<MerchantDashboard />} />
+          <Route path="/painel-lojista/autora" element={<AuthorCatalogEditor />} />
+          <Route path="/painel-lojista/gestao" element={<MerchantManagementCenter />} />
+          <Route path="/painel-lojista/catalogo" element={<MerchantCatalogStudio />} />
+          <Route path="/painel-lojista/configurar-negocio" element={<MerchantBusinessSetup />} />
+          <Route path="/painel-lojista/vendas-online" element={<MerchantOnlineSalesControl />} />
+          <Route path="/meus-pedidos" element={<CustomerOrders />} />
+          <Route path="/integracoes/mercadopago/callback" element={<MercadoPagoCallback />} />
+          <Route path="/admin/plataforma" element={<PlatformAdminDashboard />} />
+          <Route path="/admin/comercios" element={<AdminMerchantManagement />} />
+          <Route path="/colaborar" element={<CollaboratePage />} />
+          <Route path="/fale-conosco" element={<ContactPage />} />
+          <Route path="/farmacias" element={<PharmaciesPage />} />
+          <Route path="*" element={<PrecoCertoApp />} />
+        </Routes>
+      </FavoritesProvider>
     </BrowserRouter>
   );
 }
