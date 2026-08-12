@@ -4,56 +4,46 @@ import {
   ArrowRight,
   BadgeCheck,
   BookOpen,
-  Building2,
-  Check,
   ChevronRight,
   HeartPulse,
   MapPin,
   Menu,
   Moon,
   PackageSearch,
-  ReceiptText,
   Search,
   ShieldCheck,
   ShoppingBasket,
-  ShoppingBag,
   ShoppingCart,
-  Sparkles,
   Store,
   Sun,
   Tag,
   X,
 } from "lucide-react";
-import { buildCatalog, type Product } from "../data/catalog";
+import { buildCatalog, type Product, type StoreRow } from "../data/catalog";
 import { fetchCatalog } from "../data/remoteCatalog";
 import { resolveProductImage } from "../data/productImageResolver";
 import { suggestProducts } from "../lib/productSearch";
 import "./HomeV2.css";
 
-const popularSearches = ["Arroz", "Café", "Leite", "Carne", "Material de limpeza"];
+const popularSearches = ["Arroz", "Café", "Leite", "Carne", "Limpeza"];
 
 const categories = [
-  { name: "Mercados", description: "Alimentos e itens do dia a dia", icon: ShoppingBasket, query: "mercado" },
-  { name: "Açougue", description: "Carnes e cortes em lojas locais", icon: Tag, query: "carne" },
-  { name: "Farmácias", description: "Saúde, higiene e cuidados", icon: HeartPulse, href: "/farmacias" },
-  { name: "Livros", description: "Autores e cultura de Feijó", icon: BookOpen, href: "/dorinha-barroso" },
-];
-
-const featuredProducts = [
-  { name: "Arroz branco", detail: "Pacotes e marcas locais", image: "/products/arroz-branco-bernardo-1kg.jpg", query: "arroz" },
-  { name: "Café", detail: "Compare tamanhos e marcas", image: "/products/cafe-3-coracoes-500g.jpg", query: "cafe" },
-  { name: "Leite", detail: "Encontre opções perto de você", image: "/products/leite-italac-1l.jpg", query: "leite" },
-  { name: "Feijão", detail: "Veja os preços disponíveis", image: "/products/feijao-carioca-bernardo-1kg.jpg", query: "feijao" },
+  { name: "Mercados", description: "Itens do dia a dia", icon: ShoppingBasket, query: "mercado" },
+  { name: "Açougue", description: "Carnes e cortes", icon: Tag, query: "carne" },
+  { name: "Farmácias", description: "Saúde e cuidados", icon: HeartPulse, href: "/farmacias" },
+  { name: "Livros", description: "Autores de Feijó", icon: BookOpen, href: "/dorinha-barroso" },
 ];
 
 const initialCatalog = buildCatalog();
 type Theme = "light" | "dark";
+
 const readTheme = (): Theme => {
   if (typeof window === "undefined") return "light";
   const saved = window.localStorage.getItem("theme");
   if (saved === "light" || saved === "dark") return saved;
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 };
+
 const money = (value: number) => new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
@@ -75,11 +65,16 @@ function bestOffer(product: Product) {
   };
 }
 
+function priceDifference(product: Product) {
+  return Math.max(0, product.maxPrice - product.minPrice);
+}
+
 export function HomeV2() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>(initialCatalog.products);
+  const [stores, setStores] = useState<StoreRow[]>(initialCatalog.stores);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeResult, setActiveResult] = useState(-1);
@@ -100,11 +95,25 @@ export function HomeV2() {
     return suggestProducts(products, query, 5).filter((product) => product.minPrice > 0);
   }, [products, query]);
 
+  const opportunityProducts = useMemo(() => products
+    .filter((product) => product.minPrice > 0)
+    .sort((a, b) => priceDifference(b) - priceDifference(a) || a.minPrice - b.minPrice)
+    .slice(0, 4), [products]);
+
+  const featuredStores = useMemo(() => stores
+    .filter((store) => store.products > 0)
+    .sort((a, b) => b.products - a.products || a.name.localeCompare(b.name, "pt-BR"))
+    .slice(0, 4), [stores]);
+
+  const comparisonProduct = opportunityProducts[0] ?? products.find((product) => product.minPrice > 0) ?? null;
+
   useEffect(() => {
     let active = true;
     fetchCatalog()
       .then((result) => {
-        if (active) setProducts(result.products);
+        if (!active) return;
+        setProducts(result.products);
+        setStores(result.stores);
       })
       .finally(() => {
         if (active) setCatalogLoading(false);
@@ -174,12 +183,6 @@ export function HomeV2() {
     setSelectedProduct(product);
   };
 
-  const previewFeaturedProduct = (term: string) => {
-    const product = suggestProducts(products, term, 1).find((item) => item.minPrice > 0);
-    if (product) setSelectedProduct(product);
-    else search(term);
-  };
-
   const handleSearchKeys = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Escape") {
       setSearchOpen(false);
@@ -193,6 +196,15 @@ export function HomeV2() {
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActiveResult((current) => (current <= 0 ? suggestions.length - 1 : current - 1));
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      setActiveResult(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      setActiveResult(suggestions.length - 1);
+    } else if (event.key === "Enter" && activeResult >= 0) {
+      event.preventDefault();
+      openProduct(suggestions[activeResult]);
     }
   };
 
@@ -208,40 +220,31 @@ export function HomeV2() {
           </Link>
 
           <nav className="home-v2-nav" aria-label="Navegação principal">
-            <Link to="/buscar">Comparar preços</Link>
+            <Link to="/buscar">Comparar</Link>
+            <a href="#categorias">Categorias</a>
+            <a href="#oportunidades">Oportunidades</a>
             <Link to="/estabelecimentos">Estabelecimentos</Link>
-            <Link to="/farmacias">Farmácias</Link>
-            <Link to="/colaborar">Colaborar</Link>
           </nav>
 
-          <Link className="home-v2-merchant-link" to="/lojista">
-            Sou comerciante <ArrowRight aria-hidden="true" />
-          </Link>
-
-          <div className="home-v2-mobile-tools" aria-label="Ações rápidas">
-            <Link to="/cesta-basica" aria-label="Abrir minha cesta"><ShoppingCart aria-hidden="true" /></Link>
-            <button type="button" onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}>
+          <div className="home-v2-header-actions">
+            <button className="home-v2-theme" type="button" onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}>
               {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
             </button>
+            <Link className="home-v2-merchant-link" to="/lojista">Sou comerciante <ArrowRight aria-hidden="true" /></Link>
           </div>
 
-          <button
-            className="home-v2-menu-button"
-            type="button"
-            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((open) => !open)}
-          >
+          <button className="home-v2-menu-button" type="button" aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} aria-expanded={menuOpen} aria-controls="home-v2-mobile-nav" onClick={() => setMenuOpen((open) => !open)}>
             {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
           </button>
         </div>
 
         {menuOpen && (
-          <nav className="home-v2-mobile-nav" aria-label="Navegação para celular">
+          <nav id="home-v2-mobile-nav" className="home-v2-mobile-nav" aria-label="Navegação para celular">
             <Link to="/buscar" onClick={() => setMenuOpen(false)}>Comparar preços</Link>
+            <a href="#categorias" onClick={() => setMenuOpen(false)}>Categorias</a>
+            <a href="#oportunidades" onClick={() => setMenuOpen(false)}>Oportunidades</a>
             <Link to="/estabelecimentos" onClick={() => setMenuOpen(false)}>Estabelecimentos</Link>
-            <Link to="/farmacias" onClick={() => setMenuOpen(false)}>Farmácias</Link>
-            <Link to="/colaborar" onClick={() => setMenuOpen(false)}>Colaborar</Link>
+            <Link to="/cesta-basica" onClick={() => setMenuOpen(false)}>Cesta inteligente</Link>
             <Link to="/lojista" onClick={() => setMenuOpen(false)}>Sou comerciante</Link>
           </nav>
         )}
@@ -251,9 +254,9 @@ export function HomeV2() {
         <section className="home-v2-hero" aria-labelledby="home-v2-title">
           <div className="home-v2-hero-inner">
             <div className="home-v2-copy">
-              <span className="home-v2-eyebrow"><MapPin aria-hidden="true" /> Feito para Feijó, Acre</span>
-              <h1 id="home-v2-title">Sua compra começa com o <em>preço certo.</em></h1>
-              <p className="home-v2-lead">Compare produtos e estabelecimentos locais em segundos. Mais clareza para escolher, mais dinheiro sobrando no fim do mês.</p>
+              <span className="home-v2-local-label"><MapPin aria-hidden="true" /> Feijó, Acre</span>
+              <h1 id="home-v2-title">Pesquise. Compare. <em>Economize melhor.</em></h1>
+              <p className="home-v2-lead">Encontre o menor preço entre estabelecimentos locais antes de sair para comprar.</p>
 
               <div className="home-v2-search-area" ref={searchAreaRef}>
                 <form className="home-v2-search" onSubmit={handleSubmit} role="search">
@@ -277,114 +280,48 @@ export function HomeV2() {
                     aria-controls="home-product-results"
                     aria-activedescendant={activeResult >= 0 ? `home-product-result-${activeResult}` : undefined}
                   />
-                  <button type="submit">Buscar produto <ArrowRight aria-hidden="true" /></button>
+                  <button type="submit">Buscar <ArrowRight aria-hidden="true" /></button>
                 </form>
 
                 {searchOpen && query.trim().length >= 2 && (
                   <div className="home-v2-results" id="home-product-results" role="listbox" aria-label="Produtos encontrados">
-                    <div className="home-v2-results-head">
-                      <span>Resultados rápidos</span>
-                      {suggestions.length > 0 && <small>{suggestions.length} produtos</small>}
-                    </div>
-
+                    <div className="home-v2-results-head"><span>Resultados</span>{suggestions.length > 0 && <small>{suggestions.length} encontrados</small>}</div>
                     {catalogLoading && !suggestions.length ? (
-                      <div className="home-v2-results-state" role="status">
-                        <PackageSearch aria-hidden="true" />
-                        <span><strong>Buscando produtos…</strong><small>Comparando preços nos estabelecimentos.</small></span>
-                      </div>
+                      <div className="home-v2-results-state" role="status"><PackageSearch aria-hidden="true" /><span><strong>Buscando produtos…</strong><small>Consultando preços disponíveis.</small></span></div>
                     ) : suggestions.length > 0 ? (
                       <div className="home-v2-results-list">
                         {suggestions.map((product, index) => {
                           const offer = bestOffer(product);
                           const image = resolveProductImage(product);
                           return (
-                            <button
-                              id={`home-product-result-${index}`}
-                              key={String(product.id)}
-                              className={`home-v2-result${activeResult === index ? " is-active" : ""}`}
-                              type="button"
-                              role="option"
-                              aria-selected={activeResult === index}
-                              onMouseEnter={() => setActiveResult(index)}
-                              onClick={() => openProduct(product)}
-                            >
-                              <span className="home-v2-result-image">
-                                {image ? <img src={image} alt="" /> : <PackageSearch aria-hidden="true" />}
-                              </span>
-                              <span className="home-v2-result-copy">
-                                <strong>{product.name}</strong>
-                                <small>{[product.brand, product.size].filter(Boolean).join(" · ")}</small>
-                                <span className="home-v2-result-store"><Store aria-hidden="true" /> {offer.establishment}</span>
-                              </span>
-                              <span className="home-v2-result-price">
-                                <small><BadgeCheck aria-hidden="true" /> Menor preço</small>
-                                <strong>{money(offer.value)}</strong>
-                                <em>{product.storeCount} {product.storeCount === 1 ? "estabelecimento" : "estabelecimentos"}</em>
-                              </span>
+                            <button id={`home-product-result-${index}`} key={String(product.id)} className={`home-v2-result${activeResult === index ? " is-active" : ""}`} type="button" role="option" aria-selected={activeResult === index} onMouseEnter={() => setActiveResult(index)} onClick={() => openProduct(product)}>
+                              <span className="home-v2-result-image">{image ? <img src={image} alt="" /> : <PackageSearch aria-hidden="true" />}</span>
+                              <span className="home-v2-result-copy"><strong>{product.name}</strong><small>{[product.brand, product.size].filter(Boolean).join(" · ")}</small><span className="home-v2-result-store"><Store aria-hidden="true" /> {offer.establishment}</span></span>
+                              <span className="home-v2-result-price"><small>Menor preço</small><strong>{money(offer.value)}</strong></span>
                               <ChevronRight aria-hidden="true" />
                             </button>
                           );
                         })}
                       </div>
                     ) : (
-                      <div className="home-v2-results-state" role="status">
-                        <PackageSearch aria-hidden="true" />
-                        <span><strong>Nenhum produto encontrado</strong><small>Tente outro nome, marca ou categoria.</small></span>
-                      </div>
+                      <div className="home-v2-results-state" role="status"><PackageSearch aria-hidden="true" /><span><strong>Nenhum produto encontrado</strong><small>Tente outro nome, marca ou categoria.</small></span></div>
                     )}
-
-                    {suggestions.length > 0 && <p className="home-v2-results-hint">Selecione o produto exato para abrir os detalhes. A comparação de similares fica disponível dentro do produto.</p>}
                   </div>
                 )}
               </div>
 
-              <div className="home-v2-popular" aria-label="Buscas populares">
-                <span>Mais buscados:</span>
-                {popularSearches.map((item) => (
-                  <button key={item} type="button" onClick={() => search(item)}>{item}</button>
-                ))}
-              </div>
-            </div>
-
-            <div className="home-v2-visual">
-              <img src="/supermercado-premium.jpg" alt="Interior de supermercado com corredores organizados" fetchPriority="high" />
-              <div className="home-v2-visual-note">
-                <span className="home-v2-note-icon"><ShieldCheck aria-hidden="true" /></span>
-                <span><strong>Economia começa aqui</strong>Pesquise antes de sair de casa.</span>
+              <div className="home-v2-popular" aria-label="Buscas rápidas">
+                <span>Buscas rápidas</span>
+                {popularSearches.map((item) => <button key={item} type="button" onClick={() => search(item)}>{item}</button>)}
               </div>
             </div>
           </div>
         </section>
 
-        <section className="home-v2-trust" aria-label="Vantagens do PreçoCerto">
-          <div><Store aria-hidden="true" /><span><strong>Comércio local</strong>Informações de lojas de Feijó</span></div>
-          <div><Tag aria-hidden="true" /><span><strong>Comparação simples</strong>Preços organizados em um só lugar</span></div>
-          <div><ShieldCheck aria-hidden="true" /><span><strong>Escolha consciente</strong>Decida antes de comprar</span></div>
-        </section>
-
-        <section className="home-v2-marketplace" aria-labelledby="marketplace-title">
-          <div className="home-v2-marketplace-copy">
-            <span className="home-v2-marketplace-kicker"><Store aria-hidden="true" /> Uma vitrine para Feijó</span>
-            <h2 id="marketplace-title"><em>Marketplace Local</em><br />sua loja também pode vender online.</h2>
-            <p>Crie sua vitrine virtual, apresente produtos e receba pedidos de forma prática — com presença profissional no comércio digital da cidade.</p>
-            <div className="home-v2-marketplace-benefits">
-              <span><Building2 aria-hidden="true" /> Loja própria</span>
-              <span><ShoppingBag aria-hidden="true" /> Catálogo online</span>
-              <span><ReceiptText aria-hidden="true" /> Pedidos organizados</span>
-            </div>
-            <Link to="/lojista" className="home-v2-marketplace-cta">Quero vender online <ArrowRight aria-hidden="true" /></Link>
-          </div>
-          <div className="home-v2-marketplace-art">
-            <img src="/marketplace-local-profissional-v2.webp" alt="Comerciante local usando um tablet para administrar sua loja virtual" loading="lazy" width="1200" height="751" />
-            <div className="home-v2-marketplace-proof"><BadgeCheck aria-hidden="true" /><span><small>Venda online</small><strong>Sua loja aberta para toda a cidade</strong></span></div>
-          </div>
-        </section>
-
-        <section className="home-v2-section home-v2-categories" aria-labelledby="categories-title">
-          <div className="home-v2-section-heading">
-            <span className="home-v2-section-kicker">Explore por categoria</span>
-            <h2 id="categories-title">Tudo o que você procura, mais perto.</h2>
-            <p>Encontre produtos, descubra comércios locais e compare as melhores opções disponíveis em Feijó.</p>
+        <section id="categorias" className="home-v2-section home-v2-categories" aria-labelledby="categories-title">
+          <div className="home-v2-section-heading home-v2-heading-row">
+            <div><h2 id="categories-title">Comece pelo que você precisa</h2><p>Navegue pelas áreas mais úteis sem perder tempo.</p></div>
+            <Link className="home-v2-inline-link" to="/buscar">Ver tudo <ArrowRight aria-hidden="true" /></Link>
           </div>
           <div className="home-v2-category-grid">
             {categories.map(({ name, description, icon: Icon, href, query: categoryQuery }) => {
@@ -394,108 +331,103 @@ export function HomeV2() {
           </div>
         </section>
 
-        <section className="home-v2-featured" aria-labelledby="featured-title">
-          <div className="home-v2-section home-v2-featured-inner">
-            <div className="home-v2-section-heading home-v2-section-heading-light">
-              <span className="home-v2-section-kicker">Mais procurados</span>
-              <h2 id="featured-title">Produtos que fazem parte da sua rotina.</h2>
-              <p>Comece pelos itens essenciais e descubra onde sua compra pode render mais.</p>
+        <section id="oportunidades" className="home-v2-opportunities" aria-labelledby="opportunities-title">
+          <div className="home-v2-section home-v2-opportunities-inner">
+            <div className="home-v2-section-heading home-v2-heading-row">
+              <div><h2 id="opportunities-title">Preços que valem comparar agora</h2><p>Produtos reais do catálogo, ordenados pela diferença encontrada entre estabelecimentos.</p></div>
+              <Link className="home-v2-inline-link" to="/buscar">Pesquisar outro produto <ArrowRight aria-hidden="true" /></Link>
             </div>
-            <div className="home-v2-products">
-              {featuredProducts.map((product) => (
-                <button key={product.name} type="button" className="home-v2-product" onClick={() => previewFeaturedProduct(product.query)} aria-haspopup="dialog">
-                  <span className="home-v2-product-image"><img src={product.image} alt="" loading="lazy" /></span>
-                  <span className="home-v2-product-copy"><strong>{product.name}</strong><small>{product.detail}</small></span>
-                  <ArrowRight aria-hidden="true" />
-                </button>
-              ))}
+            <div className="home-v2-product-grid">
+              {opportunityProducts.map((product) => {
+                const offer = bestOffer(product);
+                const image = resolveProductImage(product);
+                const difference = priceDifference(product);
+                return (
+                  <button key={String(product.id)} type="button" className="home-v2-product-card" onClick={() => openProduct(product)} aria-haspopup="dialog">
+                    <span className="home-v2-product-media">{image ? <img src={image} alt="" loading="lazy" /> : <PackageSearch aria-hidden="true" />}</span>
+                    <span className="home-v2-product-body">
+                      <small>{[product.category, product.size].filter(Boolean).join(" · ")}</small>
+                      <strong className="home-v2-product-name">{product.name}</strong>
+                      <span className="home-v2-store-line"><Store aria-hidden="true" /> {offer.establishment}{offer.neighborhood ? ` · ${offer.neighborhood}` : ""}</span>
+                      <span className="home-v2-product-bottom"><span><small>Menor preço</small><b>{money(offer.value)}</b></span>{difference > 0 && <em>Diferença de até {money(difference)}</em>}</span>
+                      <span className="home-v2-card-action">Comparar preços <ArrowRight aria-hidden="true" /></span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-            <Link className="home-v2-text-link" to="/buscar">Explorar produtos <ArrowRight aria-hidden="true" /></Link>
           </div>
+        </section>
+
+        {comparisonProduct && (
+          <section className="home-v2-section home-v2-compare" aria-labelledby="compare-title">
+            <div className="home-v2-compare-copy">
+              <h2 id="compare-title">Compare antes de escolher.</h2>
+              <p>O PreçoCerto organiza menor preço, média e maior preço para deixar a decisão evidente sem transformar a compra em um painel complicado.</p>
+              <button type="button" className="home-v2-primary-button" onClick={() => openProduct(comparisonProduct)}>Ver comparação completa <ArrowRight aria-hidden="true" /></button>
+            </div>
+            <div className="home-v2-compare-example">
+              <div className="home-v2-compare-product"><span>{resolveProductImage(comparisonProduct) ? <img src={resolveProductImage(comparisonProduct)} alt="" loading="lazy" /> : <PackageSearch aria-hidden="true" />}</span><div><small>Exemplo do catálogo</small><strong>{comparisonProduct.name}</strong></div></div>
+              <div className="home-v2-price-row"><span><small>Menor</small><strong>{money(comparisonProduct.minPrice)}</strong></span><span><small>Média</small><strong>{money(comparisonProduct.avgPrice)}</strong></span><span><small>Maior</small><strong>{money(comparisonProduct.maxPrice)}</strong></span></div>
+              <p><ShieldCheck aria-hidden="true" /> {comparisonProduct.storeCount} {comparisonProduct.storeCount === 1 ? "estabelecimento comparado" : "estabelecimentos comparados"}</p>
+            </div>
+          </section>
+        )}
+
+        <section className="home-v2-section home-v2-stores" aria-labelledby="stores-title">
+          <div className="home-v2-section-heading home-v2-heading-row">
+            <div><h2 id="stores-title">Estabelecimentos locais</h2><p>Abra o catálogo de cada comércio e confira o que está disponível.</p></div>
+            <Link className="home-v2-inline-link" to="/estabelecimentos">Ver todos <ArrowRight aria-hidden="true" /></Link>
+          </div>
+          <div className="home-v2-store-grid">
+            {featuredStores.map((store) => (
+              <Link key={String(store.id)} className="home-v2-store-card" to={`/estabelecimento/${store.slug}`}>
+                <span className="home-v2-store-mark" style={{ backgroundColor: store.color || "#155eef" }}><Store aria-hidden="true" /></span>
+                <span><strong>{store.name}</strong><small>{store.neighborhood || "Feijó, AC"}</small></span>
+                <span className="home-v2-store-meta">{store.products} {store.products === 1 ? "produto" : "produtos"}</span>
+                <ChevronRight aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="home-v2-section home-v2-basket" aria-labelledby="basket-title">
+          <span className="home-v2-basket-icon"><ShoppingCart aria-hidden="true" /></span>
+          <div><h2 id="basket-title">Planeje a cesta inteira, não só um item.</h2><p>Reúna o que precisa e compare sua compra com mais clareza.</p></div>
+          <Link className="home-v2-primary-link" to="/cesta-basica">Montar minha cesta <ArrowRight aria-hidden="true" /></Link>
         </section>
 
         <section className="home-v2-section home-v2-how" aria-labelledby="how-title">
-          <div className="home-v2-how-copy">
-            <span className="home-v2-eyebrow"><Sparkles aria-hidden="true" /> Compra mais inteligente</span>
-            <h2 id="how-title">Da pesquisa à melhor escolha.</h2>
-            <p>O PreçoCerto organiza informações para você gastar menos tempo procurando e decidir com mais segurança.</p>
-            <Link className="home-v2-primary-link" to="/buscar">Começar comparação <ArrowRight aria-hidden="true" /></Link>
-          </div>
+          <div className="home-v2-section-heading"><h2 id="how-title">Da busca à economia em três passos</h2><p>Um fluxo direto para decidir melhor antes de comprar.</p></div>
           <ol className="home-v2-steps">
-            <li><span>1</span><div><strong>Pesquise o produto</strong><p>Digite o nome ou escolha uma categoria.</p></div></li>
-            <li><span>2</span><div><strong>Compare as opções</strong><p>Veja produtos e estabelecimentos disponíveis.</p></div></li>
-            <li><span>3</span><div><strong>Planeje sua compra</strong><p>Escolha o que faz sentido para seu orçamento.</p></div></li>
+            <li><span>1</span><div><strong>Pesquise</strong><p>Digite o produto que procura.</p></div></li>
+            <li><span>2</span><div><strong>Compare</strong><p>Veja preços e estabelecimentos.</p></div></li>
+            <li><span>3</span><div><strong>Escolha</strong><p>Vá direto à opção que faz sentido.</p></div></li>
           </ol>
         </section>
 
-        <section className="home-v2-section home-v2-ai" aria-labelledby="ai-title">
-          <div className="home-v2-ai-icon"><ShoppingBasket aria-hidden="true" /></div>
-          <div>
-            <h2 id="ai-title">Monte sua cesta com mais inteligência</h2>
-            <p>Informe o que precisa e use o comparador para encontrar opções para sua compra.</p>
-          </div>
-          <Link className="home-v2-ai-link" to="/buscar">Montar minha cesta <ArrowRight aria-hidden="true" /></Link>
-        </section>
-
-        <section className="home-v2-local" aria-labelledby="local-title">
-          <div className="home-v2-local-image"><img src="/comerciante-local-feijo.webp" alt="Comerciante local organizando produtos frescos em seu estabelecimento" loading="lazy" width="1440" height="960" /></div>
-          <div className="home-v2-local-copy">
-            <h2 id="local-title">Valorize quem movimenta Feijó.</h2>
-            <p>Conheça os estabelecimentos cadastrados, explore seus catálogos e encontre novas opções perto de você.</p>
-            <ul>
-              <li><Check aria-hidden="true" /> Catálogos organizados por estabelecimento</li>
-              <li><Check aria-hidden="true" /> Pesquisa por produtos e categorias</li>
-              <li><Check aria-hidden="true" /> Acesso simples pelo celular</li>
-            </ul>
-            <Link className="home-v2-secondary-link" to="/estabelecimentos">Conhecer estabelecimentos <ArrowRight aria-hidden="true" /></Link>
-          </div>
+        <section className="home-v2-merchant" aria-labelledby="merchant-title">
+          <div className="home-v2-merchant-inner"><span className="home-v2-merchant-icon"><Store aria-hidden="true" /></span><div><h2 id="merchant-title">Seu comércio também pode estar no PreçoCerto.</h2><p>Organize seu catálogo e facilite a descoberta dos seus produtos em Feijó.</p></div><Link to="/lojista">Conhecer área do comerciante <ArrowRight aria-hidden="true" /></Link></div>
         </section>
       </main>
 
       {selectedProduct && (() => {
-        const offers = [...(selectedProduct.offers ?? [])]
-          .filter((offer) => Number.isFinite(offer.value) && offer.value > 0)
-          .sort((a, b) => a.value - b.value);
+        const offers = [...(selectedProduct.offers ?? [])].filter((offer) => Number.isFinite(offer.value) && offer.value > 0).sort((a, b) => a.value - b.value);
         const image = resolveProductImage(selectedProduct);
         const updatedAt = new Date(selectedProduct.capturedAt);
         return (
-          <div className="home-v2-product-modal" role="presentation" onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setSelectedProduct(null);
-          }}>
+          <div className="home-v2-product-modal" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedProduct(null); }}>
             <section ref={modalDialogRef} className="home-v2-product-dialog" role="dialog" aria-modal="true" aria-labelledby="home-v2-modal-title">
               <button ref={modalCloseRef} className="home-v2-modal-close" type="button" aria-label="Fechar detalhes do produto" onClick={() => setSelectedProduct(null)}><X aria-hidden="true" /></button>
-              <div className="home-v2-modal-media">
-                <span className="home-v2-modal-badge"><BadgeCheck aria-hidden="true" /> Melhor preço encontrado</span>
-                {image ? <img src={image} alt={selectedProduct.name} /> : <PackageSearch aria-hidden="true" />}
-              </div>
+              <div className="home-v2-modal-media"><span className="home-v2-modal-badge"><BadgeCheck aria-hidden="true" /> Melhor preço encontrado</span>{image ? <img src={image} alt={selectedProduct.name} /> : <PackageSearch aria-hidden="true" />}</div>
               <div className="home-v2-modal-content">
                 <span className="home-v2-modal-category">{selectedProduct.category || "Produto"}</span>
                 <h2 id="home-v2-modal-title">{selectedProduct.name}</h2>
                 <p className="home-v2-modal-meta">{[selectedProduct.brand, selectedProduct.size].filter(Boolean).join(" · ")}</p>
-
-                <div className="home-v2-modal-prices" aria-label="Resumo dos preços">
-                  <div className="is-best"><small>Menor preço</small><strong>{money(selectedProduct.minPrice)}</strong></div>
-                  <div><small>Média local</small><strong>{money(selectedProduct.avgPrice)}</strong></div>
-                  <div><small>Maior preço</small><strong>{money(selectedProduct.maxPrice)}</strong></div>
-                </div>
-
-                <div className="home-v2-modal-stores">
-                  <div className="home-v2-modal-stores-head"><strong>Onde está mais barato</strong><small>{selectedProduct.storeCount} {selectedProduct.storeCount === 1 ? "estabelecimento" : "estabelecimentos"}</small></div>
-                  {(offers.length ? offers : [bestOffer(selectedProduct)]).slice(0, 4).map((offer, index) => (
-                    <div className={`home-v2-modal-store${index === 0 ? " is-cheapest" : ""}`} key={`${offer.establishmentId}-${offer.value}`}>
-                      <span className="home-v2-modal-store-icon" style={{ backgroundColor: offer.storeColor || "#155eef" }}><Store aria-hidden="true" /></span>
-                      <span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span>
-                      {index === 0 && <em>Mais barato</em>}
-                      <b>{money(offer.value)}</b>
-                    </div>
-                  ))}
-                </div>
-
+                <div className="home-v2-modal-prices" aria-label="Resumo dos preços"><div className="is-best"><small>Menor preço</small><strong>{money(selectedProduct.minPrice)}</strong></div><div><small>Média local</small><strong>{money(selectedProduct.avgPrice)}</strong></div><div><small>Maior preço</small><strong>{money(selectedProduct.maxPrice)}</strong></div></div>
+                <div className="home-v2-modal-stores"><div className="home-v2-modal-stores-head"><strong>Onde está mais barato</strong><small>{selectedProduct.storeCount} {selectedProduct.storeCount === 1 ? "estabelecimento" : "estabelecimentos"}</small></div>{(offers.length ? offers : [bestOffer(selectedProduct)]).slice(0, 4).map((offer, index) => <div className={`home-v2-modal-store${index === 0 ? " is-cheapest" : ""}`} key={`${offer.establishmentId}-${offer.value}`}><span className="home-v2-modal-store-icon" style={{ backgroundColor: offer.storeColor || "#155eef" }}><Store aria-hidden="true" /></span><span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span>{index === 0 && <em>Mais barato</em>}<b>{money(offer.value)}</b></div>)}</div>
                 <p className="home-v2-modal-update"><ShieldCheck aria-hidden="true" /> Atualizado {Number.isNaN(updatedAt.getTime()) ? "recentemente" : updatedAt.toLocaleDateString("pt-BR")}</p>
-                <div className="home-v2-modal-actions">
-                  <Link to={`/produto/${selectedProduct.slug || selectedProduct.id}`} onClick={() => setSelectedProduct(null)}>Ver detalhes completos <ArrowRight aria-hidden="true" /></Link>
-                  <button type="button" onClick={() => search(selectedProduct.name)}>Comparar similares</button>
-                </div>
+                <div className="home-v2-modal-actions"><Link to={`/produto/${selectedProduct.slug || selectedProduct.id}`} onClick={() => setSelectedProduct(null)}>Ver detalhes completos <ArrowRight aria-hidden="true" /></Link><button type="button" onClick={() => search(selectedProduct.name)}>Comparar similares</button></div>
               </div>
             </section>
           </div>
@@ -503,12 +435,8 @@ export function HomeV2() {
       })()}
 
       <footer className="home-v2-footer">
-        <div className="home-v2-footer-inner">
-          <div className="home-v2-footer-brand"><img src="/logo-preco-certo-inversa.svg" alt="PreçoCerto" /><p>Compare preços locais e planeje compras melhores em Feijó.</p></div>
-          <div className="home-v2-footer-links"><strong>Explore</strong><Link to="/buscar">Comparar preços</Link><Link to="/estabelecimentos">Estabelecimentos</Link><Link to="/farmacias">Farmácias</Link></div>
-          <div className="home-v2-footer-links"><strong>PreçoCerto</strong><Link to="/colaborar">Colaborar</Link><Link to="/fale-conosco">Fale conosco</Link><Link to="/lojista">Área do comerciante</Link></div>
-        </div>
-        <div className="home-v2-footer-bottom"><span>PreçoCerto Feijó-AC</span><span>Informação local para escolhas melhores.</span></div>
+        <div className="home-v2-footer-inner"><div className="home-v2-footer-brand"><img src="/logo-preco-certo-inversa.svg" alt="PreçoCerto" /><p>Pesquise, compare e escolha melhor em Feijó.</p></div><div className="home-v2-footer-links"><strong>Explorar</strong><Link to="/buscar">Comparar preços</Link><Link to="/estabelecimentos">Estabelecimentos</Link><Link to="/farmacias">Farmácias</Link></div><div className="home-v2-footer-links"><strong>PreçoCerto</strong><Link to="/colaborar">Colaborar</Link><Link to="/fale-conosco">Fale conosco</Link><Link to="/lojista">Área do comerciante</Link></div></div>
+        <div className="home-v2-footer-bottom"><span>PreçoCerto · Feijó, Acre</span><span>Informação local para escolhas melhores.</span></div>
       </footer>
     </div>
   );

@@ -8,7 +8,6 @@ import { SearchSafePolish } from "./components/SearchSafePolish";
 import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
-import { TrueHomepage } from "./components/TrueHomepage";
 import { HomeV2 } from "./pages/HomeV2";
 import { SmartCompareSearchProMax } from "./components/SmartCompareSearchProMax";
 import { HomepageSearchKeyboardProMax } from "./components/HomepageSearchKeyboardProMax";
@@ -55,12 +54,10 @@ import { AdminMerchantManagement } from "./components/AdminMerchantManagement";
 import { CustomerOrders } from "./components/CustomerOrders";
 import { MercadoPagoCallback } from "./components/MercadoPagoCallback";
 import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/PublicFooterServicePages";
-import "./components/TrueHomepageKowalski.css";
 import "./components/KowalskiGlobalExperience.css";
 import "./components/KowalskiLegacyDeep.css";
 import "./components/ImpeccableFullSitePolish.css";
 import "./components/ImpeccableStructuralLegacy.css";
-import "./pages/HomeV2Premium.css";
 import "./components/DorinhaEditorialCompactV6.css";
 
 export default function App() {
@@ -100,7 +97,7 @@ export default function App() {
       <BasketSessionFlow />
       <AuthorMerchantDashboardWelcome />
       <Routes>
-       <Route path="/" element={<HomeV2 />} />
+        <Route path="/" element={<HomeV2 />} />
         <Route path="/buscar" element={<SmartCompareSearchProMax />} />
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/estabelecimento/dorinha-barroso-livros" element={<DorinhaAuthorStoreProMax />} />
