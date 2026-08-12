@@ -7,6 +7,7 @@ import superacaoAsset from "../assets/uma-historia-de-superacao.png.asset.json";
 import despertarAsset from "../assets/o-despertar-para-o-mundo-literario.png.asset.json";
 import "./DorinhaAuthorStoreProMax.css";
 import "./DorinhaAuthorStoreProMaxV4.css";
+import "./DorinhaCheckoutProMax.css";
 
 type AssetMeta={url:string};
 type ExternalStore={label:string;url:string};
