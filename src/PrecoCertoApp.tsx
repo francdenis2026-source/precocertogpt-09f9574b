@@ -2,7 +2,7 @@
 import {
   Activity, AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Camera, Check, CheckCircle2,
   ChevronDown, ChevronRight, CircleDollarSign, Clock3, CreditCard, Database, Download, Edit, ExternalLink, Flag,
-  Heart, Home, LayoutDashboard, LineChart, ListChecks, Loader2, LockKeyhole, MapPin, Menu, Moon, PackageSearch,
+  Heart, Home, Info, LayoutDashboard, LineChart, ListChecks, Loader2, LockKeyhole, MapPin, Menu, Moon, PackageSearch,
   Plus, Printer, Receipt, RotateCcw, Save, Search, Settings, Share2, ShieldCheck, ShoppingBasket,
   SlidersHorizontal, Sparkles, Store, Sun, Trash2, TrendingDown, TrendingUp, Truck, Upload, UserRound, Users, X,
 } from "lucide-react";
