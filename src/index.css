@@ -115,7 +115,7 @@ body {
 .visual-product-image {
   display: flex;
   position: relative;
-  height: 160px; /* Reduced from 200px/240px to compact grid */
+  height: 140px; /* Mais compacto ainda */
   background: linear-gradient(to bottom, var(--surface), var(--surface-2));
   align-items: center;
   justify-content: center;
