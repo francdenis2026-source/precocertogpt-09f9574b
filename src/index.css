@@ -498,8 +498,6 @@ body {
 .site-header--absolute {
   position: sticky; /* Always fixed/sticky for better navigation */
   top: 0;
-}
-  top: 0;
   left: 0;
   right: 0;
   background: transparent;
