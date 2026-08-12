@@ -472,7 +472,7 @@ function useAccountSpace(){
 }
 
 
-function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: number; favoritesCount: number; user: any; onLogout: () => void }) {
+function Header({ basketCount, favoritesCount, user, onLogout, products, favorites, addBasket }: { basketCount: number; favoritesCount: number; user: any; onLogout: () => void; products: Product[]; favorites: string[]; addBasket: (p: Product) => void }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
