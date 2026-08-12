@@ -5205,8 +5205,10 @@ export default function PrecoCertoApp() {
   else if(pathname==="/buscar"||pathname==="/comparador"||pathname==="/melhores-precos") page=<SearchPage {...props} metrics={metrics}/>;
   else if(pathname==="/acougues"||pathname==="/categoria/acougue") page=<ButchersPage {...props}/>;
   else if(pathname==="/planos" && isEnabled("consumerPlans")) page=<PlansPage/>;
+  else if(pathname==="/meus-pedidos"||pathname==="/historico-pedidos") page=<CustomerOrders/>;
   else if(pathname==="/alertas"||pathname==="/perfil"||pathname==="/favoritos") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user} setUser={setUserAndUpdateStorage}/>;
-  else if(pathname==="/cesta"||pathname==="/cesta-basica"||pathname==="/checkout") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user} syncStatus={syncStatus}/>;
+  else if(pathname==="/cesta"||pathname==="/cesta-basica"||pathname==="/checkout") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user} syncStatus={syncStatus} stores={stores} setToast={setToast}/>;
+
   else if(pathname.startsWith("/cesta/snapshot/")) page=<SnapshotPage {...props}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
   else if(isAuth) page=<AuthPage path={pathname} onAdminAuth={handleAdminAuth} onLogin={handleUserLogin}/>;
@@ -5220,8 +5222,9 @@ export default function PrecoCertoApp() {
   return <div className="app">
     <Header basketCount={cart.length} favoritesCount={favorites.length} user={user} onLogout={handleLogout}/>
     <main><div className="page-transition-enter-active" key={pathname}>{page}</div></main>
-    <Footer/>
+    <Footer user={user}/>
     <MobileBar basketCount={cart.length} favoritesCount={favorites.length}/>
+
     {toast && (
       <div 
         className={`toast ${toastExit ? "toast--exit" : ""}`}
