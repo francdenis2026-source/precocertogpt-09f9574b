@@ -45,6 +45,11 @@ describe('Busca de produtos por relevância', () => {
     expect(suggestProducts(products, 'arranha')).toEqual([]);
   });
 
+  it('não sugere produtos apenas porque marca ou categoria se parecem com a busca', () => {
+    const branded = [{ ...products[2], id: 8, name: 'Biscoito Cream Cracker', brand: 'Arroz Bom', category: 'Arroz' }];
+    expect(suggestProducts(branded, 'arroz')).toEqual([]);
+  });
+
   it('consolida o mesmo produto de lojas diferentes na sugestão', () => {
     const duplicated = [...products, { ...products[0], id: 4, establishment: 'Outra Loja', minPrice: 27.9 }];
     const suggestions = suggestProducts(duplicated, 'arroz tio');

@@ -46,10 +46,8 @@ export function suggestProducts(products: Product[], query: string, limit = 6) {
 
   const queryTokens = q.split(" ").filter(Boolean);
   const matches = products.filter(product => {
-    const searchableWords = normalizeSearchText([
-      product.name, product.brand, product.category, product.size,
-    ].filter(Boolean).join(" ")).split(" ");
-    return queryTokens.every(token => searchableWords.some(word => word.startsWith(token)));
+    const nameWords = normalizeSearchText(product.name).split(" ");
+    return queryTokens.every(token => nameWords.some(word => word === token || word.startsWith(token)));
   });
 
   const unique = new Map<string, Product>();

@@ -4,15 +4,18 @@ import {
   ArrowRight,
   BadgeCheck,
   BookOpen,
+  Building2,
   Check,
   ChevronRight,
   HeartPulse,
   MapPin,
   Menu,
   PackageSearch,
+  ReceiptText,
   Search,
   ShieldCheck,
   ShoppingBasket,
+  ShoppingBag,
   Sparkles,
   Store,
   Tag,
@@ -70,7 +73,10 @@ export function HomeV2() {
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeResult, setActiveResult] = useState(-1);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const searchAreaRef = useRef<HTMLDivElement>(null);
+  const modalCloseRef = useRef<HTMLButtonElement>(null);
+  const modalDialogRef = useRef<HTMLElement>(null);
 
   const suggestions = useMemo(() => {
     if (query.trim().length < 2) return [];
@@ -90,6 +96,36 @@ export function HomeV2() {
   }, []);
 
   useEffect(() => {
+    if (!selectedProduct) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    modalCloseRef.current?.focus();
+    const handleModalKeys = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedProduct(null);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = [...(modalDialogRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])') ?? [])];
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleModalKeys);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleModalKeys);
+    };
+  }, [selectedProduct]);
+
+  useEffect(() => {
     const closeOnOutsideClick = (event: PointerEvent) => {
       if (!searchAreaRef.current?.contains(event.target as Node)) {
         setSearchOpen(false);
@@ -107,8 +143,10 @@ export function HomeV2() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (activeResult >= 0 && suggestions[activeResult]) {
-      navigate(`/produto/${suggestions[activeResult].slug || suggestions[activeResult].id}`);
+    const selected = activeResult >= 0 ? suggestions[activeResult] : suggestions[0];
+    if (selected) {
+      setSearchOpen(false);
+      setSelectedProduct(selected);
       return;
     }
     search(query);
@@ -116,7 +154,13 @@ export function HomeV2() {
 
   const openProduct = (product: Product) => {
     setSearchOpen(false);
-    navigate(`/produto/${product.slug || product.id}`);
+    setSelectedProduct(product);
+  };
+
+  const previewFeaturedProduct = (term: string) => {
+    const product = suggestProducts(products, term, 1).find((item) => item.minPrice > 0);
+    if (product) setSelectedProduct(product);
+    else search(term);
   };
 
   const handleSearchKeys = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -209,7 +253,7 @@ export function HomeV2() {
                     aria-controls="home-product-results"
                     aria-activedescendant={activeResult >= 0 ? `home-product-result-${activeResult}` : undefined}
                   />
-                  <button type="submit">Comparar <ArrowRight aria-hidden="true" /></button>
+                  <button type="submit">Buscar produto <ArrowRight aria-hidden="true" /></button>
                 </form>
 
                 {searchOpen && query.trim().length >= 2 && (
@@ -265,9 +309,7 @@ export function HomeV2() {
                       </div>
                     )}
 
-                    <button className="home-v2-results-all" type="button" onClick={() => search(query)}>
-                      Ver comparação completa <ArrowRight aria-hidden="true" />
-                    </button>
+                    {suggestions.length > 0 && <p className="home-v2-results-hint">Selecione o produto exato para abrir os detalhes. A comparação de similares fica disponível dentro do produto.</p>}
                   </div>
                 )}
               </div>
@@ -296,6 +338,28 @@ export function HomeV2() {
           <div><ShieldCheck aria-hidden="true" /><span><strong>Escolha consciente</strong>Decida antes de comprar</span></div>
         </section>
 
+        <section className="home-v2-marketplace" aria-labelledby="marketplace-title">
+          <div className="home-v2-marketplace-copy">
+            <span className="home-v2-marketplace-kicker"><Store aria-hidden="true" /> Uma vitrine para Feijó</span>
+            <h2 id="marketplace-title"><em>Marketplace Local</em><br />sua loja também pode vender online.</h2>
+            <p>Crie sua vitrine virtual, apresente produtos e receba pedidos de forma prática — com presença profissional no comércio digital da cidade.</p>
+            <div className="home-v2-marketplace-benefits">
+              <span><Building2 aria-hidden="true" /> Loja própria</span>
+              <span><ShoppingBag aria-hidden="true" /> Catálogo online</span>
+              <span><ReceiptText aria-hidden="true" /> Pedidos organizados</span>
+            </div>
+            <Link to="/lojista" className="home-v2-marketplace-cta">Quero vender online <ArrowRight aria-hidden="true" /></Link>
+          </div>
+          <div className="home-v2-marketplace-art" aria-label="Exemplo de uma loja virtual no PreçoCerto">
+            <div className="home-v2-marketplace-window">
+              <div className="home-v2-marketplace-window-top"><i /><i /><i /><span>precocerto · loja local</span></div>
+              <div className="home-v2-marketplace-store-head"><span><Store aria-hidden="true" /></span><div><strong>Minha Loja</strong><small>Feijó, Acre · aberta agora</small></div><BadgeCheck aria-hidden="true" /></div>
+              <div className="home-v2-marketplace-products" aria-hidden="true"><i /><i /><i /></div>
+              <div className="home-v2-marketplace-order"><ShoppingBag aria-hidden="true" /><span><small>Novo pedido</small><strong>Recebido com sucesso</strong></span><Check aria-hidden="true" /></div>
+            </div>
+          </div>
+        </section>
+
         <section className="home-v2-section home-v2-categories" aria-labelledby="categories-title">
           <div className="home-v2-section-heading">
             <span className="home-v2-section-kicker">Explore por categoria</span>
@@ -319,7 +383,7 @@ export function HomeV2() {
             </div>
             <div className="home-v2-products">
               {featuredProducts.map((product) => (
-                <button key={product.name} type="button" className="home-v2-product" onClick={() => search(product.query)}>
+                <button key={product.name} type="button" className="home-v2-product" onClick={() => previewFeaturedProduct(product.query)} aria-haspopup="dialog">
                   <span className="home-v2-product-image"><img src={product.image} alt="" loading="lazy" /></span>
                   <span className="home-v2-product-copy"><strong>{product.name}</strong><small>{product.detail}</small></span>
                   <ArrowRight aria-hidden="true" />
@@ -367,6 +431,56 @@ export function HomeV2() {
           </div>
         </section>
       </main>
+
+      {selectedProduct && (() => {
+        const offers = [...(selectedProduct.offers ?? [])]
+          .filter((offer) => Number.isFinite(offer.value) && offer.value > 0)
+          .sort((a, b) => a.value - b.value);
+        const image = resolveProductImage(selectedProduct);
+        const updatedAt = new Date(selectedProduct.capturedAt);
+        return (
+          <div className="home-v2-product-modal" role="presentation" onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setSelectedProduct(null);
+          }}>
+            <section ref={modalDialogRef} className="home-v2-product-dialog" role="dialog" aria-modal="true" aria-labelledby="home-v2-modal-title">
+              <button ref={modalCloseRef} className="home-v2-modal-close" type="button" aria-label="Fechar detalhes do produto" onClick={() => setSelectedProduct(null)}><X aria-hidden="true" /></button>
+              <div className="home-v2-modal-media">
+                <span className="home-v2-modal-badge"><BadgeCheck aria-hidden="true" /> Melhor preço encontrado</span>
+                {image ? <img src={image} alt={selectedProduct.name} /> : <PackageSearch aria-hidden="true" />}
+              </div>
+              <div className="home-v2-modal-content">
+                <span className="home-v2-modal-category">{selectedProduct.category || "Produto"}</span>
+                <h2 id="home-v2-modal-title">{selectedProduct.name}</h2>
+                <p className="home-v2-modal-meta">{[selectedProduct.brand, selectedProduct.size].filter(Boolean).join(" · ")}</p>
+
+                <div className="home-v2-modal-prices" aria-label="Resumo dos preços">
+                  <div className="is-best"><small>Menor preço</small><strong>{money(selectedProduct.minPrice)}</strong></div>
+                  <div><small>Média local</small><strong>{money(selectedProduct.avgPrice)}</strong></div>
+                  <div><small>Maior preço</small><strong>{money(selectedProduct.maxPrice)}</strong></div>
+                </div>
+
+                <div className="home-v2-modal-stores">
+                  <div className="home-v2-modal-stores-head"><strong>Onde está mais barato</strong><small>{selectedProduct.storeCount} {selectedProduct.storeCount === 1 ? "estabelecimento" : "estabelecimentos"}</small></div>
+                  {(offers.length ? offers : [bestOffer(selectedProduct)]).slice(0, 4).map((offer, index) => (
+                    <div className={`home-v2-modal-store${index === 0 ? " is-cheapest" : ""}`} key={`${offer.establishmentId}-${offer.value}`}>
+                      <span className="home-v2-modal-store-icon" style={{ backgroundColor: offer.storeColor || "#155eef" }}><Store aria-hidden="true" /></span>
+                      <span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span>
+                      {index === 0 && <em>Mais barato</em>}
+                      <b>{money(offer.value)}</b>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="home-v2-modal-update"><ShieldCheck aria-hidden="true" /> Atualizado {Number.isNaN(updatedAt.getTime()) ? "recentemente" : updatedAt.toLocaleDateString("pt-BR")}</p>
+                <div className="home-v2-modal-actions">
+                  <Link to={`/produto/${selectedProduct.slug || selectedProduct.id}`} onClick={() => setSelectedProduct(null)}>Ver detalhes completos <ArrowRight aria-hidden="true" /></Link>
+                  <button type="button" onClick={() => search(selectedProduct.name)}>Comparar similares</button>
+                </div>
+              </div>
+            </section>
+          </div>
+        );
+      })()}
 
       <footer className="home-v2-footer">
         <div className="home-v2-footer-inner">
