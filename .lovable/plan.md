@@ -5,38 +5,29 @@ Enhance the writer's store pages with better SEO, navigation aids, and user expe
 ## User Review Required
 
 > [!IMPORTANT]
-> The "Favorites Dropdown" will be a new UI element in the header. Do you have a preference for how it should look (e.g., a simple list vs. cards)?
-
-- **SEO Tags**: Are there specific keywords or descriptions you'd like for /dorinha besides the defaults I'll set?
-- **Redirection**: Should the post-checkout redirection be automatic or ask the user if they want to return?
+> The "Favorites Dropdown" will be a new UI element in the header. I will implement it as a clean, professional list with small product thumbnails and prices.
 
 ## Proposed Changes
 
 ### SEO and Metadata
 - Configure specific `<title>` and `<meta>` tags (Open Graph/Twitter) for `/dorinha` and `/escritora` routes.
-- Ensure proper canonical URLs for these routes.
+- Set descriptive tags: "Dorinha Barroso · Livros Acreanos" with her bio and professional cover images.
 
 ### Navigation and UI
 - **Active State**: Highlight "Dorinha Barroso" in the header and mobile menu when on her routes.
-- **Breadcrumbs**: Add a navigation path (e.g., "Início > Dorinha Barroso > [Livro]") on the writer's store page.
-- **Return Buttons**: Add "Voltar para Loja da Dorinha" buttons in the checkout and profile pages if the user originated from her store.
-- **Post-Checkout**: Store the originating store slug in `sessionStorage` to redirect the user back after a successful purchase.
+- **Breadcrumbs**: Add a navigation path (e.g., "Início > Dorinha Barroso") on the writer's store page.
+- **Return Buttons**: Add a "Voltar" button in the checkout and other internal pages if the user originated from the writer's store.
+- **Post-Checkout**: Redirect the user back to `/dorinha` after a successful purchase if they started there.
 
 ### Favorites Dropdown
-- Implement a dropdown menu for the Heart icon in the desktop header.
-- Display a quick list of favorited products with images, prices, and a link to view all.
+- Implement a professional dropdown menu for the Heart icon in the desktop header.
+- Display favorited products with quick links and the ability to add to the basket directly.
 
 ## Technical Details
 
-### SEO Implementation
-- Use a dedicated `SEO` component or `useEffect` to manage `document.title` and meta tags dynamically based on the current path.
-
-### Breadcrumbs Logic
-- Implement a `Breadcrumbs` component that parses the current path and generates links.
-
-### Redirection Logic
-- Update `handleCheckout` and payment success handlers to check for a `return_to` parameter or session variable.
-
-### Favorites Dropdown
-- Create a `FavoritesDropdown` component using `Radix UI` or a custom absolute-positioned div.
-- Sync with the existing `favorites` state in `PrecoCertoApp`.
+- **SEO**: Update `src/components/DorinhaAuthorStore.tsx` to include dynamic meta tag injection using `document.querySelector('meta[property="og:title"]')` etc.
+- **State Management**: Use `localStorage` to track the "Originating Store" to ensure the "Voltar" button persists even after refresh.
+- **UI Components**: 
+  - Add a `Breadcrumbs` component to `DorinhaAuthorStore`.
+  - Add a `FavoritesMenu` component to `src/PrecoCertoApp.tsx`'s Header.
+- **Checkout**: Update `handleCheckout` and success callbacks to check for the stored origin.
