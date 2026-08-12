@@ -10,6 +10,7 @@ import "./pages/HomePremiumLightSurface.css";
 import "./pages/HomeFeaturedStability.css";
 import "./pages/HomePremiumFooterRefinement.css";
 import "./pages/HomePremiumHeaderRefinement.css";
+import "./pages/HomeComparisonSpotlight.css";
 import App from "./App";
 import { startPaymentNotifications } from "./lib/paymentNotifications";
 
