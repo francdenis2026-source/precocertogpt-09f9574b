@@ -222,7 +222,12 @@ export function DorinhaAuthorStore() {
     `}</style>
 
     <header style={s.topbar} className="db-topbar">
-      <a href="/" style={s.brand} className="db-brand"><span style={s.brandMark} className="db-brand-mark">P</span><span><b>PreçoCerto</b><small>Marketplace Local</small></span></a>
+      <div style={s.brand} className="db-brand">
+        <a href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'inherit' }}>
+          <span style={s.brandMark} className="db-brand-mark">P</span>
+          <span><b>PreçoCerto</b><small>Marketplace Local</small></span>
+        </a>
+      </div>
       <nav className="db-top-label" style={s.topNav} aria-label="Navegação da autora"><a href="#livros">Livros</a><a href="#autora">A autora</a><a href="#contato">Contato</a></nav>
       <div style={s.topActions} className="db-top-actions">
         <button onClick={sharePage} style={s.iconButton} className="db-share-button" aria-label="Compartilhar página">{copied?<Check size={19}/>:<Share2 size={19}/>}<span className="db-icon-label">{copied?"Link copiado":"Compartilhar"}</span></button>
