@@ -2174,7 +2174,8 @@ function UserBasketHistory({ user, products }: { user: any; products: Product[] 
       total,
       savings: 0,
       items,
-      storeBreakdown
+      storeBreakdown,
+      couponDiscount: Number(basket.discount || 0)
     };
 
     const plan = planBasketPdf(result, basket.optimization_mode, "portrait");
