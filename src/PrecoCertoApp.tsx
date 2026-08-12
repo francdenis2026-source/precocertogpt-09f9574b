@@ -29,6 +29,7 @@ import { getPdfOrientation, setPdfOrientation as savePdfOrientation } from "./li
 import { AdminStoreCatalog } from "./components/AdminStoreCatalog";
 import { getStoreLogoUrl } from "./data/storeLogos";
 import { AdminUserManagement } from "./components/AdminUserManagement";
+import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
 
 
 const initialCatalog = buildCatalog();
