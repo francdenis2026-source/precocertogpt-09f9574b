@@ -21,6 +21,7 @@ import { priceReportReasons, submitPriceReport } from "./data/priceReports";
 import { loadSessionProfile, requestPasswordReset, signIn, signInMerchantWithCpf, signOut, type SessionProfile } from "./lib/roles";
 import { loadMerchantMembership, resolveAuthenticatedHome, loadDeliveryZones, createMarketplaceOrder, startMercadoPagoCheckout, type DeliveryZone } from "./lib/merchantPlatform";
 import { CustomerOrders } from "./components/CustomerOrders";
+import { PriceHistorySection } from "./components/PriceHistorySection";
 
 import { optimizeBasket, saveBasket, getBasketSnapshot, type OptimizationMode, type BasketItemConfig, type BasketResult } from "./lib/smartBasket";
 import { jsPDF } from "jspdf";
