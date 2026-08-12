@@ -352,13 +352,24 @@ export function HomePremium() {
                   </div>
                 </div>
                 <div className="pc-offer-list">
-                  {(comparisonOffers.length ? comparisonOffers : [bestOffer(comparisonProduct)]).map((offer, index) => (
-                    <div className={`pc-offer-row${index === 0 ? " is-best" : ""}`} key={`${offer.establishmentId}-${offer.value}`}>
-                      <span className="pc-offer-rank">{index + 1}</span>
-                      <span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span>
-                      {index === 0 && <em>Melhor preço</em>}
-                      <b>{money(offer.value)}</b>
-                    </div>
+                  {comparisonOffers.length > 0 ? (
+                    comparisonOffers.map((offer, idx) => (
+                      <div key={`${comparisonProduct.id}-${offer.storeId}`} className={`pc-offer-row ${idx === 0 ? "is-best" : ""}`}>
+                        <span className="pc-offer-rank">{idx + 1}</span>
+                        <span>
+                          <strong>{offer.storeName}</strong>
+                          <small>Feijó, AC</small>
+                        </span>
+                        {idx === 0 && <em>Melhor preço</em>}
+                        <b>{money(offer.value)}</b>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="pc-offer-row-empty">Carregando ofertas...</div>
+                  )}
+                  {/* Fill empty rows to maintain height if fewer than 3 offers */}
+                  {comparisonOffers.length < 3 && Array.from({ length: 3 - comparisonOffers.length }).map((_, i) => (
+                    <div key={`empty-${i}`} className="pc-offer-row pc-offer-row-placeholder" />
                   ))}
                 </div>
               </div>
