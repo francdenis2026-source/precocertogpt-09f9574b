@@ -500,7 +500,8 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
     { label: "Açougues", href: "/acougues" },
     { label: "Cesta inteligente", href: "/cesta-basica" },
     { label: "Estabelecimentos", href: "/estabelecimentos" },
-    { label: "Planos", href: "/planos" }
+    { label: "Planos", href: "/planos" },
+    { label: "Dorinha Barroso", href: "/dorinha" }
   ];
 
   return <header className={headerClass} role="banner">
@@ -591,6 +592,7 @@ function Header({ basketCount, favoritesCount, user, onLogout }: { basketCount: 
             <a href="/estabelecimentos" onClick={() => setOpen(false)}>Estabelecimentos</a>
             <a href="/melhores-precos" onClick={() => setOpen(false)}>Ofertas de hoje</a>
             <a href="/planos" onClick={() => setOpen(false)}>Planos</a>
+            <a href="/dorinha" onClick={() => setOpen(false)}>Dorinha Barroso (Livros)</a>
             <a href="/colaborar" onClick={() => setOpen(false)}>Enviar nota fiscal</a>
             <a href="/admin" className="drawer-admin-link" onClick={() => setOpen(false)}>Área Administrativa</a>
           </nav>
@@ -5461,6 +5463,7 @@ export default function PrecoCertoApp() {
   else if(pathname==="/meus-pedidos"||pathname==="/historico-pedidos") page=<CustomerOrders/>;
   else if(pathname==="/alertas"||pathname==="/perfil"||pathname==="/favoritos") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user} setUser={setUserAndUpdateStorage}/>;
   else if(pathname==="/cesta"||pathname==="/cesta-basica"||pathname==="/checkout") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user} syncStatus={syncStatus} stores={stores} setToast={setToast}/>;
+  else if(pathname==="/dorinha"||pathname==="/escritora") page=<DorinhaAuthorStore />;
 
   else if(pathname.startsWith("/cesta/snapshot/")) page=<SnapshotPage {...props}/>;
   else if(isAdmin) page=<AdminPage path={pathname} onLogout={handleAdminLogout} products={products} stores={stores}/>;
