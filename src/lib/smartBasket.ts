@@ -22,6 +22,7 @@ export interface BasketResult {
   total: number;
   savings: number;
   travelCost?: number;
+  couponDiscount?: number;
   items: Array<{
     product: Product;
     quantity: number;
@@ -205,7 +206,9 @@ export async function saveBasket(
   mode: OptimizationMode,
   budget: number,
   items: BasketItemConfig[],
-  result: BasketResult
+  result: BasketResult,
+  couponCode?: string,
+  couponDiscount?: number
 ) {
   const client = requireSupabase();
   let basketId: string | null = null;
@@ -234,7 +237,14 @@ export async function saveBasket(
   if (!basketId) {
     const { data: basket, error: bError } = await client
       .from('smart_baskets')
-      .insert({ user_id: userId, name, budget, optimization_mode: mode })
+      .insert({ 
+        user_id: userId, 
+        name, 
+        budget, 
+        optimization_mode: mode,
+        coupon_code: couponCode,
+        discount: couponDiscount
+      })
       .select('id')
       .single();
     if (bError) throw bError;

@@ -2044,7 +2044,9 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
                             mode,
                             budget,
                             basketItems,
-                            optimizationResult
+                            optimizationResult,
+                            couponCode,
+                            couponDiscount
                           );
                           alert(`Cesta salva com sucesso no seu histórico!\nData: ${timestamp}`);
                         } catch (err: any) {
