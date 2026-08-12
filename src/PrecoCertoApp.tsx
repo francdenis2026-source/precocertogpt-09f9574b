@@ -5234,6 +5234,24 @@ export default function PrecoCertoApp() {
     localStorage.setItem("precocerto:basket", JSON.stringify(cart));
   }, [cart]);
 
+  // Carrega favoritos remotos ao logar e sincroniza favoritos locais ao banco
+  useEffect(() => {
+    if (user) {
+      import("./lib/roles").then(async m => {
+        const remoteFavs = await m.loadRemoteFavorites();
+        const localFavs = JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]");
+        
+        // Merge: local + remoto
+        const mergedFavs = Array.from(new Set([...localFavs, ...remoteFavs]));
+        setFavorites(mergedFavs);
+        localStorage.setItem("precocerto:favorites", JSON.stringify(mergedFavs));
+        
+        // Garante que o banco tem tudo
+        await m.syncFavorites(mergedFavs);
+      });
+    }
+  }, [user]);
+
   const [toastExit, setToastExit] = useState(false);
   useEffect(() => {
     if (!toast) return;
@@ -5245,6 +5263,7 @@ export default function PrecoCertoApp() {
       clearTimeout(clearTimer);
     };
   }, [toast]);
+
 
   
   const [undoAction, setUndoAction] = useState<(() => void) | null>(null);
