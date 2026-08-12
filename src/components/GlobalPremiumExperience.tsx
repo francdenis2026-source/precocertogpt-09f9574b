@@ -85,9 +85,10 @@ export function GlobalPremiumExperience() {
 
   useEffect(() => {
     installStyles();
+    if (pathname === "/") return;
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
+  }, [theme, pathname]);
 
   useEffect(() => {
     const publicRoute = !pathname.startsWith("/admin") && !pathname.startsWith("/painel-lojista");
@@ -96,6 +97,8 @@ export function GlobalPremiumExperience() {
     const timer = window.setTimeout(run, 80);
     return () => { window.clearTimeout(timer); document.body.classList.remove("pc-premium-public"); document.querySelector(".pc-secondary-hero")?.remove(); };
   }, [pathname]);
+
+  if (pathname === "/") return null;
 
   return <button className="pc-theme-toggle" type="button" aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"} title={theme === "dark" ? "Modo claro" : "Modo escuro"} onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>{theme === "dark" ? <Sun aria-hidden="true"/> : <Moon aria-hidden="true"/>}</button>;
 }
