@@ -3041,7 +3041,132 @@ h1,h2,h3,.brand__word b,.brand__word strong,.button{font-family:var(--primary-fo
 [data-theme='dark'] .header-inner>.brand .brand__logo-img{box-shadow:0 0 0 1px rgba(255,255,255,.1)}
 @media(max-width:600px){.header-inner>.brand .brand__logo-img{height:42px!important;max-width:160px!important}}
 
+/* Favoritos Dropdown Premium */
+.favorites-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: -80px;
+  width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  overflow: hidden;
+  animation: dropdownIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(12px);
+}
+
+[data-theme='dark'] .favorites-dropdown-menu {
+  background: rgba(16, 48, 77, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.favorites-dropdown-head {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.favorites-dropdown-head strong {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.favorites-dropdown-head a {
+  font-size: 0.85rem;
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.favorites-dropdown-list {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.fav-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.fav-menu-item:hover {
+  background: var(--surface-2);
+}
+
+.fav-menu-item .product-image-container {
+  width: 48px;
+  height: 48px;
+  background: white;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.fav-menu-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.fav-menu-info .name {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-main);
+}
+
+.fav-menu-info .price {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.fav-menu-item .add-mini {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: var(--blue-soft);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fav-menu-item .add-mini:hover {
+  background: var(--blue);
+  color: white;
+  transform: scale(1.1);
+}
+
+.favorites-dropdown-footer {
+  padding: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.favorites-dropdown-footer .button {
+  width: 100%;
+}
+
 .toast {
+
   position: fixed;
   bottom: 32px;
   right: 32px;

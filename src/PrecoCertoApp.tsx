@@ -566,7 +566,11 @@ function Header({ basketCount, favoritesCount, user, onLogout, products, favorit
         
         <div className="favorites-dropdown-container" style={{ position: 'relative' }}>
           <a className="icon-button header-action-button favorites-button" href="/favoritos" aria-label={user ? `${favoritesCount} produtos favoritos` : "Entre para ver favoritos"} title={user ? "Meus Favoritos" : "Entre para ver favoritos"} onClick={(e) => { 
-            if (!user) { e.preventDefault(); window.location.href = `/login?redirect=${encodeURIComponent('/favoritos')}`; } 
+            // Permite acesso mesmo deslogado para ver favoritos locais
+            if (!user && favoritesCount === 0) {
+              e.preventDefault();
+              window.location.href = `/login?redirect=${encodeURIComponent('/favoritos')}`;
+            }
           }}>
             <Heart size={20} fill={favoritesCount > 0 ? "currentColor" : "none"} aria-hidden="true" />
             {favoritesCount > 0 && <span className="badge" aria-hidden="true">{favoritesCount}</span>}
@@ -585,13 +589,17 @@ function Header({ basketCount, favoritesCount, user, onLogout, products, favorit
                       <span className="name">{p.name}</span>
                       <span className="price">{money(p.minPrice)}</span>
                     </div>
-                    <button className="add-mini" onClick={() => addBasket(p)} title="Adicionar à cesta"><Plus size={14}/></button>
+                    <button className="add-mini" onClick={(e) => { e.preventDefault(); addBasket(p); }} title="Adicionar à cesta"><Plus size={14}/></button>
                   </div>
                 ))}
+              </div>
+              <div className="favorites-dropdown-footer">
+                <a href="/favoritos" className="button button--ghost button--small w-full">Gerenciar Favoritos</a>
               </div>
             </div>
           )}
         </div>
+
 
         <a className="icon-button header-action-button basket-button" href="/cesta" aria-label={`Cesta com ${basketCount} itens`} title="Minha Cesta Inteligente">
           <ShoppingBasket size={20} aria-hidden="true" />
@@ -5250,7 +5258,11 @@ export default function PrecoCertoApp() {
   });
   const [favorites, setFavorites] = useState<string[]>(() => {
     if (!localStorage.getItem("precocerto:user")) return [];
-    try { return JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]"); }
+    try { 
+      const saved = localStorage.getItem("precocerto:favorites");
+      return saved ? JSON.parse(saved) : []; 
+    }
+
     catch { return []; }
   });
   // O acesso admin nunca é decidido pelo navegador: consultamos a sessão e os
