@@ -29,11 +29,13 @@ export default function FavoritesPage({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [priceAlerts, setPriceAlerts] = useState<Record<string, boolean>>(() => {
     try {
-      return JSON.parse(localStorage.getItem("precocerto:price_alerts") ?? "{}");
+      const saved = localStorage.getItem("precocerto:price_alerts");
+      return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
     }
   });
+
 
   const favoriteProducts = useMemo(() => {
     return products.filter(p => favorites.includes(String(p.id)));
