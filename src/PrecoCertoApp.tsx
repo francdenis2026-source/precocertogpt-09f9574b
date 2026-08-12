@@ -5715,15 +5715,15 @@ export default function PrecoCertoApp() {
                       <Store size={18} /> Comparação entre estabelecimentos
                     </h4>
                     <div className="price-table-card" style={{ background: 'var(--surface-2)', borderRadius: '12px', overflow: 'hidden' }}>
-                      {selectedProduct.offers.sort((a, b) => a.price - b.price).map((offer, idx) => (
+                      {[...selectedProduct.offers].sort((a, b) => a.value - b.value).map((offer, idx) => (
                         <div key={idx} className="price-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1rem', borderBottom: idx < selectedProduct.offers!.length - 1 ? '1px solid var(--border-soft)' : 'none' }}>
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{offer.establishment}</span>
                             <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{offer.neighborhood}</span>
                           </div>
                           <div style={{ textAlign: 'right' }}>
-                            <strong style={{ fontSize: '1rem', color: offer.price === selectedProduct.minPrice ? 'var(--green)' : 'var(--foreground)' }}>
-                              {money(offer.price)}
+                            <strong style={{ fontSize: '1rem', color: offer.value === selectedProduct.minPrice ? 'var(--green)' : 'var(--foreground)' }}>
+                              {money(offer.value)}
                             </strong>
                             <div style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>
                               Verificado há {Math.floor((Date.now() - new Date(offer.capturedAt).getTime()) / 86400000)} dias
