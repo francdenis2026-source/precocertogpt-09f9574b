@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { buildCatalog, type Product } from "../../data/catalog";
 import { fetchCatalog } from "../../data/remoteCatalog";
 import { useFavorites } from "./FavoritesProvider";
@@ -22,6 +23,7 @@ function HeaderFavoriteShortcut(){
 }
 
 export function CommerceIntentBridge(){
+  const navigate = useNavigate();
   const { favoriteIds, toggleFavorite, isFavorite } = useFavorites();
   const [products,setProducts]=useState<Product[]>(buildCatalog().products);
   const byName=useMemo(()=>new Map(products.map(product=>[normalize(product.name),product])),[products]);
@@ -37,13 +39,39 @@ export function CommerceIntentBridge(){
     const renderInto=(host:Element,product:Product,compact:boolean)=>{
       let mount=host.querySelector<HTMLElement>(":scope > .pc-favorite-mount");
       if(!mount){mount=document.createElement("span");mount.className="pc-favorite-mount";host.appendChild(mount)}
+      mount.classList.toggle("is-modal",host.classList.contains("pc-dialog"));
       let root=roots.get(mount);if(!root){root=createRoot(mount);roots.set(mount,root)}
       root.render(<FavoriteControl product={product} compact={compact}/>);
     };
 
+    const bindModalStores=(dialog:Element,product:Product)=>{
+      const offerByStore=new Map((product.offers??[]).map(offer=>[normalize(offer.establishment||""),offer]));
+      dialog.querySelectorAll<HTMLElement>(".pc-dialog-offers > div").forEach(row=>{
+        const storeName=row.querySelector<HTMLElement>("strong");
+        if(!storeName)return;
+        const name=storeName.textContent?.trim()||"";
+        const offer=offerByStore.get(normalize(name));
+        const fallbackMatches=normalize(product.establishment||"")===normalize(name);
+        const identifier=offer?.establishmentSlug||offer?.establishmentId||(fallbackMatches?(product.establishmentSlug||product.establishmentId):undefined);
+        if(!identifier)return;
+        const href=`/estabelecimento/${encodeURIComponent(String(identifier))}`;
+        storeName.classList.add("pc-modal-store-link");
+        storeName.dataset.pcStoreHref=href;
+        storeName.setAttribute("role","link");
+        storeName.setAttribute("tabindex","0");
+        storeName.setAttribute("aria-label",`Abrir estabelecimento ${name}`);
+        storeName.setAttribute("title",`Ver ${name}`);
+      });
+
+      dialog.querySelectorAll<HTMLAnchorElement>(".pc-dialog-actions a[href^='/produto/']").forEach(link=>{
+        link.dataset.pcDirectNavigation="true";
+        link.setAttribute("title","Abrir página completa do produto");
+      });
+    };
+
     const patch=()=>{
       document.querySelectorAll(".pc-product-card").forEach(card=>{const p=findProduct(card);if(p)renderInto(card,p,true)});
-      document.querySelectorAll(".pc-dialog").forEach(dialog=>{const p=findProduct(dialog);if(p)renderInto(dialog,p,false)});
+      document.querySelectorAll(".pc-dialog").forEach(dialog=>{const p=findProduct(dialog);if(p){renderInto(dialog,p,true);bindModalStores(dialog,p)}});
 
       const actions=document.querySelector(".pc-header .pc-header-actions");
       if(actions&&!actions.querySelector(".pc-favorites-header-mount")){
@@ -68,6 +96,12 @@ export function CommerceIntentBridge(){
 
     const capture=(event:Event)=>{
       const element=event.target as Element|null;
+      const storeLink=element?.closest<HTMLElement>(".pc-modal-store-link[data-pc-store-href]");
+      if(storeLink){
+        const href=storeLink.dataset.pcStoreHref;
+        if(href){event.preventDefault();event.stopPropagation();navigate(href);return;}
+      }
+
       const legacy=element?.closest<HTMLElement>(LEGACY_FAVORITE_SELECTOR);
       if(!legacy)return;
       const host=legacy.closest("article,.compact-product,.professional-result-card")||legacy.parentElement;
@@ -75,11 +109,21 @@ export function CommerceIntentBridge(){
       event.preventDefault();event.stopPropagation();(event as any).stopImmediatePropagation?.();void toggleFavorite(product.id);
     };
 
+    const keyCapture=(event:KeyboardEvent)=>{
+      if(event.key!=="Enter"&&event.key!==" ")return;
+      const element=event.target as Element|null;
+      const storeLink=element?.closest<HTMLElement>(".pc-modal-store-link[data-pc-store-href]");
+      const href=storeLink?.dataset.pcStoreHref;
+      if(!href)return;
+      event.preventDefault();event.stopPropagation();navigate(href);
+    };
+
     patch();
     const observer=new MutationObserver(patch);observer.observe(document.body,{childList:true,subtree:true});
     document.addEventListener("click",capture,true);
-    return()=>{observer.disconnect();document.removeEventListener("click",capture,true)};
-  },[byName,favoriteIds,isFavorite,toggleFavorite]);
+    document.addEventListener("keydown",keyCapture,true);
+    return()=>{observer.disconnect();document.removeEventListener("click",capture,true);document.removeEventListener("keydown",keyCapture,true)};
+  },[byName,favoriteIds,isFavorite,navigate,toggleFavorite]);
 
   return null;
 }

@@ -175,6 +175,10 @@ export function ProductInteractionUx() {
         const target = event.target;
         if (!(target instanceof Element)) return;
 
+        /* A homepage premium já possui destinos explícitos e acessíveis. Não transforme
+           esses links em eventos de modal: isso impedia “Ver detalhes” de navegar. */
+        if (target.closest(".pc-home a[href^='/produto/'], .pc-home a[href^='/estabelecimento/']")) return;
+
         if (target.closest("button, .professional-compare-button, .professional-result-store, a[href^='/estabelecimento/'], .visual-product-actions .button--primary")) return;
 
         const isProductIntent = Boolean(
