@@ -283,7 +283,7 @@
 /* Comparison band — strong contrast, restrained glass */
 .pc-compare-section { position: relative; overflow: hidden; background: var(--pc-deep-2); color: #fff; }
 .pc-compare-section::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8,38,34,.965), rgba(8,38,34,.82)), url('/compra-inteligente-profissional.webp') center / cover no-repeat; }
-.pc-compare-layout { position: relative; display: grid; grid-template-columns: .88fr 1.12fr; gap: 48px; align-items: center; padding-block: 50px; }
+.pc-compare-layout { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 5vw, 48px); align-items: center; padding-block: 50px; }
 .pc-compare-copy h2 { max-width: 470px; margin: 8px 0 12px; color: #fff; }
 .pc-compare-copy p { max-width: 470px; margin-bottom: 16px; color: #c9d8d3; font-size: .87rem; line-height: 1.55; }
 .pc-compare-copy button { min-height: 42px; display: inline-flex; align-items: center; gap: 7px; border: 0; border-radius: 9px; background: var(--pc-coral); color: #fff; padding: 0 14px; font-size: .74rem; font-weight: 850; transition: transform var(--pc-fast) var(--pc-ease), background-color var(--pc-fast) ease; }
@@ -298,13 +298,24 @@
   padding: 24px; 
   box-shadow: 0 32px 84px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,0.1); 
   backdrop-filter: blur(16px);
-  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+  transition: 
+    transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), 
+    opacity 1s ease-in-out,
+    filter 1s ease-in-out;
   min-height: 420px;
   display: flex;
   flex-direction: column;
 }
-.pc-compare-product.is-exiting { transform: translateY(10px) scale(0.96); opacity: 0; filter: blur(4px); }
-.pc-compare-product.is-entering { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+.pc-compare-product.is-exiting { 
+  transform: translateY(20px) scale(0.95); 
+  opacity: 0; 
+  filter: blur(8px) grayscale(0.2); 
+}
+.pc-compare-product.is-entering { 
+  transform: translateY(0) scale(1); 
+  opacity: 1; 
+  filter: blur(0) grayscale(0); 
+}
 
 .pc-compare-product-head { 
   display: flex;
@@ -316,8 +327,8 @@
 }
 .pc-compare-product-image { 
   position: relative;
-  width: 154px; 
-  height: 154px; 
+  width: clamp(120px, 15vw, 154px); 
+  height: clamp(120px, 15vw, 154px); 
   display: flex; 
   align-items: center;
   justify-content: center;
@@ -326,7 +337,7 @@
   border: 1px solid #f0ede8;
   box-shadow: 0 12px 32px rgba(0,0,0,.08);
   padding: 16px;
-  margin-inline: auto; /* Ensure horizontal centering */
+  margin-inline: auto;
 }
 .pc-compare-product-image img { 
   width: 100%; 

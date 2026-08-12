@@ -168,7 +168,7 @@ export function HomePremium() {
         
         setComparisonIndex(indicesPool[currentIndex]);
         setIsTransitioning(false);
-      }, 800); // Slower transition for "more professional" feel
+      }, 1000); // Increased duration for a smoother, high-end feel
     }, 60000); // 60 seconds interval as requested
     
     return () => clearInterval(interval);
