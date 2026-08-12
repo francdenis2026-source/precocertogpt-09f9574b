@@ -96,9 +96,9 @@ export function HomeV2() {
         <section className="home-v2-hero" aria-labelledby="home-v2-title">
           <div className="home-v2-hero-inner">
             <div className="home-v2-copy">
-              <span className="home-v2-eyebrow"><MapPin aria-hidden="true" /> Feijó, Acre</span>
-              <h1 id="home-v2-title">Compare preços locais. Compre melhor em Feijó.</h1>
-              <p className="home-v2-lead">Encontre produtos, compare lojas e planeje sua compra em poucos passos.</p>
+              <span className="home-v2-eyebrow"><MapPin aria-hidden="true" /> Feito para Feijó, Acre</span>
+              <h1 id="home-v2-title">Sua compra começa com o <em>preço certo.</em></h1>
+              <p className="home-v2-lead">Compare produtos e estabelecimentos locais em segundos. Mais clareza para escolher, mais dinheiro sobrando no fim do mês.</p>
 
               <form className="home-v2-search" onSubmit={handleSubmit} role="search">
                 <Search aria-hidden="true" />
@@ -125,7 +125,7 @@ export function HomeV2() {
               <img src="/supermercado-premium.jpg" alt="Interior de supermercado com corredores organizados" fetchPriority="high" />
               <div className="home-v2-visual-note">
                 <span className="home-v2-note-icon"><ShieldCheck aria-hidden="true" /></span>
-                <span><strong>Compare antes de sair</strong>Consulte preços e planeje sua compra.</span>
+                <span><strong>Economia começa aqui</strong>Pesquise antes de sair de casa.</span>
               </div>
             </div>
           </div>
@@ -139,8 +139,9 @@ export function HomeV2() {
 
         <section className="home-v2-section home-v2-categories" aria-labelledby="categories-title">
           <div className="home-v2-section-heading">
-            <h2 id="categories-title">Comece pelo que você precisa</h2>
-            <p>Pesquise produtos, descubra lojas e compare opções disponíveis na cidade.</p>
+            <span className="home-v2-section-kicker">Explore por categoria</span>
+            <h2 id="categories-title">Tudo o que você procura, mais perto.</h2>
+            <p>Encontre produtos, descubra comércios locais e compare as melhores opções disponíveis em Feijó.</p>
           </div>
           <div className="home-v2-category-grid">
             {categories.map(({ name, description, icon: Icon, href, query: categoryQuery }) => {
@@ -153,8 +154,9 @@ export function HomeV2() {
         <section className="home-v2-featured" aria-labelledby="featured-title">
           <div className="home-v2-section home-v2-featured-inner">
             <div className="home-v2-section-heading home-v2-section-heading-light">
-              <h2 id="featured-title">Itens para comparar agora</h2>
-              <p>Atalhos para produtos presentes na rotina das famílias.</p>
+              <span className="home-v2-section-kicker">Mais procurados</span>
+              <h2 id="featured-title">Produtos que fazem parte da sua rotina.</h2>
+              <p>Comece pelos itens essenciais e descubra onde sua compra pode render mais.</p>
             </div>
             <div className="home-v2-products">
               {featuredProducts.map((product) => (
