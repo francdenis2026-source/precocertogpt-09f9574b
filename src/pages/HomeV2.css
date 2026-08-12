@@ -45,6 +45,7 @@
 .home-v2-header-inner { width: min(var(--pc-container), calc(100% - 40px)); height: 60px; margin: auto; display: flex; align-items: center; gap: 24px; }
 .home-v2-logo { display: flex; align-items: center; flex: 0 0 auto; }
 .home-v2-logo img { display: block; width: 146px; height: 35px; object-fit: contain; object-position: left center; }
+.home-v2-logo-dark { display: none !important; }
 .home-v2-nav { display: flex; align-items: center; gap: 22px; margin-left: auto; }
 .home-v2-nav a { color: #344054; font-size: .86rem; font-weight: 750; transition: color var(--pc-fast) ease; }
 .home-v2-merchant-link, .home-v2-primary-link, .home-v2-ai-link { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: var(--pc-radius-sm); background: var(--pc-blue-700); color: #fff; padding: 9px 15px; font-size: .86rem; font-weight: 850; transition: transform var(--pc-normal) var(--pc-ease), background-color var(--pc-fast) ease, box-shadow var(--pc-normal) ease; }
@@ -125,16 +126,16 @@
 .home-v2-text-link svg { width: 17px; }
 
 /* How it works */
-.home-v2-how { position: relative; overflow: hidden; display: grid; grid-template-columns: .92fr 1.08fr; gap: 38px; align-items: center; margin-top: var(--pc-section); margin-bottom: var(--pc-section); border-radius: var(--pc-radius-lg); background: linear-gradient(90deg, rgba(6, 23, 44, .98), rgba(6, 23, 44, .84) 58%, rgba(6, 23, 44, .5)), url('/supermercado-premium.jpg') center / cover; padding: 36px; color: #fff; }
+.home-v2-how { position: relative; overflow: hidden; display: grid; grid-template-columns: .92fr 1.08fr; gap: 38px; align-items: center; margin-top: var(--pc-section); margin-bottom: var(--pc-section); border-radius: var(--pc-radius-lg); background: linear-gradient(90deg, rgba(4, 16, 33, .99) 0%, rgba(4, 18, 35, .93) 47%, rgba(4, 18, 35, .7) 68%, rgba(4, 18, 35, .38) 100%), url('/compra-inteligente-profissional.webp') center / cover; padding: 36px; color: #fff; box-shadow: var(--pc-shadow-md); }
 .home-v2-how .home-v2-eyebrow { margin-bottom: 10px; color: #ffc34d; }
 .home-v2-how h2 { color: #fff; }
-.home-v2-how-copy > p { max-width: 500px; color: #d6e1ec; }
+.home-v2-how-copy > p { max-width: 500px; color: #e2ebf4; text-shadow: 0 1px 12px rgba(0, 0, 0, .42); }
 .home-v2-primary-link { margin-top: 15px; background: #ffc34d; color: var(--pc-navy-950); }
 .home-v2-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.home-v2-steps li { display: grid; grid-template-columns: auto 1fr; gap: 12px; border: 1px solid rgba(255, 255, 255, .16); border-radius: var(--pc-radius-md); background: rgba(7, 31, 59, .72); padding: 11px 13px; backdrop-filter: blur(8px); }
+.home-v2-steps li { display: grid; grid-template-columns: auto 1fr; gap: 12px; border: 1px solid rgba(255, 255, 255, .24); border-radius: var(--pc-radius-md); background: rgba(4, 20, 39, .84); padding: 11px 13px; box-shadow: 0 8px 22px rgba(0, 0, 0, .12); backdrop-filter: blur(10px); }
 .home-v2-steps li > span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: var(--pc-radius-sm); background: #ffc34d; color: var(--pc-navy-950); font-weight: 900; }
 .home-v2-steps strong { color: #fff; font-size: .94rem; }
-.home-v2-steps p { margin: 3px 0 0; color: #cbd8e4; font-size: .8rem; line-height: 1.4; }
+.home-v2-steps p { margin: 3px 0 0; color: #dce7f1; font-size: .8rem; line-height: 1.4; }
 
 /* Basket CTA and local commerce */
 .home-v2-ai { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; border: 1px solid #dfe7f2; border-radius: var(--pc-radius-lg); background: linear-gradient(110deg, #fff, #edf3ff); padding: 19px 22px; box-shadow: var(--pc-shadow-sm); }
@@ -232,7 +233,8 @@
 
 html[data-theme="dark"] .home-v2 { --pc-page: #071522; --pc-surface: #0d2135; --pc-surface-soft: #132b43; --pc-text: #edf4fb; --pc-muted: #b0c0d1; --pc-border: #294158; background: #071522; }
 html[data-theme="dark"] .home-v2-header { border-color: #263f5a; background: rgba(7, 23, 44, .96); }
-html[data-theme="dark"] .home-v2-logo img { filter: brightness(0) invert(1); }
+html[data-theme="dark"] .home-v2-logo-light { display: none !important; }
+html[data-theme="dark"] .home-v2-logo-dark { display: block !important; }
 html[data-theme="dark"] .home-v2-nav a { color: #dce7f3; }
 html[data-theme="dark"] .home-v2-menu-button { border-color: #34506d; background: #102b46; color: #fff; }
 html[data-theme="dark"] .home-v2-mobile-nav { border-color: #294158; background: #071f3b; }
@@ -242,3 +244,8 @@ html[data-theme="dark"] .home-v2-trust strong, html[data-theme="dark"] .home-v2-
 html[data-theme="dark"] .home-v2-trust span, html[data-theme="dark"] .home-v2-category small { color: var(--pc-muted); }
 html[data-theme="dark"] .home-v2-ai { border-color: #294158; background: linear-gradient(110deg, #0d2135, #102b46); }
 html[data-theme="dark"] .home-v2-section-heading h2, html[data-theme="dark"] .home-v2-local h2, html[data-theme="dark"] .home-v2-ai h2 { color: var(--pc-text); }
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .home-v2-logo-light { display: none !important; }
+  html:not([data-theme]) .home-v2-logo-dark { display: block !important; }
+}

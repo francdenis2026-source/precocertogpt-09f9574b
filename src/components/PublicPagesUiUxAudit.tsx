@@ -34,11 +34,28 @@ function installStyles() {
       text-wrap: balance;
     }
 
-    body.pc-public-refined :where(.generic-hero p,.page-title p,.center-heading p,.section-heading p,.search-page p) {
+    body.pc-public-refined :where(.page-title p,.center-heading p,.section-heading p,.search-page p) {
       max-width: 720px;
       font-size: clamp(.98rem,1.5vw,1.08rem) !important;
       line-height: 1.62 !important;
       color: var(--muted) !important;
+    }
+
+    body.pc-public-refined :where(.generic-hero,.page-hero,.search-hero,.store-hero,.plans-hero,.auth-hero) :where(h1,h2) {
+      color: #ffffff !important;
+      text-shadow: 0 2px 18px rgba(0,0,0,.42);
+    }
+
+    body.pc-public-refined :where(.generic-hero,.page-hero,.search-hero,.store-hero,.plans-hero,.auth-hero) p {
+      max-width: 720px;
+      color: #dce7f2 !important;
+      font-size: clamp(.98rem,1.5vw,1.08rem) !important;
+      line-height: 1.62 !important;
+      text-shadow: 0 2px 16px rgba(0,0,0,.48);
+    }
+
+    body.pc-public-refined :where(.generic-hero,.page-hero,.search-hero,.store-hero,.plans-hero,.auth-hero) :where(.eyebrow,.kicker) {
+      color: #a8d2ff !important;
     }
 
     body.pc-public-refined :where(.section,.page-section) {

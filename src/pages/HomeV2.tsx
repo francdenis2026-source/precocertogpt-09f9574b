@@ -56,7 +56,8 @@ export function HomeV2() {
       <header className="home-v2-header">
         <div className="home-v2-header-inner">
           <Link className="home-v2-logo" to="/" aria-label="PreçoCerto - página inicial">
-            <img src="/logo-preco-certo.svg" alt="PreçoCerto" />
+            <img className="home-v2-logo-light" src="/logo-preco-certo.svg" alt="PreçoCerto" />
+            <img className="home-v2-logo-dark" src="/logo-preco-certo-inversa.svg" alt="" aria-hidden="true" />
           </Link>
 
           <nav className="home-v2-nav" aria-label="Navegação principal">
