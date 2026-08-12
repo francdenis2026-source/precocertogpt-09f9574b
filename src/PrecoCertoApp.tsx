@@ -5152,7 +5152,7 @@ function SearchPage({ products, stores, metrics, query, setQuery, addBasket, sav
 
 
 
-export default function PrecoCertoApp() {
+export default function PrecoCertoApp({ renderContent }: { renderContent?: (props: any) => ReactNode }) {
   const pathname = useLocation().pathname || "/";
   const [products,setProducts]=useState<Product[]>(initialProducts);
   const [stores,setStores]=useState<StoreRow[]>(initialStores);
