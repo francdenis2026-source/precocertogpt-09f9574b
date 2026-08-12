@@ -5134,7 +5134,7 @@ export default function PrecoCertoApp() {
     localStorage.setItem("precocerto:user", JSON.stringify(newUser));
   };
 
-  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user,setUser: setUserAndUpdateStorage,setToast}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites]);
+  const props = useMemo(()=>({products,stores,metrics,query,setQuery,addBasket,saveAction,favorites,toggleFavorite,fetchError,syncStatus,user,setUser: setUserAndUpdateStorage,setToast}),[products,stores,metrics,query,fetchError,syncStatus,user,favorites,setToast]);
 
   // Toast global listener
   useEffect(() => {
