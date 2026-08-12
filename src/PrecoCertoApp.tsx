@@ -656,7 +656,62 @@ function Header({ basketCount, favoritesCount, user, onLogout, products, favorit
 }
 
 function Footer({ user }: { user?: any }) {
-  return <footer className="site-footer"><div className="shell footer-grid"><div><Brand inverse /><p>Compare preços reais no comércio de Feijó e transforme cada compra em economia.</p><span className="footer-place"><MapPin size={15} /> Feijó • Acre • Brasil</span></div><div><h3>Descobrir</h3><a href="/buscar">Comparar preços</a><a href="/acougues">Açougues e carnes</a><a href="/cesta">Cesta inteligente</a><a href="/estabelecimentos">Estabelecimentos</a><a href="/farmacias">Farmácias de plantão</a></div><div><h3>PreçoCerto</h3><a href="/#como-funciona">Como funciona</a><a href="/lojista">Para empresas</a><a href="/colaborar">Colaborar</a><a href="/fale-conosco">Fale conosco</a></div><div><h3>Conta</h3>{user && <a href="/meus-pedidos">Meus pedidos</a>}<a href="/login">Entrar</a><a href="/cadastro">Criar conta</a><a href="/planos">Planos</a><a href="/admin">Área Administrativa</a></div></div><div className="shell footer-bottom"><span>SKAES NET TECHNOLOGY • FRANC D’NIS</span><span>© 2026 PreçoCerto. Todos os direitos reservados.</span></div></footer>;
+  return (
+    <footer className="site-footer">
+      <div className="shell footer-grid">
+        <div className="footer-brand-column">
+          <Brand inverse />
+          <p className="footer-description">
+            Compare preços reais no comércio de Feijó e transforme cada compra em economia.
+          </p>
+          <div className="footer-meta">
+            <span className="footer-place"><MapPin size={14} /> Feijó • Acre • Brasil</span>
+          </div>
+        </div>
+        
+        <div className="footer-links-column">
+          <h3>Descobrir</h3>
+          <nav>
+            <a href="/buscar">Comparar preços</a>
+            <a href="/acougues">Açougues e carnes</a>
+            <a href="/cesta">Cesta inteligente</a>
+            <a href="/estabelecimentos">Estabelecimentos</a>
+            <a href="/farmacias">Farmácias de plantão</a>
+          </nav>
+        </div>
+        
+        <div className="footer-links-column">
+          <h3>Empresa</h3>
+          <nav>
+            <a href="/#como-funciona">Como funciona</a>
+            <a href="/lojista">Para empresas</a>
+            <a href="/colaborar">Colaborar</a>
+            <a href="/fale-conosco">Fale conosco</a>
+          </nav>
+        </div>
+        
+        <div className="footer-links-column">
+          <h3>Conta</h3>
+          <nav>
+            {user && <a href="/meus-pedidos">Meus pedidos</a>}
+            <a href="/login">Entrar</a>
+            <a href="/cadastro">Criar conta</a>
+            <a href="/planos">Planos</a>
+            <a href="/admin">Administrativo</a>
+          </nav>
+        </div>
+      </div>
+      
+      <div className="shell footer-bottom">
+        <div className="footer-credits">
+          <span>SKAES NET TECHNOLOGY • FRANC D’NIS</span>
+        </div>
+        <div className="footer-copyright">
+          <span>© 2026 PreçoCerto. Todos os direitos reservados.</span>
+        </div>
+      </div>
+    </footer>
+  );
 }
 
 function MobileBar({ basketCount, favoritesCount }: { basketCount: number; favoritesCount: number }) {
