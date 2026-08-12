@@ -319,7 +319,7 @@
 }
 .pc-compare-product:hover {
   box-shadow: 0 42px 92px rgba(0,0,0,.22), 0 0 0 2px var(--pc-coral);
-  transform: translateY(-2px) scale(1.01);
+  /* Removed scale/translate to avoid layout jitters during interaction */
 }
 .pc-compare-product.is-exiting { 
   transform: translateY(20px) scale(0.95); 
@@ -631,7 +631,15 @@
   grid-template-columns: minmax(0, 1fr) auto auto; 
   gap: 12px; 
   align-items: center; 
-  border-bottom: 1px solid var(--pc-border); 
+  border-bottom: 1px solid var(--pc-border);
+  transition: transform var(--pc-fast) var(--pc-ease), background-color var(--pc-fast) ease;
+}
+.pc-dialog-offers > div:hover {
+  background: rgba(0, 0, 0, 0.02);
+  transform: translateX(4px);
+}
+[data-theme="dark"] .pc-dialog-offers > div:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 .pc-dialog-offers > div:last-child { border-bottom: 0; }
 .pc-dialog-offers strong { font-size: 0.85rem; font-weight: 750; }
