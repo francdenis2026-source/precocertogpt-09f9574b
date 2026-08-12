@@ -9,6 +9,7 @@ import { ProductInteractionUx } from "./components/ProductInteractionUx";
 import { PublicCatalogUxFixes } from "./components/PublicCatalogUxFixes";
 import { PublicOnlineSalesAvailability } from "./components/PublicOnlineSalesAvailability";
 import { TrueHomepage } from "./components/TrueHomepage";
+import { HomeV2 } from "./pages/HomeV2";
 import { SmartCompareSearchProMax } from "./components/SmartCompareSearchProMax";
 import { HomepageSearchKeyboardProMax } from "./components/HomepageSearchKeyboardProMax";
 import { ProductMediaClippingProMax } from "./components/ProductMediaClippingProMax";
@@ -97,7 +98,7 @@ export default function App() {
       <BasketSessionFlow />
       <AuthorMerchantDashboardWelcome />
       <Routes>
-        <Route path="/" element={<TrueHomepage />} />
+       <Route path="/" element={<HomeV2 />} />
         <Route path="/buscar" element={<SmartCompareSearchProMax />} />
         <Route path="/estabelecimentos" element={<EstablishmentsMarketplacePage />} />
         <Route path="/estabelecimento/dorinha-barroso-livros" element={<DorinhaAuthorStoreProMax />} />
