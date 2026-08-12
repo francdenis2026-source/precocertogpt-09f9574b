@@ -5745,8 +5745,6 @@ export default function PrecoCertoApp() {
                     Ir para a loja <ArrowRight size={18} style={{ marginLeft: '8px' }} />
                   </a>
                 </div>
-              </>
-            )}
                 {selectedProduct && <PriceHistorySection product={selectedProduct} />}
               </>
             )}
