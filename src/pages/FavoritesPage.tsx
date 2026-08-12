@@ -136,18 +136,26 @@ export default function FavoritesPage({
 
   if (favorites.length === 0) {
     return (
-      <div className="favorites-page" style={{ padding: '2rem 1rem', textAlign: 'center' }}>
-        <div className="empty-state" style={{ maxWidth: '400px', margin: '4rem auto' }}>
-          <div style={{ background: 'var(--surface-2)', width: '80px', height: '80px', borderRadius: '99px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-            <Heart size={40} color="var(--muted)" />
+      <div className="shell page-shell">
+        <div className="favorites-page" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
+          <div className="empty-state" style={{ maxWidth: '400px', margin: '0 auto' }}>
+            <div style={{ background: 'var(--blue-soft)', width: '100px', height: '100px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', border: '2px solid var(--blue)' }}>
+              <Heart size={48} color="var(--blue)" fill="var(--blue-glass)" />
+            </div>
+            <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem', color: 'var(--text-main)' }}>Sua lista está vazia</h2>
+            <p style={{ color: 'var(--muted)', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '2.5rem' }}>
+              Favorite os produtos que você mais compra para comparar preços rapidamente e economizar em Feijó.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <a href="/buscar" className="button button--primary" style={{ paddingInline: '2rem' }}>Explorar Produtos</a>
+              <a href="/" className="button button--outline">Voltar ao Início</a>
+            </div>
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>Sua lista está vazia</h2>
-          <p style={{ color: 'var(--muted)', marginBottom: '2rem' }}>Favorite os produtos que você mais compra para acompanhar preços e economizar.</p>
-          <a href="/buscar" className="button button--primary" style={{ textDecoration: 'none' }}>Explorar Produtos</a>
         </div>
       </div>
     );
   }
+
 
   return (
     <div className="favorites-page" style={{ padding: '2rem 1rem' }}>

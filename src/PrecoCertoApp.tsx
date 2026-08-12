@@ -5258,7 +5258,11 @@ export default function PrecoCertoApp() {
   });
   const [favorites, setFavorites] = useState<string[]>(() => {
     if (!localStorage.getItem("precocerto:user")) return [];
-    try { return JSON.parse(localStorage.getItem("precocerto:favorites") ?? "[]"); }
+    try { 
+      const saved = localStorage.getItem("precocerto:favorites");
+      return saved ? JSON.parse(saved) : []; 
+    }
+
     catch { return []; }
   });
   // O acesso admin nunca é decidido pelo navegador: consultamos a sessão e os
