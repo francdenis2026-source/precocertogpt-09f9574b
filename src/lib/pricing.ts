@@ -1,3 +1,5 @@
+export function money(value: number) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value); }
+
 // Normalização de medidas, preço por unidade e frescor do preço.
 // Cálculos 100% determinísticos — nenhuma IA participa destas contas.
 

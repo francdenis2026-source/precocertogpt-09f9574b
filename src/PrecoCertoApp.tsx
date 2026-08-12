@@ -30,6 +30,7 @@ import { AdminStoreCatalog } from "./components/AdminStoreCatalog";
 import { getStoreLogoUrl } from "./data/storeLogos";
 import { AdminUserManagement } from "./components/AdminUserManagement";
 import { DorinhaAuthorStore } from "./components/DorinhaAuthorStore";
+import FavoritesPage from "./pages/FavoritesPage";
 
 
 const initialCatalog = buildCatalog();
@@ -5507,7 +5508,8 @@ export default function PrecoCertoApp() {
   else if(pathname==="/acougues"||pathname==="/categoria/acougue") page=<ButchersPage {...props}/>;
   else if(pathname==="/planos" && isEnabled("consumerPlans")) page=<PlansPage/>;
   else if(pathname==="/meus-pedidos"||pathname==="/historico-pedidos") page=<CustomerOrders/>;
-  else if(pathname==="/alertas"||pathname==="/perfil"||pathname==="/favoritos") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user} setUser={setUserAndUpdateStorage}/>;
+  else if(pathname==="/perfil") page=<GenericPage {...props} metrics={metrics} path={pathname} user={user} setUser={setUserAndUpdateStorage}/>;
+  else if(pathname==="/alertas"||pathname==="/favoritos") page=<FavoritesPage {...props} user={user} />;
   else if(pathname==="/cesta"||pathname==="/cesta-basica"||pathname==="/checkout") page=<BasketPage {...props} cart={cart} removeBasket={removeBasket} clearBasket={clearBasket} user={adminProfile ? { id: adminProfile.userId, name: adminProfile.name } : user} syncStatus={syncStatus} stores={stores} setToast={setToast}/>;
   else if(pathname==="/dorinha"||pathname==="/escritora") page=<DorinhaAuthorStore />;
 
