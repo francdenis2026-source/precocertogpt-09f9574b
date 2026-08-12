@@ -2122,7 +2122,165 @@ function BasketPage({ products, addBasket, cart: initialCart, removeBasket, clea
             </div>
           </section>
         )}
+        {step === 4 && optimizationResult && (
+          <section className="basket-step-view animate-fade-in checkout-view">
+            <div className="step-card-header">
+              <h2>Finalizar Compra</h2>
+              <p>Confirme seus dados e escolha a forma de entrega para concluir o pedido.</p>
+            </div>
+            
+            <div className="checkout-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '2rem' }}>
+              <div className="checkout-main">
+                <form id="checkout-form" onSubmit={handleCheckout} className="checkout-form-container">
+                  <div className="form-section">
+                    <h3><UserRound size={18}/> Seus Dados</h3>
+                    <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <div className="input-group">
+                        <label>Nome Completo</label>
+                        <input name="name" required defaultValue={user?.user_metadata?.full_name || user?.user_metadata?.name || ""} />
+                      </div>
+                      <div className="input-group">
+                        <label>WhatsApp / Telefone</label>
+                        <input name="phone" required placeholder="(68) 99999-9999" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="form-section" style={{ marginTop: '2rem' }}>
+                    <h3><Truck size={18}/> Entrega ou Retirada</h3>
+                    <div className="delivery-toggle" style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                      <button 
+                        type="button" 
+                        className={`mode-pill ${deliveryType === 'delivery' ? 'active' : ''}`}
+                        onClick={() => setDeliveryType('delivery')}
+                      >
+                        <Truck size={16} /> Entrega
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`mode-pill ${deliveryType === 'pickup' ? 'active' : ''}`}
+                        onClick={() => setDeliveryType('pickup')}
+                      >
+                        <Store size={16} /> Retirada no Local
+                      </button>
+                    </div>
+
+                    {deliveryType === 'delivery' && (
+                      <div className="address-fields animate-fade-in">
+                        <div className="store-zones-selection">
+                          {Object.keys(optimizationResult.storeBreakdown).map(storeName => (
+                            <div key={storeName} className="store-zone-item" style={{ marginBottom: '1rem', padding: '1rem', background: 'var(--surface-2)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Bairro para entrega em <strong>{storeName}</strong></label>
+                              <select 
+                                required 
+                                value={selectedZones[storeName] || ""} 
+                                onChange={e => setSelectedZones(prev => ({ ...prev, [storeName]: e.target.value }))}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}
+                              >
+                                <option value="">Escolha seu bairro</option>
+                                {zonesMap[storeName]?.map(z => (
+                                  <option key={z.id} value={z.id}>{z.name} ({money(z.fee)})</option>
+                                ))}
+                                {(!zonesMap[storeName] || zonesMap[storeName].length === 0) && (
+                                  <option disabled>Esta loja não definiu zonas de entrega</option>
+                                )}
+                              </select>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                          <div className="input-group">
+                            <label>Rua / Logradouro</label>
+                            <input name="street" required />
+                          </div>
+                          <div className="input-group">
+                            <label>Número</label>
+                            <input name="number" required />
+                          </div>
+                        </div>
+                        <div className="input-group" style={{ marginTop: '1rem' }}>
+                          <label>Complemento ou Referência <small>(Opcional)</small></label>
+                          <input name="complement" />
+                        </div>
+                      </div>
+                    )}
+
+                    {deliveryType === 'pickup' && (
+                      <div className="pickup-notice animate-fade-in" style={{ padding: '1.5rem', background: 'var(--blue-soft)', borderRadius: '12px', color: 'var(--blue)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <Store size={24} />
+                        <div>
+                          <strong>Retirada Grátis</strong>
+                          <p style={{ margin: 0, fontSize: '0.85rem' }}>Você deve retirar os itens diretamente nos estabelecimentos indicados no roteiro.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </form>
+              </div>
+
+              <aside className="checkout-summary-sidebar">
+                <div className="summary-card" style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: '20px', padding: '1.5rem', position: 'sticky', top: '2rem' }}>
+                  <h3>Resumo do Pedido</h3>
+                  <div className="summary-items" style={{ maxHeight: '200px', overflowY: 'auto', margin: '1rem 0', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+                    {optimizationResult.items.map((item, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                        <span>{item.quantity}x {item.product.name}</span>
+                        <strong>{money(item.subtotal)}</strong>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="summary-totals" style={{ display: 'grid', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Subtotal</span>
+                      <span>{money(optimizationResult.total)}</span>
+                    </div>
+                    {deliveryType === 'delivery' && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--muted)' }}>
+                        <span>Taxa de Entrega</span>
+                        <span>{money(Object.keys(optimizationResult.storeBreakdown).reduce((sum, storeName) => {
+                          const zone = zonesMap[storeName]?.find(z => z.id === selectedZones[storeName]);
+                          return sum + (zone?.fee || 0);
+                        }, 0))}</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 800, marginTop: '0.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem', color: 'var(--blue)' }}>
+                      <span>Total Geral</span>
+                      <span>{money(optimizationResult.total + (deliveryType === 'delivery' ? Object.keys(optimizationResult.storeBreakdown).reduce((sum, storeName) => {
+                        const zone = zonesMap[storeName]?.find(z => z.id === selectedZones[storeName]);
+                        return sum + (zone?.fee || 0);
+                      }, 0) : 0))}</span>
+                    </div>
+                  </div>
+
+                  {orderNotice && <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: '8px', background: 'var(--red-soft)', color: 'var(--red)', fontSize: '0.85rem' }}>{orderNotice}</div>}
+
+                  <button 
+                    form="checkout-form"
+                    type="submit"
+                    className="button button--primary button--full" 
+                    style={{ marginTop: '1.5rem', height: '56px', fontSize: '1.1rem' }}
+                    disabled={isSubmittingOrder || (deliveryType === 'delivery' && Object.keys(optimizationResult.storeBreakdown).some(s => !selectedZones[s]))}
+                  >
+                    {isSubmittingOrder ? <><Loader2 className="animate-spin" /> Processando...</> : <><CreditCard /> Finalizar e Pagar</>}
+                  </button>
+                  
+                  <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                    <button className="button button--ghost button--small" onClick={() => setStep(3)}>
+                      <ArrowLeft size={14} /> Voltar para otimização
+                    </button>
+                  </div>
+
+                  <div className="payment-security" style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center', color: 'var(--muted)', fontSize: '0.75rem' }}>
+                    <LockKeyhole size={14} /> Pagamento processado pelo Mercado Pago
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </section>
+        )}
       </div>
+
     </div>
   );
 }
