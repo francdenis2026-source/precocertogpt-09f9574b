@@ -134,7 +134,28 @@ export function HomePremium() {
     .sort((a, b) => (b.maxPrice - b.minPrice) - (a.maxPrice - a.minPrice))
     .slice(0, 8), [catalog.products]);
 
-  const comparisonProduct = opportunities[0] ?? catalog.products[0];
+  const [comparisonIndex, setComparisonIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const comparableProducts = useMemo(() => {
+    return catalog.products
+      .filter((p) => p.minPrice > 0 && (p.offers?.length ?? 0) > 1)
+      .sort((a, b) => (b.maxPrice - b.minPrice) - (a.maxPrice - a.minPrice));
+  }, [catalog.products]);
+
+  useEffect(() => {
+    if (comparableProducts.length <= 1) return;
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setComparisonIndex((prev) => (prev + 1) % Math.min(comparableProducts.length, 12));
+        setIsTransitioning(false);
+      }, 400);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [comparableProducts.length]);
+
+  const comparisonProduct = comparableProducts[comparisonIndex] ?? opportunities[0] ?? catalog.products[0];
   const comparisonOffers = useMemo(() => comparisonProduct
     ? [...(comparisonProduct.offers ?? [])].filter((offer) => offer.value > 0).sort((a, b) => a.value - b.value).slice(0, 3)
     : [], [comparisonProduct]);
@@ -315,10 +336,20 @@ export function HomePremium() {
                 <p>Compare o mesmo produto em diferentes estabelecimentos sem precisar abrir várias telas.</p>
                 <button type="button" onClick={() => setSelectedProduct(comparisonProduct)}>Abrir comparação completa <ArrowRight aria-hidden="true" /></button>
               </div>
-              <div className="pc-compare-product">
+              <div className={`pc-compare-product${isTransitioning ? " is-exiting" : " is-entering"}`}>
                 <div className="pc-compare-product-head">
-                  <span className="pc-compare-product-image">{resolveProductImage(comparisonProduct) ? <img src={resolveProductImage(comparisonProduct)} alt={comparisonProduct.name} loading="lazy" /> : <PackageSearch aria-hidden="true" />}</span>
-                  <span><small>{[comparisonProduct.brand, comparisonProduct.size].filter(Boolean).join(" · ")}</small><strong>{comparisonProduct.name}</strong></span>
+                  <span className="pc-compare-product-image">
+                    {resolveProductImage(comparisonProduct) ? (
+                      <img src={resolveProductImage(comparisonProduct)} alt={comparisonProduct.name} loading="lazy" />
+                    ) : (
+                      <PackageSearch aria-hidden="true" />
+                    )}
+                    <span className="pc-compare-badge"><Sparkles size={10} /> Em destaque</span>
+                  </span>
+                  <div className="pc-compare-product-details">
+                    <small>{[comparisonProduct.brand, comparisonProduct.size].filter(Boolean).join(" · ")}</small>
+                    <strong>{comparisonProduct.name}</strong>
+                  </div>
                 </div>
                 <div className="pc-offer-list">
                   {(comparisonOffers.length ? comparisonOffers : [bestOffer(comparisonProduct)]).map((offer, index) => (
