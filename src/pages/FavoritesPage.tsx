@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { 
   Heart, ShoppingBasket, Search, Trash2, ArrowRight, Download, Upload, 
-  Bell, Filter, SlidersHorizontal, Package, Check, ChevronRight, X, AlertCircle, FileText
+  Bell, Filter, SlidersHorizontal, Package, Check, ChevronRight, X, AlertCircle, FileText, Share2
 } from "lucide-react";
 import { type Product } from "../data/catalog";
 import { money } from "../lib/pricing";
