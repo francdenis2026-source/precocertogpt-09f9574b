@@ -5328,20 +5328,26 @@ export default function PrecoCertoApp() {
 
               if (offers) {
                 const formattedOffers = offers.map((o: any) => ({
+                  establishmentId: o.establishment_id || '0',
+                  establishmentSlug: '', // Omitido ou buscado se necessário
                   establishment: o.establishments?.name || 'Desconhecido',
                   neighborhood: o.establishments?.neighborhood || '',
+                  storeColor: '#1473E6',
                   value: Number(o.value),
                   capturedAt: o.captured_at
                 }));
                 
-                setSelectedProduct(prev => prev ? {
-                  ...prev,
-                  offers: formattedOffers,
-                  storeCount: formattedOffers.length,
-                  minPrice: Math.min(...formattedOffers.map(o => o.value)),
-                  maxPrice: Math.max(...formattedOffers.map(o => o.value)),
-                  avgPrice: formattedOffers.reduce((a, b) => a + b.value, 0) / formattedOffers.length
-                } : null);
+                setSelectedProduct(prev => {
+                  if (!prev) return null;
+                  return {
+                    ...prev,
+                    offers: formattedOffers,
+                    storeCount: formattedOffers.length,
+                    minPrice: Math.min(...formattedOffers.map(o => o.value)),
+                    maxPrice: Math.max(...formattedOffers.map(o => o.value)),
+                    avgPrice: formattedOffers.reduce((a, b) => a + b.value, 0) / formattedOffers.length
+                  } as Product;
+                });
               }
 
               const { data: history } = await supabase
