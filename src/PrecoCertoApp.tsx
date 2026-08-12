@@ -5300,9 +5300,20 @@ export default function PrecoCertoApp() {
   useEffect(() => {
     const handler = (e: any) => {
       if (e.detail) {
-        // Garante que o estado seja resetado antes de aplicar o novo para evitar bugs de transição
         setSelectedProduct(null);
-        setTimeout(() => setSelectedProduct(e.detail), 0);
+        setModalError(null);
+        setModalLoading(true);
+        
+        // Simula carregamento para exibir skeleton (ou faz fetch real se necessário no futuro)
+        setTimeout(() => {
+          setSelectedProduct(e.detail);
+          setModalLoading(false);
+          
+          // Simulação de erro caso o produto não tenha preço mínimo válido
+          if (!Number.isFinite(e.detail.minPrice)) {
+            setModalError("Dados de preço indisponíveis para este produto.");
+          }
+        }, 600);
       }
     };
     window.addEventListener('pc:open-product-details', handler);
