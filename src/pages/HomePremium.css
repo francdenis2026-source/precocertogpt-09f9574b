@@ -320,6 +320,8 @@
 }
 .pc-offer-row b { color: #1c2b28; font-size: 1.05rem; font-weight: 850; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
 .pc-offer-row.is-best b { color: var(--pc-success); }
+.pc-offer-row-placeholder { border-bottom: 1px solid transparent !important; opacity: 0; pointer-events: none; }
+.pc-offer-row-empty { height: 192px; display: grid; place-items: center; color: #a1ada8; font-size: 0.8rem; }
 
 /* Stores */
 .pc-store-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
