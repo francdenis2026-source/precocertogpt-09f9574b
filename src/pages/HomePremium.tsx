@@ -145,13 +145,32 @@ export function HomePremium() {
 
   useEffect(() => {
     if (comparableProducts.length <= 1) return;
+    
+    // Create a pool of indices and shuffle them to avoid repetition
+    const indicesPool = Array.from({ length: Math.min(comparableProducts.length, 24) }, (_, i) => i);
+    let currentIndex = 0;
+    
+    const shuffle = (array: number[]) => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    };
+    
+    shuffle(indicesPool);
+
     const interval = setInterval(() => {
       setIsTransitioning(true);
       setTimeout(() => {
-        setComparisonIndex((prev) => (prev + 1) % Math.min(comparableProducts.length, 12));
+        currentIndex = (currentIndex + 1) % indicesPool.length;
+        if (currentIndex === 0) shuffle(indicesPool);
+        
+        setComparisonIndex(indicesPool[currentIndex]);
         setIsTransitioning(false);
-      }, 400);
-    }, 8000);
+      }, 800); // Slower transition for "more professional" feel
+    }, 60000); // 60 seconds interval as requested
+    
     return () => clearInterval(interval);
   }, [comparableProducts.length]);
 
