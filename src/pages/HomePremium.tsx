@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   BadgeCheck,
+  BadgeDollarSign,
   BookOpen,
-  Check,
+  CheckCircle2,
   ChevronRight,
   HeartPulse,
   MapPin,
@@ -12,9 +13,10 @@ import {
   Moon,
   PackageSearch,
   Search,
-  ShieldCheck,
   ShoppingBasket,
   ShoppingCart,
+  Smartphone,
+  Sparkles,
   Store,
   Sun,
   Tag,
@@ -26,12 +28,12 @@ import { resolveProductImage } from "../data/productImageResolver";
 import { suggestProducts } from "../lib/productSearch";
 import "./HomePremium.css";
 
-const popularSearches = ["Arroz", "Café", "Leite", "Carne"];
+const popularSearches = ["Arroz", "Café", "Leite", "Carne", "Limpeza"];
 const categories = [
-  { name: "Mercados", icon: ShoppingBasket, query: "mercado" },
-  { name: "Açougue", icon: Tag, query: "carne" },
-  { name: "Farmácias", icon: HeartPulse, href: "/farmacias" },
-  { name: "Livros", icon: BookOpen, href: "/dorinha-barroso" },
+  { name: "Mercados", description: "Itens do dia a dia", icon: ShoppingBasket, query: "mercado" },
+  { name: "Açougue", description: "Carnes e cortes", icon: Tag, query: "carne" },
+  { name: "Farmácias", description: "Saúde e cuidados", icon: HeartPulse, href: "/farmacias" },
+  { name: "Livros", description: "Autores de Feijó", icon: BookOpen, href: "/dorinha-barroso" },
 ];
 
 type Theme = "light" | "dark";
@@ -124,18 +126,20 @@ export function HomePremium() {
 
   const suggestions = useMemo(() => {
     if (query.trim().length < 2) return [];
-    return suggestProducts(catalog.products, query, 5).filter((product) => product.minPrice > 0);
+    return suggestProducts(catalog.products, query, 6).filter((product) => product.minPrice > 0);
   }, [catalog.products, query]);
 
   const opportunities = useMemo(() => catalog.products
     .filter((product) => product.minPrice > 0)
     .sort((a, b) => (b.maxPrice - b.minPrice) - (a.maxPrice - a.minPrice))
-    .slice(0, 6), [catalog.products]);
+    .slice(0, 8), [catalog.products]);
 
   const comparisonProduct = opportunities[0] ?? catalog.products[0];
   const comparisonOffers = useMemo(() => comparisonProduct
     ? [...(comparisonProduct.offers ?? [])].filter((offer) => offer.value > 0).sort((a, b) => a.value - b.value).slice(0, 3)
     : [], [comparisonProduct]);
+
+  const stores = useMemo(() => catalog.stores.filter((store) => store.products > 0).slice(0, 6), [catalog.stores]);
 
   const search = (term: string) => {
     const normalized = term.trim();
@@ -146,8 +150,8 @@ export function HomePremium() {
     event.preventDefault();
     const selected = activeResult >= 0 ? suggestions[activeResult] : undefined;
     if (selected) {
-      setSearchOpen(false);
       setSelectedProduct(selected);
+      setSearchOpen(false);
       return;
     }
     search(query);
@@ -172,13 +176,14 @@ export function HomePremium() {
   return (
     <div className="pc-home">
       <a className="pc-skip" href="#pc-content">Ir para o conteúdo</a>
+
       <header className="pc-header">
         <div className="pc-shell pc-header-inner">
-          <Link className="pc-logo" to="/" aria-label="PreçoCerto — início">
+          <Link className="pc-logo" to="/" aria-label="PreçoCerto — página inicial">
             <img src="/logo-preco-certo-inversa.svg" alt="PreçoCerto" />
           </Link>
           <nav className="pc-nav" aria-label="Navegação principal">
-            <Link to="/buscar">Buscar</Link>
+            <Link to="/buscar">Comparar</Link>
             <Link to="/estabelecimentos">Estabelecimentos</Link>
             <Link to="/farmacias">Farmácias</Link>
             <Link to="/colaborar">Colaborar</Link>
@@ -187,7 +192,7 @@ export function HomePremium() {
             <button className="pc-icon-button" type="button" onClick={() => setTheme((value) => value === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}>
               {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
             </button>
-            <Link className="pc-merchant" to="/lojista">Para comerciantes <ArrowRight aria-hidden="true" /></Link>
+            <Link className="pc-merchant" to="/lojista">Sou comerciante <ArrowRight aria-hidden="true" /></Link>
             <button className="pc-menu-button" type="button" aria-expanded={menuOpen} aria-controls="pc-mobile-menu" aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} onClick={() => setMenuOpen((value) => !value)}>
               {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
             </button>
@@ -195,11 +200,11 @@ export function HomePremium() {
         </div>
         {menuOpen && (
           <nav id="pc-mobile-menu" className="pc-mobile-menu" aria-label="Navegação mobile">
-            <Link to="/buscar" onClick={() => setMenuOpen(false)}>Buscar preços</Link>
+            <Link to="/buscar" onClick={() => setMenuOpen(false)}>Comparar preços</Link>
             <Link to="/estabelecimentos" onClick={() => setMenuOpen(false)}>Estabelecimentos</Link>
             <Link to="/farmacias" onClick={() => setMenuOpen(false)}>Farmácias</Link>
             <Link to="/colaborar" onClick={() => setMenuOpen(false)}>Colaborar</Link>
-            <Link to="/lojista" onClick={() => setMenuOpen(false)}>Para comerciantes</Link>
+            <Link to="/lojista" onClick={() => setMenuOpen(false)}>Sou comerciante</Link>
           </nav>
         )}
       </header>
@@ -209,8 +214,8 @@ export function HomePremium() {
           <div className="pc-shell pc-hero-inner">
             <div className="pc-hero-copy">
               <span className="pc-kicker"><MapPin aria-hidden="true" /> Feijó · Acre</span>
-              <h1 id="pc-title">Pesquise. Compare. <em>Economize.</em></h1>
-              <p>Veja preços de produtos em estabelecimentos locais e escolha melhor antes de sair de casa.</p>
+              <h1 id="pc-title">Antes de comprar, encontre o <em>preço certo.</em></h1>
+              <p>Pesquise produtos, compare estabelecimentos locais e escolha a melhor opção para sua compra em poucos segundos.</p>
               <div className="pc-search-area" ref={searchAreaRef}>
                 <form className="pc-search" role="search" onSubmit={submitSearch}>
                   <Search aria-hidden="true" />
@@ -218,7 +223,7 @@ export function HomePremium() {
                   <input
                     id="pc-home-search"
                     value={query}
-                    placeholder="O que você quer comparar hoje?"
+                    placeholder="Busque arroz, café, carne, leite..."
                     autoComplete="off"
                     role="combobox"
                     aria-autocomplete="list"
@@ -229,12 +234,12 @@ export function HomePremium() {
                     onChange={(event) => { setQuery(event.target.value); setSearchOpen(true); setActiveResult(-1); }}
                     onKeyDown={handleSearchKeys}
                   />
-                  <button type="submit">Comparar preços <ArrowRight aria-hidden="true" /></button>
+                  <button type="submit">Encontrar menor preço <ArrowRight aria-hidden="true" /></button>
                 </form>
                 {searchOpen && query.trim().length >= 2 && (
                   <div className="pc-results" id="pc-search-results" role="listbox" aria-label="Sugestões de produtos">
                     {catalogLoading && !suggestions.length ? (
-                      <div className="pc-result-state" role="status"><PackageSearch aria-hidden="true" /><span><strong>Buscando produtos…</strong><small>Consultando o catálogo local.</small></span></div>
+                      <div className="pc-result-state" role="status"><PackageSearch aria-hidden="true" /><span><strong>Buscando produtos…</strong><small>Consultando os preços disponíveis.</small></span></div>
                     ) : suggestions.length ? suggestions.map((product, index) => {
                       const offer = bestOffer(product);
                       const image = resolveProductImage(product);
@@ -242,32 +247,45 @@ export function HomePremium() {
                         <button id={`pc-result-${index}`} key={String(product.id)} type="button" role="option" aria-selected={activeResult === index} className={`pc-result${activeResult === index ? " is-active" : ""}`} onMouseEnter={() => setActiveResult(index)} onClick={() => { setSelectedProduct(product); setSearchOpen(false); }}>
                           <span className="pc-result-image">{image ? <img src={image} alt="" /> : <PackageSearch aria-hidden="true" />}</span>
                           <span className="pc-result-copy"><strong>{product.name}</strong><small>{[product.brand, product.size].filter(Boolean).join(" · ")}</small><em><Store aria-hidden="true" /> {offer.establishment}</em></span>
-                          <span className="pc-result-price"><small>desde</small><strong>{money(product.minPrice)}</strong></span>
+                          <span className="pc-result-price"><small>menor preço</small><strong>{money(product.minPrice)}</strong></span>
                         </button>
                       );
                     }) : (
-                      <div className="pc-result-state" role="status"><PackageSearch aria-hidden="true" /><span><strong>Nenhum resultado</strong><small>Tente nome, marca ou categoria.</small></span></div>
+                      <div className="pc-result-state" role="status"><PackageSearch aria-hidden="true" /><span><strong>Nenhum produto encontrado</strong><small>Tente outro nome, marca ou categoria.</small></span></div>
                     )}
                   </div>
                 )}
               </div>
-              <div className="pc-quick" aria-label="Buscas rápidas"><span>Buscas rápidas</span>{popularSearches.map((item) => <button key={item} type="button" onClick={() => search(item)}>{item}</button>)}</div>
+              <div className="pc-quick" aria-label="Buscas rápidas"><span>Mais buscados:</span>{popularSearches.map((item) => <button key={item} type="button" onClick={() => search(item)}>{item}</button>)}</div>
             </div>
+            <aside className="pc-hero-side" aria-label="Recursos principais">
+              <div><BadgeDollarSign aria-hidden="true" /><span><strong>Compare preços reais</strong><small>Veja a diferença entre estabelecimentos.</small></span></div>
+              <div><ShoppingCart aria-hidden="true" /><span><strong>Monte sua cesta</strong><small>Planeje sua compra com mais clareza.</small></span></div>
+              <div><Store aria-hidden="true" /><span><strong>Descubra lojas locais</strong><small>Acesse catálogos e ofertas disponíveis.</small></span></div>
+            </aside>
+          </div>
+        </section>
+
+        <section className="pc-action-strip" aria-label="Atalhos da plataforma">
+          <div className="pc-shell pc-action-strip-inner">
+            <Link to="/buscar"><Search aria-hidden="true" /><span><strong>Comparar produto</strong><small>Pesquise e veja onde está mais barato</small></span><ChevronRight aria-hidden="true" /></Link>
+            <Link to="/cesta-basica"><ShoppingCart aria-hidden="true" /><span><strong>Cesta inteligente</strong><small>Organize os itens que pretende comprar</small></span><ChevronRight aria-hidden="true" /></Link>
+            <Link to="/estabelecimentos"><Store aria-hidden="true" /><span><strong>Explorar lojas</strong><small>Conheça os catálogos de Feijó</small></span><ChevronRight aria-hidden="true" /></Link>
           </div>
         </section>
 
         <section className="pc-section pc-shell pc-categories" aria-labelledby="pc-categories-title">
-          <div className="pc-heading"><span>Comece por aqui</span><h2 id="pc-categories-title">Categorias essenciais</h2></div>
+          <div className="pc-heading"><span>Explore por categoria</span><h2 id="pc-categories-title">Encontre mais rápido o que precisa.</h2></div>
           <div className="pc-category-row">
-            {categories.map(({ name, icon: Icon, href, query: categoryQuery }) => {
-              const content = <><Icon aria-hidden="true" /><span>{name}</span><ChevronRight aria-hidden="true" /></>;
+            {categories.map(({ name, description, icon: Icon, href, query: categoryQuery }) => {
+              const content = <><span className="pc-category-icon"><Icon aria-hidden="true" /></span><span><strong>{name}</strong><small>{description}</small></span><ChevronRight aria-hidden="true" /></>;
               return href ? <Link key={name} className="pc-category" to={href}>{content}</Link> : <button key={name} className="pc-category" type="button" onClick={() => search(categoryQuery ?? name)}>{content}</button>;
             })}
           </div>
         </section>
 
-        <section className="pc-section pc-shell" aria-labelledby="pc-opportunities-title">
-          <div className="pc-heading pc-heading-row"><div><span>Melhores oportunidades</span><h2 id="pc-opportunities-title">Compare onde a diferença importa</h2></div><Link to="/buscar">Ver todos <ArrowRight aria-hidden="true" /></Link></div>
+        <section className="pc-section pc-shell pc-opportunities" aria-labelledby="pc-opportunities-title">
+          <div className="pc-heading pc-heading-row"><div><span>Oportunidades do catálogo</span><h2 id="pc-opportunities-title">Produtos com diferença de preço para comparar.</h2></div><Link to="/buscar">Ver todos <ArrowRight aria-hidden="true" /></Link></div>
           <div className="pc-product-grid">
             {opportunities.map((product) => {
               const offer = bestOffer(product);
@@ -279,9 +297,9 @@ export function HomePremium() {
                     <span className="pc-product-media">{image ? <img src={image} alt={product.name} loading="lazy" /> : <PackageSearch aria-hidden="true" />}</span>
                     <span className="pc-product-info"><small>{[product.brand, product.size].filter(Boolean).join(" · ")}</small><strong>{product.name}</strong></span>
                   </button>
-                  <div className="pc-price-block"><span><small>Menor preço</small><strong>{money(product.minPrice)}</strong></span>{saving > 0 && <em>até {money(saving)} de diferença</em>}</div>
-                  <div className="pc-product-store"><Store aria-hidden="true" /><span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span></div>
-                  <button className="pc-compare-button" type="button" onClick={() => setSelectedProduct(product)}>Comparar ofertas <ArrowRight aria-hidden="true" /></button>
+                  <div className="pc-price-line"><span><small>Menor preço</small><strong>{money(product.minPrice)}</strong></span>{saving > 0 && <em>diferença de {money(saving)}</em>}</div>
+                  <div className="pc-store-line"><Store aria-hidden="true" /><span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span></div>
+                  <button className="pc-compare-button" type="button" onClick={() => setSelectedProduct(product)}>Comparar <ArrowRight aria-hidden="true" /></button>
                 </article>
               );
             })}
@@ -291,40 +309,84 @@ export function HomePremium() {
         {comparisonProduct && (
           <section className="pc-compare-section" aria-labelledby="pc-compare-title">
             <div className="pc-shell pc-compare-layout">
-              <div className="pc-compare-copy"><span className="pc-kicker"><BadgeCheck aria-hidden="true" /> Comparação prática</span><h2 id="pc-compare-title">O menor preço fica fácil de enxergar.</h2><p>Para <strong>{comparisonProduct.name}</strong>, organizamos as ofertas do menor para o maior preço. Sem tabela pesada e sem informação repetida.</p><button type="button" onClick={() => setSelectedProduct(comparisonProduct)}>Ver comparação completa <ArrowRight aria-hidden="true" /></button></div>
-              <div className="pc-offer-stack" aria-label={`Ofertas de ${comparisonProduct.name}`}>
-                {(comparisonOffers.length ? comparisonOffers : [bestOffer(comparisonProduct)]).map((offer, index) => (
-                  <div className={`pc-offer${index === 0 ? " is-best" : ""}`} key={`${offer.establishmentId}-${offer.value}`}>
-                    <span className="pc-offer-rank">{index + 1}</span><span className="pc-store-mark" style={{ backgroundColor: offer.storeColor || "#15385a" }}><Store aria-hidden="true" /></span><span className="pc-offer-name"><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span>{index === 0 && <em>Melhor preço</em>}<b>{money(offer.value)}</b>
-                  </div>
-                ))}
+              <div className="pc-compare-copy">
+                <span className="pc-kicker"><BadgeCheck aria-hidden="true" /> Comparação prática</span>
+                <h2 id="pc-compare-title">A melhor escolha aparece lado a lado.</h2>
+                <p>Compare o mesmo produto em diferentes estabelecimentos sem precisar abrir várias telas.</p>
+                <button type="button" onClick={() => setSelectedProduct(comparisonProduct)}>Abrir comparação completa <ArrowRight aria-hidden="true" /></button>
+              </div>
+              <div className="pc-compare-product">
+                <div className="pc-compare-product-head">
+                  <span className="pc-compare-product-image">{resolveProductImage(comparisonProduct) ? <img src={resolveProductImage(comparisonProduct)} alt={comparisonProduct.name} loading="lazy" /> : <PackageSearch aria-hidden="true" />}</span>
+                  <span><small>{[comparisonProduct.brand, comparisonProduct.size].filter(Boolean).join(" · ")}</small><strong>{comparisonProduct.name}</strong></span>
+                </div>
+                <div className="pc-offer-list">
+                  {(comparisonOffers.length ? comparisonOffers : [bestOffer(comparisonProduct)]).map((offer, index) => (
+                    <div className={`pc-offer-row${index === 0 ? " is-best" : ""}`} key={`${offer.establishmentId}-${offer.value}`}>
+                      <span className="pc-offer-rank">{index + 1}</span>
+                      <span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span>
+                      {index === 0 && <em>Melhor preço</em>}
+                      <b>{money(offer.value)}</b>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
         )}
 
-        <section className="pc-section pc-shell" aria-labelledby="pc-stores-title">
-          <div className="pc-heading pc-heading-row"><div><span>Comércio local</span><h2 id="pc-stores-title">Estabelecimentos de Feijó</h2></div><Link to="/estabelecimentos">Ver estabelecimentos <ArrowRight aria-hidden="true" /></Link></div>
+        <section className="pc-section pc-shell pc-stores" aria-labelledby="pc-stores-title">
+          <div className="pc-heading pc-heading-row"><div><span>Comércio local</span><h2 id="pc-stores-title">Estabelecimentos para explorar.</h2></div><Link to="/estabelecimentos">Ver todos <ArrowRight aria-hidden="true" /></Link></div>
           <div className="pc-store-grid">
-            {catalog.stores.slice(0, 6).map((store) => (
-              <Link className="pc-store-card" key={String(store.id)} to={`/estabelecimento/${store.slug}`}>
-                <span className="pc-store-logo" style={{ backgroundColor: store.color }}><Store aria-hidden="true" /></span><span><strong>{store.name}</strong><small><MapPin aria-hidden="true" /> {store.neighborhood || "Feijó, AC"}</small></span>{store.products > 0 && <em>{store.products} produtos</em>}<ChevronRight aria-hidden="true" />
+            {stores.map((store) => (
+              <Link className="pc-store-card" to={`/estabelecimento/${store.slug}`} key={String(store.id)}>
+                <span className="pc-store-avatar" style={{ background: store.color }}><Store aria-hidden="true" /></span>
+                <span><strong>{store.name}</strong><small>{store.neighborhood || "Feijó, AC"}</small><em>{store.products} {store.products === 1 ? "produto" : "produtos"} no catálogo</em></span>
+                <ChevronRight aria-hidden="true" />
               </Link>
             ))}
           </div>
         </section>
 
-        <section className="pc-section pc-shell pc-basket" aria-labelledby="pc-basket-title">
-          <span className="pc-basket-icon"><ShoppingCart aria-hidden="true" /></span><div><span>Cesta inteligente</span><h2 id="pc-basket-title">Planeje vários itens sem perder tempo.</h2><p>Monte sua lista e use a comparação para decidir onde cada item compensa mais.</p></div><Link to="/cesta-basica">Montar minha cesta <ArrowRight aria-hidden="true" /></Link>
+        <section className="pc-basket-section" aria-labelledby="pc-basket-title">
+          <div className="pc-shell pc-basket-layout">
+            <div className="pc-basket-copy">
+              <span className="pc-kicker"><Sparkles aria-hidden="true" /> Planejamento de compra</span>
+              <h2 id="pc-basket-title">Monte a cesta antes de sair de casa.</h2>
+              <p>Junte os produtos que precisa e use o PreçoCerto para pesquisar, comparar e organizar melhor sua compra.</p>
+              <Link to="/cesta-basica">Abrir minha cesta <ArrowRight aria-hidden="true" /></Link>
+            </div>
+            <div className="pc-basket-points" aria-label="Benefícios da cesta">
+              <span><CheckCircle2 aria-hidden="true" /> Organize os itens da compra</span>
+              <span><CheckCircle2 aria-hidden="true" /> Compare antes de decidir</span>
+              <span><CheckCircle2 aria-hidden="true" /> Acesse pelo celular</span>
+            </div>
+          </div>
         </section>
 
         <section className="pc-section pc-shell pc-how" aria-labelledby="pc-how-title">
-          <div className="pc-heading"><span>Como funciona</span><h2 id="pc-how-title">Da busca à economia em três passos</h2></div>
-          <ol><li><span>01</span><div><strong>Pesquise</strong><p>Digite o produto que você precisa.</p></div></li><li><span>02</span><div><strong>Compare</strong><p>Veja preços e estabelecimentos lado a lado.</p></div></li><li><span>03</span><div><strong>Escolha</strong><p>Decida com clareza e economize na compra.</p></div></li></ol>
+          <div className="pc-heading"><span>Simples de usar</span><h2 id="pc-how-title">Pesquisar, comparar e escolher.</h2></div>
+          <ol className="pc-steps">
+            <li><span>01</span><div><strong>Pesquise</strong><p>Digite o produto que deseja encontrar.</p></div></li>
+            <li><span>02</span><div><strong>Compare</strong><p>Veja preços e estabelecimentos disponíveis.</p></div></li>
+            <li><span>03</span><div><strong>Escolha</strong><p>Abra a melhor opção e planeje sua compra.</p></div></li>
+          </ol>
         </section>
 
-        <section className="pc-merchant-cta" aria-labelledby="pc-merchant-title">
-          <div className="pc-shell pc-merchant-layout"><div><span>Para comerciantes</span><h2 id="pc-merchant-title">Seu catálogo pode estar onde seus clientes pesquisam.</h2><p>Apresente sua loja, organize seus produtos e participe da comparação local do PreçoCerto.</p></div><Link to="/lojista">Conhecer área do comerciante <ArrowRight aria-hidden="true" /></Link></div>
+        <section className="pc-commercial" aria-labelledby="pc-commercial-title">
+          <div className="pc-shell pc-commercial-layout">
+            <div className="pc-commercial-copy">
+              <span><Store aria-hidden="true" /> PreçoCerto para comerciantes</span>
+              <h2 id="pc-commercial-title">Sua loja pode aparecer onde o cliente já está pesquisando.</h2>
+              <p>Crie sua presença digital, organize o catálogo, apresente preços e prepare seu comércio para receber pedidos online pela plataforma.</p>
+              <div className="pc-commercial-features">
+                <span><Smartphone aria-hidden="true" /> Vitrine digital</span>
+                <span><PackageSearch aria-hidden="true" /> Catálogo organizado</span>
+                <span><BadgeDollarSign aria-hidden="true" /> Preços e ofertas</span>
+              </div>
+              <Link to="/lojista">Quero colocar minha loja no PreçoCerto <ArrowRight aria-hidden="true" /></Link>
+            </div>
+          </div>
         </section>
       </main>
 
@@ -333,16 +395,33 @@ export function HomePremium() {
         const image = resolveProductImage(selectedProduct);
         return (
           <div className="pc-modal" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedProduct(null); }}>
-            <section className="pc-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="pc-dialog-title">
-              <button ref={closeRef} className="pc-dialog-close" type="button" onClick={() => setSelectedProduct(null)} aria-label="Fechar"><X aria-hidden="true" /></button>
+            <section ref={dialogRef} className="pc-dialog" role="dialog" aria-modal="true" aria-labelledby="pc-dialog-title">
+              <button ref={closeRef} className="pc-dialog-close" type="button" aria-label="Fechar comparação" onClick={() => setSelectedProduct(null)}><X aria-hidden="true" /></button>
               <div className="pc-dialog-media">{image ? <img src={image} alt={selectedProduct.name} /> : <PackageSearch aria-hidden="true" />}</div>
-              <div className="pc-dialog-content"><span>{selectedProduct.category || "Produto"}</span><h2 id="pc-dialog-title">{selectedProduct.name}</h2><p>{[selectedProduct.brand, selectedProduct.size].filter(Boolean).join(" · ")}</p><div className="pc-dialog-summary"><div><small>Menor</small><strong>{money(selectedProduct.minPrice)}</strong></div><div><small>Média</small><strong>{money(selectedProduct.avgPrice)}</strong></div><div><small>Maior</small><strong>{money(selectedProduct.maxPrice)}</strong></div></div><div className="pc-dialog-offers">{(offers.length ? offers : [bestOffer(selectedProduct)]).slice(0, 5).map((offer, index) => <div key={`${offer.establishmentId}-${offer.value}`} className={index === 0 ? "is-best" : ""}><span className="pc-store-mark" style={{ backgroundColor: offer.storeColor || "#15385a" }}><Store aria-hidden="true" /></span><span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span>{index === 0 && <em>Mais barato</em>}<b>{money(offer.value)}</b></div>)}</div><div className="pc-dialog-actions"><Link to={`/produto/${selectedProduct.slug || selectedProduct.id}`} onClick={() => setSelectedProduct(null)}>Detalhes do produto</Link><button type="button" onClick={() => search(selectedProduct.name)}>Comparar similares <ArrowRight aria-hidden="true" /></button></div></div>
+              <div className="pc-dialog-content">
+                <span className="pc-dialog-kicker">{selectedProduct.category || "Produto"}</span>
+                <h2 id="pc-dialog-title">{selectedProduct.name}</h2>
+                <p>{[selectedProduct.brand, selectedProduct.size].filter(Boolean).join(" · ")}</p>
+                <div className="pc-dialog-prices"><span><small>Menor</small><strong>{money(selectedProduct.minPrice)}</strong></span><span><small>Média</small><strong>{money(selectedProduct.avgPrice)}</strong></span><span><small>Maior</small><strong>{money(selectedProduct.maxPrice)}</strong></span></div>
+                <div className="pc-dialog-offers">
+                  {(offers.length ? offers : [bestOffer(selectedProduct)]).slice(0, 5).map((offer, index) => (
+                    <div className={index === 0 ? "is-best" : ""} key={`${offer.establishmentId}-${offer.value}`}><span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span>{index === 0 && <em>Melhor preço</em>}<b>{money(offer.value)}</b></div>
+                  ))}
+                </div>
+                <div className="pc-dialog-actions"><Link to={`/produto/${selectedProduct.slug || selectedProduct.id}`} onClick={() => setSelectedProduct(null)}>Ver detalhes <ArrowRight aria-hidden="true" /></Link><button type="button" onClick={() => search(selectedProduct.name)}>Comparar similares</button></div>
+              </div>
             </section>
           </div>
         );
       })()}
 
-      <footer className="pc-footer"><div className="pc-shell pc-footer-inner"><div><img src="/logo-preco-certo-inversa.svg" alt="PreçoCerto" /><p>Pesquise, compare e escolha melhor em Feijó.</p></div><nav aria-label="Links do rodapé"><Link to="/buscar">Buscar</Link><Link to="/estabelecimentos">Estabelecimentos</Link><Link to="/colaborar">Colaborar</Link><Link to="/fale-conosco">Fale conosco</Link></nav></div></footer>
+      <footer className="pc-footer">
+        <div className="pc-shell pc-footer-inner">
+          <div className="pc-footer-brand"><img src="/logo-preco-certo-inversa.svg" alt="PreçoCerto" /><p>Pesquise, compare e escolha melhor no comércio local de Feijó.</p></div>
+          <nav aria-label="Links do rodapé"><Link to="/buscar">Comparar</Link><Link to="/estabelecimentos">Estabelecimentos</Link><Link to="/cesta-basica">Minha cesta</Link><Link to="/lojista">Sou comerciante</Link><Link to="/fale-conosco">Contato</Link></nav>
+        </div>
+        <div className="pc-shell pc-footer-bottom"><span>PreçoCerto · Feijó, Acre</span><span>Informação local para compras mais inteligentes.</span></div>
+      </footer>
     </div>
   );
 }
