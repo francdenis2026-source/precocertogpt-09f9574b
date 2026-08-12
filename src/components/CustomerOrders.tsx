@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, Circle, Clock3, CreditCard, MapPin, PackageCheck, ShoppingBag, Truck, XCircle } from "lucide-react";
 import { supabase } from "../lib/roles";
-import { startMercadoPagoCheckout, updateOrderStatus, type MerchantOrder, type OrderStatus } from "../lib/merchantPlatform";
+import { startMercadoPagoCheckout, updateOrderStatus, loadOrderEvents, type MerchantOrder, type OrderStatus } from "../lib/merchantPlatform";
 import { notifyStatusUpdate } from "../lib/paymentNotifications";
 
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -19,9 +19,11 @@ const rank: Record<OrderStatus, number> = { pending_payment: 0, pending_review: 
 export function CustomerOrders() {
   const [orders, setOrders] = useState<MerchantOrder[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [paying, setPaying] = useState("");
-  const [notice, setNotice] = useState("");
+   const [loading, setLoading] = useState(true);
+   const [paying, setPaying] = useState("");
+   const [notice, setNotice] = useState("");
+   const [events, setEvents] = useState<any[]>([]);
+   const [loadingEvents, setLoadingEvents] = useState(false);
 
   async function load() {
     if (!supabase) return;
@@ -33,9 +35,22 @@ export function CustomerOrders() {
     setOrders(rows);
     setSelected(current => current || rows[0]?.id || null);
     setLoading(false);
-  }
-
-  useEffect(() => {
+   }
+ 
+   async function loadEvents(orderId: string) {
+     setLoadingEvents(true);
+     const data = await loadOrderEvents(orderId);
+     setEvents(data);
+     setLoadingEvents(false);
+   }
+ 
+   useEffect(() => {
+     if (selected) {
+       void loadEvents(selected);
+     }
+   }, [selected]);
+ 
+   useEffect(() => {
     if (!supabase) { setLoading(false); return; }
     let ordersChannel: any;
     
@@ -150,9 +165,34 @@ export function CustomerOrders() {
               {order.estimated_delivery_at && <p style={{margin: "4px 0", fontSize: 13}}>Previsão de entrega: <strong>{dateTime.format(new Date(order.estimated_delivery_at))}</strong></p>}
             </div>
           </div>
-        )}
-
-        <div style={s.cards}>
+         )}
+ 
+         <div style={s.eventTimeline}>
+           <span style={s.kicker}>HISTÓRICO DO PEDIDO</span>
+           {loadingEvents ? (
+             <div style={{padding: "10px 0", fontSize: 12}}>Carregando eventos...</div>
+           ) : events.length > 0 ? (
+             <div style={s.eventList}>
+               {events.map((ev, i) => (
+                 <div key={ev.id} style={s.eventItem}>
+                   <div style={s.eventDot} />
+                   {i < events.length - 1 && <div style={s.eventVerticalLine} />}
+                   <div style={s.eventContent}>
+                     <div style={s.eventHeader}>
+                       <strong>{ev.description || (ev.event_type === 'status_change' ? `Status alterado para ${ev.metadata?.new_status || 'novo status'}` : ev.event_type)}</strong>
+                       <small>{dateTime.format(new Date(ev.created_at))}</small>
+                     </div>
+                     {ev.notes && <p style={s.eventNotes}>{ev.notes}</p>}
+                   </div>
+                 </div>
+               ))}
+             </div>
+           ) : (
+             <div style={{padding: "10px 0", fontSize: 12, opacity: 0.6}}>Nenhum evento registrado ainda.</div>
+           )}
+         </div>
+ 
+         <div style={s.cards}>
           <article style={s.info}><MapPin size={18}/><div><span style={s.kicker}>ENTREGA</span><strong>{order.delivery_type === "pickup" ? "Retirada no estabelecimento" : order.delivery_address ? `${order.delivery_address.street ?? ""}, ${order.delivery_address.number ?? ""} · ${order.delivery_address.neighborhood ?? ""}` : "Endereço informado no pedido"}</strong><small style={s.muted}>Taxa: {brl.format(order.delivery_fee)}</small></div></article>
           <article style={s.info}><ShoppingBag size={18}/><div><span style={s.kicker}>PAGAMENTO</span><strong>{order.payment_provider || "Pagamento"}</strong><small style={s.muted}>Situação: {order.payment_status}</small></div></article>
         </div>
@@ -164,5 +204,13 @@ export function CustomerOrders() {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page:{minHeight:"100vh",background:"#f6f8f6",padding:"26px clamp(16px,4vw,56px)",fontFamily:"Inter,system-ui,sans-serif",color:"#152019"},header:{maxWidth:1200,margin:"0 auto 20px",display:"flex",justifyContent:"space-between",alignItems:"center"},kicker:{display:"block",fontSize:10,fontWeight:900,letterSpacing:".12em",opacity:.55},h1:{fontSize:30,letterSpacing:"-.04em",margin:"5px 0"},h2:{fontSize:25,letterSpacing:"-.03em",margin:"4px 0"},layout:{maxWidth:1200,margin:"0 auto",display:"grid",gridTemplateColumns:"300px minmax(0,1fr)",gap:14},list:{background:"white",border:"1px solid #e1e6e2",borderRadius:16,padding:14,display:"grid",alignContent:"start",gap:7},orderButton:{border:"1px solid #edf0ee",background:"#fafbfa",padding:12,borderRadius:11,display:"flex",justifyContent:"space-between",alignItems:"center",textAlign:"left",cursor:"pointer"},orderActive:{borderColor:"#2b6547",background:"#eff8f2"},detail:{background:"white",border:"1px solid #e1e6e2",borderRadius:17,padding:"clamp(17px,3vw,30px)"},detailTop:{display:"flex",justifyContent:"space-between",gap:20,alignItems:"flex-start"},total:{display:"block",fontSize:22},payButton:{border:0,borderRadius:9,padding:"9px 12px",background:"#183d2b",color:"white",fontWeight:800,display:"inline-flex",gap:6,alignItems:"center",cursor:"pointer"},cancelButton:{border:"1px solid #e5e9e6",borderRadius:9,padding:"9px 12px",background:"white",color:"#d93025",fontWeight:600,display:"inline-flex",gap:6,alignItems:"center",cursor:"pointer"},trackingCard:{background:"#eff8f2",border:"1px solid #c9d7cd",borderRadius:13,padding:15,marginBottom:16,display:"flex",gap:12,alignItems:"center"},timeline:{display:"grid",gridTemplateColumns:"repeat(6,minmax(0,1fr))",margin:"30px 0",gap:4},step:{position:"relative",textAlign:"center",fontSize:11,display:"grid",justifyItems:"center",gap:7},dot:{width:34,height:34,borderRadius:99,background:"#edf0ee",display:"grid",placeItems:"center",zIndex:1},dotDone:{background:"#183d2b",color:"white"},line:{position:"absolute",height:2,background:"#e2e6e3",left:"56%",right:"-44%",top:16},lineDone:{background:"#6baa7f"},muted:{display:"block",fontSize:11,color:"#768078",marginTop:3},cards:{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10},info:{border:"1px solid #e5e9e6",borderRadius:13,padding:15,display:"flex",gap:11},items:{marginTop:16,borderTop:"1px solid #edf0ee",paddingTop:16},itemsHead:{display:"flex",justifyContent:"space-between",marginBottom:8},item:{display:"flex",justifyContent:"space-between",padding:"8px 0",fontSize:13,borderBottom:"1px solid #f0f2f1"},summary:{marginLeft:"auto",marginTop:16,maxWidth:310,display:"grid",gap:7,fontSize:13},grand:{borderTop:"1px solid #dfe4e1",paddingTop:10,fontSize:17,display:"flex",justifyContent:"space-between"},button:{background:"#183d2b",color:"white",padding:"10px 14px",borderRadius:10,textDecoration:"none"},notice:{maxWidth:1200,margin:"0 auto 12px",padding:11,borderRadius:10,background:"#fff5e7",color:"#83551f"},center:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10,textAlign:"center",fontFamily:"Inter,system-ui,sans-serif"}
-};
+   page:{minHeight:"100vh",background:"#f6f8f6",padding:"26px clamp(16px,4vw,56px)",fontFamily:"Inter,system-ui,sans-serif",color:"#152019"},header:{maxWidth:1200,margin:"0 auto 20px",display:"flex",justifyContent:"space-between",alignItems:"center"},kicker:{display:"block",fontSize:10,fontWeight:900,letterSpacing:".12em",opacity:.55},h1:{fontSize:30,letterSpacing:"-.04em",margin:"5px 0"},h2:{fontSize:25,letterSpacing:"-.03em",margin:"4px 0"},layout:{maxWidth:1200,margin:"0 auto",display:"grid",gridTemplateColumns:"300px minmax(0,1fr)",gap:14},list:{background:"white",border:"1px solid #e1e6e2",borderRadius:16,padding:14,display:"grid",alignContent:"start",gap:7},orderButton:{border:"1px solid #edf0ee",background:"#fafbfa",padding:12,borderRadius:11,display:"flex",justifyContent:"space-between",alignItems:"center",textAlign:"left",cursor:"pointer"},orderActive:{borderColor:"#2b6547",background:"#eff8f2"},detail:{background:"white",border:"1px solid #e1e6e2",borderRadius:17,padding:"clamp(17px,3vw,30px)"},detailTop:{display:"flex",justifyContent:"space-between",gap:20,alignItems:"flex-start"},total:{display:"block",fontSize:22},payButton:{border:0,borderRadius:9,padding:"9px 12px",background:"#183d2b",color:"white",fontWeight:800,display:"inline-flex",gap:6,alignItems:"center",cursor:"pointer"},cancelButton:{border:"1px solid #e5e9e6",borderRadius:9,padding:"9px 12px",background:"white",color:"#d93025",fontWeight:600,display:"inline-flex",gap:6,alignItems:"center",cursor:"pointer"},trackingCard:{background:"#eff8f2",border:"1px solid #c9d7cd",borderRadius:13,padding:15,marginBottom:16,display:"flex",gap:12,alignItems:"center"},timeline:{display:"grid",gridTemplateColumns:"repeat(6,minmax(0,1fr))",margin:"30px 0",gap:4},step:{position:"relative",textAlign:"center",fontSize:11,display:"grid",justifyItems:"center",gap:7},dot:{width:34,height:34,borderRadius:99,background:"#edf0ee",display:"grid",placeItems:"center",zIndex:1},dotDone:{background:"#183d2b",color:"white"},line:{position:"absolute",height:2,background:"#e2e6e3",left:"56%",right:"-44%",top:16},lineDone:{background:"#6baa7f"},muted:{display:"block",fontSize:11,color:"#768078",marginTop:3},cards:{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10},info:{border:"1px solid #e5e9e6",borderRadius:13,padding:15,display:"flex",gap:11},items:{marginTop:16,borderTop:"1px solid #edf0ee",paddingTop:16},itemsHead:{display:"flex",justifyContent:"space-between",marginBottom:8},item:{display:"flex",justifyContent:"space-between",padding:"8px 0",fontSize:13,borderBottom:"1px solid #f0f2f1"},summary:{marginLeft:"auto",marginTop:16,maxWidth:310,display:"grid",gap:7,fontSize:13},grand:{borderTop:"1px solid #dfe4e1",paddingTop:10,fontSize:17,display:"flex",justifyContent:"space-between"},button:{background:"#183d2b",color:"white",padding:"10px 14px",borderRadius:10,textDecoration:"none"},notice:{maxWidth:1200,margin:"0 auto 12px",padding:11,borderRadius:10,background:"#fff5e7",color:"#83551f"},center:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10,textAlign:"center",fontFamily:"Inter,system-ui,sans-serif"},
+   eventTimeline: { marginTop: 20, marginBottom: 24, padding: "16px 0", borderTop: "1px solid #edf0ee" },
+   eventList: { marginTop: 12, display: "grid", gap: 0 },
+   eventItem: { position: "relative", display: "flex", gap: 16, paddingBottom: 20 },
+   eventDot: { width: 8, height: 8, borderRadius: 99, background: "#183d2b", marginTop: 6, zIndex: 1 },
+   eventVerticalLine: { position: "absolute", left: 3.5, top: 14, bottom: -6, width: 1, background: "#e1e6e2" },
+   eventContent: { flex: 1 },
+   eventHeader: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 },
+   eventNotes: { fontSize: 12, color: "#768078", marginTop: 4, background: "#f8f9f8", padding: "6px 10px", borderRadius: 6, borderLeft: "2px solid #e1e6e2" }
+ };
