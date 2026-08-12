@@ -387,6 +387,11 @@ function FavoriteCard({
   hasAlert: boolean;
   onToggleAlert: () => void;
 }) {
+  const openDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.dispatchEvent(new CustomEvent('pc:open-product-details', { detail: product }));
+  };
+
   return (
     <div className={`favorite-card ${isSelected ? 'selected' : ''}`} style={{ 
       position: 'relative', 
@@ -397,6 +402,7 @@ function FavoriteCard({
       transition: 'all 0.2s ease',
       cursor: 'pointer'
     }} onClick={onSelect}>
+
       <div style={{ position: 'absolute', top: '12px', left: '12px', zIndex: 2 }}>
         <div style={{ 
           width: '24px', 
