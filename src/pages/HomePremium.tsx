@@ -357,7 +357,7 @@ export function HomePremium() {
               </div>
               <div className={`pc-compare-product${isTransitioning ? " is-exiting" : " is-entering"}`}>
                 <div className="pc-compare-product-head">
-                  <span className="pc-compare-product-image">
+                  <span className={`pc-compare-product-image ${resolveProductImage(comparisonProduct)?.endsWith('.png') ? 'is-transparent' : ''}`}>
                     {resolveProductImage(comparisonProduct) ? (
                       <img src={resolveProductImage(comparisonProduct)} alt={comparisonProduct.name} loading="lazy" />
                     ) : (
