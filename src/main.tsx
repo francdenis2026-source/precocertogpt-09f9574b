@@ -12,6 +12,7 @@ import "./pages/HomePremiumFooterRefinement.css";
 import "./pages/HomePremiumHeaderRefinement.css";
 import "./pages/HomeComparisonSpotlight.css";
 import "./pages/HomeSearchResultsContrast.css";
+import "./styles/GlobalScrollbarRefinement.css";
 import App from "./App";
 import { startPaymentNotifications } from "./lib/paymentNotifications";
 
