@@ -5629,25 +5629,30 @@ export default function PrecoCertoApp() {
                   </div>
                 </div>
 
-                <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--surface-3)', borderRadius: '12px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', border: '1px solid var(--border-soft)' }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mínimo</span>
-                    <strong style={{ fontSize: '0.9rem', color: 'var(--green)' }}>{money(selectedProduct.minPrice)}</strong>
+                {(selectedProduct.storeCount > 1 || (selectedProduct.offers && selectedProduct.offers.length > 1)) && (
+                  <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--surface-3)', borderRadius: '12px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', border: '1px solid var(--border-soft)' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mínimo</span>
+                      <strong style={{ fontSize: '0.9rem', color: 'var(--green)' }}>{money(selectedProduct.minPrice)}</strong>
+                    </div>
+                    <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border-soft)', borderRight: '1px solid var(--border-soft)' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Médio</span>
+                      <strong style={{ fontSize: '0.9rem', color: 'var(--blue)' }}>
+                        {money(selectedProduct.avgPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
+                          ? selectedProduct.price_history.reduce((a: number, b: any) => a + b.value, 0) / selectedProduct.price_history.length
+                          : selectedProduct.minPrice))}
+                      </strong>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Máximo</span>
+                      <strong style={{ fontSize: '0.9rem', color: 'var(--red)' }}>
+                        {money(selectedProduct.maxPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
+                          ? Math.max(...selectedProduct.price_history.map((h: any) => h.value))
+                          : (selectedProduct.previousPrice || selectedProduct.minPrice)))}
+                      </strong>
+                    </div>
                   </div>
-                  <div style={{ textAlign: 'center', borderLeft: '1px solid var(--border-soft)', borderRight: '1px solid var(--border-soft)' }}>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Médio</span>
-                    <strong style={{ fontSize: '0.9rem', color: 'var(--blue)' }}>
-                      {money(selectedProduct.avgPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
-                        ? selectedProduct.price_history.reduce((a: number, b: any) => a + b.value, 0) / selectedProduct.price_history.length
-                        : selectedProduct.minPrice))}
-                    </strong>
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Máximo</span>
-                    <strong style={{ fontSize: '0.9rem', color: 'var(--red)' }}>
-                      {money(selectedProduct.maxPrice || (selectedProduct.price_history && selectedProduct.price_history.length > 0
-                        ? Math.max(...selectedProduct.price_history.map((h: any) => h.value))
-                        : (selectedProduct.previousPrice || selectedProduct.minPrice)))}
+                )}
                     </strong>
                   </div>
                 </div>
