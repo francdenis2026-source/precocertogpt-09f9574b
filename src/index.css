@@ -488,6 +488,7 @@ body {
 }
 @media (min-width: 1024px) {
   .site-header { height: 64px; }
+  .brand__logo-img { height: 86px; } /* Stand out even more on desktop */
 }
 
 .site-header--scrolled {
