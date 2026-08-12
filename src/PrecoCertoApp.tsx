@@ -4393,7 +4393,7 @@ function GenericPage({ path, products, stores, metrics, addBasket, favorites, to
           <h1>{info[1]}</h1>
           <p>Informação clara, preços comparáveis e decisões melhores para quem compra e vende em Feijó.</p>
         </div>
-        <a className="button button--primary" href="/buscar">Comparar agora <ArrowRight/></a>
+        <a className="button button--primary" href="/buscar" style={{ padding: '0.6rem 1.2rem' }}>Comparar agora <ArrowRight size={18}/></a>
       </section>
 
       <div className="generic-grid">
