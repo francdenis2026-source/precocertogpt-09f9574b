@@ -354,11 +354,11 @@ export function HomePremium() {
                 <div className="pc-offer-list">
                   {comparisonOffers.length > 0 ? (
                     comparisonOffers.map((offer, idx) => (
-                      <div key={`${comparisonProduct.id}-${offer.storeId}`} className={`pc-offer-row ${idx === 0 ? "is-best" : ""}`}>
+                      <div key={`${comparisonProduct.id}-${offer.establishmentId}-${idx}`} className={`pc-offer-row ${idx === 0 ? "is-best" : ""}`}>
                         <span className="pc-offer-rank">{idx + 1}</span>
                         <span>
-                          <strong>{offer.storeName}</strong>
-                          <small>Feijó, AC</small>
+                          <strong>{offer.establishment}</strong>
+                          <small>{offer.neighborhood || "Feijó, AC"}</small>
                         </span>
                         {idx === 0 && <em>Melhor preço</em>}
                         <b>{money(offer.value)}</b>
