@@ -56,6 +56,7 @@ import { MercadoPagoCallback } from "./components/MercadoPagoCallback";
 import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/PublicFooterServicePages";
 import "./components/TrueHomepageKowalski.css";
 import "./components/KowalskiGlobalExperience.css";
+import "./components/KowalskiLegacyDeep.css";
 
 export default function App() {
   return (
