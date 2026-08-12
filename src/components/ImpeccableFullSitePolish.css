@@ -1,0 +1,91 @@
+/* Impeccable 4.0.4 full-site polish.
+   Refinement only: preserves product behavior, factual copy and business logic. */
+:root{
+  --imp-fast:150ms;
+  --imp-ui:210ms;
+  --imp-ease:cubic-bezier(.2,.8,.2,1);
+  --imp-radius:14px;
+  --imp-shadow:0 10px 28px rgba(15,23,42,.07);
+  --imp-shadow-strong:0 18px 46px rgba(15,23,42,.11);
+}
+
+/* ---------- Homepage: Persuade ---------- */
+.true-home .th-kicker{display:none!important}
+.true-home .th-hero h1{margin-top:0!important;letter-spacing:-.035em!important;line-height:.98!important;max-width:13ch}
+.true-home .th-heading h2,.true-home .th-basket-mini h2,.true-home .th-merchant h2{letter-spacing:-.03em!important}
+.true-home .th-heading>span{display:none!important}
+.true-home .th-header{backdrop-filter:none!important;background:rgba(6,23,35,.96)!important}
+.true-home .th-search{border-radius:var(--imp-radius)!important;box-shadow:0 14px 34px rgba(0,0,0,.2)!important}
+.true-home .th-hero-card{background:rgba(7,29,40,.86)!important;backdrop-filter:none!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:var(--imp-radius)!important;box-shadow:0 16px 38px rgba(0,0,0,.18)!important}
+.true-home .th-hero-card__stats div{background:transparent!important;border-color:rgba(255,255,255,.1)!important}
+.true-home .th-quick__grid>a,.true-home .th-product,.true-home .th-store{border-radius:var(--imp-radius)!important}
+.true-home .th-product{box-shadow:0 7px 22px rgba(15,23,42,.055)!important}
+.true-home .th-product__price strong{letter-spacing:-.025em!important}
+.true-home .th-mid-hero__panel{backdrop-filter:none!important;background:rgba(6,23,35,.92)!important}
+.true-home .th-basket-mini{box-shadow:0 16px 38px rgba(7,56,47,.13)!important}
+.true-home :where(.th-search button,.th-button,.th-header__cta,.th-product-modal__actions a):disabled{opacity:.52;cursor:not-allowed;transform:none!important;filter:none!important}
+
+/* ---------- Dorinha: Persuade / editorial ---------- */
+.dorinha-pro__hero h1{letter-spacing:-.035em!important;line-height:.98!important;max-width:12ch;text-wrap:balance}
+.dorinha-pro__intro h2,.dorinha-pro__section-head h2,.dorinha-pro__author-copy h2,.dorinha-pro__market h2{letter-spacing:-.03em!important;text-wrap:balance}
+.dorinha-pro__top{backdrop-filter:none!important;background:rgba(251,247,241,.97)!important}
+.dorinha-pro__hero{background:linear-gradient(118deg,#19091f,#301034 54%,#4a214a)!important}
+.dorinha-pro__book{border-radius:var(--imp-radius)!important;box-shadow:0 8px 24px rgba(50,26,48,.06)!important}
+.dorinha-pro__hero-portrait,.dorinha-pro__author-photo{box-shadow:0 22px 54px rgba(0,0,0,.22)!important}
+.dorinha-pro__facts div{background:transparent!important;border:1px solid rgba(255,255,255,.1)!important}
+.dorinha-pro__pix{box-shadow:var(--imp-shadow)!important}
+.dorinha-pro :where(a,button):disabled{opacity:.5!important;cursor:not-allowed!important;transform:none!important}
+html[data-theme="dark"] .dorinha-pro__top{background:rgba(16,11,18,.97)!important}
+
+/* ---------- Public surfaces ---------- */
+:where(.scpm-page,.establishments-page,.establishments-marketplace,.public-establishment,.public-store,.fremix-page,.merchant-online-store,.orders-page,.customer-orders,.mercadopago-callback,.public-service-page) :where(h1,h2){letter-spacing:-.03em!important;text-wrap:balance}
+:where(.scpm-page,.establishments-page,.establishments-marketplace,.public-establishment,.public-store,.fremix-page,.merchant-online-store,.orders-page,.customer-orders,.mercadopago-callback,.public-service-page) :where(p){max-width:75ch}
+:where(.scpm-page,.establishments-page,.establishments-marketplace,.public-establishment,.public-store,.fremix-page,.merchant-online-store,.orders-page,.customer-orders,.public-service-page) :where(article,[class*="card"],[class*="panel"]){border-radius:var(--imp-radius)!important}
+:where(.scpm-page,.establishments-page,.establishments-marketplace,.public-establishment,.public-store,.merchant-online-store) :where([class*="price"] strong,[class*="price"] b){font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+/* ---------- Legacy public routes ---------- */
+body.pc-public-refined :where(.generic-hero,.page-hero,.search-hero,.store-hero,.plans-hero,.auth-hero){border-radius:0!important}
+body.pc-public-refined :where(.generic-hero h1,.page-title h1,.center-heading h1,.plans-page h1,.auth-card h1){letter-spacing:-.035em!important;line-height:1.02!important}
+body.pc-public-refined :where(.section-heading h2,.center-heading h2,.visual-product-content h2,.basket-plan h2,.plan-card h2){letter-spacing:-.025em!important}
+body.pc-public-refined :where(.visual-product-card,.store-card,.price-table-card,.basket-plan,.benefit-card,.plan-card,.auth-card,.pc-service-card,.order-card,.search-panel,.compare-card){border-radius:var(--imp-radius)!important;box-shadow:var(--imp-shadow)!important}
+body.pc-public-refined :where(.button,.button--primary,.search-combo__button,button,[role="button"]):disabled{opacity:.5!important;cursor:not-allowed!important;transform:none!important;box-shadow:none!important}
+body.pc-public-refined :where(.empty-state,.empty,.no-results,.loading-state,.error-state){max-width:680px;margin-inline:auto;text-align:center}
+body.pc-public-refined :where(.error-state,[class*="error"]){overflow-wrap:anywhere}
+
+/* ---------- Operate surfaces: merchant + admin ---------- */
+:where(.merchant-dashboard,.merchant-page,.merchant-studio,.merchant-management,.merchant-onboarding,.platform-admin,.admin-merchant,.author-catalog) :where(h1,h2),
+body.pc-internal-deep :where(h1,h2){letter-spacing:-.025em!important;text-wrap:balance}
+:where(.merchant-dashboard,.merchant-page,.merchant-studio,.merchant-management,.merchant-onboarding,.platform-admin,.admin-merchant,.author-catalog) :where([class*="card"],[class*="panel"],article),
+body.pc-internal-deep :where(article[style*="borderRadius"],section[style*="borderRadius"],div[style*="borderRadius"]){border-radius:12px!important;box-shadow:0 6px 18px rgba(15,23,42,.045)!important}
+body.pc-internal-deep :where(table){font-variant-numeric:tabular-nums;border-collapse:separate;border-spacing:0}
+body.pc-internal-deep :where(th){letter-spacing:.04em!important;text-transform:uppercase}
+body.pc-internal-deep :where(td,th){vertical-align:middle}
+body.pc-internal-deep :where(input,select,textarea){border-radius:10px!important}
+body.pc-internal-deep :where(button,a[role="button"],a[style*="padding"]):disabled{opacity:.5!important;cursor:not-allowed!important;transform:none!important}
+body.pc-merchant-deep aside{box-shadow:none!important}
+
+/* ---------- Shared interaction floor ---------- */
+:where(main,header,footer,nav) :where(a,button,input,select,textarea,[role="button"]):focus-visible{outline:3px solid color-mix(in srgb,#10b981 46%,transparent)!important;outline-offset:3px!important}
+:where(main,header,footer,nav) :where(button,[role="button"],a.button,a[class*="button"],a[class*="cta"],a[class*="action"]){transition:transform var(--imp-fast) var(--imp-ease),background-color var(--imp-ui) ease,border-color var(--imp-ui) ease,color var(--imp-ui) ease,box-shadow var(--imp-ui) ease,filter var(--imp-ui) ease!important}
+:where(main,header,footer,nav) :where(button,[role="button"],a.button,a[class*="button"],a[class*="cta"],a[class*="action"]):active:not(:disabled){transform:scale(.975)!important}
+:where(input,select,textarea){transition:border-color var(--imp-ui) ease,box-shadow var(--imp-ui) ease,background-color var(--imp-ui) ease!important}
+
+@media (hover:hover) and (pointer:fine){
+  .true-home :where(.th-product,.th-store,.th-quick__grid>a):hover,
+  .dorinha-pro__book:hover,
+  body.pc-public-refined :where(.visual-product-card,.store-card,.plan-card,.benefit-card,.pc-service-card,.order-card):hover{transform:none!important;box-shadow:var(--imp-shadow-strong)!important}
+  :where(main,header,footer,nav) :where(button,a.button,a[class*="button"],a[class*="cta"],a[class*="action"]):hover{transform:none!important}
+}
+
+@media(max-width:720px){
+  .true-home .th-hero h1{max-width:none;letter-spacing:-.025em!important}
+  .true-home .th-hero-card{border-radius:12px!important}
+  .dorinha-pro__hero h1{max-width:none;letter-spacing:-.025em!important}
+  :where(.true-home,.dorinha-pro,body.pc-public-refined,body.pc-internal-deep) :where(button,a.button,a[class*="button"],input,select,textarea){min-height:44px}
+  body.pc-internal-deep :where(table){font-size:.88rem!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  :where(.true-home,.dorinha-pro,body.pc-public-refined,body.pc-internal-deep) *{scroll-behavior:auto!important}
+  :where(.true-home,.dorinha-pro,body.pc-public-refined,body.pc-internal-deep) :where(a,button,[role="button"],[class*="card"],[class*="panel"],[class*="store"]){animation:none!important;transform:none!important;transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease,opacity 160ms ease!important}
+}
