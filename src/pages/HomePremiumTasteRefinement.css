@@ -1,5 +1,184 @@
-/* Refinamento Taste — escopo deliberadamente restrito ao header e ao modal de produto.
-   Não redefine o restante da homepage e preserva toda a lógica existente. */
+/* Refinamento Taste — header, modal e escala tipográfica da homepage.
+   Mantém a lógica existente e consolida o refinamento visual em uma única camada. */
+
+/* Escala tipográfica — mais legível, madura e comercial sem perder compacidade */
+.pc-home {
+  font-size: 16px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pc-home h2 {
+  font-size: clamp(1.95rem, 2.9vw, 2.68rem);
+  line-height: 1.06;
+  letter-spacing: -.04em;
+}
+
+.pc-home .pc-heading > span,
+.pc-home .pc-heading-row > div > span {
+  font-size: .76rem;
+  line-height: 1.35;
+  letter-spacing: .075em;
+  font-weight: 840;
+}
+
+.pc-home .pc-heading-row > a {
+  font-size: .82rem;
+  font-weight: 780;
+}
+
+.pc-home .pc-action-strip strong {
+  font-size: .87rem;
+  line-height: 1.25;
+}
+
+.pc-home .pc-action-strip small {
+  font-size: .72rem;
+  line-height: 1.4;
+}
+
+.pc-home .pc-category strong {
+  font-size: .84rem;
+  line-height: 1.25;
+}
+
+.pc-home .pc-category small {
+  font-size: .71rem;
+  line-height: 1.35;
+}
+
+.pc-home .pc-product-info > small {
+  font-size: .7rem;
+  line-height: 1.35;
+}
+
+.pc-home .pc-product-info > strong {
+  font-size: .88rem;
+  line-height: 1.3;
+}
+
+.pc-home .pc-price-line small {
+  font-size: .66rem;
+}
+
+.pc-home .pc-price-line strong {
+  font-size: 1.16rem;
+  line-height: 1.05;
+}
+
+.pc-home .pc-price-line em {
+  font-size: .65rem;
+}
+
+.pc-home .pc-store-line strong,
+.pc-home .pc-offer-row strong,
+.pc-home .pc-store-card strong,
+.pc-home .pc-dialog-offers strong {
+  color: var(--pc-teal-strong);
+  font-weight: 850;
+  letter-spacing: -.008em;
+}
+
+.pc-home .pc-store-line strong {
+  font-size: .76rem;
+}
+
+.pc-home .pc-store-line small {
+  font-size: .66rem;
+}
+
+.pc-home .pc-offer-row strong {
+  font-size: .76rem;
+}
+
+.pc-home .pc-offer-row small {
+  font-size: .65rem;
+}
+
+.pc-home .pc-offer-row b {
+  font-size: .9rem;
+}
+
+.pc-home .pc-store-card strong {
+  font-size: .86rem;
+  line-height: 1.25;
+}
+
+.pc-home .pc-store-card small,
+.pc-home .pc-store-card em {
+  font-size: .69rem;
+  line-height: 1.4;
+}
+
+.pc-home .pc-basket-copy p,
+.pc-home .pc-compare-copy p,
+.pc-home .pc-commercial-copy p {
+  font-size: .9rem;
+  line-height: 1.58;
+}
+
+.pc-home .pc-basket-points span,
+.pc-home .pc-commercial-features span {
+  font-size: .72rem;
+}
+
+.pc-home .pc-steps strong {
+  font-size: .92rem;
+}
+
+.pc-home .pc-steps p {
+  font-size: .74rem;
+  line-height: 1.5;
+}
+
+.pc-home .pc-footer-brand p {
+  font-size: .84rem;
+  line-height: 1.5;
+}
+
+.pc-home .pc-footer nav a {
+  font-size: .81rem;
+}
+
+.pc-home .pc-footer-bottom {
+  font-size: .73rem;
+}
+
+/* Nomes de estabelecimentos devem ser um dado de decisão, não metadado neutro */
+.pc-home .pc-store-line strong,
+.pc-home .pc-store-card strong,
+.pc-home .pc-dialog-offers strong {
+  text-decoration-color: rgba(31,107,97,.24);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.pc-home .pc-product-card:hover .pc-store-line strong,
+.pc-home .pc-store-card:hover strong,
+.pc-home .pc-dialog-offers > div:hover strong {
+  color: var(--pc-coral-strong);
+}
+
+.pc-home .pc-compare-section .pc-offer-row strong {
+  color: #ffd0bf;
+}
+
+.pc-home .pc-compare-section .pc-offer-row.is-best strong {
+  color: #fff1e9;
+}
+
+.pc-home .pc-result-copy em {
+  color: var(--pc-teal-strong);
+  font-size: .7rem;
+  font-weight: 760;
+}
+
+[data-theme="dark"] .pc-home .pc-store-line strong,
+[data-theme="dark"] .pc-home .pc-store-card strong,
+[data-theme="dark"] .pc-home .pc-dialog-offers strong,
+[data-theme="dark"] .pc-home .pc-result-copy em {
+  color: #83d5c2;
+}
 
 /* Header: menos chrome, mesma presença de marca */
 .pc-home .pc-header-inner {
@@ -22,7 +201,7 @@
 
 .pc-home .pc-nav a {
   min-height: 40px;
-  font-size: .755rem;
+  font-size: .81rem;
   font-weight: 720;
 }
 
@@ -46,13 +225,54 @@
   min-height: 38px;
   padding-inline: 12px;
   border-radius: 9px;
-  font-size: .735rem;
+  font-size: .79rem;
   box-shadow: 0 6px 17px rgba(242,121,85,.16);
 }
 
 /* Compensa o chrome menor sem alterar a densidade do conteúdo do hero */
 .pc-home .pc-hero {
   padding-top: 70px;
+}
+
+.pc-home .pc-kicker {
+  font-size: .75rem;
+}
+
+.pc-home .pc-hero-copy > p {
+  font-size: clamp(.98rem, 1.15vw, 1.08rem);
+  line-height: 1.55;
+}
+
+.pc-home .pc-search input {
+  font-size: 1.04rem;
+}
+
+.pc-home .pc-search button {
+  font-size: .84rem;
+}
+
+.pc-home .pc-quick {
+  font-size: .72rem;
+}
+
+.pc-home .pc-quick button {
+  font-size: .72rem;
+}
+
+.pc-home .pc-result-copy strong {
+  font-size: .87rem;
+}
+
+.pc-home .pc-result-copy small {
+  font-size: .71rem;
+}
+
+.pc-home .pc-result-price small {
+  font-size: .64rem;
+}
+
+.pc-home .pc-result-price strong {
+  font-size: 1.02rem;
 }
 
 /* Modal: janela de comparação compacta com hero editorial lateral */
@@ -124,7 +344,7 @@
   border-radius: 999px;
   background: rgba(7,34,31,.5);
   color: rgba(255,255,255,.88);
-  font-size: .57rem;
+  font-size: .61rem;
   font-weight: 820;
   letter-spacing: .07em;
   text-transform: uppercase;
@@ -170,7 +390,7 @@
   border-radius: 999px;
   background: rgba(31,107,97,.09);
   color: var(--pc-teal-strong);
-  font-size: .57rem;
+  font-size: .62rem;
   letter-spacing: .085em;
 }
 
@@ -178,14 +398,14 @@
   max-width: 430px;
   margin: 7px 42px 3px 0;
   color: #18332e;
-  font-size: clamp(1.38rem, 2.35vw, 1.82rem);
+  font-size: clamp(1.45rem, 2.45vw, 1.9rem);
   line-height: 1.06;
   letter-spacing: -.035em;
 }
 
 .pc-home .pc-dialog-content > p {
   color: #6f7e78;
-  font-size: .69rem;
+  font-size: .74rem;
   line-height: 1.4;
 }
 
@@ -202,12 +422,12 @@
 }
 
 .pc-home .pc-dialog-prices small {
-  font-size: .55rem;
+  font-size: .6rem;
 }
 
 .pc-home .pc-dialog-prices strong {
   margin-top: 2px;
-  font-size: .82rem;
+  font-size: .88rem;
 }
 
 .pc-home .pc-dialog-offers {
@@ -224,24 +444,24 @@
 }
 
 .pc-home .pc-dialog-offers strong {
-  font-size: .67rem;
+  font-size: .73rem;
 }
 
 .pc-home .pc-dialog-offers small {
-  font-size: .56rem;
+  font-size: .62rem;
 }
 
 .pc-home .pc-dialog-offers em {
   padding: 3px 6px;
-  font-size: .5rem;
+  font-size: .54rem;
 }
 
 .pc-home .pc-dialog-offers b {
-  font-size: .78rem;
+  font-size: .83rem;
 }
 
 .pc-home .pc-dialog-offers .is-best b {
-  font-size: .84rem;
+  font-size: .9rem;
 }
 
 .pc-home .pc-dialog-actions {
@@ -253,7 +473,7 @@
 .pc-home .pc-dialog-actions button {
   min-height: 38px;
   border-radius: 8px;
-  font-size: .65rem;
+  font-size: .7rem;
 }
 
 .pc-home .pc-dialog-actions a {
@@ -336,6 +556,10 @@
 }
 
 @media (max-width: 720px) {
+  .pc-home h2 {
+    font-size: clamp(1.72rem, 7vw, 2.15rem);
+  }
+
   .pc-home .pc-header-inner {
     height: 52px;
   }
@@ -357,6 +581,18 @@
 
   .pc-home .pc-hero {
     padding-top: 66px;
+  }
+
+  .pc-home .pc-hero-copy > p {
+    font-size: .95rem;
+  }
+
+  .pc-home .pc-product-info > strong {
+    font-size: .85rem;
+  }
+
+  .pc-home .pc-store-card strong {
+    font-size: .84rem;
   }
 
   .pc-home .pc-modal {
@@ -384,7 +620,7 @@
     bottom: 11px;
     min-height: 24px;
     padding-inline: 7px;
-    font-size: .51rem;
+    font-size: .55rem;
   }
 
   .pc-home .pc-dialog-media img {
@@ -412,7 +648,7 @@
 
   .pc-home .pc-dialog-content h2 {
     margin-right: 34px;
-    font-size: clamp(1.25rem, 6vw, 1.55rem);
+    font-size: clamp(1.3rem, 6vw, 1.62rem);
   }
 
   .pc-home .pc-dialog-prices {
@@ -431,6 +667,10 @@
 @media (max-width: 420px) {
   .pc-home .pc-logo img {
     width: 130px;
+  }
+
+  .pc-home .pc-footer-bottom {
+    font-size: .7rem;
   }
 
   .pc-home .pc-dialog-actions {
