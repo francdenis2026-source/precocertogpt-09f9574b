@@ -5501,7 +5501,15 @@ export default function PrecoCertoApp() {
   }, []);
 
   return <div className="app">
-    <Header basketCount={cart.length} favoritesCount={favorites.length} user={user} onLogout={handleLogout}/>
+    <Header 
+      basketCount={cart.length} 
+      favoritesCount={favorites.length} 
+      user={user} 
+      onLogout={handleLogout}
+      products={products}
+      favorites={favorites}
+      addBasket={addBasket}
+    />
     <main><div className="page-transition-enter-active" key={pathname}>{page}</div></main>
     <Footer user={user}/>
     <MobileBar basketCount={cart.length} favoritesCount={favorites.length}/>
