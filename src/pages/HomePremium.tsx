@@ -332,14 +332,14 @@ export function HomePremium() {
               const image = resolveProductImage(product);
               const saving = Math.max(0, product.maxPrice - product.minPrice);
               return (
-                <article className="pc-product-card" key={String(product.id)}>
-                  <button className="pc-product-open" type="button" onClick={() => setSelectedProduct(product)} aria-label={`Abrir comparação de ${product.name}`}>
+                <article className="pc-product-card" key={String(product.id)} onClick={() => setSelectedProduct(product)}>
+                  <div className="pc-product-open" aria-label={`Abrir comparação de ${product.name}`}>
                     <span className="pc-product-media">{image ? <img src={image} alt={product.name} loading="lazy" /> : <PackageSearch aria-hidden="true" />}</span>
                     <span className="pc-product-info"><small>{[product.brand, product.size].filter(Boolean).join(" · ")}</small><strong>{product.name}</strong></span>
-                  </button>
+                  </div>
                   <div className="pc-price-line"><span><small>Menor preço</small><strong>{money(product.minPrice)}</strong></span>{saving > 0 && <em>diferença de {money(saving)}</em>}</div>
                   <div className="pc-store-line"><Store aria-hidden="true" /><span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span></div>
-                  <button className="pc-compare-button" type="button" onClick={() => setSelectedProduct(product)}>Comparar <ArrowRight aria-hidden="true" /></button>
+                  <button className="pc-compare-button" type="button">Comparar <ArrowRight aria-hidden="true" /></button>
                 </article>
               );
             })}
