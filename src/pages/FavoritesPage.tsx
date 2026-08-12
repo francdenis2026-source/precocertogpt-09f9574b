@@ -494,12 +494,13 @@ function FavoriteCard({
         <button 
           className="button button--outline" 
           style={{ width: '44px', height: '44px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          onClick={(e) => { e.stopPropagation(); window.location.href = `/buscar?q=${encodeURIComponent(product.name)}`; }}
-          title="Comparar preços"
+          onClick={openDetails}
+          title="Ver detalhes"
         >
-          <ArrowRight size={18} />
+          <Search size={18} />
         </button>
       </div>
     </div>
   );
 }
+
