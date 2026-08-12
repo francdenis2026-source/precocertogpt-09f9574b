@@ -54,6 +54,7 @@ import { AdminMerchantManagement } from "./components/AdminMerchantManagement";
 import { CustomerOrders } from "./components/CustomerOrders";
 import { MercadoPagoCallback } from "./components/MercadoPagoCallback";
 import { CollaboratePage, ContactPage, PharmaciesPage } from "./components/PublicFooterServicePages";
+import { FavoritesPage } from "./pages/FavoritesPage";
 import "./components/TrueHomepageKowalski.css";
 import "./components/KowalskiGlobalExperience.css";
 import "./components/KowalskiLegacyDeep.css";
@@ -116,6 +117,18 @@ export default function App() {
         <Route path="/painel-lojista/vendas-online" element={<MerchantOnlineSalesControl />} />
         <Route path="/meus-pedidos" element={<CustomerOrders />} />
         <Route path="/integracoes/mercadopago/callback" element={<MercadoPagoCallback />} />
+        <Route path="/favoritos" element={
+          <PrecoCertoApp 
+            renderContent={(props: any) => (
+              <FavoritesPage 
+                favorites={props.favorites} 
+                products={props.products} 
+                onToggleFavorite={props.toggleFavorite} 
+                onAddToBasket={props.addBasket} 
+              />
+            )} 
+          />
+        } />
         <Route path="/admin/plataforma" element={<PlatformAdminDashboard />} />
         <Route path="/admin/comercios" element={<AdminMerchantManagement />} />
         <Route path="/colaborar" element={<CollaboratePage />} />
