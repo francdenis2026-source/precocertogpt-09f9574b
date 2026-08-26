@@ -490,6 +490,223 @@
   .pc-home .pc-commercial-layout { min-height: 780px; }
 }
 
+/* Mobile readability pass — keeps the compact composition without microtype. */
+@media (max-width: 720px) {
+  .pc-home {
+    font-size: 16px;
+  }
+
+  .pc-home .pc-icon-button,
+  .pc-home .pc-menu-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .pc-home .pc-mobile-menu a,
+  .pc-home .pc-search button,
+  .pc-home .pc-heading-row > a,
+  .pc-home .pc-compare-copy button,
+  .pc-home .pc-basket-copy > a,
+  .pc-home .pc-how-head > a,
+  .pc-home .pc-commercial-copy > a,
+  .pc-home .pc-dialog-actions a,
+  .pc-home .pc-dialog-actions button {
+    min-height: 48px;
+    font-size: .94rem;
+  }
+
+  .pc-home .pc-kicker,
+  .pc-home .pc-heading > span,
+  .pc-home .pc-heading-row > div > span,
+  .pc-home .pc-commercial-copy > span {
+    font-size: .82rem;
+    line-height: 1.4;
+  }
+
+  .pc-home .pc-hero-copy > p,
+  .pc-home .pc-compare-copy p,
+  .pc-home .pc-basket-copy p,
+  .pc-home .pc-how-head p,
+  .pc-home .pc-commercial-copy p {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .pc-home .pc-search input {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+
+  .pc-home .pc-search button {
+    height: 48px;
+  }
+
+  .pc-home .pc-quick {
+    gap: 8px;
+    font-size: .84rem;
+    line-height: 1.45;
+  }
+
+  .pc-home .pc-quick button {
+    min-height: 44px;
+    padding-inline: 12px;
+    font-size: .84rem;
+  }
+
+  .pc-home .pc-result {
+    min-height: 76px;
+  }
+
+  .pc-home .pc-result-copy strong,
+  .pc-home .pc-result-state strong {
+    font-size: .96rem;
+  }
+
+  .pc-home .pc-result-copy small,
+  .pc-home .pc-result-copy em,
+  .pc-home .pc-result-state small {
+    font-size: .8rem;
+    line-height: 1.4;
+  }
+
+  .pc-home .pc-result-price strong {
+    font-size: 1.12rem;
+  }
+
+  .pc-home .pc-action-strip strong,
+  .pc-home .pc-category strong,
+  .pc-home .pc-product-info > strong,
+  .pc-home .pc-store-card strong,
+  .pc-home .pc-how-copy strong {
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .pc-home .pc-action-strip small,
+  .pc-home .pc-category small,
+  .pc-home .pc-product-info > small,
+  .pc-home .pc-store-card small,
+  .pc-home .pc-store-card em,
+  .pc-home .pc-how-copy p {
+    font-size: .84rem;
+    line-height: 1.5;
+  }
+
+  .pc-home .pc-category small {
+    display: block;
+  }
+
+  .pc-home .pc-category {
+    min-height: 104px;
+    grid-template-columns: 44px minmax(0,1fr) 20px;
+    gap: 12px;
+    padding: 13px 14px;
+  }
+
+  .pc-home .pc-category-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .pc-home .pc-category > svg {
+    display: block;
+  }
+
+  .pc-home .pc-product-media {
+    height: 148px;
+  }
+
+  .pc-home .pc-product-media img {
+    max-height: 126px;
+  }
+
+  .pc-home .pc-product-info {
+    min-height: 64px;
+    padding-top: 12px;
+  }
+
+  .pc-home .pc-price-line span small,
+  .pc-home .pc-store-line strong,
+  .pc-home .pc-offer-row small,
+  .pc-home .pc-compare-product-details small {
+    font-size: .78rem;
+    line-height: 1.4;
+  }
+
+  .pc-home .pc-price-line span strong {
+    font-size: 1.28rem;
+  }
+
+  .pc-home .pc-price-line em {
+    font-size: .72rem;
+  }
+
+  .pc-home .pc-compare-button {
+    min-height: 44px;
+    font-size: .86rem;
+  }
+
+  .pc-home .pc-offer-row {
+    min-height: 62px;
+  }
+
+  .pc-home .pc-offer-row strong {
+    font-size: .9rem;
+  }
+
+  .pc-home .pc-offer-row b {
+    font-size: 1.08rem;
+  }
+
+  .pc-home .pc-basket-points span,
+  .pc-home .pc-commercial-features span {
+    min-height: 44px;
+    font-size: .86rem;
+    line-height: 1.4;
+  }
+
+  .pc-home .pc-how-step {
+    min-height: 194px;
+  }
+
+  .pc-home .pc-how-query > span,
+  .pc-home .pc-how-result strong {
+    font-size: .82rem;
+  }
+
+  .pc-home .pc-how-bars small,
+  .pc-home .pc-how-result small {
+    font-size: .72rem;
+  }
+
+  .pc-home .pc-footer nav a {
+    min-height: 44px;
+    font-size: .9rem;
+  }
+
+  .pc-home .pc-footer-bottom {
+    font-size: .8rem;
+  }
+
+  .pc-home .pc-dialog-kicker,
+  .pc-home .pc-dialog-prices small,
+  .pc-home .pc-dialog-offers small,
+  .pc-home .pc-dialog-offers em {
+    font-size: .75rem;
+  }
+
+  .pc-home .pc-dialog-content > p,
+  .pc-home .pc-dialog-offers strong {
+    font-size: .86rem;
+    line-height: 1.45;
+  }
+
+  .pc-home .pc-dialog-prices strong,
+  .pc-home .pc-dialog-offers b {
+    font-size: 1rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pc-home .pc-action-strip a,
   .pc-home .pc-category,
