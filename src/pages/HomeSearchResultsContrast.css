@@ -1,20 +1,32 @@
-/* PreçoCerto — refinamento da janela de busca com Taste + Kowalski + Impeccable + UI UX Pro Max.
-   Foco: contraste, leitura rápida, destaque do estabelecimento e estados de interação. */
+/* PreçoCerto — refinamento da hero e da janela de busca com Taste + Kowalski + Impeccable + UI UX Pro Max.
+   Foco: identidade visual consistente, contraste, leitura rápida, destaque do estabelecimento e estados de interação. */
+
+/* Restaura na hero principal a mesma fotografia profissional usada no Planejador de compras. */
+.pc-home .pc-hero::before {
+  background-image: url('/compra-inteligente-profissional.webp');
+  background-position: center 44%;
+  filter: saturate(.9) contrast(1.04) brightness(.78);
+}
+
+.pc-home .pc-hero::after {
+  background: linear-gradient(90deg, rgba(7,34,31,.985) 0%, rgba(7,34,31,.955) 43%, rgba(7,34,31,.72) 68%, rgba(7,34,31,.34) 100%);
+}
 
 .pc-home .pc-results {
-  border: 1px solid #c9d3cc;
+  border: 1px solid #c7d2cb;
   background: rgba(252, 253, 249, .995);
   box-shadow: 0 26px 72px rgba(8, 32, 28, .30), 0 0 0 1px rgba(255,255,255,.72) inset;
 }
 
 .pc-home .pc-result {
-  min-height: 76px;
-  border-bottom: 1px solid #e0e6e1;
+  min-height: 82px;
+  border-bottom: 1px solid #dde5df;
   background: transparent;
+  padding-block: 10px;
   transition:
     background-color 160ms cubic-bezier(.2,.8,.2,1),
     border-color 160ms ease,
-    transform 140ms cubic-bezier(.22,1,.36,1);
+    box-shadow 160ms cubic-bezier(.2,.8,.2,1);
 }
 
 .pc-home .pc-result:last-child {
@@ -25,7 +37,7 @@
 .pc-home .pc-result:focus-visible,
 .pc-home .pc-result.is-active,
 .pc-home .pc-result[aria-selected="true"] {
-  background: linear-gradient(90deg, rgba(31,107,97,.095), rgba(31,107,97,.035));
+  background: linear-gradient(90deg, rgba(31,107,97,.09), rgba(31,107,97,.025));
 }
 
 .pc-home .pc-result.is-active,
@@ -34,74 +46,91 @@
 }
 
 .pc-home .pc-result-image {
-  border: 1px solid #d6dfd8;
-  background: #f3f6f1;
+  border: 1px solid #d4ddd6;
+  background: #f5f7f3;
   box-shadow: 0 4px 12px rgba(22,55,47,.055);
+}
+
+.pc-home .pc-result-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .pc-home .pc-result-copy strong {
   color: #172a26;
-  font-size: .96rem;
-  line-height: 1.24;
+  font-size: 1rem;
+  line-height: 1.22;
   font-weight: 850;
-  letter-spacing: -.012em;
+  letter-spacing: -.014em;
 }
 
 .pc-home .pc-result-copy small {
-  color: #5c6b65;
-  font-size: .77rem;
+  margin-top: 2px;
+  color: #596962;
+  font-size: .79rem;
   line-height: 1.35;
-  font-weight: 630;
+  font-weight: 640;
 }
 
-/* Estabelecimento deliberadamente cromático para leitura imediata. */
+/*
+  O estabelecimento vira uma assinatura visual discreta.
+  --pc-store-hue é atribuído de forma estável pelo bridge: o mesmo comércio mantém a mesma cor
+  e nomes diferentes recebem matizes diferentes sem badges ou saturação exagerada.
+*/
 .pc-home .pc-result-copy em {
   display: inline-flex;
   align-items: center;
   width: fit-content;
   max-width: 100%;
-  margin-top: 3px;
-  color: #0b6256;
-  font-size: .8rem;
+  margin-top: 5px;
+  color: hsl(var(--pc-store-hue, 168) 54% 31%);
+  font-size: .83rem;
   line-height: 1.25;
   font-style: normal;
-  font-weight: 880;
+  font-weight: 850;
   letter-spacing: -.006em;
+  transition: color 160ms cubic-bezier(.2,.8,.2,1);
 }
 
 .pc-home .pc-result-copy em svg {
   flex: 0 0 auto;
   width: 14px;
   height: 14px;
-  margin-right: 4px;
-  color: #158171;
+  margin-right: 5px;
+  color: currentColor;
+  opacity: .88;
 }
 
 .pc-home .pc-result:hover .pc-result-copy em,
 .pc-home .pc-result:focus-visible .pc-result-copy em,
 .pc-home .pc-result.is-active .pc-result-copy em,
 .pc-home .pc-result[aria-selected="true"] .pc-result-copy em {
-  color: #084f46;
+  color: hsl(var(--pc-store-hue, 168) 58% 25%);
 }
 
 .pc-home .pc-result-price {
-  min-width: 96px;
-  padding-left: 12px;
-  border-left: 1px solid #e0e6e1;
+  min-width: 100px;
+  padding-left: 13px;
+  border-left: 1px solid #dde5df;
 }
 
 .pc-home .pc-result-price small {
   color: #65736d;
-  font-size: .69rem;
-  font-weight: 760;
-  letter-spacing: .01em;
+  font-size: .7rem;
+  line-height: 1.25;
+  font-weight: 770;
+  letter-spacing: .012em;
 }
 
 .pc-home .pc-result-price strong {
+  margin-top: 2px;
   color: #126747;
-  font-size: 1.13rem;
-  line-height: 1.05;
+  font-size: 1.16rem;
+  line-height: 1.04;
   font-weight: 920;
+  letter-spacing: -.018em;
   font-variant-numeric: tabular-nums;
 }
 
@@ -111,10 +140,12 @@
 
 .pc-home .pc-result-state strong {
   color: #203832;
+  font-size: .9rem;
 }
 
 .pc-home .pc-result-state small {
   color: #62716b;
+  font-size: .76rem;
 }
 
 [data-theme="dark"] .pc-home .pc-results {
@@ -131,7 +162,7 @@
 [data-theme="dark"] .pc-home .pc-result:focus-visible,
 [data-theme="dark"] .pc-home .pc-result.is-active,
 [data-theme="dark"] .pc-home .pc-result[aria-selected="true"] {
-  background: linear-gradient(90deg, rgba(67,171,151,.14), rgba(67,171,151,.045));
+  background: linear-gradient(90deg, rgba(67,171,151,.13), rgba(67,171,151,.035));
 }
 
 [data-theme="dark"] .pc-home .pc-result-image {
@@ -145,15 +176,18 @@
 
 [data-theme="dark"] .pc-home .pc-result-copy small,
 [data-theme="dark"] .pc-home .pc-result-price small {
-  color: #b0c0ba;
+  color: #b2c1bc;
 }
 
 [data-theme="dark"] .pc-home .pc-result-copy em {
-  color: #67d3be;
+  color: hsl(var(--pc-store-hue, 168) 62% 70%);
 }
 
-[data-theme="dark"] .pc-home .pc-result-copy em svg {
-  color: #76dfca;
+[data-theme="dark"] .pc-home .pc-result:hover .pc-result-copy em,
+[data-theme="dark"] .pc-home .pc-result:focus-visible .pc-result-copy em,
+[data-theme="dark"] .pc-home .pc-result.is-active .pc-result-copy em,
+[data-theme="dark"] .pc-home .pc-result[aria-selected="true"] .pc-result-copy em {
+  color: hsl(var(--pc-store-hue, 168) 70% 77%);
 }
 
 [data-theme="dark"] .pc-home .pc-result-price {
@@ -165,30 +199,45 @@
 }
 
 @media (max-width: 720px) {
+  .pc-home .pc-hero::before {
+    background-position: 57% 44%;
+  }
+
   .pc-home .pc-result {
-    min-height: 70px;
+    min-height: 74px;
+    padding-block: 8px;
   }
 
   .pc-home .pc-result-copy strong {
-    font-size: .91rem;
+    font-size: .94rem;
+  }
+
+  .pc-home .pc-result-copy small {
+    font-size: .74rem;
   }
 
   .pc-home .pc-result-copy em {
-    font-size: .76rem;
+    margin-top: 4px;
+    font-size: .79rem;
   }
 
   .pc-home .pc-result-price {
-    min-width: 82px;
+    min-width: 86px;
     padding-left: 8px;
   }
 
+  .pc-home .pc-result-price small {
+    font-size: .64rem;
+  }
+
   .pc-home .pc-result-price strong {
-    font-size: 1.02rem;
+    font-size: 1.05rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pc-home .pc-result {
+  .pc-home .pc-result,
+  .pc-home .pc-result-copy em {
     transition: none;
   }
 }

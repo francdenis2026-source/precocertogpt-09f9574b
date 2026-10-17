@@ -10,6 +10,26 @@ import "./commerce-intents.css";
 const normalize = (value:string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").replace(/\s+/g," ").trim();
 const roots = new WeakMap<Element, Root>();
 const LEGACY_FAVORITE_SELECTOR = '[aria-label*="favorit" i]:not(.pc-favorite-action):not(.scpm-favorite)';
+const storeHueByName = new Map<string, number>();
+const reservedStoreHues = new Set<number>();
+
+function getStoreHue(value:string){
+  const key=normalize(value);
+  const saved=storeHueByName.get(key);
+  if(saved!==undefined)return saved;
+
+  let hash=2166136261;
+  for(let index=0;index<key.length;index+=1){
+    hash^=key.charCodeAt(index);
+    hash=Math.imul(hash,16777619)>>>0;
+  }
+
+  let hue=hash%360;
+  while(reservedStoreHues.has(hue))hue=(hue+47)%360;
+  storeHueByName.set(key,hue);
+  reservedStoreHues.add(hue);
+  return hue;
+}
 
 function FavoriteControl({ product, compact=false }:{product:Product;compact?:boolean}){
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -69,9 +89,19 @@ export function CommerceIntentBridge(){
       });
     };
 
+    const applySearchStoreIdentity=()=>{
+      document.querySelectorAll<HTMLElement>(".pc-results .pc-result-copy em").forEach(label=>{
+        const storeName=label.textContent?.replace(/\s+/g," ").trim()||"";
+        if(!storeName)return;
+        label.style.setProperty("--pc-store-hue",String(getStoreHue(storeName)));
+        label.dataset.pcStoreIdentity=normalize(storeName);
+      });
+    };
+
     const patch=()=>{
       document.querySelectorAll(".pc-product-card").forEach(card=>{const p=findProduct(card);if(p)renderInto(card,p,true)});
       document.querySelectorAll(".pc-dialog").forEach(dialog=>{const p=findProduct(dialog);if(p){renderInto(dialog,p,true);bindModalStores(dialog,p)}});
+      applySearchStoreIdentity();
 
       const actions=document.querySelector(".pc-header .pc-header-actions");
       if(actions&&!actions.querySelector(".pc-favorites-header-mount")){
